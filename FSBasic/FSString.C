@@ -82,13 +82,16 @@ FSString::int2TString(int number, int ndigits){
 
 
 
-  // ********************************************************
-  // CONVERT FROM DOUBLE TO TSTRING
-  //   if fixdecimal is false:
-  //     precision is the number of significant digits
-  //   if fixdecimal is true:
-  //     the last digit will be in the pow(10,precision) place
-  // ********************************************************
+      // ********************************************************
+      // ROUTINES TO CONVERT FROM DOUBLE TO TSTRING
+      //   scientific == true:
+      //       put the result in scentific format by adding eXX 
+      //   fixdecimal == false: 
+      //       *precision* will be the number of significant digits
+      //   fixdecimal == true: 
+      //       the last digit will be in the pow(10,*precision*) place
+      //   sign:  can be "+-", "+", or "-"
+      // ********************************************************
 
 
 TString 
@@ -160,7 +163,7 @@ TString
 FSString::latexMeasurement(double x, double ex1, 
                                   int precision, bool fixdecimal){
 
-  double ex;
+  double ex = 0.0;
   if (!fixdecimal) ex = ex1;
   if (fixdecimal) {ex = pow(10.0,precision); precision = 1;}
 
@@ -177,7 +180,7 @@ FSString::latexMeasurement(double x, TString sign1, double ex1,
                                    TString sign2, double ex2, 
                                   int precision, bool fixdecimal){
 
-  double ex;
+  double ex = 0.0;
   if (!fixdecimal) ex = getLeastPrecise(ex1,ex2,precision);
   if (fixdecimal) {ex = pow(10.0,precision); precision = 1;}
 
@@ -203,7 +206,7 @@ FSString::latexMeasurement(double x, TString sign1, double ex1,
                                    TString sign3, double ex3, 
                                   int precision, bool fixdecimal){
 
-  double ex;
+  double ex = 0.0;
   if (!fixdecimal) ex = getLeastPrecise(ex1,ex2,ex3,precision);
   if (fixdecimal) {ex = pow(10.0,precision); precision = 1;}
 
@@ -234,7 +237,7 @@ FSString::latexMeasurement(double x, TString sign1, double ex1,
                                    TString sign4, double ex4,
                                   int precision, bool fixdecimal){
 
-  double ex;
+  double ex = 0.0;
   if (!fixdecimal) ex = getLeastPrecise(ex1,ex2,ex3,ex4,precision);
   if (fixdecimal) {ex = pow(10.0,precision); precision = 1;}
 
@@ -357,214 +360,6 @@ FSString::getLeastPrecise(double x1, double x2, double x3, double x4, int precis
 
 
   // ********************************************************
-  // CONVERT SYMBOLS TO ROOT FORMAT (e.g. "pi+" TO "#pi^{+}")
-  // ********************************************************
-
-TString
-FSString::rootSymbols(TString input){
-  while (input.Contains("\\pm")){
-    input.Replace(input.Index("\\pm"),3," #pm ");
-  }
-  while (input.Contains("omega")){
-    input.Replace(input.Index("omega"),5,"TMP");
-  }
-      while (input.Contains("TMP")){
-	input.Replace(input.Index("TMP"),3,"#omega");
-      }
-  while (input.Contains("phi")){
-    input.Replace(input.Index("phi"),3,"TMP");
-  }
-      while (input.Contains("TMP")){
-	input.Replace(input.Index("TMP"),3,"#phi");
-      }
-  while (input.Contains("etaprime")){
-    input.Replace(input.Index("etaprime"),8,"#eta'");
-  }
-  while (input.Contains("mu+mu-")){
-    input.Replace(input.Index("mu+mu-"),6,"#mu^{+}#mu^{-}");
-  }
-  while (input.Contains("mu+")){
-    input.Replace(input.Index("mu+"),3,"#mu^{+}");
-  }
-  while (input.Contains("mu-")){
-    input.Replace(input.Index("mu-"),3,"#mu^{-}");
-  }
-  while (input.Contains("e+e-")){
-    input.Replace(input.Index("e+e-"),4,"e^{+}e^{-}");
-  }
-  while (input.Contains("e+")){
-    input.Replace(input.Index("e+"),2,"e^{+}");
-  }
-  while (input.Contains("e-")){
-    input.Replace(input.Index("e-"),2,"e^{-}");
-  }
-  while (input.Contains("K+")){
-    input.Replace(input.Index("K+"),2,"K^{+}");
-  }
-  while (input.Contains("K-")){
-    input.Replace(input.Index("K-"),2,"K^{-}");
-  }
-  while (input.Contains("K_S0")){
-    input.Replace(input.Index("K_S0"),4,"K_{S}");
-  }
-  while (input.Contains("Ks")){
-    input.Replace(input.Index("Ks"),2,"K_{S}");
-  }
-  while (input.Contains("pi+")){
-    input.Replace(input.Index("pi+"),3,"#pi^{+}");
-  }
-  while (input.Contains("pi-")){
-    input.Replace(input.Index("pi-"),3,"#pi^{-}");
-  }
-  while (input.Contains("pi0")){
-    input.Replace(input.Index("pi0"),3,"#pi^{0}");
-  }
-  while (input.Contains("eta")){
-    input.Replace(input.Index("eta"),3,"TMP");
-  }
-      while (input.Contains("TMP")){
-	input.Replace(input.Index("TMP"),3,"#eta");
-      }
-  while (input.Contains("#eta+-0")){
-    input.Replace(input.Index("#eta+-0"),7,"#eta_{+-0}");
-  }
-  while (input.Contains("p+")){
-    input.Replace(input.Index("p+"),2,"p^{+}");
-  }
-  while (input.Contains("p-")){
-    input.Replace(input.Index("p-"),2,"p^{-}");
-  }
-  while (input.Contains("gamma")){
-    input.Replace(input.Index("gamma"),5,"TMP");
-  }
-      while (input.Contains("TMP")){
-	input.Replace(input.Index("TMP"),3,"#gamma");
-      }
-  while (input.Contains("ALambda")){
-    input.Replace(input.Index("ALambda"),7,"TMP");
-  }
-      while (input.Contains("TMP")){
-	input.Replace(input.Index("TMP"),3,"#Lambda");
-      }
-  while (input.Contains("Lambda")){
-    input.Replace(input.Index("Lambda"),6,"TMP");
-  }
-      while (input.Contains("TMP")){
-	input.Replace(input.Index("TMP"),3,"#Lambda");
-      }
-  while (input.Contains("##")){
-    input.Replace(input.Index("##"),2,"#");
-  }
-  return input;
-}
-
-
-  // ********************************************************
-  // CONVERT SYMBOLS TO LATEX FORMAT (e.g. "pi+" TO "\pi^{+}")
-  // ********************************************************
-
-TString
-FSString::latexSymbols(TString input){
-  while (input.Contains("#pi")){
-    input.Replace(input.Index("#pi"),3,"\\pi");
-  }
-  while (input.Contains("pi+")){
-    input.Replace(input.Index("pi+"),3,"\\pi^{+}");
-  }
-  while (input.Contains("pi-")){
-    input.Replace(input.Index("pi-"),3,"\\pi^{-}");
-  }
-  while (input.Contains("pi0")){
-    input.Replace(input.Index("pi0"),3,"\\pi^{0}");
-  }
-  while (input.Contains("K+")){
-    input.Replace(input.Index("K+"),2,"K^{+}");
-  }
-  while (input.Contains("K-")){
-    input.Replace(input.Index("K-"),2,"K^{-}");
-  }
-  while (input.Contains("K_S0")){
-    input.Replace(input.Index("K_S0"),4,"K_{S}");
-  }
-  while (input.Contains("Ks")){
-    input.Replace(input.Index("Ks"),2,"K_{S}");
-  }
-  while (input.Contains("#eta")){
-    input.Replace(input.Index("#eta"),4,"TMP");
-  }
-  while (input.Contains("eta")){
-    input.Replace(input.Index("eta"),3,"TMP");
-  }
-  while (input.Contains("TMP")){
-    input.Replace(input.Index("TMP"),3,"\\eta");
-  }
-  while (input.Contains("mu+mu-")){
-    input.Replace(input.Index("mu+mu-"),6,"\\mu^{+}\\mu^{-}");
-  }
-  while (input.Contains("mu+")){
-    input.Replace(input.Index("mu+"),3,"\\mu^{+}");
-  }
-  while (input.Contains("mu-")){
-    input.Replace(input.Index("mu-"),3,"\\mu^{-}");
-  }
-  while (input.Contains("e+e-")){
-    input.Replace(input.Index("e+e-"),4,"e^{+}e^{-}");
-  }
-  while (input.Contains("e+")){
-    input.Replace(input.Index("e+"),2,"e^{+}");
-  }
-  while (input.Contains("e-")){
-    input.Replace(input.Index("e-"),2,"e^{-}");
-  }
-  while (input.Contains("#omega")){
-    input.Replace(input.Index("#omega"),6,"TMP");
-  }
-  while (input.Contains("omega")){
-    input.Replace(input.Index("omega"),5,"TMP");
-  }
-  while (input.Contains("TMP")){
-    input.Replace(input.Index("TMP"),3,"\\omega");
-  }
-  while (input.Contains("#phi")){
-    input.Replace(input.Index("phi"),4,"TMP");
-  }
-  while (input.Contains("phi")){
-    input.Replace(input.Index("phi"),3,"TMP");
-  }
-  while (input.Contains("TMP")){
-    input.Replace(input.Index("TMP"),3,"\\phi");
-  }
-  while (input.Contains("etaprime")){
-    input.Replace(input.Index("etaprime"),8,"\\eta^{\\prime}");
-  }
-  while (input.Contains("#eta+-0")){
-    input.Replace(input.Index("#eta+-0"),7,"\\eta_{+-0}");
-  }
-  while (input.Contains("p+")){
-    input.Replace(input.Index("p+"),2,"p^{+}");
-  }
-  while (input.Contains("p-")){
-    input.Replace(input.Index("p-"),2,"p^{-}");
-  }
-  while (input.Contains("gamma")){
-    input.Replace(input.Index("gamma"),5,"TMP");
-  }
-  while (input.Contains("TMP")){
-    input.Replace(input.Index("TMP"),3,"\\gamma");
-  }
-  while (input.Contains("#psi")){
-    input.Replace(input.Index("#psi"),4,"\\psi");
-  }
-  while (input.Contains("TMP")){
-    input.Replace(input.Index("TMP"),3,"\\psi");
-  }
-  while (input.Contains("\\\\")){
-    input.Replace(input.Index("\\\\"),2,"\\");
-  }
-  return input;
-}
-
-  // ********************************************************
   // CONVERT ROOT SYMBOLS TO LATEX FORMAT (e.g. "#pi^{+}" TO "\pi^{+}")
   // ********************************************************
 
@@ -637,14 +432,24 @@ FSString::parseTStringTest(TString input, TString spacer){
 
 
 
-  // ********************************************************
-  // PARSE SIMPLE LOGIC 
-  //    (using "," for OR, "&" for AND, "!" for NOT)
-  //    outer vector contains "OR"s
-  //    inner vector contains "AND"s
-  //    pair.first has int of 1 for NOT
-  //    pair.second is a statemet
-  // ********************************************************
+      // ********************************************************
+      // PARSE VERY SIMPLE LOGIC 
+      //    (using "," for OR, "&" for AND, "!" for NOT)
+      //    (no parentheses, no nested structures)
+      //    parseLogicalTString:
+      //      * outer vector contains "OR"s
+      //      * inner vector contains "AND"s
+      //      * pair.first has int of 1 for NOT
+      //      * pair.second is a statemet
+      //    evalLogicalTString:
+      //      Determines whether or not a list of categories contains
+      //      what is in input.
+      //      For example, for categories = "A","B","C",
+      //        input = "A&B" --> true
+      //        input = "A&B&!C" --> false
+      //        input = "A&D" --> false
+      //        input = "D,!E" --> true
+      // ********************************************************
 
 
 vector< vector< pair<int,TString> > >
@@ -794,15 +599,6 @@ FSString::latexLine(TString filename, TString text, bool append){
 }
 
 void
-FSString::writeTStringToFile(TString filename, TString text, bool append){
-  std::ios_base::openmode mode = ios::out;
-  if (append) mode = ios::app;
-  ofstream outfile(TString2string(filename).c_str(),mode);
-  outfile << text << endl;
-  outfile.close();
-}
-
-void
 FSString::latexCloser(TString filename, bool append){
   std::ios_base::openmode mode = ios::out;
   if (append) mode = ios::app;
@@ -810,6 +606,15 @@ FSString::latexCloser(TString filename, bool append){
   outfile << endl;
   outfile << "\\end{document}" << endl;
   outfile << endl;
+  outfile.close();
+}
+
+void
+FSString::writeTStringToFile(TString filename, TString text, bool append){
+  std::ios_base::openmode mode = ios::out;
+  if (append) mode = ios::app;
+  ofstream outfile(TString2string(filename).c_str(),mode);
+  outfile << text << endl;
   outfile.close();
 }
 

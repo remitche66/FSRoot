@@ -46,11 +46,14 @@ class FSString{
 
 
       // ********************************************************
-      // CONVERT FROM DOUBLE TO TSTRING
-      //   if fixdecimal is false:
-      //     precision is the number of significant digits
-      //   if fixdecimal is true:
-      //     the last digit will be in the pow(10,precision) place
+      // ROUTINES TO CONVERT FROM DOUBLE TO TSTRING
+      //   scientific == true:
+      //       put the result in scentific format by adding eXX 
+      //   fixdecimal == false: 
+      //       *precision* will be the number of significant digits
+      //   fixdecimal == true: 
+      //       the last digit will be in the pow(10,*precision*) place
+      //   sign:  can be "+-", "+", or "-"
       // ********************************************************
 
     static TString double2TString(double x, int precision = 3, bool scientific = false, 
@@ -76,20 +79,6 @@ class FSString{
 
 
       // ********************************************************
-      // CONVERT SYMBOLS TO ROOT FORMAT (e.g. "pi+" TO "#pi^{+}")
-      // ********************************************************
-
-    static TString rootSymbols(TString input);
-
-
-      // ********************************************************
-      // CONVERT SYMBOLS TO LATEX FORMAT (e.g. "pi+" TO "\pi^{+}")
-      // ********************************************************
-
-    static TString latexSymbols(TString input);
-
-
-      // ********************************************************
       // CONVERT ROOT SYMBOLS TO LATEX FORMAT (e.g. "#pi^{+}" TO "\pi^{+}")
       // ********************************************************
 
@@ -110,19 +99,29 @@ class FSString{
 
 
       // ********************************************************
-      // PARSE SIMPLE LOGIC 
+      // PARSE VERY SIMPLE LOGIC 
       //    (using "," for OR, "&" for AND, "!" for NOT)
-      //    outer vector contains "OR"s
-      //    inner vector contains "AND"s
-      //    pair.first has int of 1 for NOT
-      //    pair.second is a statemet
+      //    (no parentheses, no nested structures)
+      //    parseLogicalTString:
+      //      * outer vector contains "OR"s
+      //      * inner vector contains "AND"s
+      //      * pair.first has int of 1 for NOT
+      //      * pair.second is a statemet
+      //    evalLogicalTString:
+      //      Determines whether or not a list of categories contains
+      //      what is in input.
+      //      For example, for categories = "A","B","C",
+      //        input = "A&B" --> true
+      //        input = "A&B&!C" --> false
+      //        input = "A&D" --> false
+      //        input = "D,!E" --> true
       // ********************************************************
 
     static vector< vector< pair<int,TString> > >  parseLogicalTString(TString input);
 
     static void parseLogicalTStringTest(TString input);
 
-    static bool evalLogicalTString(TString input, vector<TString> cats);
+    static bool evalLogicalTString(TString input, vector<TString> categories);
 
 
       // ********************************************************
