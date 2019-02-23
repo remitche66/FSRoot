@@ -47,6 +47,8 @@ gROOT->ProcessLine(".include ${FSROOT}");
 
 cout << "Loading FSBasic/FSControl.h..." << endl;
 gROOT->LoadMacro("FSBasic/FSControl.C+");
+cout << "Loading FSBasic/FSCanvas.C..." << endl;
+gROOT->LoadMacro("FSBasic/FSCanvas.C+");
 cout << "Loading FSBasic/FSString.h..." << endl;
 gROOT->LoadMacro("FSBasic/FSString.C+");
 
