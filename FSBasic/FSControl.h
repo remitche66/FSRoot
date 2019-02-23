@@ -1,12 +1,12 @@
-#if !defined(CONTROLVARIABLES_H)
-#define CONTROLVARIABLES_H
+#if !defined(FSCONTROL_H)
+#define FSCONTROL_H
 
 #include "TString.h"
 
 using namespace std;
 
 
-class ControlVariables{
+class FSControl{
 
   public:
 
