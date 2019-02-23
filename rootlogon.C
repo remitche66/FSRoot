@@ -45,8 +45,8 @@ gROOT->ProcessLine(".include ${FSROOT}");
 // BASIC UTILITIES
 // *****************
 
-cout << "Loading FSBasic/ControlVariables.h..." << endl;
-gROOT->LoadMacro("FSBasic/ControlVariables.C+");
+cout << "Loading FSBasic/FSControl.h..." << endl;
+gROOT->LoadMacro("FSBasic/FSControl.C+");
 
 
 cout << "------------------------------------------" << endl;
