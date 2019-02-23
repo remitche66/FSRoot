@@ -866,7 +866,6 @@ FSHistogram::addHistogramGeneral(TString addName, TH1F* hist1d, TH2F* hist2d,
 TString 
 FSHistogram::expandVariable(TString variable){
 
-  TString MEASUREDMARK("U");  // only for old CLEO code
   TString PREFIXMARK("");
 
   TString RECOILMASSMARK  ("RECOILMASS(");
@@ -897,7 +896,6 @@ FSHistogram::expandVariable(TString variable){
 
     int index = 0;
     int size = 0;
-    bool hasmeasuredmark = false;
     bool hasprefixmark = false;
     TString EnN("");  TString EnM("");  TString En("");
     TString PxN("");  TString PxM("");	TString Px("");
@@ -917,11 +915,6 @@ FSHistogram::expandVariable(TString variable){
     else if (variable.Contains(DOTPRODUCT))      mark = DOTPRODUCT;
     else if (variable.Contains(COSINE))          mark = COSINE;
 
-         if (variable.Contains(MEASUREDMARK+mark)){
-	   index = variable.Index(MEASUREDMARK+mark);
-	   size = (MEASUREDMARK+mark).Length()+1;
-	   hasmeasuredmark = true;
-    }
     else if (variable.Contains(mark) && 
              variable.Index(mark) >= 1 &&
              TString(variable[variable.Index(mark)-1]).IsAlpha()){
@@ -1029,7 +1022,6 @@ FSHistogram::expandVariable(TString variable){
     TString post("");
     TString operation("");
     if (hasprefixmark)   pre =  PREFIXMARK;
-    if (hasmeasuredmark) post = MEASUREDMARK;
     if (pre == "TR") pre = "MCDecayParticle";
     for (unsigned int i = ipN; i < pN.size(); i++) { if (i == 0) operation = "";
                                                      if (i != 0) operation = "+";
