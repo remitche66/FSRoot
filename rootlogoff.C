@@ -1,11 +1,9 @@
 {
-/*
-cout << "HistogramUtilities::clearAddCache()..." << endl;       HistogramUtilities::clearAddCache();
-cout << "HistogramUtilities::clearChainCache()..." << endl;     HistogramUtilities::clearChainCache();
-cout << "HistogramUtilities::clearFileCache()..." << endl;      HistogramUtilities::clearFileCache();
-cout << "HistogramUtilities::clearHistogramCache()..." << endl; HistogramUtilities::clearHistogramCache();
-cout << "ModeCollection::clear()..." << endl;                   ModeCollection::clear();
-cout << "ModeHistogram::clearHistogramCache()..." << endl;      ModeHistogram::clearHistogramCache();
-*/
+cout << "FSHistogram::clearAddCache()..." << endl;       FSHistogram::clearAddCache();
+cout << "FSHistogram::clearChainCache()..." << endl;     FSHistogram::clearChainCache();
+cout << "FSHistogram::clearFileCache()..." << endl;      FSHistogram::clearFileCache();
+cout << "FSHistogram::clearHistogramCache()..." << endl; FSHistogram::clearHistogramCache();
+cout << "FSModeCollection::clear()..." << endl;                   FSModeCollection::clear();
+cout << "FSModeHistogram::clearHistogramCache()..." << endl;      FSModeHistogram::clearHistogramCache();
 }
 
