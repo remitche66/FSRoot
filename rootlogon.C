@@ -1,6 +1,13 @@
 {
 
+cout << "---------------------------------" << endl;
 cout << "--- Loading the FSRoot Macros ---" << endl;
+cout << "---------------------------------" << endl;
+
+
+// **********
+// FORMATTING
+// **********
 
 gStyle->SetFillColor(10);
 gStyle->SetCanvasColor(10);
@@ -18,20 +25,10 @@ gStyle->SetCanvasDefW(600.0);
 
 gStyle->SetTitleOffset(1.5,"Y");
 
-  //gStyle->SetPalette(1);
- // {int MAXCOLS = 250;  int COLSTART = 0;
- // int NCOLS = MAXCOLS - COLSTART;
- // TColor* pcols[MAXCOLS];
- // for (int i = 0; i < MAXCOLS; i++){
- //   float grey = i / (float) MAXCOLS;
- //   pcols[i] = new TColor(1000+(MAXCOLS-i-1),grey,grey,grey,"mycol"+(MAXCOLS-i-1));
- // }   
- // int cols[NCOLS];
- // for (int i = 0; i < NCOLS; i++){
- //   cols[i] = 1000+COLSTART+i;
- // }
- // gStyle->SetPalette(NCOLS,cols);}
 
+// ***********
+// ROOT TWEAKS
+// ***********
 
 TTreeFormula::SetMaxima(10000,1000,1000);
 TTree::SetMaxTreeSize(100e9);
@@ -43,6 +40,18 @@ TTree::SetMaxTreeSize(100e9);
 
 gROOT->ProcessLine(".include ${FSROOT}");
 
+
+// *****************
+// BASIC UTILITIES
+// *****************
+
+cout << "Loading FSBasic/ControlVariables.h..." << endl;
+gROOT->LoadMacro("FSBasic/ControlVariables.C+");
+
+
+cout << "------------------------------------------" << endl;
+cout << "--- Finished loading the FSRoot Macros ---" << endl;
+cout << "------------------------------------------" << endl;
 
 
 /*  
