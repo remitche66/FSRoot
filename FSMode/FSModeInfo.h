@@ -193,8 +193,8 @@ class FSModeInfo{
 
       // *************************************************************
       // USEFUL FOR MAKING CUTS ON INDIVIDIUAL PARTICLE TYPES
-      //  examples:  AND(EnPXpi+X>0) --> ((EnP1>0)&&(EnP2>0)&&(EnP3>0))
-      //              OR(EnPXpi+X>0) --> ((EnP1>0)||(EnP2>0)||(EnP3>0))
+      //  examples:  AND(EnP[pi+]>0) --> ((EnP1>0)&&(EnP2>0)&&(EnP3>0))
+      //              OR(EnP[pi+]>0) --> ((EnP1>0)||(EnP2>0)||(EnP3>0))
       //   (also allows nested ANDs and ORs although it may not be useful)
       // *************************************************************
 
