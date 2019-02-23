@@ -57,6 +57,8 @@ gROOT->LoadMacro("FSBasic/FSString.C+");
 cout << "Loading FSBasic/FSPhysics.C..." << endl;
 gROOT->LoadMacro("FSBasic/FSPhysics.C+");
 
+cout << "Loading FSBasic/FSHistogram.C..." << endl;
+gROOT->LoadMacro("FSBasic/FSHistogram.C+");
 
 cout << "------------------------------------------" << endl;
 cout << "--- Finished loading the FSRoot Macros ---" << endl;
