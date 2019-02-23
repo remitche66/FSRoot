@@ -6,7 +6,7 @@
 #include "TCanvas.h"
 #include "TBox.h"
 #include "TLine.h"
-#include "RootMacros/Utilities/FSPhysics.h"
+#include "FSBasic/FSPhysics.h"
 
 
 const double FSPhysics::XMY3S    = 10.3552;
