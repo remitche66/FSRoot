@@ -60,6 +60,25 @@ gROOT->LoadMacro("FSBasic/FSPhysics.C+");
 cout << "Loading FSBasic/FSHistogram.C..." << endl;
 gROOT->LoadMacro("FSBasic/FSHistogram.C+");
 
+
+// *****************
+// MODE UTILITIES
+// *****************
+
+cout << "Loading FSMode/FSModeString.C..." << endl;
+gROOT->LoadMacro("FSMode/FSModeString.C+");
+
+cout << "Loading FSMode/FSModeInfo.C..." << endl;
+gROOT->LoadMacro("FSMode/FSModeInfo.C+");
+
+cout << "Loading FSMode/FSModeCollection.C..." << endl;
+gROOT->LoadMacro("FSMode/FSModeCollection.C+");
+
+cout << "Loading FSMode/FSModeHistogram.C..." << endl;
+gROOT->LoadMacro("FSMode/FSModeHistogram.C+");
+
+
+
 cout << "------------------------------------------" << endl;
 cout << "--- Finished loading the FSRoot Macros ---" << endl;
 cout << "------------------------------------------" << endl;
