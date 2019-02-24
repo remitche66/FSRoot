@@ -5,14 +5,8 @@
 //
 //    a class used for the bookkeeping of decay modes
 //
-//    every decay mode is specified in four different ways:
-//
-//      modeNumber -- a unique number for every mode, 
-//                    ~545950 combinations
-//                    (not every mode will necessarily have a number;
-//                     this is mostly historical)
+//    every decay mode is specified in three different ways:
 //                 
-//
 //      modeCode -- two integers that count the number of particles
 //                  in a decay mode.
 //                    code1 = abcdefg
@@ -70,13 +64,12 @@ class FSModeInfo{
       // *******************************************************
       // CONSTRUCTORS STARTING FROM:
       //   "modeCode", "modeCode1,modeCode2", "modeString", 
-      //     "modeDescription", OR "modeNumber"
+      //     or "modeDescription"
       // *******************************************************
 
     FSModeInfo (pair < int,int > mCode);
     FSModeInfo (int mCode1, int mCode2);
     FSModeInfo (TString mString);
-    FSModeInfo (int mNumber);
 
 
       // *******************************************************
@@ -84,7 +77,6 @@ class FSModeInfo{
       //  modeString recognizes and replaces these strings 
       //    if "original" is given:
       //      "MODESTRING"
-      //      "MODENUMBER"
       //      "MODEDESCRIPTION"
       //      "MODECODE"
       //      "MODECODE1"
@@ -98,7 +90,6 @@ class FSModeInfo{
     int            modeCode1();
     int            modeCode2();
     TString        modeString(TString original = "", int counter = -1);
-    int            modeNumber();
     TString        modeDescription();
 
     vector<TString> particles();
@@ -216,11 +207,6 @@ class FSModeInfo{
     static void setSubmode (TString particleName,
                      vector<TString> particleDecays);
 
-      // *************************************************************
-      // RETURN AN ORDERED LIST OF PARTICLE NAMES
-      // *************************************************************
-
-    static vector<TString> particleNameDefinitions();
 
   private:
 
@@ -233,30 +219,7 @@ class FSModeInfo{
     vector<TString> m_categories;
     vector<TString> m_particles;
 
-    static map < int, pair<int,int> >  m_modeMapNum2Code;
-    static map < pair<int,int>, int >  m_modeMapCode2Num;
     static map < TString, vector<TString> > m_submodeMap;
-
-
-      // ****************************************************
-      // MAXIMUM NUMBERS OF PARTICLES ALLOWED
-      //    (only used for "modeNumber" -- modes not satisfying 
-      //     these bounds (and a few other constraints)
-      //     will have modeNumber = -1)
-      // ****************************************************
-
-    static const int MAXNUMBER_EE          = 1;
-    static const int MAXNUMBER_MM          = 1;
-    static const int MAXNUMBER_GAMMA       = 6;
-    static const int MAXNUMBER_PROTONPLUS  = 2;
-    static const int MAXNUMBER_PROTONMINUS = 2;
-    static const int MAXNUMBER_ETA         = 4;
-    static const int MAXNUMBER_KAONPLUS    = 4;
-    static const int MAXNUMBER_KAONMINUS   = 4;
-    static const int MAXNUMBER_KSHORT      = 4;
-    static const int MAXNUMBER_PIONPLUS    = 6;
-    static const int MAXNUMBER_PIONMINUS   = 6;
-    static const int MAXNUMBER_PI0         = 4;
 
 
       // *********************************************************
@@ -264,13 +227,6 @@ class FSModeInfo{
       // *********************************************************
 
     void addStandardCategories();
-
-
-      // *********************************************************
-      // INITIALIZE MAPS TO GO BETWEEN "modeCode" AND "modeNumber"
-      // *********************************************************
-
-    void modeInitialization();
 
 
       // *******************************************************

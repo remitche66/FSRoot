@@ -13,8 +13,6 @@
   // static member data
 map< pair<int,int>, FSModeInfo*> FSModeCollection::m_modeInfoMap;
 
-int FSModeCollection::m_numberedModes = 0;
-
 
   // *******************************************************
   // ADD MODES TO THE COLLECTION
@@ -38,11 +36,6 @@ FSModeCollection::addModeInfo(TString mString){
   FSModeInfo* modeInfo = addModeInfo(modeInfoTemp.modeCode());
   modeInfo->addCategory(modeInfoTemp.categories());
   return modeInfo;
-}
-
-FSModeInfo*
-FSModeCollection::addModeInfo(int mNumber){
-  return addModeInfo(FSModeInfo(mNumber).modeCode());
 }
 
 
@@ -70,10 +63,6 @@ FSModeCollection::removeModeInfo(TString mString){
   if (modeInfo(mString) != NULL) removeModeInfo(FSModeInfo(mString).modeCode());
 }
 
-void
-FSModeCollection::removeModeInfo(int mNumber){
-  if (modeInfo(mNumber) != NULL) return removeModeInfo(FSModeInfo(mNumber).modeCode());
-}
 
   // *******************************************************
   // READ MODES FROM A FILE AND ADD TO THE COLLECTION
@@ -141,7 +130,7 @@ FSModeCollection::addModesFromFile(TString filename){
 
 
   // *******************************************************
-  // RETRIEVE MODES FROM THE CACHE
+  // RETRIEVE MODES FROM THE COLLECTION
   // *******************************************************
 
 FSModeInfo*
@@ -162,15 +151,10 @@ FSModeCollection::modeInfo(TString mString){
   return modeInfo(FSModeInfo(mString).modeCode());
 }
 
-FSModeInfo*
-FSModeCollection::modeInfo(int mNumber){
-  return modeInfo(FSModeInfo(mNumber).modeCode());
-}
-
 
 
   // *******************************************************
-  // DISPLAY MODES IN THE CACHE
+  // DISPLAY MODES IN THE COLLECTION
   // *******************************************************
 
 void 
@@ -183,7 +167,7 @@ FSModeCollection::display(TString category){
 
 
   // *******************************************************
-  // CLEAR THE CACHE
+  // CLEAR THE COLLECTION
   // *******************************************************
 
 void 
@@ -254,20 +238,6 @@ FSModeCollection::modeVectorElement(TString category, unsigned int index){
   FSModeInfo* mElement = NULL;
   if (index < mVector.size()) mElement = mVector[index];
   return mElement;
-}
-
-
-  // *******************************************************
-  // NUMBER OF MODES THAT HAVE AN ASSOCIATED MODENUMBER
-  // *******************************************************
-
-int 
-FSModeCollection::numberedModes(){
-  if (m_numberedModes > 100) return m_numberedModes;
-  m_numberedModes = 0;
-  while (FSModeInfo(m_numberedModes).modeNumber() == m_numberedModes) { m_numberedModes++; }
-  m_numberedModes--;
-  return m_numberedModes;
 }
 
 

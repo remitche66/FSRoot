@@ -19,7 +19,6 @@ class FSModeCollection{
     static FSModeInfo* addModeInfo(pair<int,int> mCode);
     static FSModeInfo* addModeInfo(int mCode1, int mCode2);
     static FSModeInfo* addModeInfo(TString mString);
-    static FSModeInfo* addModeInfo(int mNumber);
 
 
       // *******************************************************
@@ -29,7 +28,6 @@ class FSModeCollection{
     static void removeModeInfo(pair<int,int> mCode);
     static void removeModeInfo(int mCode1, int mCode2);
     static void removeModeInfo(TString mString);
-    static void removeModeInfo(int mNumber);
 
 
       // *******************************************************
@@ -41,13 +39,12 @@ class FSModeCollection{
 
 
       // *******************************************************
-      // RETRIEVE MODES FROM THE CACHE
+      // RETRIEVE MODES FROM THE COLLECTION
       // *******************************************************
 
     static FSModeInfo* modeInfo(pair<int,int> mCode);
     static FSModeInfo* modeInfo(int mCode1, int mCode2);
     static FSModeInfo* modeInfo(TString mString);
-    static FSModeInfo* modeInfo(int mNumber);
 
 
       // *******************************************************
@@ -58,18 +55,6 @@ class FSModeCollection{
     static int               modeVectorSize(TString category = "");
     static FSModeInfo*         modeVectorElement(TString category = "", 
                                                unsigned int index = 0);
-
-
-      // *******************************************************
-      // NUMBER OF MODES THAT HAVE AN ASSOCIATED MODENUMBER;
-      //   LOOP OVER ALL NUMBERED MODES LIKE:
-      //     for (int i = 0; i < FSModeCollection::numberedModes(); i++){
-      //       FSModeInfo mi(i);
-      //       mi.display();
-      //     }
-      // *******************************************************
-
-    static int numberedModes();
 
 
       // *******************************************************
@@ -105,14 +90,14 @@ class FSModeCollection{
 
 
       // *******************************************************
-      // DISPLAY MODES IN THE CACHE
+      // DISPLAY MODES IN THE COLLECTION
       // *******************************************************
 
     static void display(TString category = "");
 
 
       // *******************************************************
-      // CLEAR THE CACHE
+      // CLEAR THE COLLECTION
       // *******************************************************
 
     static void clear();
@@ -120,12 +105,10 @@ class FSModeCollection{
 
   private:
 
-      // the mode cache
+      // the mode collection
       // [[store the pair as (code2,code1) for sorting]]
     static map< pair<int,int>, FSModeInfo*> m_modeInfoMap;
 
-      // the number of modes that have an associated number
-    static int m_numberedModes;
 
 };
 

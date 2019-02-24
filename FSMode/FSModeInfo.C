@@ -9,16 +9,14 @@
 #include "FSMode/FSModeInfo.h"
 
 // definitions of static variables
-map < int, pair<int,int> >  FSModeInfo::m_modeMapNum2Code;
-map < pair<int,int>, int >  FSModeInfo::m_modeMapCode2Num;
 map < TString, vector<TString> > FSModeInfo::m_submodeMap;
 
 
-  // ***************************************************************
-  // CONSTRUCTORS STARTING FROM:
-  //   "modeCode", "modeCode1,modeCode2", "modeString", 
-  //     or "modeNumber"
-  // ***************************************************************
+      // *******************************************************
+      // CONSTRUCTORS STARTING FROM:
+      //   "modeCode", "modeCode1,modeCode2", "modeString", 
+      //     or "modeDescription"
+      // *******************************************************
 
 
 FSModeInfo::FSModeInfo(pair<int,int> mCode){
@@ -179,29 +177,20 @@ FSModeInfo::FSModeInfo(TString mString){
 }
 
 
-FSModeInfo::FSModeInfo(int mNumber){
-  modeInitialization();
-  m_modeCode = pair<int,int>(0,0);
-  map< int, pair<int,int> >::const_iterator mapitr = m_modeMapNum2Code.find(mNumber);
-  if (mapitr != m_modeMapNum2Code.end()) m_modeCode = m_modeMapNum2Code[mNumber];
-  addStandardCategories();
-}
+      // *******************************************************
+      // RETURN INFORMATION ABOUT THIS MODE
+      //  modeString recognizes and replaces these strings 
+      //    if "original" is given:
+      //      "MODESTRING"
+      //      "MODEDESCRIPTION"
+      //      "MODECODE"
+      //      "MODECODE1"
+      //      "MODECODE2"
+      //    if "counter" is also given and non-negative:
+      //      "MODECOUNTER"
+      //        or "MODECOUNTERXXXX" to pad with zeros
+      // *******************************************************
 
-
-  // *******************************************************
-  // RETURN INFORMATION ABOUT THIS MODE
-  //  modeString recognizes and replaces these strings 
-  //    if "original" is given:
-  //      "MODESTRING"
-  //      "MODENUMBER"
-  //      "MODEDESCRIPTION"
-  //      "MODECODE"
-  //      "MODECODE1"
-  //      "MODECODE2"
-  //    if "counter" is also given and non-negative:
-  //      "MODECOUNTER"
-  //        or "MODECOUNTERXXXX" to pad with zeros
-  // *******************************************************
 
 pair<int,int>
 FSModeInfo::modeCode(){
@@ -230,11 +219,6 @@ FSModeInfo::modeString(TString original, int counter){
   while (original.Contains("MODESTRING")){
     original.Replace(original.Index("MODESTRING"),10,mString);
   }
-  while (original.Contains("MODENUMBER")){
-    TString stmp("");  
-    stmp += modeNumber();
-    original.Replace(original.Index("MODENUMBER"),12,stmp);
-  }
   while (original.Contains("MODEDESCRIPTION")){
     TString stmp("");  
     stmp += modeDescription();
@@ -262,16 +246,6 @@ FSModeInfo::modeString(TString original, int counter){
                      FSString::int2TString(counter,digits));
   }
   return original;
-}
-
-
-
-int
-FSModeInfo::modeNumber(){
-  modeInitialization();
-  map< pair<int,int>, int >::const_iterator mapitr = m_modeMapCode2Num.find(m_modeCode);
-  if (mapitr != m_modeMapCode2Num.end()) return m_modeMapCode2Num[m_modeCode];
-  return -1;
 }
 
 
@@ -322,46 +296,6 @@ FSModeInfo::particles(){
   np = modeNPim       ();  for (int i = 0; i < np; i++){ m_particles.push_back("pi-"); }
   np = modeNPi0       ();  for (int i = 0; i < np; i++){ m_particles.push_back("pi0"); }
   return m_particles;
-}
-
-
-
-  // *********************************************************
-  // INITIALIZE MAPS TO GO BETWEEN "modeCode" AND "modeNumber"
-  // *********************************************************
-
-void 
-FSModeInfo::modeInitialization(){
-  if (m_modeMapNum2Code.size() > 100) return;
-  if (FSControl::DEBUG)
-    cout << "FSModeInfo:  initializing modeNumbers " << modeString() << endl;
-  int number = 0;
-  for (int iee = 0; iee <= MAXNUMBER_EE          ; iee++){
-  for (int imm = 0; imm <= MAXNUMBER_MM          ; imm++){
-    if ((iee+imm)<=1){
-  for (int ig  = 0; ig  <= MAXNUMBER_GAMMA       ; ig++){
-  for (int ipp = 0; ipp <= MAXNUMBER_PROTONPLUS  ; ipp++){
-  for (int ipm = 0; ipm <= MAXNUMBER_PROTONMINUS ; ipm++){
-    if (abs(ipp-ipm)<=1){
-  for (int ikp = 0; ikp <= MAXNUMBER_KAONPLUS    ; ikp++){
-  for (int ikm = 0; ikm <= MAXNUMBER_KAONMINUS   ; ikm++){
-  for (int iks = 0; iks <= MAXNUMBER_KSHORT      ; iks++){
-    if (abs(ikp-ikm) <= (iks+1)){
-  for (int ipip = 0; ipip <= MAXNUMBER_PIONPLUS   ; ipip++){
-  for (int ipim = 0; ipim <= MAXNUMBER_PIONMINUS  ; ipim++){
-    if (abs(ipp-ipm+ikp-ikm+ipip-ipim)<=1){
-  for (int ipi0 = 0; ipi0 <= MAXNUMBER_PI0        ; ipi0++){
-  for (int ieg = 0; ieg <= MAXNUMBER_ETA         ; ieg++){
-    if ((2*iee+2*imm+ig+ipp+ipm+ieg+ikp+ikm+iks+ipip+ipim+ipi0)<=14){
-      int code1 = ipi0+10*ipim+100*ipip+1000*iks+10000*ikm+100000*ikp+1000000*ig;
-      int code2 = ieg+10*ipm+100*ipp+1000*imm+10000*imm+100000*iee+1000000*iee;
-      m_modeMapNum2Code[number] = pair<int,int> (code1,code2);
-      m_modeMapCode2Num[pair<int,int> (code1,code2)] = number;
-      number++;
-  }}}}}}}}}}}}}}}}}
-  if (FSControl::DEBUG)
-    cout << "FSModeInfo:  done initializing modeNumbers " << modeString() << endl;
-  return;
 }
 
 
@@ -1043,7 +977,6 @@ FSModeInfo::addStandardCategories(){
   m_categories.push_back(modeString("CODE=MODECODE"));
   m_categories.push_back(modeString("CODE1=MODECODE1"));
   m_categories.push_back(modeString("CODE2=MODECODE2"));
-  m_categories.push_back(modeString("NUM=MODENUMBER"));
 
   if (FSControl::DEBUG)
     cout << "FSModeInfo:  done adding standard categories to mode " << modeString() << endl;
@@ -1087,39 +1020,14 @@ FSModeInfo::removeCategory(TString category){
 
 void
 FSModeInfo::display(int counter){
-  cout << counter << "\t" << modeNumber() 
-                  << "\t" << modeString() 
-                  << "\t" << modeDescription();
+  cout << counter;
+  TString mString = modeString();
+  for (int i = mString.Length(); i < 18; i++){ cout << " "; }
+  cout << modeString() << "   " << modeDescription();
   for (unsigned int j = 0; j < m_categories.size(); j++){
-    if (j%3 == 0){  cout << endl;  cout << "\t\t\t\t\t\t\t";  }
+    if (j%4 == 0){  cout << endl;  cout << "\t\t\t\t\t";  }
     cout << m_categories[j] << "  ";
   }
   cout << endl << endl;
-}
-
-  // *************************************************************
-  // RETURN AN ORDERED LIST OF PARTICLE NAMES
-  // *************************************************************
-
-vector<TString> 
-FSModeInfo::particleNameDefinitions(){
-  vector<TString> names;
-  names.push_back("Lambda");
-  names.push_back("ALambda");
-  names.push_back("e+");
-  names.push_back("e-");
-  names.push_back("mu+");
-  names.push_back("mu-");
-  names.push_back("p+");
-  names.push_back("p-");
-  names.push_back("eta");
-  names.push_back("gamma");
-  names.push_back("K+");
-  names.push_back("K-");
-  names.push_back("Ks");
-  names.push_back("pi+");
-  names.push_back("pi-");
-  names.push_back("pi0");
-  return names;
 }
 
