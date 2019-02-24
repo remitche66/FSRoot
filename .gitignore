@@ -1,6 +1,7 @@
 # FSRoot
 NotesOnChangesFromRootMacros.txt
 *.pcm
+*.root
 
 # Prerequisites
 *.d
