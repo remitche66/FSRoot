@@ -64,7 +64,9 @@ Instructions for installation and initial setup:
 
 (5) Now when you open \ROOT, the \FSR\ utilities should be loaded and compiled -- you should see a message saying "Loading the FSRoot Macros" along with the output of the compilation.  The loading and compiling is done in the file {\tt rootlogon.C}.  This file also sets up default styles, which are not essential.  Since these might conflict with styles you have defined elsewhere, it could be worthwhile to tweak or remove these.
 
-\section{Conventions}
+\section{Basic Operations:  the {\tt FSBasic} directory}
+
+\subsection{Basic Conventions}
 \label{sec:conventions}
 
 Some \FSR\ operations on variables within a \ROOT\ {\tt TTree} assume a particular format within the tree.  Four-vectors are assumed to take the form:
@@ -80,7 +82,7 @@ Variable names for run numbers, event numbers, and the $\chi^2$/dof from a kinem
 Maybe a future version of \FSR\ could make these formats customizable.
 
 
-\section{Basic Histogram Utilities}
+\subsection{Basic Histogram Utilities}
 \label{sec:hist}
 
 Basic histogram functions are provided by the {\tt FSHistogram} class in the {\tt FSBasic} directory.  Like many other functions within \FSR, the functions within the {\tt FSHistogram} class are static member functions, so there is never a need to deal with instances of {\tt FSHistogram}.
@@ -121,7 +123,7 @@ To see more verbose output during a session:
     > FSControl::DEBUG = true;
 \end{verbatim}
 
-\section{Basic Tree Utilities}
+\subsection{Basic Tree Utilities}
 \label{sec:tree}
 
 The {\tt FSTree} class is also located in the {\tt FSBasic} directory and provides basic utilities to operate on trees.  
@@ -136,9 +138,12 @@ will take the tree named {\tt inputTreeName} from the file {\tt inputFileName}, 
           "abs(MASS(1,2)-0.5)<0.1"); 
 \end{verbatim}
 
+\section{Final State Operations:  the {\tt FSMode} directory}
 
 
-\section{Fitting Utilities}
+
+
+\section{Fitting Utilities:  the {\tt FSFit} directory}
 
 The fitting utilities (contained in the directory {\tt FSFit}) work, but are still under development.  See the examples in the directory {\tt Examples/Fitting} to get the general idea.
 
