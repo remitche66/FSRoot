@@ -65,10 +65,22 @@ Instructions for installation and initial setup:
 (5) Now when you open \ROOT, the \FSR\ utilities should be loaded and compiled -- you should see a message saying "Loading the FSRoot Macros" along with the output of the compilation.  The loading and compiling is done in the file {\tt rootlogon.C}.  This file also sets up default styles, which are not essential.  Since these might conflict with styles you have defined elsewhere, it could be worthwhile to tweak or remove these.
 
 \section{Conventions}
+\label{sec:conventions}
 
+Some \FSR\ operations on variables within a \ROOT\ {\tt TTree} assume a particular format within the tree.  Four-vectors are assumed to take the form:
+\begin{verbatim}
+    [AB]EnP[CD], [AB]PxP[CD], [AB]PyP[CD], [AB]PzP[CD]
+\end{verbatim}
+where {\tt [CD]} is a particle label (often "1", "2", "3", "2a", etc., but also "CM" or "B" or other) and {\tt [AB]} labels the type of four-vector (for example, "R" for raw or "K" for kinematically fit or "MC" for Monte Carlo, etc.).  The \FSR\ code does not assume anything about the conventions for {\tt [CD]} and {\tt [AB]}.
 
+Variable names for run numbers, event numbers, and the $\chi^2$/dof from a kinematic fit are also hardcoded in a couple of places:
+\begin{verbatim}
+    Run, Event, Chi2DOF
+\end{verbatim}
+Maybe a future version of \FSR\ could make these formats customizable.
 
 \section{Basic Histograms}
+\label{sec:hist}
 
 Basic histogram functions are provided by the {\tt FSHistogram} class in the {\tt FSBasic} directory.  Like many other functions within \FSR, the functions within the {\tt FSHistogram} class are static member functions, so there is never a need to deal with instances of {\tt FSHistogram}.
 
@@ -83,7 +95,7 @@ Cuts can be added in the fifth argument:
     > FSHistogram::getTH1F(FileName,TreeName,"Chi2DOF",
         "(60,0.0,6.0)","Chi2DOF<5.0")->Draw();
 \end{verbatim}
-The variable and cut arguments can contain shortcuts.  For example, {\tt MASS(1,2)} is expanded into the total invariant mass of particles 1 and 2, where 1 and 2 are not necessarily numbers.  This is done in the member function {\tt expandVariable}, which can also be used on its own to explicitly see what it is doing.  Characters in front of {\tt MASS}~(for example) are prepended to the variable names.  See {\tt FSHistogram::expandVariable} for more options.  Examples:
+The variable and cut arguments can contain shortcuts.  For example, {\tt MASS(I,J)} is expanded into the total invariant mass of particles {\tt I} and {\tt J}, where {\tt I} and {\tt J} are not necessarily numbers~(they are the {\tt [CD]} in Sec.~\ref{sec:conventions}).  Characters in front of {\tt MASS}~(for example) are prepended to the variable names (the {\tt [AB]} in Sec.~\ref{sec:conventions}).  This is all done in the member function {\tt expandVariable}, which can also be used on its own to explicitly see what it is doing.    See {\tt FSHistogram::expandVariable} for more options beyond {\tt MASS}~(for example, {\tt RECOILMASS}, {\tt MOMENTUM}, {\tt COSINE}, etc.).  Examples:
 \begin{verbatim}
     > FSHistogram::getTH1F(FileName,TreeName,"MASS(1,2)",
         "(60,0.0,6.0)","Chi2DOF<5.0&&MASS(1,2)>1.0")->Draw();
