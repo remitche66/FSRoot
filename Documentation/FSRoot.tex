@@ -1,0 +1,64 @@
+\documentclass[11pt]{article}
+%\usepackage{graphicx}
+\usepackage{amssymb}
+%\usepackage[]{epsfig}
+%\usepackage{parskip}
+
+\textheight 8.0in
+\topmargin 0.0in
+\textwidth 6.0in
+\oddsidemargin 0.25in
+\evensidemargin 0.25in
+
+\newcommand{\FSR}{{\tt FSRoot}}
+\newcommand{\git}{{\tt git}}
+
+\begin{document}
+
+
+\title{Notes on the \FSR\ Package}
+\author{Ryan Mitchell}
+\date{\today}
+\maketitle
+
+\abstract{
+\FSR\ is a set of utilities to help manipulate information about different Final States~(FS) produced in particle physics experiments.  The utilities are built around the CERN {\tt ROOT} framework.  This document provides an introduction to \FSR.}
+
+\tableofcontents
+
+\parindent 0pt
+\parskip 10pt
+
+
+\section{Overview of \FSR}
+
+This is an overview of \FSR.
+
+\section{Download and Setup}
+
+There are three initial steps:
+
+(1) The macros can be downloaded from the \git\ repository.  This command will download the macros into a directory called \FSR:
+\begin{verbatim}
+> git clone <user>@stanley.physics.indiana.edu:/home/s4/remitche/git/RootMacros.git
+\end{verbatim}
+
+(2) The {\tt \$ROOTMACROS} environment variable needs to be set to point to the \FSR\ directory.  For example, in {\tt tcsh} (usually using the {\tt .tcshrc} file):
+\begin{verbatim}
+> setenv ROOTMACROS <RootMacros directory>
+\end{verbatim}
+
+(3) The following lines need to be added to a file called {\tt .rootrc} (usually in your home directory):
+\begin{verbatim}
+Unix.*.Root.DynamicPath: .:$(ROOTMACROS):$(ROOTSYS)/lib:
+Unix.*.Root.MacroPath:   .:$(ROOTMACROS):
+\end{verbatim}
+
+\section{Getting Updates}
+
+To get updates, do this from the {\tt \$ROOTMACROS} directory:
+\begin{verbatim}
+> git pull
+\end{verbatim}
+
+\end{document}
