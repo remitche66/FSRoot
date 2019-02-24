@@ -30,35 +30,38 @@
 \parskip 10pt
 
 
-\section{Overview of \FSR}
 
-This is an overview of \FSR.
+%\section{Overview of \FSR}
 
-\section{Download and Setup}
+%This is an overview of \FSR.
 
-There are three initial steps:
+\section{Installation and Initial Setup}
 
-(1) The macros can be downloaded from the \git\ repository.  This command will download the macros into a directory called \FSR:
+Instructions for installation and initial setup:
+
+(1) Download the source:
 \begin{verbatim}
-> git clone <user>@stanley.physics.indiana.edu:/home/s4/remitche/git/RootMacros.git
+    git clone https://github.com/remitche66/FSRoot.git FSRoot
 \end{verbatim}
 
-(2) The {\tt \$ROOTMACROS} environment variable needs to be set to point to the \FSR\ directory.  For example, in {\tt tcsh} (usually using the {\tt .tcshrc} file):
+(2) Set the location of \FSR\ in your login shell script (e.g. {\tt .cshrc}):
 \begin{verbatim}
-> setenv ROOTMACROS <RootMacros directory>
+    setenv FSROOT [xxxxx]/FSRoot
 \end{verbatim}
 
-(3) The following lines need to be added to a file called {\tt .rootrc} (usually in your home directory):
+(3) Also probably add the \FSR\ directory to {\tt \$DYLD\_LIBRARY\_PATH} and {\tt \$LD\_LIBRARY\_PATH}.  This allows you to compile code including \FSR\ functions.  For example:
 \begin{verbatim}
-Unix.*.Root.DynamicPath: .:$(ROOTMACROS):$(ROOTSYS)/lib:
-Unix.*.Root.MacroPath:   .:$(ROOTMACROS):
+     setenv DYLD_LIBRARY_PATH $DYLD_LIBRARY_PATH\:$FSROOT
+     setenv   LD_LIBRARY_PATH   $LD_LIBRARY_PATH\:$FSROOT
 \end{verbatim}
 
-\section{Getting Updates}
-
-To get updates, do this from the {\tt \$ROOTMACROS} directory:
+(4) There is usually a {\tt .rootrc} file in your home directory that {\tt ROOT} uses for initialization.  Add lines like these to {\tt .rootrc}, which tell {\tt ROOT} the location of {\tt FSRoot}:
 \begin{verbatim}
-> git pull
+    Unix.*.Root.DynamicPath: .:$(FSROOT):$(ROOTSYS)/lib:
+    Unix.*.Root.MacroPath:   .:$(FSROOT):
 \end{verbatim}
+
+(5) Now when you open {\tt ROOT}, the \FSR\ utilities should be loaded and compiled -- you should see a message saying "Loading the FSRoot Macros" along with the output of the compilation.
+
 
 \end{document}
