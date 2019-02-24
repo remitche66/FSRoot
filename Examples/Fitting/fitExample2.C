@@ -40,7 +40,7 @@
 
   FSFitUtilities::createDataSet("hist",hist);
   FSFitUtilities::createMinuit("minuit");
-  FSFitUtilities::addFSFitComponent("minuit","hist","pg");
+  FSFitUtilities::addFitComponent("minuit","hist","pg");
   FSFitUtilities::migrad("minuit");
 
 

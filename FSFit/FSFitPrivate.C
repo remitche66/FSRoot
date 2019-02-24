@@ -46,6 +46,6 @@ void FSFitMinuit::setMNAME(){
 }
 
 vector< pair<TString,TString> >  FSFitMinuit::fitComponents(){
-  return FSFitMinuitList::getFSFitComponents(m_mName);
+  return FSFitMinuitList::getFitComponents(m_mName);
 }
 

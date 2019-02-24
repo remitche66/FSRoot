@@ -66,8 +66,8 @@
   FSFitUtilities::createDataSet("hist1",hist1);
   FSFitUtilities::createDataSet("hist2",hist2);
   FSFitUtilities::createMinuit("minuit");
-  FSFitUtilities::addFSFitComponent("minuit","hist1","pg1");
-  FSFitUtilities::addFSFitComponent("minuit","hist2","pg2");
+  FSFitUtilities::addFitComponent("minuit","hist1","pg1");
+  FSFitUtilities::addFitComponent("minuit","hist2","pg2");
   FSFitUtilities::migrad("minuit");
 
 

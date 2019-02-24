@@ -203,15 +203,15 @@ class FSFitUtilities{
       // Manage fit ranges for different data sets.
       //   Multiple fit ranges can be added to each data set.
 
-    static void clearFSFitRange(TString dName){
+    static void clearFitRange(TString dName){
       FSFitDataSetList::getDataSet(dName)->clearLimits();
     }
 
-    static void setFSFitRange(TString dName, double lowLimit, double highLimit){
+    static void setFitRange(TString dName, double lowLimit, double highLimit){
       FSFitDataSetList::getDataSet(dName)->setLimits(lowLimit,highLimit);
     }
 
-    static void addFSFitRange(TString dName, double lowLimit, double highLimit){
+    static void addFitRange(TString dName, double lowLimit, double highLimit){
       FSFitDataSetList::getDataSet(dName)->addLimits(lowLimit,highLimit);
     }
 
@@ -225,14 +225,14 @@ class FSFitUtilities{
     static void createMinuit(TString mName, TString dName = "", TString fName = "", 
                                TString fcnName = "CHI2"){
       FSFitMinuitList::addMinuit(mName,fcnName);
-      if (dName != "" && fName != "") FSFitMinuitList::addFSFitComponent(mName,dName,fName);
+      if (dName != "" && fName != "") FSFitMinuitList::addFitComponent(mName,dName,fName);
     }
 
       // Add a data set to fit and a function to fit it with.  Many of these can be added for
       //  simultaneous fits (with constraints between parameters).
 
-    static void addFSFitComponent(TString mName, TString dName, TString fName){
-      FSFitMinuitList::addFSFitComponent(mName,dName,fName);
+    static void addFitComponent(TString mName, TString dName, TString fName){
+      FSFitMinuitList::addFitComponent(mName,dName,fName);
     }
 
       // Do a migrad fit.

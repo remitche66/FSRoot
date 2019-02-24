@@ -1074,13 +1074,13 @@ class FSFitMinuitList {
       m_fitMinuitMap.clear();
     }
 
-    static void addFSFitComponent(TString mName, TString dName, TString fName){ 
-      vector< pair<TString,TString> > comps = getFSFitComponents(mName);
+    static void addFitComponent(TString mName, TString dName, TString fName){ 
+      vector< pair<TString,TString> > comps = getFitComponents(mName);
       comps.push_back(pair<TString,TString>(dName,fName));
       m_fitComponentMap[mName] = comps;
     }
 
-    static vector< pair<TString,TString> > getFSFitComponents(TString mName){
+    static vector< pair<TString,TString> > getFitComponents(TString mName){
       map<TString,vector< pair<TString,TString> > >::iterator it = m_fitComponentMap.find(mName);
       if (it != m_fitComponentMap.end()) return it->second;
       cout << "FSFitMinuitList ERROR:  cannot find fit components for minuit fit named " << mName << endl;
