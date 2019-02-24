@@ -915,7 +915,7 @@ FSHistogram::expandVariable(TString variable){
     else if (variable.Contains(DOTPRODUCT))      mark = DOTPRODUCT;
     else if (variable.Contains(COSINE))          mark = COSINE;
 
-    else if (variable.Contains(mark) && 
+    if (variable.Contains(mark) && 
              variable.Index(mark) >= 1 &&
              TString(variable[variable.Index(mark)-1]).IsAlpha()){
            PREFIXMARK = "";
