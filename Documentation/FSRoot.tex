@@ -95,13 +95,13 @@ Cuts can be added in the fifth argument:
     > FSHistogram::getTH1F(FileName,TreeName,"Chi2DOF",
         "(60,0.0,6.0)","Chi2DOF<5.0")->Draw();
 \end{verbatim}
-The variable and cut arguments can contain shortcuts.  For example, {\tt MASS(I,J)} is expanded into the total invariant mass of particles {\tt I} and {\tt J}, where {\tt I} and {\tt J} are not necessarily numbers~(they are the {\tt [CD]} in Sec.~\ref{sec:conventions}).  Characters in front of {\tt MASS}~(for example) are prepended to the variable names (the {\tt [AB]} in Sec.~\ref{sec:conventions}).  This is all done in the member function {\tt expandVariable}, which can also be used on its own to explicitly see what it is doing.    See {\tt FSHistogram::expandVariable} for more options beyond {\tt MASS}~(for example, {\tt RECOILMASS}, {\tt MOMENTUM}, {\tt COSINE}, etc.).  Examples:
+The variable and cut arguments can contain shortcuts.  For example, {\tt MASS(I,J)} is expanded into the total invariant mass of particles {\tt I} and {\tt J}, where {\tt I} and {\tt J} are not necessarily numbers~(they are the {\tt [CD]} in Sec.~\ref{sec:conventions}).  Characters in front of {\tt MASS}~(for example) are prepended to the variable names (the {\tt [AB]} in Sec.~\ref{sec:conventions}).  This is all done in the function {\tt FSTree::expandVariable}, which can also be used on its own to explicitly see what it is doing.    See {\tt FSTree::expandVariable} for more options beyond {\tt MASS}~(for example, {\tt RECOILMASS}, {\tt MOMENTUM}, {\tt COSINE}, etc.).  Examples:
 \begin{verbatim}
     > FSHistogram::getTH1F(FileName,TreeName,"MASS(1,2)",
         "(60,0.0,6.0)","Chi2DOF<5.0&&MASS(1,2)>1.0")->Draw();
-    > cout << FSHistogram::expandVariable("MASS(1,2)+MASS(2,3)") << endl;
-    > cout << FSHistogram::expandVariable("ABMASS(1,C)") << endl;
-    > cout << FSHistogram::expandVariable("RECOILMASS(CM;D,2)") << endl;
+    > cout << FSTree::expandVariable("MASS(1,2)+MASS(2,3)") << endl;
+    > cout << FSTree::expandVariable("ABMASS(1,C)") << endl;
+    > cout << FSTree::expandVariable("RECOILMASS(CM;D,2)") << endl;
 \end{verbatim}
 Histograms are automatically cached so they are made only once.  To save histograms at the end of a session, use the function:
 \begin{verbatim}
