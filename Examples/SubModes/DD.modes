@@ -1,0 +1,75 @@
+Decay DDModes
+  DD                _DD_
+  gamma DD          _gammaDD_
+  pi+ pi- DD        _pi+pi-DD_
+Enddecay
+
+Decay DD
+  D+ D-             _D+D-_
+  D0 D0bar          _D0D0bar_
+  D*+ D-            _D*+D-_
+  D*- D+            _D*-D+_
+  D*0 D0bar         _D*0D0bar_
+  D*0bar D0         _D*0barD0_
+Enddecay
+
+Decay D*+
+  D0 pi+
+  D+ pi0
+Enddecay
+
+Decay D*-
+  D0bar pi-
+  D- pi0
+Enddecay
+
+Decay D*0
+  D0 pi0
+  D0 gamma
+Enddecay
+
+Decay D*0bar
+  D0bar pi0
+  D0bar gamma
+Enddecay
+
+Decay D+
+  Ks pi+
+  Ks pi+ pi0
+  Ks pi+ pi+ pi-
+  K- pi+ pi+
+  K- pi+ pi+ pi0
+  K- pi+ pi+ pi+ pi-
+Enddecay
+
+Decay D-
+  Ks pi-
+  Ks pi- pi0
+  Ks pi- pi- pi+
+  K+ pi- pi-
+  K+ pi- pi- pi0
+  K+ pi- pi- pi- pi+
+Enddecay
+
+Decay D0
+  Ks pi0
+  Ks pi+ pi-
+  Ks pi+ pi- pi0
+  K- pi+
+  K- pi+ pi0
+  K- pi+ pi+ pi-
+  K- pi+ pi+ pi- pi0
+Enddecay
+
+Decay D0bar
+  Ks pi0
+  Ks pi- pi+
+  Ks pi- pi+ pi0
+  K+ pi-
+  K+ pi- pi0
+  K+ pi- pi- pi+
+  K+ pi- pi- pi+ pi0
+Enddecay
+
+End
+
