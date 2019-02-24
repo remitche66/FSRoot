@@ -62,7 +62,7 @@ Instructions for installation and initial setup:
     Unix.*.Root.MacroPath:   .:$(FSROOT):
 \end{verbatim}
 
-(5) Now when you open \ROOT, the \FSR\ utilities should be loaded and compiled -- you should see a message saying "Loading the FSRoot Macros" along with the output of the compilation.  The loading and compiling is done in the file {\tt rootlogon.C}.  This file also sets up default styles, which are not essential.  Since these might conflict with styles you have defined elsewhere, it could be worthwhile to tweak or remove these.
+(5) Now when you open \ROOT, the \FSR\ utilities should be loaded and compiled -- you should see a message saying ``Loading the FSRoot Macros'' along with the output of the compilation.  The loading and compiling is done in the file {\tt rootlogon.C}.  This file also sets up default styles, which are not essential.  Since these might conflict with styles you have defined elsewhere, it could be worthwhile to tweak or remove these.
 
 \section{Basic Operations:  the {\tt FSBasic} directory}
 
@@ -73,7 +73,7 @@ Some \FSR\ operations on variables within a \ROOT\ {\tt TTree} assume a particul
 \begin{verbatim}
     [AB]EnP[CD], [AB]PxP[CD], [AB]PyP[CD], [AB]PzP[CD]
 \end{verbatim}
-where {\tt [CD]} is a particle label (often "1", "2", "3", "2a", etc., but also "CM" or "B" or other) and {\tt [AB]} labels the type of four-vector (for example, "R" for raw or "K" for kinematically fit or "MC" for Monte Carlo, etc.).  The \FSR\ code does not assume anything about the conventions for {\tt [CD]} and {\tt [AB]}.
+where {\tt [CD]} is a particle label (often ``1'', ``2'', ``3'', ``2a'', etc., but also ``CM'' or ``B'' or other) and {\tt [AB]} labels the type of four-vector (for example, ``R'' for raw or ``K'' for kinematically fit or ``MC'' for Monte Carlo, etc.).  The \FSR\ code does not assume anything about the conventions for {\tt [CD]} and {\tt [AB]}.
 
 Variable names for run numbers, event numbers, and the $\chi^2$/dof from a kinematic fit are also hardcoded in a couple of places:
 \begin{verbatim}
@@ -140,6 +140,55 @@ will take the tree named {\tt inputTreeName} from the file {\tt inputFileName}, 
 
 \section{Final State Operations:  the {\tt FSMode} directory}
 
+
+\subsection{Mode Numbering and Conventions}
+
+A ``final state''~(also called ``mode'') is made from a combination of: $\Lambda (\to p \pi^-)$, $\bar{\Lambda} (\to \bar{p} \pi^+)$, $e^+$, $e^-$, $\mu^+$, $\mu^-$, $p$, $\bar{p}$, $\eta (\to \gamma\gamma)$, $\gamma$, $K^+$, $K^-$, $K^0_S (\to \pi^+\pi^-)$, $\pi^+$, $\pi^-$, $\pi^0 (\to \gamma\gamma)$.
+
+As strings, these final state particles are given as:
+$\Lambda (\to p \pi^-) \equiv $~{\tt Lambda}, 
+$\bar{\Lambda} (\to \bar{p} \pi^+) \equiv $~{\tt ALambda}, 
+$e^+ \equiv $~{\tt e+}, 
+$e^- \equiv $~{\tt e-}, 
+$\mu^+ \equiv $~{\tt mu+},  
+$\mu^- \equiv $~{\tt mu-}, 
+$p \equiv $~{\tt p+}, 
+$\bar{p} \equiv $~{\tt p-}, 
+$\eta (\to \gamma\gamma) \equiv $~{\tt eta}, 
+$\gamma \equiv $~{\tt gamma}, 
+$K^+ \equiv $~{\tt K+}, 
+$K^- \equiv $~{\tt K-}, 
+$K^0_S (\to \pi^+\pi^-) \equiv $~{\tt Ks}, 
+$\pi^+ \equiv $~{\tt pi+}, 
+$\pi^- \equiv $~{\tt pi-}, 
+$\pi^0 (\to \gamma\gamma) \equiv $~{\tt pi0}.
+
+Every final state can be specified in three different ways:
+
+(1) {\tt pair<int,int> modeCode}: a pair of two integers ({\tt code1}, {\tt code2}) that count the number of particles in a decay mode.
+\begin{verbatim}
+              code1 = abcdefg
+                  a = # gamma
+                  b = # K+
+                  c = # K-
+                  d = # Ks
+                  e = # pi+
+                  f = # pi-
+                  g = # pi0
+              code2 = abcdefghi
+                  a = # Lambda
+                  b = # ALambda
+                  c = # e+
+                  d = # e-
+                  e = # mu+
+                  f = # mu-
+                  g = # p+
+                  h = # p-
+                  i = # eta
+\end{verbatim}
+(2) {\tt TString modeString}: a string version of {\tt code1} and {\tt code2} in the format ``{\tt code2\_code1}''.  It can contain a prefix (for example, ``FS'' or ``EXC'' or ``INC'' or anything longer) that isn't used here, but can help with organization elsewhere.
+
+(3) {\tt TString modeDescription}: a string with a list of space-separated particle names~(for example ``{\tt K+ K- pi+ pi+ pi- pi-}'').
 
 
 
