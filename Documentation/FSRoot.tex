@@ -6,11 +6,12 @@
 
 \textheight 8.0in
 \topmargin 0.0in
-\textwidth 6.0in
-\oddsidemargin 0.25in
-\evensidemargin 0.25in
+\textwidth 6.5in
+\oddsidemargin 0.0in
+\evensidemargin 0.0in
 
 \newcommand{\FSR}{{\tt FSRoot}}
+\newcommand{\ROOT}{{\tt ROOT}}
 \newcommand{\git}{{\tt git}}
 
 \begin{document}
@@ -22,7 +23,7 @@
 \maketitle
 
 \abstract{
-\FSR\ is a set of utilities to help manipulate information about different Final States~(FS) produced in particle physics experiments.  The utilities are built around the CERN {\tt ROOT} framework.  This document provides an introduction to \FSR.}
+\FSR\ is a set of utilities to help manipulate information about different Final States~(FS) produced in particle physics experiments.  The utilities are built around the CERN \ROOT\ framework.  This document provides an introduction to \FSR.}
 
 \tableofcontents
 
@@ -41,7 +42,7 @@ Instructions for installation and initial setup:
 
 (1) Download the source:
 \begin{verbatim}
-    git clone https://github.com/remitche66/FSRoot.git FSRoot
+    > git clone https://github.com/remitche66/FSRoot.git FSRoot
 \end{verbatim}
 
 (2) Set the location of \FSR\ in your login shell script (e.g. {\tt .cshrc}):
@@ -55,13 +56,57 @@ Instructions for installation and initial setup:
      setenv   LD_LIBRARY_PATH   $LD_LIBRARY_PATH\:$FSROOT
 \end{verbatim}
 
-(4) There is usually a {\tt .rootrc} file in your home directory that {\tt ROOT} uses for initialization.  Add lines like these to {\tt .rootrc}, which tell {\tt ROOT} the location of {\tt FSRoot}:
+(4) There is usually a {\tt .rootrc} file in your home directory that \ROOT\ uses for initialization.  Add lines like these to {\tt .rootrc}, which tell \ROOT\ the location of \FSR:
 \begin{verbatim}
     Unix.*.Root.DynamicPath: .:$(FSROOT):$(ROOTSYS)/lib:
     Unix.*.Root.MacroPath:   .:$(FSROOT):
 \end{verbatim}
 
-(5) Now when you open {\tt ROOT}, the \FSR\ utilities should be loaded and compiled -- you should see a message saying "Loading the FSRoot Macros" along with the output of the compilation.
+(5) Now when you open \ROOT, the \FSR\ utilities should be loaded and compiled -- you should see a message saying "Loading the FSRoot Macros" along with the output of the compilation.  The loading and compiling is done in the file {\tt rootlogon.C}.  This file also sets up default styles, which are not essential.  Since these might conflict with styles you have defined elsewhere, it could be worthwhile to tweak or remove these.
+
+\section{Conventions}
+
+
+
+\section{Basic Histograms}
+
+Basic histogram functions are provided by the {\tt FSHistogram} class in the {\tt FSBasic} directory.  Like many other functions within \FSR, the functions within the {\tt FSHistogram} class are static member functions, so there is never a need to deal with instances of {\tt FSHistogram}.
+
+The basic functionality is through the {\tt FSHistogram::getTH1F} and {\tt FSHistogram::getTH2F} classes.  Here are example uses that can be run from either the \ROOT\ command line or from a macro~(see {\tt Examples/Intro/intro.C}).  The first draws a 1d histogram and the second draws a 2d histogram.  The third argument is the variable to plot; the fourth holds the number of bins and bounds.
+\begin{verbatim}
+    > FSHistogram::getTH1F(FileName,TreeName,"Chi2DOF","(60,0.0,6.0)","")->Draw();
+    > FSHistogram::getTH2F(FileName,TreeName,"Chi2DOF:Event",
+          "(100,0.0,1.0e6,60,0.0,6.0)","")->Draw("colz");
+\end{verbatim}
+Cuts can be added in the fifth argument:
+\begin{verbatim}
+    > FSHistogram::getTH1F(FileName,TreeName,"Chi2DOF",
+        "(60,0.0,6.0)","Chi2DOF<5.0")->Draw();
+\end{verbatim}
+The variable and cut arguments can contain shortcuts.  For example, {\tt MASS(1,2)} is expanded into the total invariant mass of particles 1 and 2, where 1 and 2 are not necessarily numbers.  This is done in the member function {\tt expandVariable}, which can also be used on its own to explicitly see what it is doing.  Characters in front of {\tt MASS}~(for example) are prepended to the variable names.  See {\tt FSHistogram::expandVariable} for more options.  Examples:
+\begin{verbatim}
+    > FSHistogram::getTH1F(FileName,TreeName,"MASS(1,2)",
+        "(60,0.0,6.0)","Chi2DOF<5.0&&MASS(1,2)>1.0")->Draw();
+    > cout << FSHistogram::expandVariable("MASS(1,2)+MASS(2,3)") << endl;
+    > cout << FSHistogram::expandVariable("ABMASS(1,C)") << endl;
+    > cout << FSHistogram::expandVariable("RECOILMASS(CM;D,2)") << endl;
+\end{verbatim}
+Histograms are automatically cached so they are made only once.  To save histograms at the end of a session, use the function:
+\begin{verbatim}
+    > FSHistogram::dumpHistogramCache(); 
+\end{verbatim}
+To read in the cache at the beginning of a session:
+\begin{verbatim}
+    > FSHistogram::readHistogramCache(); 
+\end{verbatim}
+To clear a cache from memory during a session:
+\begin{verbatim}
+    > FSHistogram::clearHistogramCache(); 
+\end{verbatim}
+To see more verbose output during a session:
+\begin{verbatim}
+    > FSControl::DEBUG = true;
+\end{verbatim}
 
 
 \end{document}
