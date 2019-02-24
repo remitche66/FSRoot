@@ -79,7 +79,8 @@ Variable names for run numbers, event numbers, and the $\chi^2$/dof from a kinem
 \end{verbatim}
 Maybe a future version of \FSR\ could make these formats customizable.
 
-\section{Basic Histograms}
+
+\section{Basic Histogram Utilities}
 \label{sec:hist}
 
 Basic histogram functions are provided by the {\tt FSHistogram} class in the {\tt FSBasic} directory.  Like many other functions within \FSR, the functions within the {\tt FSHistogram} class are static member functions, so there is never a need to deal with instances of {\tt FSHistogram}.
@@ -119,6 +120,22 @@ To see more verbose output during a session:
 \begin{verbatim}
     > FSControl::DEBUG = true;
 \end{verbatim}
+
+\section{Basic Tree Utilities}
+\label{sec:tree}
+
+The {\tt FSTree} class is also located in the {\tt FSBasic} directory and provides basic utilities to operate on trees.  
+Besides the static {\tt FSTree::expandVariable} member function mentioned in Sec.~\ref{sec:hist}, the most useful function is for skimming trees.  For example:
+\begin{verbatim}
+    > FSTree::skimTree(inputFileName, inputTreeName, outputFileName,
+          "Chi2DOF<5.0"); 
+\end{verbatim}
+will take the tree named {\tt inputTreeName} from the file {\tt inputFileName}, loop over all events and select only those that pass the cut on {\tt Chi2DOF}, then output the selected events to the file named {\tt outputFileName} in a tree with the same name as the input tree.  The shortcuts mentioned in Sec~\ref{sec:hist} can also be used here, for example:
+\begin{verbatim}
+    > FSTree::skimTree(inputFileName, inputTreeName, outputFileName,
+          "abs(MASS(1,2)-0.5)<0.1"); 
+\end{verbatim}
+
 
 
 \section{Fitting Utilities}
