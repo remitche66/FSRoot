@@ -3,8 +3,8 @@
 ROOTFLAGS     = $(shell root-config --cflags)
 ROOTLIBS      = $(shell root-config --libs) -lMinuit -lMathCore -lMathMore -lgsl -lgslcblas
 
-FSBASIC_LIBS = FSBasic/FSControl.o FSBasic/FSCanvas.o FSBasic/FSHistogram.o FSBasic/FSString.o FSBasic/FSPhysics.o
-FSMODE_LIBS = FSMode/FSModeInfo.o FSMode/FSModeHistogram.o FSMode/FSModeCollection.o FSMode/FSModeString.o
+FSBASIC_LIBS = FSBasic/FSControl.o FSBasic/FSCanvas.o FSBasic/FSTree.o FSBasic/FSHistogram.o FSBasic/FSString.o FSBasic/FSPhysics.o
+FSMODE_LIBS = FSMode/FSModeInfo.o FSMode/FSModeTree.o FSMode/FSModeHistogram.o FSMode/FSModeCollection.o FSMode/FSModeString.o
 
 MYINCLUDES = -I.
 

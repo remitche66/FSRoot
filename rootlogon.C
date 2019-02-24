@@ -57,6 +57,9 @@ gROOT->LoadMacro("FSBasic/FSString.C+");
 cout << "Loading FSBasic/FSPhysics.C..." << endl;
 gROOT->LoadMacro("FSBasic/FSPhysics.C+");
 
+cout << "Loading FSBasic/FSTree.C..." << endl;
+gROOT->LoadMacro("FSBasic/FSTree.C+");
+
 cout << "Loading FSBasic/FSHistogram.C..." << endl;
 gROOT->LoadMacro("FSBasic/FSHistogram.C+");
 
@@ -73,6 +76,9 @@ gROOT->LoadMacro("FSMode/FSModeInfo.C+");
 
 cout << "Loading FSMode/FSModeCollection.C..." << endl;
 gROOT->LoadMacro("FSMode/FSModeCollection.C+");
+
+cout << "Loading FSMode/FSModeTree.C..." << endl;
+gROOT->LoadMacro("FSMode/FSModeTree.C+");
 
 cout << "Loading FSMode/FSModeHistogram.C..." << endl;
 gROOT->LoadMacro("FSMode/FSModeHistogram.C+");
@@ -102,56 +108,6 @@ cout << "------------------------------------------" << endl;
 // ********
 // old things
 // ********
-
-// *****************
-// BASIC UTILITIES
-// *****************
-
-cout << "Loading Utilities/ControlVariables.h..." << endl;
-gROOT->LoadMacro("Utilities/ControlVariables.C+");
-
-cout << "Loading Utilities/CanvasUtilities.C..." << endl;
-gROOT->LoadMacro("Utilities/CanvasUtilities.C+");
-
-cout << "Loading Utilities/StringUtilities.C..." << endl;
-gROOT->LoadMacro("Utilities/StringUtilities.C+");
-
-cout << "Loading Utilities/SystemUtilities.C..." << endl;
-gROOT->LoadMacro("Utilities/SystemUtilities.C+");
-
-cout << "Loading Utilities/PhysicsUtilities.C..." << endl;
-gROOT->LoadMacro("Utilities/PhysicsUtilities.C+");
-
-cout << "Loading Utilities/HistogramUtilities.C..." << endl;
-gROOT->LoadMacro("Utilities/HistogramUtilities.C+");
-
-
-// *****************
-// FITTING UTILITIES
-// *****************
-
-cout << "Loading Utilities/FitPrivate.C..." << endl;
-gROOT->LoadMacro("Utilities/FitPrivate.C+");
-
-cout << "Loading Utilities/FitFunctions.C..." << endl;
-gROOT->LoadMacro("Utilities/FitFunctions.C+");
-
-cout << "Loading Utilities/FitUtilities.C..." << endl;
-gROOT->LoadMacro("Utilities/FitUtilities.C+");
-
-
-// *****************
-// MODE UTILITIES
-// *****************
-
-cout << "Loading ModeMacros/ModeInfo.C..." << endl;
-gROOT->LoadMacro("ModeMacros/ModeInfo.C+");
-
-cout << "Loading ModeMacros/ModeCollection.C..." << endl;
-gROOT->LoadMacro("ModeMacros/ModeCollection.C+");
-
-cout << "Loading ModeMacros/ModeHistogram.C..." << endl;
-gROOT->LoadMacro("ModeMacros/ModeHistogram.C+");
 
 
 // *****************
