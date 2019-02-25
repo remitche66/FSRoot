@@ -52,8 +52,8 @@ Instructions for installation and initial setup:
 
 (3) Also probably add the \FSR\ directory to {\tt \$DYLD\_LIBRARY\_PATH} and {\tt \$LD\_LIBRARY\_PATH}.  This allows you to compile code including \FSR\ functions.  For example:
 \begin{verbatim}
-     setenv DYLD_LIBRARY_PATH $DYLD_LIBRARY_PATH\:$FSROOT
-     setenv   LD_LIBRARY_PATH   $LD_LIBRARY_PATH\:$FSROOT
+    setenv DYLD_LIBRARY_PATH $DYLD_LIBRARY_PATH\:$FSROOT
+    setenv   LD_LIBRARY_PATH   $LD_LIBRARY_PATH\:$FSROOT
 \end{verbatim}
 
 (4) There is usually a {\tt .rootrc} file in your home directory that \ROOT\ uses for initialization.  Add lines like these to {\tt .rootrc}, which tell \ROOT\ the location of \FSR:
@@ -131,7 +131,7 @@ To see more verbose output during a session:
     > FSControl::DEBUG = true;
 \end{verbatim}
 
-\subsection{Basic Tree Utilities the {\tt FSTree} class}
+\subsection{Basic Tree Utilities: the {\tt FSTree} class}
 \label{sec:tree}
 
 The {\tt FSTree} class is also located in the {\tt FSBasic} directory and provides basic utilities to operate on trees.  
@@ -291,10 +291,97 @@ The {\tt FSModeInfo} object also contains a list of ``categories'' that are used
 \subsection{Collections of Modes: the {\tt FSModeCollection} class}
 \label{sec:modecollection}
 
-A list of final states~({\tt FSModeInfo} objects) is managed by the {\tt FSModeCollection} class.   Every final state is associated with a list of ``categories''. The {\tt FSModeCollection} class uses these categories to produce sublists.
+A list of final states~({\tt FSModeInfo} objects) is managed by the {\tt FSModeCollection} class through static member functions.  The {\tt FSModeCollection} class uses the categories associated with different final states to produce sublists.  The initial list of final states is empty.  There are a few methods to add final states to the list.  Here is one, where the optional additions to the end of the final state strings add categories:
+\begin{verbatim}
+    > FSModeCollection::addModeInfo("K+ K-         2K  phi   EXA");
+    > FSModeCollection::addModeInfo("pi+ pi-       2pi rho   EXB");
+    > FSModeCollection::addModeInfo("pi+ pi- pi0   3pi omega EXA");
+\end{verbatim}
+
+The {\tt display} method will show final states associated with different combinations of categories:
+\begin{verbatim}
+    > FSModeCollection::display();                // shows all three
+    > FSModeCollection::display("2K");            // shows just the 2K mode
+    > FSModeCollection::display("2K,2pi");        // shows 2K and 2pi
+    > FSModeCollection::display("EXA");           // shows 2K and 3pi
+    > FSModeCollection::display("2K&2pi");        // shows none
+    > FSModeCollection::display("2K&!2pi");       // shows 2K
+    > FSModeCollection::display("HasPions");      // shows 2pi,3pi
+    > FSModeCollection::display("HasPions&!3pi"); // shows 2pi
+\end{verbatim}
+
+The same list could be created from a text file (the format resembles that for {\tt EvtGen}; blank lines are ignored; everything after a {\tt \#} is ignored):
+\begin{verbatim}
+        ---- file: ThreeModes.modes ----
+    Decay ThreeModes
+      K+ K-          2K  phi   EXA
+      pi+ pi-        2pi rho   EXB
+      pi+ pi- pi0    3pi omega EXA
+    Enddecay
+        ----------- end file -----------
+    > FSModeCollection::addModesFromFile("ThreeModes.modes");
+\end{verbatim}
+Nested lists can also be used:
+\begin{verbatim}
+        ---- file: NestedModes.modes ----
+    Decay psi'
+      pi+ pi- JPSI     pipiJpsi
+      eta JPSI         etaJpsi
+    Enddecay
+    Decay JPSI
+      mu+ mu-      MM
+      e+ e-        EE
+    Enddecay
+        ----------- end file -----------
+    > FSModeCollection::addModesFromFile("NestedModes.modes");
+    > FSModeCollection::display("");  // shows all four combinations 
+    > FSModeCollection::display("MM");  // shows two modes with mu+ mu- 
+    > FSModeCollection::display("etaJpsi");  // shows two modes with eta JPSI 
+    > FSModeCollection::display("etaJpsi&MM");  // shows one mode 
+\end{verbatim}
+
+Other methods also operate on combinations of categories:
+\begin{verbatim}
+    > FSModeCollection::addModesFromFile("NestedModes.modes");
+    > vector<FSModeInfo*> modes = FSModeCollection::modeVector("MM");
+    > TString FN("file.MODECODE.root");  TString NT("tree_MODECODE");
+    > for (unsigned int i = 0; i < modes.size(); i++){ 
+    >   cout << "a file name:  " << modes[i]->modeString(FN) << endl;
+    >   cout << "a tree name:  " << modes[i]->modeString(NT) << endl;
+    > }
+\end{verbatim}
+
 
 \subsection{Histograms for Multiple Modes: the {\tt FSModeHistogram} class}
 \label{sec:modehist}
+
+The {\tt FSModeHistogram} class combines features from the classes described above to make histograms for multiple final states and to manage the particle combinatorics within those final states.
+
+The primary member function is {\tt FSModeHistogram::getTH1F}, which closely resembles the {\tt FSHistogram::getTH1F} function described in Sec.~\ref{sec:hist}.  It takes an additional argument that specifies the modes to loop over.  In addition to {\tt FSTree::expandVariable}, it also incorporates methods like {\tt ModeInfo::modeString}, {\tt ModeInfo::modeCombinatorics}, {\tt ModeInfo::modeCuts}, and {\tt ModeCollection::modeVector}, all illustrated above. 
+
+Here is an example that would plot the mass of the $J/\psi$ given the decay modes specified by the {\tt NestedModes.modes} file shown in the previous section.  The first histogram is a sum of two histograms; the second and third histograms are a sum of four histograms.
+\begin{verbatim}
+    > FSModeCollection::addModesFromFile("NestedModes.modes");
+    > TString FN("file.MODECODE.root");  TString NT("tree_MODECODE");
+    >     // plot the total mu+ mu- mass for modes containing muons  
+    > FSModeHistogram::getTH1F(FN,NT,"MM","MASS([mu+],[mu-])","(100,3.0,3.2)",
+        "Chi2DOF<5.0")->Draw();
+    >     // plot the total di-lepton mass for all four modes  
+    > FSModeHistogram::getTH1F(FN,NT,"","MASS([l+],[l-])","(100,3.0,3.2)",
+        "Chi2DOF<5.0")->Draw();
+    >     // plot the same using a cut on track quality
+    > TString cutTRACK("AND(TrackQualityParticle[tk]>10)");
+    > FSModeHistogram::getTH1F(FN,NT,"","MASS([l+],[l-])","(100,3.0,3.2)",
+        "Chi2DOF<5.0"+AND+cutTRACK)->Draw();
+\end{verbatim}
+
+To explicitly see how the histograms are constructed, use:
+\begin{verbatim}
+    > FSControl::DEBUG = true;
+\end{verbatim}
+
+The histogram caches also work here:  methods like {\tt FSHistogram::dumpHistogramCache} work as before.
+
 
 \subsection{Operations on Multiple Trees: the {\tt FSModeTree} class}
 \label{sec:modetree}
@@ -302,7 +389,7 @@ A list of final states~({\tt FSModeInfo} objects) is managed by the {\tt FSModeC
 
 \section{Fitting Utilities:  the {\tt FSFit} directory}
 
-The fitting utilities (contained in the directory {\tt FSFit}) work, but are still under development.  See the examples in the directory {\tt Examples/Fitting} to get the general idea.
+The fitting utilities (contained in the directory {\tt FSFit}) work, but are still under development.  See the examples in the directory {\tt Examples/Fitting} for the general idea.
 
 
 
