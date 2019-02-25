@@ -82,7 +82,7 @@ Variable names for run numbers, event numbers, and the $\chi^2$/dof from a kinem
 Maybe a future version of \FSR\ could make these formats customizable.
 
 
-\subsection{Basic Histogram Utilities}
+\subsection{Basic Histogram Utilities: the {\tt FSHistogram} class}
 \label{sec:hist}
 
 Basic histogram functions are provided by the {\tt FSHistogram} class in the {\tt FSBasic} directory.  Like many other functions within \FSR, the functions within the {\tt FSHistogram} class are static member functions, so there is never a need to deal with instances of {\tt FSHistogram}.
@@ -123,7 +123,7 @@ To see more verbose output during a session:
     > FSControl::DEBUG = true;
 \end{verbatim}
 
-\subsection{Basic Tree Utilities}
+\subsection{Basic Tree Utilities the {\tt FSTree} class}
 \label{sec:tree}
 
 The {\tt FSTree} class is also located in the {\tt FSBasic} directory and provides basic utilities to operate on trees.  
@@ -188,9 +188,9 @@ For example, for the final state $\gamma K^+ K^0_S \pi^+ \pi^- \pi^0$, the four-
 
 Every final state can be specified in three different ways:
 
-(1) {\tt pair<int,int> modeCode}: a pair of two integers ({\tt code1}, {\tt code2}) that count the number of particles in a decay mode.
+(1) {\tt pair<int,int> modeCode}: a pair of two integers ({\tt modeCode1}, {\tt modeCode2}) that count the number of particles in a decay mode.
 \begin{verbatim}
-              code1 = abcdefg
+              modeCode1 = abcdefg
                   a = # gamma
                   b = # K+
                   c = # K-
@@ -198,7 +198,7 @@ Every final state can be specified in three different ways:
                   e = # pi+
                   f = # pi-
                   g = # pi0
-              code2 = abcdefghi
+              modeCode2 = abcdefghi
                   a = # Lambda
                   b = # ALambda
                   c = # e+
@@ -209,11 +209,45 @@ Every final state can be specified in three different ways:
                   h = # p-
                   i = # eta
 \end{verbatim}
-(2) {\tt TString modeString}: a string version of {\tt code1} and {\tt code2} in the format ``{\tt code2\_code1}''.  It can contain a prefix (for example, ``FS'' or ``EXC'' or ``INC'' or anything longer) that isn't used here, but can help with organization elsewhere.
+(2) {\tt TString modeString}: a string version of {\tt modeCode1} and {\tt modeCode2} in the format ``{\tt modeCode2\_modeCode1}''.  It can contain a prefix (for example, ``FS'' or ``EXC'' or ``INC'' or anything longer) that isn't used here, but can help with organization elsewhere.  
 
-(3) {\tt TString modeDescription}: a string with a list of space-separated particle names~(for example ``{\tt K+ K- pi+ pi+ pi- pi-}'').
+(3) {\tt TString modeDescription}: a string with a list of space-separated particle names~(for example ``{\tt K+ K- pi+ pi+ pi- pi-}'').  The final state particles can appear in any order. 
+
+For example, the final state $\gamma K^+ K^0_S \pi^+ \pi^- \pi^0$ has {\tt modeCode1 = 1101111}, {\tt modeCode2 = 0}, {\tt modeString = "ANYTHING\_0\_1101111"}, {\tt modeDescription = "gamma K+ Ks pi+ pi- pi0"}. 
+
+\subsection{Mode Information: the {\tt FSModeInfo} class}
+
+\begin{verbatim}
+    > FSModeInfo mi("K+ K- K+ K- pi+ pi- pi0 eta");
+    > mi.modeString();   // ==> "1_220111"
+    > mi.modeCode1();    // ==> 220111
+    > mi.modeCode2();    // ==> 1
+    > mi.modeString("this is the code: (MODECODE1,MODECODE2)");
+                    // ==> "this is the code: (220111,1)" 
+\end{verbatim}
 
 
+\begin{verbatim}
+    > mi.modeCombinatorics("ABC[K+] DEF[K-]",true);
+      // ==>  *** MODE COMBINATORICS TEST ***
+      // ==>  ABC2 DEF4
+      // ==>  ABC3 DEF4
+      // ==>  ABC2 DEF5
+      // ==>  ABC3 DEF5
+      // ==>  *******************************
+\end{verbatim}
+
+\begin{verbatim}
+    > mi.modeCuts("OR((ABC[K+]+DEF[K-])>0)");
+      // ==>  "(((ABC2+DEF4)>0)||((ABC3+DEF4)>0)||((ABC2+DEF5)>0)||((ABC3+DEF5)>0))"
+\end{verbatim}
+
+
+\subsection{Collections of Modes: the {\tt FSModeCollection} class}
+
+\subsection{Histograms for Multiple Modes: the {\tt FSModeHistogram} class}
+
+\subsection{Operations on Multiple Trees: the {\tt FSModeTree} class}
 
 \section{Fitting Utilities:  the {\tt FSFit} directory}
 
