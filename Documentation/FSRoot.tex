@@ -73,9 +73,9 @@ Some \FSR\ operations on variables within a \ROOT\ {\tt TTree} assume a particul
 \begin{verbatim}
     [AB]EnP[CD], [AB]PxP[CD], [AB]PyP[CD], [AB]PzP[CD]
 \end{verbatim}
-where {\tt [CD]} is a particle label (often ``1'', ``2'', ``3'', ``2a'', etc., but also ``CM'' or ``B'' or other) and {\tt [AB]} labels the type of four-vector (for example, ``R'' for raw or ``K'' for kinematically fit or ``MC'' for Monte Carlo, etc.).  The \FSR\ code does not assume anything about the conventions for {\tt [CD]} and {\tt [AB]}.
+where {\tt [CD]} is a particle label (often ``1'', ``2'', ``3'', ``2a'', etc., but also ``CM'' or ``B'' or other) and {\tt [AB]} labels the type of four-vector (for example, ``R'' for raw or ``K'' for kinematically fit or ``MC'' for Monte Carlo, etc.).  The \FSR\ code does not assume anything about the conventions for {\tt [AB]}.  The final state utilities described in Sec.~\ref{sec:modes} require the particles appear in a given order and assume a numbering convention for {\tt [CD]}, described in Sec.~\ref{sec:modeconv}.  The utilities described in this section do not assume a specific form for {\tt [CD]}.
 
-Variable names for run numbers, event numbers, and the $\chi^2$/dof from a kinematic fit are also hardcoded in a couple of places:
+Variable names for run numbers, event numbers, and the $\chi^2$/dof from a kinematic fit are also hardcoded in a couple of places (like in the functions that rank combinations within an event by $\chi^2/dof$):
 \begin{verbatim}
     Run, Event, Chi2DOF
 \end{verbatim}
@@ -138,10 +138,12 @@ will take the tree named {\tt inputTreeName} from the file {\tt inputFileName}, 
           "abs(MASS(1,2)-0.5)<0.1"); 
 \end{verbatim}
 
-\section{Final State Operations:  the {\tt FSMode} directory}
 
+\section{Final State Operations:  the {\tt FSMode} directory}
+\label{sec:modes}
 
 \subsection{Mode Numbering and Conventions}
+\label{sec:modeconv}
 
 A ``final state''~(also called ``mode'') is made from a combination of: $\Lambda (\to p \pi^-)$, $\bar{\Lambda} (\to \bar{p} \pi^+)$, $e^+$, $e^-$, $\mu^+$, $\mu^-$, $p$, $\bar{p}$, $\eta (\to \gamma\gamma)$, $\gamma$, $K^+$, $K^-$, $K^0_S (\to \pi^+\pi^-)$, $\pi^+$, $\pi^-$, $\pi^0 (\to \gamma\gamma)$.
 
@@ -162,6 +164,27 @@ $K^0_S (\to \pi^+\pi^-) \equiv $~{\tt Ks},
 $\pi^+ \equiv $~{\tt pi+}, 
 $\pi^- \equiv $~{\tt pi-}, 
 $\pi^0 (\to \gamma\gamma) \equiv $~{\tt pi0}.
+
+In a {\tt TTree}, the final state particles should be listed in the order they are given above.  The numbering for the {\tt [CD]} (Sec.~\ref{sec:conventions}) starts at ``1''.  For final state particles that decay~($\Lambda (\to p \pi^-) \equiv $~{\tt Lambda}, 
+$\bar{\Lambda} (\to \bar{p} \pi^+) \equiv $~{\tt ALambda}, $\eta (\to \gamma\gamma) \equiv $~{\tt eta}, $K^0_S (\to \pi^+\pi^-) \equiv $~{\tt Ks}, $\pi^0 (\to \gamma\gamma) \equiv $~{\tt pi0}), the four-momenta of the decay particles are listed using ``a'' and ``b'' in the same order as above or ordered by energy for identical particles.
+
+For example, for the final state $\gamma K^+ K^0_S \pi^+ \pi^- \pi^0$, the four-momenta are:
+\begin{verbatim}
+    EnP1  PxP1  PyP1  PzP1     (for the gamma)
+    EnP2  PxP2  PyP2  PzP2     (for the K+)
+    EnP3  PxP3  PyP3  PzP3     (for the Ks)
+    EnP3a PxP3a PyP3a PzP3a    (for the pi+ from Ks)
+    EnP3b PxP3b PyP3b PzP3b    (for the pi- from Ks)
+    EnP4  PxP4  PyP4  PzP4     (for the pi+)
+    EnP5  PxP5  PyP5  PzP5     (for the pi-)
+    EnP6  PxP6  PyP6  PzP6     (for the pi0)
+    EnP6a PxP6a PyP6a PzP6a    (for the higher energy gamma from pi0)
+    EnP6b PxP6b PyP6b PzP6b    (for the lower energy gamma from pi0)
+\end{verbatim}
+
+
+
+
 
 Every final state can be specified in three different ways:
 
