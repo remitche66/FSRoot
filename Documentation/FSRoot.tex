@@ -69,13 +69,15 @@ Instructions for installation and initial setup:
 \subsection{Basic Conventions}
 \label{sec:conventions}
 
-Some \FSR\ operations on variables within a \ROOT\ {\tt TTree} assume a particular format within the tree.  Four-vectors are assumed to take the form:
+Some \FSR\ operations on variables within a \ROOT\ {\tt TTree} assume a particular format within the tree.  
+
+Four-vectors are assumed to take the form:
 \begin{verbatim}
     [AB]EnP[CD], [AB]PxP[CD], [AB]PyP[CD], [AB]PzP[CD]
 \end{verbatim}
-where {\tt [CD]} is a particle label (often ``1'', ``2'', ``3'', ``2a'', etc., but also ``CM'' or ``B'' or other) and {\tt [AB]} labels the type of four-vector (for example, ``R'' for raw or ``K'' for kinematically fit or ``MC'' for Monte Carlo, etc.).  The \FSR\ code does not assume anything about the conventions for {\tt [AB]}.  The final state utilities described in Sec.~\ref{sec:modes} require the particles appear in a given order and assume a numbering convention for {\tt [CD]}, described in Sec.~\ref{sec:modeconv}.  The utilities described in this section do not assume a specific form for {\tt [CD]}.
+where {\tt [CD]} is a particle label (often ``1'', ``2'', ``3'', ``2a'', etc., but also ``CM'' or ``B'' or other) and {\tt [AB]} labels the type of four-vector (for example, ``R'' for raw or ``K'' for kinematically fit or ``MC'' for Monte Carlo, etc.).  The \FSR\ code does not assume anything about the conventions for {\tt [AB]} -- they can be anything up to two characters long~(or nothing).  The final state utilities described in Sec.~\ref{sec:modes} require the final state particles appear in a given order and assume a numbering convention for {\tt [CD]}, described in Sec.~\ref{sec:modeconv}.  The utilities described in this section do not assume a specific form for {\tt [CD]} -- they can be anyting one or two characters long~(but not empty).
 
-Variable names for run numbers, event numbers, and the $\chi^2$/dof from a kinematic fit are also hardcoded in a couple of places (like in the functions that rank combinations within an event by $\chi^2/dof$):
+Variable names for run numbers, event numbers, and the $\chi^2$/dof from a kinematic fit are also hardcoded in a very limited number of places (like in the functions that rank combinations within an event by $\chi^2/dof$ described in Sec.~\ref{sec:modetree}):
 \begin{verbatim}
     Run, Event, Chi2DOF
 \end{verbatim}
@@ -101,10 +103,16 @@ Cuts can be added in the fifth argument:
 The variable and cut arguments can contain shortcuts.  For example, {\tt MASS(I,J)} is expanded into the total invariant mass of particles {\tt I} and {\tt J}, where {\tt I} and {\tt J} are not necessarily numbers~(they are the {\tt [CD]} in Sec.~\ref{sec:conventions}).  Characters in front of {\tt MASS}~(for example) are prepended to the variable names (the {\tt [AB]} in Sec.~\ref{sec:conventions}).  This is all done in the function {\tt FSTree::expandVariable}, which can also be used on its own to explicitly see what it is doing.    See {\tt FSTree::expandVariable} for more options beyond {\tt MASS}~(for example, {\tt RECOILMASS}, {\tt MOMENTUM}, {\tt COSINE}, etc.).  Examples:
 \begin{verbatim}
     > FSHistogram::getTH1F(FileName,TreeName,"MASS(1,2)",
-        "(60,0.0,6.0)","Chi2DOF<5.0&&MASS(1,2)>1.0")->Draw();
+        "(60,0.0,6.0)","Chi2DOF<5.0&&RMASS(2,3)>1.0")->Draw();
     > cout << FSTree::expandVariable("MASS(1,2)+MASS(2,3)") << endl;
+      // ==> "(sqrt((EnP1+EnP2)**2-(PxP1+PxP2)**2-(PyP1+PyP2)**2-(PzP1+PzP2)**2))
+             +(sqrt((EnP2+EnP3)**2-(PxP2+PxP3)**2-(PyP2+PyP3)**2-(PzP2+PzP3)**2))"
     > cout << FSTree::expandVariable("ABMASS(1,C)") << endl;
+      // ==> "(sqrt((ABEnP1+ABEnPC)**2-(ABPxP1+ABPxPC)**2
+                   -(ABPyP1+ABPyPC)**2-(ABPzP1+ABPzPC)**2))"
     > cout << FSTree::expandVariable("RECOILMASS(CM;D,2)") << endl;
+      // ==> "(sqrt((EnPCM-(EnP2+EnPD))**2-(PxPCM-(PxP2+PxPD))**2
+                   -(PyPCM-(PyP2+PyPD))**2-(PzPCM-(PzP2+PzPD))**2))"
 \end{verbatim}
 Histograms are automatically cached so they are made only once.  To save histograms at the end of a session, use the function:
 \begin{verbatim}
@@ -132,7 +140,7 @@ Besides the static {\tt FSTree::expandVariable} member function mentioned in Sec
     > FSTree::skimTree(inputFileName, inputTreeName, outputFileName,
           "Chi2DOF<5.0"); 
 \end{verbatim}
-will take the tree named {\tt inputTreeName} from the file {\tt inputFileName}, loop over all events and select only those that pass the cut on {\tt Chi2DOF}, then output the selected events to the file named {\tt outputFileName} in a tree with the same name as the input tree.  The shortcuts mentioned in Sec~\ref{sec:hist} can also be used here, for example:
+This will take the tree named {\tt inputTreeName} from the file {\tt inputFileName}, loop over all events and select only those that pass the cut on {\tt Chi2DOF}, then output the selected events to the file named {\tt outputFileName} in a tree with the same name as the input tree.  The shortcuts mentioned in Sec~\ref{sec:hist} can also be used here, for example:
 \begin{verbatim}
     > FSTree::skimTree(inputFileName, inputTreeName, outputFileName,
           "abs(MASS(1,2)-0.5)<0.1"); 
@@ -168,7 +176,7 @@ $\pi^0 (\to \gamma\gamma) \equiv $~{\tt pi0}.
 In a {\tt TTree}, the final state particles should be listed in the order they are given above.  The numbering for the {\tt [CD]} (Sec.~\ref{sec:conventions}) starts at ``1''.  For final state particles that decay~($\Lambda (\to p \pi^-) \equiv $~{\tt Lambda}, 
 $\bar{\Lambda} (\to \bar{p} \pi^+) \equiv $~{\tt ALambda}, $\eta (\to \gamma\gamma) \equiv $~{\tt eta}, $K^0_S (\to \pi^+\pi^-) \equiv $~{\tt Ks}, $\pi^0 (\to \gamma\gamma) \equiv $~{\tt pi0}), the four-momenta of the decay particles are listed using ``a'' and ``b'' in the same order as above or ordered by energy for identical particles.
 
-For example, for the final state $\gamma K^+ K^0_S \pi^+ \pi^- \pi^0$, the four-momenta are:
+For example, for the final state $\gamma K^+ K^0_S \pi^+ \pi^- \pi^- \pi^0$, the four-momenta are:
 \begin{verbatim}
     EnP1  PxP1  PyP1  PzP1     (for the gamma)
     EnP2  PxP2  PyP2  PzP2     (for the K+)
@@ -176,10 +184,11 @@ For example, for the final state $\gamma K^+ K^0_S \pi^+ \pi^- \pi^0$, the four-
     EnP3a PxP3a PyP3a PzP3a    (for the pi+ from Ks)
     EnP3b PxP3b PyP3b PzP3b    (for the pi- from Ks)
     EnP4  PxP4  PyP4  PzP4     (for the pi+)
-    EnP5  PxP5  PyP5  PzP5     (for the pi-)
-    EnP6  PxP6  PyP6  PzP6     (for the pi0)
-    EnP6a PxP6a PyP6a PzP6a    (for the higher energy gamma from pi0)
-    EnP6b PxP6b PyP6b PzP6b    (for the lower energy gamma from pi0)
+    EnP5  PxP5  PyP5  PzP5     (for one pi-)
+    EnP6  PxP6  PyP6  PzP6     (for the other pi-)
+    EnP7  PxP7  PyP7  PzP7     (for the pi0)
+    EnP7a PxP7a PyP7a PzP7a    (for the higher energy gamma from pi0)
+    EnP7b PxP7b PyP7b PzP7b    (for the lower energy gamma from pi0)
 \end{verbatim}
 
 
@@ -213,41 +222,83 @@ Every final state can be specified in three different ways:
 
 (3) {\tt TString modeDescription}: a string with a list of space-separated particle names~(for example ``{\tt K+ K- pi+ pi+ pi- pi-}'').  The final state particles can appear in any order. 
 
-For example, the final state $\gamma K^+ K^0_S \pi^+ \pi^- \pi^0$ has {\tt modeCode1 = 1101111}, {\tt modeCode2 = 0}, {\tt modeString = "ANYTHING\_0\_1101111"}, {\tt modeDescription = "gamma K+ Ks pi+ pi- pi0"}. 
+For example, the final state $\gamma K^+ K^0_S \pi^+ \pi^- \pi^- \pi^0$ has {\tt modeCode1 = 1101121}, {\tt modeCode2 = 0}, {\tt modeString = "0\_1101121"}, {\tt modeDescription = "gamma K+ Ks pi+ pi- pi- pi0"}. 
 
 \subsection{Mode Information: the {\tt FSModeInfo} class}
+\label{sec:modeinfo}
 
+Information about an individual final state is carried by the {\tt FSModeInfo} class.  Here are examples of a few of its basic member functions:
 \begin{verbatim}
     > FSModeInfo mi("K+ K- K+ K- pi+ pi- pi0 eta");
     > mi.modeString();   // ==> "1_220111"
     > mi.modeCode1();    // ==> 220111
     > mi.modeCode2();    // ==> 1
     > mi.modeString("this is the code: (MODECODE1,MODECODE2)");
-                    // ==> "this is the code: (220111,1)" 
+       // ==> "this is the code: (220111,1)" 
+    > mi.modeString("MODESTRING corresponds to MODEDESCRIPTION");
+       // ==> "1_220111 corresponds to  K+  K+  K-  K-  pi+  pi-  pi0  eta "
 \end{verbatim}
 
-
+The {\tt FSModeInfo} class also handles particle combinatorics within a given final state through the {\tt modeCombinatorics} member function.  This is done using placeholders like ``[pi+]'', ``[pi-]'', ``[K+]'', ``[K+3]'', ``[tk+]'', ``[pi0]'', etc., which are replaced by particle indices.  While the {\tt modeCombinatorics} function is rarely used explicitly by the user, it can be useful for cross-checking that the behavior of the combinatorics is what you want. For example:
 \begin{verbatim}
-    > mi.modeCombinatorics("ABC[K+] DEF[K-]",true);
+    > mi.modeCombinatorics("K+[K+], K-[K-], K+(again)[K+], K+(other one)[K+2]",true);
       // ==>  *** MODE COMBINATORICS TEST ***
-      // ==>  ABC2 DEF4
-      // ==>  ABC3 DEF4
-      // ==>  ABC2 DEF5
-      // ==>  ABC3 DEF5
+      // ==>  K+3, K-4, K+(again)3, K+(other one)2
+      // ==>  K+3, K-5, K+(again)3, K+(other one)2
+      // ==>  K+2, K-4, K+(again)2, K+(other one)3
+      // ==>  K+2, K-5, K+(again)2, K+(other one)3
       // ==>  *******************************
 \end{verbatim}
 
+The {\tt modeCuts} member function uses the results of {\tt modeCombinatorics} to combine combinatorics into a single string using the keywords ``AND'' and ``OR'':
 \begin{verbatim}
-    > mi.modeCuts("OR((ABC[K+]+DEF[K-])>0)");
+    > cout << mi.modeCuts("OR((ABC[K+]+DEF[K-])>0)") << endl;
       // ==>  "(((ABC2+DEF4)>0)||((ABC3+DEF4)>0)||((ABC2+DEF5)>0)||((ABC3+DEF5)>0))"
+    > cout << mi.modeCuts("AND((ABC[K+]+DEF[K-])>0)") << endl;
+      // ==>  "(((ABC2+DEF4)>0)&&((ABC3+DEF4)>0)&&((ABC2+DEF5)>0)&&((ABC3+DEF5)>0))"
 \end{verbatim}
 
+Note that most of the functionality of the {\tt FSModeInfo} class is rarely used explicitly.  It is more often combined with other functions and used in higher-level classes~(like {\tt FSModeHistogram}), often producing large strings~(used only internally), like:
+\begin{verbatim}
+    > FSTree::expandVariable(mi.modeCuts("AND(MASS2([K+],[K-])>MASS2([pi+],[K-]))"))
+      // ==>  "((((EnP2+EnP4)**2-(PxP2+PxP4)**2-(PyP2+PyP4)**2-(PzP2+PzP4)**2)>
+                 ((EnP4+EnP6)**2-(PxP4+PxP6)**2-(PyP4+PyP6)**2-(PzP4+PzP6)**2))&&
+                (((EnP3+EnP4)**2-(PxP3+PxP4)**2-(PyP3+PyP4)**2-(PzP3+PzP4)**2)>
+                 ((EnP4+EnP6)**2-(PxP4+PxP6)**2-(PyP4+PyP6)**2-(PzP4+PzP6)**2))&&
+                (((EnP2+EnP5)**2-(PxP2+PxP5)**2-(PyP2+PyP5)**2-(PzP2+PzP5)**2)>
+                 ((EnP5+EnP6)**2-(PxP5+PxP6)**2-(PyP5+PyP6)**2-(PzP5+PzP6)**2))&&
+                (((EnP3+EnP5)**2-(PxP3+PxP5)**2-(PyP3+PyP5)**2-(PzP3+PzP5)**2)>
+                 ((EnP5+EnP6)**2-(PxP5+PxP6)**2-(PyP5+PyP6)**2-(PzP5+PzP6)**2)))"
+\end{verbatim} 
+
+The {\tt FSModeInfo} object also contains a list of ``categories'' that are used by the {\tt FSModeCollection} class~(next section) for organization.  The {\tt display} method shows information about a given mode, including a list of categories, some of which are added by default.  In the following, the first use of {\tt display} will show the default list of categories; the second will also show the added categories:
+\begin{verbatim}
+    > mi.display();
+      // ==>   0    1_220111    K+  K+  K-  K-  pi+  pi-  pi0  eta 
+      // ==>                      Hadronic  HasGammas  HasEtas  HasKaons  
+      // ==>                      HasPions  HasPi0s  1Eta4K2Pi1Pi0  8Body  
+      // ==>                      4Gamma  CODE=1_220111  CODE1=220111  CODE2=1
+    > mi.addCategory("TEST1");
+    > mi.addCategory("TEST2");
+    > mi.display();
+      // ==>   0    1_220111    K+  K+  K-  K-  pi+  pi-  pi0  eta 
+      // ==>                      Hadronic  HasGammas  HasEtas  HasKaons  
+      // ==>                      HasPions  HasPi0s  1Eta4K2Pi1Pi0  8Body  
+      // ==>                      4Gamma  CODE=1_220111  CODE1=220111  CODE2=1
+      // ==>                      TEST1  TEST2
+\end{verbatim}
 
 \subsection{Collections of Modes: the {\tt FSModeCollection} class}
+\label{sec:modecollection}
+
+A list of final states~({\tt FSModeInfo} objects) is managed by the {\tt FSModeCollection} class.   Every final state is associated with a list of ``categories''. The {\tt FSModeCollection} class uses these categories to produce sublists.
 
 \subsection{Histograms for Multiple Modes: the {\tt FSModeHistogram} class}
+\label{sec:modehist}
 
 \subsection{Operations on Multiple Trees: the {\tt FSModeTree} class}
+\label{sec:modetree}
+
 
 \section{Fitting Utilities:  the {\tt FSFit} directory}
 
