@@ -56,13 +56,13 @@ Instructions for installation and initial setup:
     setenv   LD_LIBRARY_PATH   $LD_LIBRARY_PATH\:$FSROOT
 \end{verbatim}
 
-(4) There is usually a {\tt .rootrc} file in your home directory that \ROOT\ uses for initialization.  Add lines like these to {\tt .rootrc}, which tell \ROOT\ the location of \FSR:
+(4) There is usually a {\tt .rootrc} file in your home directory that \ROOT\ uses for initialization.  Add lines like these to {\tt .rootrc}, telling \ROOT\ the location of \FSR:
 \begin{verbatim}
     Unix.*.Root.DynamicPath: .:$(FSROOT):$(ROOTSYS)/lib:
     Unix.*.Root.MacroPath:   .:$(FSROOT):
 \end{verbatim}
 
-(5) Now when you open \ROOT, the \FSR\ utilities should be loaded and compiled -- you should see a message saying ``Loading the FSRoot Macros'' along with the output of the compilation.  The loading and compiling is done in the file {\tt rootlogon.C}.  This file also sets up default styles, which are not essential.  Since these might conflict with styles you have defined elsewhere, it could be worthwhile to tweak or remove these.
+(5) Now when you open \ROOT, the \FSR\ utilities should be loaded and compiled -- you should see a message saying ``Loading the FSRoot Macros'' along with the output of the compilation.  The loading and compiling is done in the file {\tt rootlogon.C}.  This file also sets up default styles, which are not essential.  If these conflict with styles you have defined elsewhere, it could be worthwhile to tweak or remove these.
 
 \section{Basic Operations:  the {\tt FSBasic} directory}
 
@@ -75,12 +75,10 @@ Four-vectors are assumed to take the form:
 \begin{verbatim}
     [AB]EnP[CD], [AB]PxP[CD], [AB]PyP[CD], [AB]PzP[CD]
 \end{verbatim}
-where {\tt [CD]} is a particle label (often ``1'', ``2'', ``3'', ``2a'', etc., but also ``CM'' or ``B'' or other) and {\tt [AB]} labels the type of four-vector (for example, ``R'' for raw or ``K'' for kinematically fit or ``MC'' for Monte Carlo, etc.).  The \FSR\ code does not assume anything about the conventions for {\tt [AB]} -- they can be anything up to two characters long~(or nothing).  The final state utilities described in Sec.~\ref{sec:modes} require the final state particles appear in a given order and assume a numbering convention for {\tt [CD]}, described in Sec.~\ref{sec:modeconv}.  The utilities described in this section do not assume a specific form for {\tt [CD]} -- they can be anyting one or two characters long~(but not empty).
+where {\tt [CD]} is a particle label (often ``1'', ``2'', ``3'', ``2a'', etc., but also ``CM'' or ``B'' or other) and {\tt [AB]} labels the type of four-vector (for example, ``R'' for raw or ``K'' for kinematically fit or ``MC'' for Monte Carlo, etc.).  The \FSR\ code does not assume anything about the conventions for {\tt [AB]} -- it can be anything up to two characters long~(or nothing).  For {\tt [CD]}, the final state utilities described in Sec.~\ref{sec:modes} require the final state particles appear in a given order and thus assume a numbering convention for {\tt [CD]}, described in Sec.~\ref{sec:modeconv}.  The utilities described in this section do not assume a specific form for {\tt [CD]} -- they can be anything one or two characters long~(but not empty).
 
-Variable names for run numbers, event numbers, and the $\chi^2$/dof from a kinematic fit are also hardcoded in a very limited number of places (like in the functions that rank combinations within an event by $\chi^2/dof$ described in Sec.~\ref{sec:modetree}):
-\begin{verbatim}
-    Run, Event, Chi2DOF
-\end{verbatim}
+Variable names for run numbers~({\tt Run}), event numbers~({\tt Event}), and the $\chi^2$/dof from a kinematic fit~({\tt Chi2DOF}) are also hard-coded in a very limited number of places (like in the function that ranks combinations within an event by $\chi^2$/dof, described in Sec.~\ref{sec:modetree}).
+
 Maybe a future version of \FSR\ could make these formats customizable.
 
 
@@ -91,19 +89,22 @@ Basic histogram functions are provided by the {\tt FSHistogram} class in the {\t
 
 The basic functionality is through the {\tt FSHistogram::getTH1F} and {\tt FSHistogram::getTH2F} classes.  Here are example uses that can be run from either the \ROOT\ command line or from a macro~(see {\tt Examples/Intro/intro.C}).  The first draws a 1d histogram and the second draws a 2d histogram.  The third argument is the variable to plot; the fourth holds the number of bins and bounds.
 \begin{verbatim}
-    > FSHistogram::getTH1F(FileName,TreeName,"Chi2DOF","(60,0.0,6.0)","")->Draw();
-    > FSHistogram::getTH2F(FileName,TreeName,"Chi2DOF:Event",
+    > FSHistogram::getTH1F(fileName,treeName,"Chi2DOF","(60,0.0,6.0)","")->Draw();
+    > FSHistogram::getTH2F(fileName,treeName,"Chi2DOF:Event",
           "(100,0.0,1.0e6,60,0.0,6.0)","")->Draw("colz");
 \end{verbatim}
 Cuts can be added in the fifth argument:
 \begin{verbatim}
-    > FSHistogram::getTH1F(FileName,TreeName,"Chi2DOF",
+    > FSHistogram::getTH1F(fileName,treeName,"Chi2DOF",
         "(60,0.0,6.0)","Chi2DOF<5.0")->Draw();
 \end{verbatim}
-The variable and cut arguments can contain shortcuts.  For example, {\tt MASS(I,J)} is expanded into the total invariant mass of particles {\tt I} and {\tt J}, where {\tt I} and {\tt J} are not necessarily numbers~(they are the {\tt [CD]} in Sec.~\ref{sec:conventions}).  Characters in front of {\tt MASS}~(for example) are prepended to the variable names (the {\tt [AB]} in Sec.~\ref{sec:conventions}).  This is all done in the function {\tt FSTree::expandVariable}, which can also be used on its own to explicitly see what it is doing.    See {\tt FSTree::expandVariable} for more options beyond {\tt MASS}~(for example, {\tt RECOILMASS}, {\tt MOMENTUM}, {\tt COSINE}, etc.).  Examples:
+The variable and cut arguments can contain shortcuts.  For example, {\tt MASS(I,J)} is expanded into the total invariant mass of particles {\tt I} and {\tt J}, where {\tt I} and {\tt J} are not necessarily numbers~(they are the {\tt [CD]} in Sec.~\ref{sec:conventions}).  Characters in front of {\tt MASS}~(for example) are prepended to the variable names (the {\tt [AB]} in Sec.~\ref{sec:conventions}).  This is all done in the function {\tt FSTree::expandVariable}, which can also be used on its own to explicitly see what it is doing.    See {\tt FSTree::expandVariable} for more options beyond {\tt MASS}~(for example, {\tt RECOILMASS}, {\tt MOMENTUM}, {\tt COSINE}, etc.).  An example for {\tt FSHistogram::getTH1F}:
 \begin{verbatim}
-    > FSHistogram::getTH1F(FileName,TreeName,"MASS(1,2)",
-        "(60,0.0,6.0)","Chi2DOF<5.0&&RMASS(2,3)>1.0")->Draw();
+    > FSHistogram::getTH1F(fileName,treeName,"MASS(1,2)",
+        "(100,3.0,3.2)","Chi2DOF<5.0&&RMASS(2,3)>1.0")->Draw();
+\end{verbatim}
+Examples for {\tt FSTree::expandVariable}:
+\begin{verbatim}
     > cout << FSTree::expandVariable("MASS(1,2)+MASS(2,3)") << endl;
       // ==> "(sqrt((EnP1+EnP2)**2-(PxP1+PxP2)**2-(PyP1+PyP2)**2-(PzP1+PzP2)**2))
              +(sqrt((EnP2+EnP3)**2-(PxP2+PxP3)**2-(PyP2+PyP3)**2-(PzP2+PzP3)**2))"
@@ -174,7 +175,7 @@ $\pi^- \equiv $~{\tt pi-},
 $\pi^0 (\to \gamma\gamma) \equiv $~{\tt pi0}.
 
 In a {\tt TTree}, the final state particles should be listed in the order they are given above.  The numbering for the {\tt [CD]} (Sec.~\ref{sec:conventions}) starts at ``1''.  For final state particles that decay~($\Lambda (\to p \pi^-) \equiv $~{\tt Lambda}, 
-$\bar{\Lambda} (\to \bar{p} \pi^+) \equiv $~{\tt ALambda}, $\eta (\to \gamma\gamma) \equiv $~{\tt eta}, $K^0_S (\to \pi^+\pi^-) \equiv $~{\tt Ks}, $\pi^0 (\to \gamma\gamma) \equiv $~{\tt pi0}), the four-momenta of the decay particles are listed using ``a'' and ``b'' in the same order as above or ordered by energy for identical particles.
+$\bar{\Lambda} (\to \bar{p} \pi^+) \equiv $~{\tt ALambda}, $\eta (\to \gamma\gamma) \equiv $~{\tt eta}, $K^0_S (\to \pi^+\pi^-) \equiv $~{\tt Ks}, $\pi^0 (\to \gamma\gamma) \equiv $~{\tt pi0}), the four-momenta of the decay particles are listed using ``a'' and ``b'' in the same order as above.  No assumptions about ordering are made for identical particles.
 
 For example, for the final state $\gamma K^+ K^0_S \pi^+ \pi^- \pi^- \pi^0$, the four-momenta are:
 \begin{verbatim}
@@ -187,8 +188,8 @@ For example, for the final state $\gamma K^+ K^0_S \pi^+ \pi^- \pi^- \pi^0$, the
     EnP5  PxP5  PyP5  PzP5     (for one pi-)
     EnP6  PxP6  PyP6  PzP6     (for the other pi-)
     EnP7  PxP7  PyP7  PzP7     (for the pi0)
-    EnP7a PxP7a PyP7a PzP7a    (for the higher energy gamma from pi0)
-    EnP7b PxP7b PyP7b PzP7b    (for the lower energy gamma from pi0)
+    EnP7a PxP7a PyP7a PzP7a    (for one gamma from pi0)
+    EnP7b PxP7b PyP7b PzP7b    (for the other gamma from pi0)
 \end{verbatim}
 
 
@@ -197,32 +198,22 @@ For example, for the final state $\gamma K^+ K^0_S \pi^+ \pi^- \pi^- \pi^0$, the
 
 Every final state can be specified in three different ways:
 
-(1) {\tt pair<int,int> modeCode}: a pair of two integers ({\tt modeCode1}, {\tt modeCode2}) that count the number of particles in a decay mode.
+(1) {\tt pair<int,int> modeCode}: a pair of two integers ({\tt modeCode1}, {\tt modeCode2}) that count the number of particles in a decay mode:
 \begin{verbatim}
-              modeCode1 = abcdefg
-                  a = # gamma
-                  b = # K+
-                  c = # K-
-                  d = # Ks
-                  e = # pi+
-                  f = # pi-
-                  g = # pi0
-              modeCode2 = abcdefghi
-                  a = # Lambda
-                  b = # ALambda
-                  c = # e+
-                  d = # e-
-                  e = # mu+
-                  f = # mu-
-                  g = # p+
-                  h = # p-
-                  i = # eta
+    modeCode1 = abcdefg
+      a = # gamma      d = # Ks         g = # pi0
+      b = # K+         e = # pi+
+      c = # K-         f = # pi-
+    modeCode2 = abcdefghi
+      a = # Lambda     d = # e-         g = # p+
+      b = # ALambda    e = # mu+        h = # p-
+      c = # e+         f = # mu-        i = # eta
 \end{verbatim}
 (2) {\tt TString modeString}: a string version of {\tt modeCode1} and {\tt modeCode2} in the format ``{\tt modeCode2\_modeCode1}''.  It can contain a prefix (for example, ``FS'' or ``EXC'' or ``INC'' or anything longer) that isn't used here, but can help with organization elsewhere.  
 
-(3) {\tt TString modeDescription}: a string with a list of space-separated particle names~(for example ``{\tt K+ K- pi+ pi+ pi- pi-}'').  The final state particles can appear in any order. 
+(3) {\tt TString modeDescription}: a string with a list of space-separated particle names~(for example, ``{\tt K+ K- pi+ pi+ pi- pi-}'').  The final state particles can appear in any order. 
 
-For example, the final state $\gamma K^+ K^0_S \pi^+ \pi^- \pi^- \pi^0$ has {\tt modeCode1 = 1101121}, {\tt modeCode2 = 0}, {\tt modeString = "0\_1101121"}, {\tt modeDescription = "gamma K+ Ks pi+ pi- pi- pi0"}. 
+For example, the final state $\gamma K^+ K^0_S \pi^+ \pi^- \pi^- \pi^0$ has {\tt modeCode1 = 1101121}, {\tt modeCode2 = 0}, {\tt modeString = "0\_1101121"}, and {\tt modeDescription = "gamma K+ Ks pi+ pi- pi- pi0"}. 
 
 \subsection{Mode Information: the {\tt FSModeInfo} class}
 \label{sec:modeinfo}
@@ -239,7 +230,7 @@ Information about an individual final state is carried by the {\tt FSModeInfo} c
        // ==> "1_220111 corresponds to  K+  K+  K-  K-  pi+  pi-  pi0  eta "
 \end{verbatim}
 
-The {\tt FSModeInfo} class also handles particle combinatorics within a given final state through the {\tt modeCombinatorics} member function.  This is done using placeholders like ``[pi+]'', ``[pi-]'', ``[K+]'', ``[K+3]'', ``[tk+]'', ``[pi0]'', etc., which are replaced by particle indices.  While the {\tt modeCombinatorics} function is rarely used explicitly by the user, it can be useful for cross-checking that the behavior of the combinatorics is what you want. For example:
+The {\tt FSModeInfo} class also handles particle combinatorics within a given final state through the {\tt modeCombinatorics} member function.  This is done using place holders like ``[pi+]'', ``[pi-]'', ``[K+]'', ``[K+3]'', ``[tk+]'', ``[pi0]'', etc., which are replaced by particle indices.  While the {\tt modeCombinatorics} function is rarely used explicitly by the user, it can be useful for cross-checking that the behavior of the combinatorics is what you want. For example:
 \begin{verbatim}
     > mi.modeCombinatorics("K+[K+], K-[K-], K+(again)[K+], K+(other one)[K+2]",true);
       // ==>  *** MODE COMBINATORICS TEST ***
@@ -385,6 +376,31 @@ The histogram caches also work here:  methods like {\tt FSHistogram::dumpHistogr
 
 \subsection{Operations on Multiple Trees: the {\tt FSModeTree} class}
 \label{sec:modetree}
+
+The {\tt FSModeTree} class contains static member functions to operate on multiple trees.
+
+The {\tt FSModeTree::skimTree} method works in the same way as the {\tt FSTree::skimTree} method~(Sec.~\ref{sec:tree}), except it takes an argument to specify a combination of categories.  To skim trees for all the final states listed in {\tt NestedModes.modes}, and to make track quality cuts on all the tracks, for example:
+\begin{verbatim}
+    > FSModeCollection::addModesFromFile("NestedModes.modes");
+    > TString inFN("file.MODECODE.root");  TString NT("tree_MODECODE");
+    > TString outFN("skim.MODECODE.root");
+    > TString cutTRACK("AND(TrackQualityParticle[tk]>10)");
+    > FSModeTree::skimTree(inFN,NT,"EE,MM",outFN,cutTRACK);
+\end{verbatim}
+
+It often happens in particle physics experiments that a given event can be reconstructed multiple times under different hypotheses.  This can happen within a single final state -- for example, an event from the final state $K^+K^-\pi^+\pi^-\pi^0$ could be reconstructed once correctly and again one or more times incorrectly by misidentifying pions as kaons and vice versa.  It can also happen across several final states -- for example, the same event from the $K^+K^-\pi^+\pi^-\pi^0$ final state could also be reconstructed as $K^+K^-\pi^+\pi^-$ by missing the $\pi^0$.  
+
+The different hypotheses in the above scenarios would lead to different values of the $\chi^2$/dof from kinematic fits.  The {\tt createChi2Friends} method uses the {\tt TTree} variables {\tt Run}, {\tt Event}, and {\tt Chi2DOF} to rank hypotheses by $\chi^2$/dof.  It does this by creating a friend tree in a new file -- the name of the new file name is the same as the old file name except with a ``{\tt .chi}'' appended.  The friend tree contains the variables:
+\begin{verbatim}
+    // NCombinations:  number of combinations within a final state
+    // Chi2Rank: rank of this combination within a final state
+    // NCombinationsGlobal:  number of combinations in all final states
+    // Chi2RankGlobal:  rank of this combination in all final states
+\end{verbatim}
+The friend tree is used automatically by {\tt FSModeHistogram} by setting:
+\begin{verbatim}
+    > FSControl::CHAINFRIEND = "chi";
+\end{verbatim}
 
 
 \section{Fitting Utilities:  the {\tt FSFit} directory}
