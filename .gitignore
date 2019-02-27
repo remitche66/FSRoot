@@ -3,6 +3,7 @@ mklatex
 *RootMacros*
 *.pcm
 *.root
+.DS*
 
 # Prerequisites
 *.d

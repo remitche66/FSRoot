@@ -20,9 +20,9 @@
 map< TString, pair<TH1F*,TH2F*> > FSHistogram::m_histogramCache;
 map< TString, pair<TH1F*,TH2F*> > FSHistogram::m_addCache;
 
-TString AND("&&");
-TString OR("||");
-TString NOT("!");
+TString FSAND("&&");
+TString FSOR("||");
+TString FSNOT("!");
 
 
   // ********************************************************

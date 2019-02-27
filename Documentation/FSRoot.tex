@@ -38,31 +38,50 @@
 
 \section{Installation and Initial Setup}
 
-Instructions for installation and initial setup:
+\begin{enumerate}
 
-(1) Download the source:
+\item Download the source:
 \begin{verbatim}
     > git clone https://github.com/remitche66/FSRoot.git FSRoot
 \end{verbatim}
 
-(2) Set the location of \FSR\ in your login shell script (e.g. {\tt .cshrc}):
+
+\item Set the location of \FSR\ in your login shell script (e.g. {\tt .cshrc}):
 \begin{verbatim}
     setenv FSROOT [xxxxx]/FSRoot
 \end{verbatim}
 
-(3) Also probably add the \FSR\ directory to {\tt \$DYLD\_LIBRARY\_PATH} and {\tt \$LD\_LIBRARY\_PATH}.  This allows you to compile code including \FSR\ functions.  For example:
+\item Also probably add the \FSR\ directory to {\tt \$DYLD\_LIBRARY\_PATH} and {\tt \$LD\_LIBRARY\_PATH}.  This allows you to compile code including \FSR\ functions.  For example:
 \begin{verbatim}
     setenv DYLD_LIBRARY_PATH $DYLD_LIBRARY_PATH\:$FSROOT
     setenv   LD_LIBRARY_PATH   $LD_LIBRARY_PATH\:$FSROOT
 \end{verbatim}
 
-(4) There is usually a {\tt .rootrc} file in your home directory that \ROOT\ uses for initialization.  Add lines like these to {\tt .rootrc}, telling \ROOT\ the location of \FSR:
+\item There is usually a {\tt .rootrc} file in your home directory that \ROOT\ uses for initialization.  Add lines like these to {\tt .rootrc}, telling \ROOT\ the location of \FSR:
 \begin{verbatim}
     Unix.*.Root.DynamicPath: .:$(FSROOT):$(ROOTSYS)/lib:
     Unix.*.Root.MacroPath:   .:$(FSROOT):
 \end{verbatim}
 
-(5) Now when you open \ROOT, the \FSR\ utilities should be loaded and compiled -- you should see a message saying ``Loading the FSRoot Macros'' along with the output of the compilation.  The loading and compiling is done in the file {\tt rootlogon.C}.  This file also sets up default styles, which are not essential.  If these conflict with styles you have defined elsewhere, it could be worthwhile to tweak or remove these.
+\item To load and unload \FSR\ automatically when you open and close \ROOT, you can also add lines like these to the {\tt .rootrc}:
+\begin{verbatim}
+    Rint.Logon:    $(FSROOT)/rootlogon.FSRoot.C
+    Rint.Logoff:   $(FSROOT)/rootlogoff.FSRoot.C
+\end{verbatim}
+Alternatively, you could have those lines point to other login and logoff files and then load and unload \FSR\ from those files with lines like these [this is the method to use in the case that you want to load several different sets of macros]:
+\begin{verbatim}
+    gROOT->ProcessLine(".x $FSROOT/rootlogon.FSRoot.C");
+    gROOT->ProcessLine(".x $FSROOT/rootlogoff.FSRoot.C");
+\end{verbatim}
+As a third alternative, you could load \FSR\ manually from \ROOT:
+\begin{verbatim}
+    > .x $FSROOT/rootlogon.FSRoot.C
+\end{verbatim}
+
+\item When \FSR\ is loaded and compiled, you should see a message saying ``Loading the FSRoot Macros'' along with the output of the compilation.  The {\tt rootlogon.FSRoot.C} file also sets up default styles, which are not essential.  If these conflict with styles you have defined elsewhere, it could be worthwhile to tweak or remove these.
+
+\end{enumerate}
+
 
 \section{Basic Operations:  the {\tt FSBasic} directory}
 

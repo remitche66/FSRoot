@@ -17,9 +17,9 @@ using namespace std;
 
 // useful global strings
 
-extern TString AND;
-extern TString OR;
-extern TString NOT;
+extern TString FSAND;
+extern TString FSOR;
+extern TString FSNOT;
 
 
 class FSHistogram{

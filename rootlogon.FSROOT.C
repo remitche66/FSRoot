@@ -30,7 +30,7 @@ gStyle->SetTitleOffset(1.5,"Y");
 // ROOT TWEAKS
 // ***********
 
-TTreeFormula::SetMaxima(10000,1000,1000);
+TTreeFormula::SetMaxima(100000,10000,10000);
 TTree::SetMaxTreeSize(100e9);
 
 
