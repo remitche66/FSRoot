@@ -13,6 +13,10 @@ Notes on Installation
 
     git clone https://github.com/remitche66/FSRoot.git FSRoot
 
+Alternatively, get a released version from the releases tab and unpack:
+
+    > tar -xzf v[version].tar.gz
+
 (2) Set the location of FSRoot in your login shell script (e.g. .cshrc):
 
     setenv FSROOT [xxxxx]/FSRoot
