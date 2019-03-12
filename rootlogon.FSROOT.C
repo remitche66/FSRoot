@@ -32,6 +32,8 @@ gStyle->SetTitleOffset(1.5,"Y");
 
 TTreeFormula::SetMaxima(100000,10000,10000);
 TTree::SetMaxTreeSize(100e9);
+TH1::SetDefaultSumw2(true);
+TH2::SetDefaultSumw2(true);
 
 
 // *****************
@@ -56,6 +58,9 @@ gROOT->LoadMacro("FSBasic/FSString.C+");
 
 cout << "Loading FSBasic/FSPhysics.C..." << endl;
 gROOT->LoadMacro("FSBasic/FSPhysics.C+");
+
+cout << "Loading FSBasic/FSCut.C..." << endl;
+gROOT->LoadMacro("FSBasic/FSCut.C+");
 
 cout << "Loading FSBasic/FSTree.C..." << endl;
 gROOT->LoadMacro("FSBasic/FSTree.C+");

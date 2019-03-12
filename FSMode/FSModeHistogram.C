@@ -18,11 +18,11 @@
 #include "FSBasic/FSCanvas.h"
 #include "FSBasic/FSString.h"
 #include "FSBasic/FSPhysics.h"
+#include "FSBasic/FSCut.h"
 #include "FSMode/FSModeString.h"
 #include "FSMode/FSModeHistogram.h"
 
   // static member data
-map<TString, pair<TH1F*,TH2F*> > FSModeHistogram::m_modeHistogramCache;
 map<TString, float> FSModeHistogram::m_mcComponentsMap;
 map<TString, map<TString, float> > FSModeHistogram::m_cacheComponentsMap;
 
@@ -36,7 +36,7 @@ FSModeHistogram::getTH1F(TString fileName, TString ntName, TString category,
                        TString variable, TString bounds,
                        TString cuts,     TString options,
                        float scale){
-  return getHistogramGeneral(1,fileName,ntName,category,
+  return getTHNF(1,fileName,ntName,category,
                              variable,bounds,cuts,options,scale).first;
 }
 
@@ -46,20 +46,18 @@ FSModeHistogram::getTH2F(TString fileName, TString ntName, TString category,
                        TString variable, TString bounds,
                        TString cuts,     TString options,
                        float scale){
-  return getHistogramGeneral(2,fileName,ntName,category,
+  return getTHNF(2,fileName,ntName,category,
                              variable,bounds,cuts,options,scale).second;
 }
 
 
 pair<TH1F*,TH2F*> 
-FSModeHistogram::getHistogramGeneral(int dimension,
+FSModeHistogram::getTHNF(int dimension,
                        TString fileName, TString ntName, TString category,
                        TString variable, TString bounds,
                        TString cuts,     TString options,
                        float scale){
 
-  TH1F* hist1d = NULL;
-  TH2F* hist2d = NULL;
 
   vector<FSModeInfo*> modeVector = FSModeCollection::modeVector(category);
   if (modeVector.size() == 0){
@@ -67,8 +65,51 @@ FSModeHistogram::getHistogramGeneral(int dimension,
     cout << "                ... returning NULL" << endl;
   }
 
+    // expand "cuts" using FSCut and check for multidimensional sidebands
+    //   note: this section of code is the same as FSHistogram...
+    //           it could be organized better, probably
+
+
+  vector< pair<TString,double> > fsCuts = FSCut::expandCuts(cuts);
+  if (fsCuts.size() == 1){ cuts = fsCuts[0].first; scale *= fsCuts[0].second; }
+
+
+    // make histograms using multidimensional sidebands
+
+  if (fsCuts.size() > 1){
+
+      // loop over sideband cuts and add to a running total
+
+    TH1F* hist1d = NULL;
+    TH2F* hist2d = NULL;
+    for (unsigned int i = 0; i < fsCuts.size(); i++){
+      TString cuts_i = fsCuts[i].first;
+      double scale_i = scale * fsCuts[i].second;
+      if (dimension == 1){
+        TH1F* hi = FSModeHistogram::getTH1F(fileName, ntName, category, variable, bounds,
+                                        cuts_i, options, scale_i);
+        hist1d = FSHistogram::addTH1F("FSMODECUTTOTAL",hi);
+      }
+      if (dimension == 2){
+        TH2F* hi = FSModeHistogram::getTH2F(fileName, ntName, category, variable, bounds,
+                                        cuts_i, options, scale_i);
+        hist2d = FSHistogram::addTH2F("FSMODECUTTOTAL",hi);
+      }
+    }
+
+      // clear the add cache and return new histograms
+
+    pair<TH1F*,TH2F*> newHists = FSHistogram::addTempHistToCache(hist1d,hist2d);
+    FSHistogram::clearAddCache("FSMODECUTTOTAL");
+    return newHists;
+
+  }
+
 
   // loop over all modes in this category
+
+  TH1F* hist1d = NULL;
+  TH2F* hist2d = NULL;
 
   for (unsigned int i = 0; i < modeVector.size(); i++){
     if (!FSControl::QUIET){cout << endl; modeVector[i]->display(i+1);}
@@ -126,31 +167,11 @@ FSModeHistogram::getHistogramGeneral(int dimension,
     }
   }
 
-
     // make copies of the resulting totals and return
 
-  TH1F* hist1dcopy = NULL;
-  TH2F* hist2dcopy = NULL;
-
-  TString histName("MODECACHE");  histName += m_modeHistogramCache.size();
-
-  if (hist1d){
-    hist1dcopy = new TH1F(*hist1d);
-    hist1dcopy->SetName(histName);
-    hist1dcopy = FSHistogram::getTH1F(hist1dcopy);
-  }
-
-  if (hist2d){
-    hist2dcopy = new TH2F(*hist2d);
-    hist2dcopy->SetName(histName);
-    hist2dcopy = FSHistogram::getTH2F(hist2dcopy);
-  }
-
+  pair<TH1F*,TH2F*> newHists = FSHistogram::addTempHistToCache(hist1d,hist2d);
   FSHistogram::clearAddCache("MODEHISTOGRAMTOTAL");
-
-  m_modeHistogramCache[histName] = pair<TH1F*,TH2F*>(hist1dcopy,hist2dcopy);
-
-  return pair<TH1F*,TH2F*>(hist1dcopy,hist2dcopy);
+  return newHists;
 
 }
 
@@ -167,7 +188,7 @@ FSModeHistogram::drawTH1F(TString fileName, TString ntName, TString category,
                         TString variable, TString bounds,
                         TString cuts,     TString options,
                         float scale, TCanvas* c1){
-  drawHistogramGeneral(1,fileName,ntName,category,variable,bounds,cuts,options,scale,c1);
+  drawTHNF(1,fileName,ntName,category,variable,bounds,cuts,options,scale,c1);
 }
 
 void
@@ -175,12 +196,12 @@ FSModeHistogram::drawTH2F(TString fileName, TString ntName, TString category,
                         TString variable, TString bounds,
                         TString cuts,     TString options,
                         float scale, TCanvas* c1){
-  drawHistogramGeneral(2,fileName,ntName,category,variable,bounds,cuts,options,scale,c1);
+  drawTHNF(2,fileName,ntName,category,variable,bounds,cuts,options,scale,c1);
 }
 
 
 void
-FSModeHistogram::drawHistogramGeneral(int dimension,
+FSModeHistogram::drawTHNF(int dimension,
                        TString fileName, TString ntName, TString category,
                        TString variable, TString bounds,
                        TString cuts,     TString options,
@@ -617,22 +638,5 @@ void
 FSModeHistogram::readHistogramCache(string cacheName){
   FSHistogram::readHistogramCache(cacheName);
   readComponentsCache(cacheName);
-}
-
-
-  // ********************************************************
-  // CLEAR GLOBAL CACHES
-  // ********************************************************
-
-void
-FSModeHistogram::clearHistogramCache(){
-  if (FSControl::DEBUG) cout << "FSModeHistogram: clearing histogram cache" << endl;
-  for (map<TString,pair<TH1F*,TH2F*> >::iterator rmItr = m_modeHistogramCache.begin();
-       rmItr != m_modeHistogramCache.end(); rmItr++){
-    if (rmItr->second.first) delete rmItr->second.first;
-    if (rmItr->second.second) delete rmItr->second.second;
-  }
-  m_modeHistogramCache.clear();
-  if (FSControl::DEBUG) cout << "FSModeHistogram: done clearing histogram cache" << endl;
 }
 

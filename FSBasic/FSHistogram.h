@@ -92,25 +92,6 @@ class FSHistogram{
 
 
       // ********************************************************
-      // GET (OR CREATE) THE CACHING INDEX ASSOCIATED WITH A HISTOGRAM
-      // ********************************************************
-
-    static TString getTH1FIndex(TString fileName, TString ntName,
-                                TString variable, TString bounds,
-                                TString cuts,     TString options = "",
-                                float scale = 1.0);
-
-    static TString getTH2FIndex(TString fileName, TString ntName,
-                                TString variable, TString bounds,
-                                TString cuts,     TString options = "",
-                                float scale = 1.0);
-
-    static TString getTH1FIndex(TH1F* hist1d);
-
-    static TString getTH2FIndex(TH2F* hist2d);
-
-
-      // ********************************************************
       // KEEP RUNNING TOTALS FOR HISTOGRAMS
       //   reset using clearAddCache
       // ********************************************************
@@ -126,48 +107,67 @@ class FSHistogram{
       // ********************************************************
 
     static void clearHistogramCache();
+    static void clearTempHistCache();
 
+    friend class FSModeHistogram;
 
   private:
 
       // helper functions for histogram caching
 
+    static TString getTH1FIndex(TString fileName, TString ntName,
+                                TString variable, TString bounds,
+                                TString cuts,     TString options = "",
+                                float scale = 1.0);
+
+    static TString getTH2FIndex(TString fileName, TString ntName,
+                                TString variable, TString bounds,
+                                TString cuts,     TString options = "",
+                                float scale = 1.0);
+
+    static TString getTH1FIndex(TH1F* hist1d);
+
+    static TString getTH2FIndex(TH2F* hist2d);
+
     static pair<TH1F*,TH2F*> getHistogramFromCache(TString index);
 
-    static pair<TH1F*,TH2F*> getHistogramGeneral(int dimension, 
-                                                 TString fileName, TString histName,
-                                                 TString index = "");
+    static pair<TH1F*,TH2F*> getTHNF(int dimension, 
+                                     TString fileName, TString histName,
+                                     TString index = "");
 
-    static pair<TH1F*,TH2F*> getHistogramGeneral(int dimension,
+    static pair<TH1F*,TH2F*> getTHNF(int dimension,
                                 TString fileName, TString ntName,
                                 TString variable, TString bounds,
                                 TString cuts,     TString options,
                                 float scale);
 
-    static TString getHistogramIndexGeneral(int dimension,
+    static TString getTHNFIndex(int dimension,
                                 TString fileName, TString ntName,
                                 TString variable, TString bounds,
                                 TString cuts,     TString options,
                                 float scale);
 
-    static TString getHistogramIndexGeneral(pair<TH1F*,TH2F*> hist);
+    static TString getTHNFIndex(pair<TH1F*,TH2F*> hist);
+
+    static TString makeHistogramName();
+    static TString makeAddName();
+    static TString makeTempHistName();
 
     static void addHistogramToCache(TString index, TH1F* hist1d, TH2F* hist2d);
 
-    static TString makeHistogramName();
+    static pair<TH1F*,TH2F*> addTempHistToCache(TH1F* hist1d, TH2F* hist2d);
 
-    static TString makeAddName();
-
-    static pair<TH1F*,TH2F*> addHistogramGeneral(TString addName, 
-                                                 TH1F* hist1d, TH2F* hist2d, 
-                                                 float scale);
+    static pair<TH1F*,TH2F*> addTHNF(TString addName, 
+                                     TH1F* hist1d, TH2F* hist2d, 
+                                     float scale);
 
 
       // global caches
 
     static map< TString, pair<TH1F*,TH2F*> > m_histogramCache;
+    static map< TString, pair<TH1F*,TH2F*> > m_tempCache;
     static map< TString, pair<TH1F*,TH2F*> > m_addCache;
-
+    static unsigned int m_addCacheTotalSize;
 
 };
 

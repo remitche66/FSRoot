@@ -18,6 +18,7 @@
 #include "FSBasic/FSCanvas.h"
 #include "FSBasic/FSString.h"
 #include "FSBasic/FSPhysics.h"
+#include "FSBasic/FSCut.h"
 #include "FSMode/FSModeString.h"
 #include "FSMode/FSModeTree.h"
 
@@ -32,6 +33,12 @@ void
 FSModeTree::skimTree(TString fileNameInput, TString ntName, TString category,
                          TString fileNameOutput, TString cuts, 
                 	 unsigned int iModeStart, unsigned int iModeEnd){
+
+    // expand "cuts" using FSCut and check for multidimensional sidebands
+
+  vector< pair<TString,double> > fsCuts = FSCut::expandCuts(cuts);
+  if (fsCuts.size() == 1){ cuts = fsCuts[0].first; }
+  else{ cout << "FSModeTree::skimTree Error: multidimensional sidebands not allowed" << endl; exit(1); }
 
 
     // make a list of modes

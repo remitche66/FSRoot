@@ -12,13 +12,16 @@
 #include "FSBasic/FSControl.h"
 #include "FSBasic/FSString.h"
 #include "FSBasic/FSTree.h"
+#include "FSBasic/FSCut.h"
 #include "FSBasic/FSHistogram.h"
 
 
   // static member data
 
 map< TString, pair<TH1F*,TH2F*> > FSHistogram::m_histogramCache;
+map< TString, pair<TH1F*,TH2F*> > FSHistogram::m_tempCache;
 map< TString, pair<TH1F*,TH2F*> > FSHistogram::m_addCache;
+unsigned int FSHistogram::m_addCacheTotalSize = 0;
 
 TString FSAND("&&");
 TString FSOR("||");
@@ -73,9 +76,17 @@ FSHistogram::makeHistogramName(){
 }
 
 TString
+FSHistogram::makeTempHistName(){
+  TString hname("TEMPHISTCACHE");
+  hname += (m_tempCache.size() + 1);
+  return hname;
+}
+
+TString
 FSHistogram::makeAddName(){
   TString hname("ADDCACHE");
-  hname += (m_addCache.size() + 1);
+  hname += ++m_addCacheTotalSize; //(m_addCache.size() + 1);
+  if (FSControl::DEBUG) { cout << "FSHistogram::makeAddName: new name = " << hname << endl; }
   return hname;
 }
 
@@ -114,6 +125,33 @@ FSHistogram::addHistogramToCache(TString index, TH1F* hist1d, TH2F* hist2d){
 
 }
 
+pair<TH1F*,TH2F*>
+FSHistogram::addTempHistToCache(TH1F* hist1d, TH2F* hist2d){
+  if (FSControl::DEBUG){
+    cout << "FSHistogram: adding a histogram to the temporary cache" << endl;
+    if (hist1d){ cout << "  hist1d exists with "; 
+                 cout << hist1d->GetEntries() << " entries" << endl; }
+    if (hist2d){ cout << "  hist2d exists with " << endl; 
+                 cout << hist2d->GetEntries() << " entries" << endl; }
+  }
+  TH1F* hist1dcopy = NULL;
+  TH2F* hist2dcopy = NULL;
+  TString histName = makeTempHistName();
+  if (FSControl::DEBUG){ cout << "  new name = " << histName << endl; }
+  if (hist1d){
+    hist1dcopy = new TH1F(*hist1d);
+    hist1dcopy->SetName(histName);
+    hist1dcopy = FSHistogram::getTH1F(hist1dcopy);
+  }
+  if (hist2d){
+    hist2dcopy = new TH2F(*hist2d);
+    hist2dcopy->SetName(histName);
+    hist2dcopy = FSHistogram::getTH2F(hist2dcopy);
+  }
+  m_tempCache[histName] = pair<TH1F*,TH2F*>(hist1dcopy,hist2dcopy);
+  if (FSControl::DEBUG){ cout << "   added it to the cache" << endl; }
+  return pair<TH1F*,TH2F*>(hist1dcopy,hist2dcopy);
+}
 
 
   // ********************************************************
@@ -168,16 +206,16 @@ FSHistogram::getTH2F(TH2F* hist){
 
 TH1F* 
 FSHistogram::getTH1F(TString fileName, TString histName){
-  return getTH1F(getHistogramGeneral(1,fileName,histName).first);
+  return getTH1F(getTHNF(1,fileName,histName).first);
 }
 
 TH2F* 
 FSHistogram::getTH2F(TString fileName, TString histName){
-  return getTH2F(getHistogramGeneral(2,fileName,histName).second);
+  return getTH2F(getTHNF(2,fileName,histName).second);
 }
 
 pair<TH1F*,TH2F*> 
-FSHistogram::getHistogramGeneral(int dimension, TString fileName, 
+FSHistogram::getTHNF(int dimension, TString fileName, 
                                         TString histName, TString index){
 
     // create an index (or use the original index for readHistogramCache)
@@ -233,8 +271,7 @@ FSHistogram::getTH1F(TString fileName, TString ntName,
                                    TString variable, TString bounds,
                                    TString cuts,     TString options,
                                    float scale){
-  TH1F* hist = getHistogramGeneral(1,fileName,ntName,variable,bounds,cuts,options,scale).first;
-  if (hist->GetSum() != 0.0) hist->Scale(scale*hist->GetEntries()/hist->GetSum());
+  TH1F* hist = getTHNF(1,fileName,ntName,variable,bounds,cuts,options,scale).first;
   return getTH1F(hist);
 } 
 
@@ -243,18 +280,55 @@ FSHistogram::getTH2F(TString fileName, TString ntName,
                                    TString variable, TString bounds,
                                    TString cuts,     TString options,
                                    float scale){
-  TH2F* hist = getHistogramGeneral(2,fileName,ntName,variable,bounds,cuts,options,scale).second;
-  if (hist->GetSum() != 0.0) hist->Scale(scale*hist->GetEntries()/hist->GetSum());
+  TH2F* hist = getTHNF(2,fileName,ntName,variable,bounds,cuts,options,scale).second;
   return getTH2F(hist);
 } 
 
 
 pair<TH1F*,TH2F*> 
-FSHistogram::getHistogramGeneral(int dimension,
+FSHistogram::getTHNF(int dimension,
                                    TString fileName, TString ntName,
                                    TString variable, TString bounds,
                                    TString cuts,     TString options,
                                    float scale){
+
+
+    // expand "cuts" using FSCut and check for multidimensional sidebands
+
+  vector< pair<TString,double> > fsCuts = FSCut::expandCuts(cuts);
+  if (fsCuts.size() == 1){ cuts = fsCuts[0].first; scale *= fsCuts[0].second; }
+
+
+    // make histograms using multidimensional sidebands
+
+  if (fsCuts.size() > 1){
+
+      // loop over sideband cuts and add to a running total
+
+    TH1F* hist1d = NULL;
+    TH2F* hist2d = NULL;
+    for (unsigned int i = 0; i < fsCuts.size(); i++){
+      TString cuts_i = fsCuts[i].first;
+      double scale_i = scale * fsCuts[i].second;
+      if (dimension == 1){
+        TH1F* hi = FSHistogram::getTH1F(fileName, ntName, variable, bounds,
+                                        cuts_i, options, scale_i);
+        hist1d = FSHistogram::addTH1F("FSCUTTOTAL",hi);
+      }
+      if (dimension == 2){
+        TH2F* hi = FSHistogram::getTH2F(fileName, ntName, variable, bounds,
+                                        cuts_i, options, scale_i);
+        hist2d = FSHistogram::addTH2F("FSCUTTOTAL",hi);
+      }
+    }
+
+      // clear the add cache and return new histograms
+
+    pair<TH1F*,TH2F*> newHists = FSHistogram::addTempHistToCache(hist1d,hist2d);
+    FSHistogram::clearAddCache("FSCUTTOTAL");
+    return newHists;
+
+  }
 
 
     // expand "variable" and "cuts" taking out things like MASS(xxxx)
@@ -265,7 +339,7 @@ FSHistogram::getHistogramGeneral(int dimension,
 
     // create an index
 
-  TString index = getHistogramIndexGeneral(dimension, fileName, ntName, 
+  TString index = getTHNFIndex(dimension, fileName, ntName, 
                                            fullVariable, bounds, fullCuts, 
                                            options, scale);
 
@@ -340,8 +414,10 @@ FSHistogram::getHistogramGeneral(int dimension,
 
     // add to the histogram cache and return
 
+  if (hist1d && hist1d->GetSum() != 0.0) hist1d->Scale(scale*hist1d->GetEntries()/hist1d->GetSum());
+  if (hist2d && hist2d->GetSum() != 0.0) hist2d->Scale(scale*hist2d->GetEntries()/hist2d->GetSum());
   addHistogramToCache(index,hist1d,hist2d);
-  return m_histogramCache[index];
+  return pair<TH1F*,TH2F*>(hist1d,hist2d);
 
 } 
 
@@ -501,7 +577,7 @@ FSHistogram::readHistogramCache(string cacheName){
     if (FSControl::DEBUG) cout << "\tindex = " << index << endl;
     int dim = 1;
     if (index.Index("2") == 0) dim = 2;
-    getHistogramGeneral(dim,FSString::string2TString(rootCacheName),name,index);
+    getTHNF(dim,FSString::string2TString(rootCacheName),name,index);
   }
 
     // close files
@@ -523,7 +599,7 @@ FSHistogram::getTH1FIndex(TString fileName, TString ntName,
                                 TString variable, TString bounds,
                                 TString cuts,     TString options,
                                 float scale){
-  return getHistogramIndexGeneral(1,fileName,ntName,variable,bounds,cuts,options,scale);
+  return getTHNFIndex(1,fileName,ntName,variable,bounds,cuts,options,scale);
 }
 
 TString
@@ -531,25 +607,25 @@ FSHistogram::getTH2FIndex(TString fileName, TString ntName,
                                 TString variable, TString bounds,
                                 TString cuts,     TString options,
                                 float scale){
-  return getHistogramIndexGeneral(2,fileName,ntName,variable,bounds,cuts,options,scale);
+  return getTHNFIndex(2,fileName,ntName,variable,bounds,cuts,options,scale);
 }
 
 TString
 FSHistogram::getTH1FIndex(TH1F* hist1d){
   TH2F* hist2d = NULL;
-  return getHistogramIndexGeneral(pair<TH1F*,TH2F*>(hist1d,hist2d));
+  return getTHNFIndex(pair<TH1F*,TH2F*>(hist1d,hist2d));
 }
 
 TString
 FSHistogram::getTH2FIndex(TH2F* hist2d){
   TH1F* hist1d = NULL;
-  return getHistogramIndexGeneral(pair<TH1F*,TH2F*>(hist1d,hist2d));
+  return getTHNFIndex(pair<TH1F*,TH2F*>(hist1d,hist2d));
 }
 
 
 
 TString
-FSHistogram::getHistogramIndexGeneral(int dimension,
+FSHistogram::getTHNFIndex(int dimension,
                                 TString fileName, TString ntName,
                                 TString variable, TString bounds,
                                 TString cuts,     TString options,
@@ -562,16 +638,16 @@ FSHistogram::getHistogramIndexGeneral(int dimension,
   index += "(va)";  index += FSTree::expandVariable(variable);
   index += "(bo)";  index += bounds;
   index += "(cu)";  index += FSTree::expandVariable(cuts);
-  //index += "(op)";  index += options;
-  //index += "(sc)";  index += FSString::double2TString(scale,8,true);
-  options = "";
-  scale = 0.0;
+  index += "(op)";  index += options;
+  index += "(sc)";  index += FSString::double2TString(scale,8,true);
+  //options = "";
+  //scale = 0.0;
   return index;
 }
 
 
 TString
-FSHistogram::getHistogramIndexGeneral(pair<TH1F*,TH2F*> hist){
+FSHistogram::getTHNFIndex(pair<TH1F*,TH2F*> hist){
   for (map< TString, pair<TH1F*,TH2F*> >::const_iterator mItr = m_histogramCache.begin();
        mItr != m_histogramCache.end(); mItr++){
     if (mItr->second == hist) return mItr->first;
@@ -588,18 +664,17 @@ FSHistogram::getHistogramIndexGeneral(pair<TH1F*,TH2F*> hist){
 TH1F*
 FSHistogram::addTH1F(TString addName, TH1F* hist, float scale){
   TH2F* hist2d = NULL;
-  return addHistogramGeneral(addName,hist,hist2d,scale).first;
+  return addTHNF(addName,hist,hist2d,scale).first;
 }
 
 TH2F*
 FSHistogram::addTH2F(TString addName, TH2F* hist, float scale){
   TH1F* hist1d = NULL;
-  return addHistogramGeneral(addName,hist1d,hist,scale).second;
+  return addTHNF(addName,hist1d,hist,scale).second;
 }
 
 pair<TH1F*,TH2F*>
-FSHistogram::addHistogramGeneral(TString addName, TH1F* hist1d, TH2F* hist2d, 
-                                       float scale){
+FSHistogram::addTHNF(TString addName, TH1F* hist1d, TH2F* hist2d, float scale){
 
     // the original histogram
 
@@ -660,6 +735,20 @@ FSHistogram::clearHistogramCache(){
   m_histogramCache.clear();
   if (FSControl::DEBUG) 
     cout << "FSHistogram: done clearing histogram cache" << endl;
+}
+
+void
+FSHistogram::clearTempHistCache(){
+  if (FSControl::DEBUG) 
+    cout << "FSHistogram: clearing temp histogram cache" << endl;
+  for (map<TString,pair<TH1F*,TH2F*> >::iterator rmItr = m_tempCache.begin();
+       rmItr != m_tempCache.end(); rmItr++){
+    if (rmItr->second.first) delete rmItr->second.first;
+    if (rmItr->second.second) delete rmItr->second.second;
+  }
+  m_tempCache.clear();
+  if (FSControl::DEBUG) 
+    cout << "FSHistogram: done clearing temp histogram cache" << endl;
 }
 
 

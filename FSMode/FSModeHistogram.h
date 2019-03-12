@@ -81,22 +81,9 @@ class FSModeHistogram{
     static void readHistogramCache(string cacheName = "");
 
 
-      // ********************************************************
-      // CLEAR HISTOGRAMS
-      //    [[only frees memory]]
-      // ********************************************************
-
-    static void clearHistogramCache();
-
-
-
-
 
   private:
 
-      // global cache
-
-    static map<TString, pair<TH1F*,TH2F*> > m_modeHistogramCache;
 
       // MC components
 
@@ -108,17 +95,17 @@ class FSModeHistogram{
 
       // helper functions for histograms
 
-    static pair<TH1F*,TH2F*> getHistogramGeneral(int dimension,
+    static pair<TH1F*,TH2F*> getTHNF(int dimension,
                                    TString fileName, TString ntName, TString category,
                                    TString variable, TString bounds,
                                    TString cuts,     TString options,
                                    float scale);
 
-    static void drawHistogramGeneral(int dimension,
-                                   TString fileName, TString ntName, TString category,
-                                   TString variable, TString bounds,
-                                   TString cuts,     TString options,
-                                   float scale, TCanvas* c1);
+    static void drawTHNF(int dimension,
+                         TString fileName, TString ntName, TString category,
+                         TString variable, TString bounds,
+                         TString cuts,     TString options,
+                         float scale, TCanvas* c1);
 
 };
 

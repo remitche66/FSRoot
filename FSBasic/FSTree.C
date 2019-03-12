@@ -11,6 +11,7 @@
 #include "TFile.h"
 #include "FSBasic/FSControl.h"
 #include "FSBasic/FSString.h"
+#include "FSBasic/FSCut.h"
 #include "FSBasic/FSTree.h"
 
 
@@ -149,16 +150,19 @@ void
 FSTree::skimTree(TString fileNameInput, TString chainName, 
                                TString fileNameOutput, TString cuts, TString newChainName){
 
-
   // create an output file first (further set up later)
 
   TFile* file2 = new TFile(fileNameOutput,"recreate");
-
 
   // retrieve tree 1
 
   TChain* nt = getTChain(fileNameInput,chainName);
 
+    // expand "cuts" using FSCut and check for multidimensional sidebands
+
+  vector< pair<TString,double> > fsCuts = FSCut::expandCuts(cuts);
+  if (fsCuts.size() == 1){ cuts = fsCuts[0].first; }
+  else{ cout << "FSTree::skimTree Error: multidimensional sidebands not allowed" << endl; exit(1); }
 
   // expand variable macros
 

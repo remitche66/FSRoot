@@ -134,7 +134,7 @@ Cuts can be added in the fifth argument:
 The variable and cut arguments can contain shortcuts.  For example, {\tt MASS(I,J)} is expanded into the total invariant mass of particles {\tt I} and {\tt J}, where {\tt I} and {\tt J} are not necessarily numbers~(they are the {\tt [CD]} in Sec.~\ref{sec:conventions}).  Characters in front of {\tt MASS}~(for example) are prepended to the variable names (the {\tt [AB]} in Sec.~\ref{sec:conventions}).  This is all done in the function {\tt FSTree::expandVariable}, which can also be used on its own to explicitly see what it is doing.    See {\tt FSTree::expandVariable} for more options beyond {\tt MASS}~(for example, {\tt RECOILMASS}, {\tt MOMENTUM}, {\tt COSINE}, etc.).  An example for {\tt FSHistogram::getTH1F}:
 \begin{verbatim}
     > FSHistogram::getTH1F(fileName,treeName,"MASS(1,2)",
-        "(100,3.0,3.2)","Chi2DOF<5.0&&RMASS(2,3)>1.0")->Draw();
+        "(100,3.0,3.2)","Chi2DOF<5.0&&abs(RMASS(2,3)-1.0)<0.2")->Draw();
 \end{verbatim}
 Examples for {\tt FSTree::expandVariable}:
 \begin{verbatim}
@@ -164,6 +164,41 @@ To see more verbose output during a session:
 \begin{verbatim}
     > FSControl::DEBUG = true;
 \end{verbatim}
+
+\subsection{Basic Cut Utilities: the {\tt FSCut} class}
+\label{sec:cut}
+
+Additional shortcuts for making plots are available through the {\tt FSCut} class in the {\tt FSBasic} directory.  The following example~(not using {\tt FSCut}) defines two cuts and then uses them to make a plot, as above:
+\begin{verbatim}
+    > TString cutCHI2("Chi2DOF<5.0");
+    > TString cutRMASS("abs(RMASS(2,3)-1.0)<0.2");
+    > FSHistogram::getTH1F(fileName,treeName,"MASS(1,2)",
+        "(100,3.0,3.2)",cutCHI2+"&&"+cutRMASS)->Draw();
+\end{verbatim}
+As a shortcut to do the exact same thing, one can give the cuts names and then implement them using the keyword {\tt CUT()}:
+\begin{verbatim}
+    > FSCut::defineCut("chi2",cutCHI2);
+    > FSCut::defineCut("rmass",cutRMASS);
+    > FSHistogram::getTH1F(fileName,treeName,"MASS(1,2)",
+        "(100,3.0,3.2)","CUT(chi2,rmass)")->Draw();
+\end{verbatim}
+The {\tt FSCut} class can also be used to define sidebands, which can then be implemented using the keyword {\tt CUTSB()}:
+\begin{verbatim}
+    > TString cutCHI2SB("Chi2DOF>10.0&&Chi2DOF<20.0");
+    >   // the relative size of signal to sideband is 0.5
+    > FSCut::defineCut("chi2",cutCHI2,cutCHI2SB,0.5);
+    > FSHistogram::getTH1F(fileName,treeName,"MASS(1,2)",
+        "(100,3.0,3.2)","CUT(rmass)&&CUTSB(chi2)")->Draw();
+\end{verbatim}
+If multiple sidebands are used simultaneously, then all combinations of sideband regions are considered and the resulting histogram is a sum of sideband regions with weights determined by the weights for individual regions:
+\begin{verbatim}
+    > TString cutRMASSSB("abs(RMASS(2,3)-2.0)<0.6");
+    >   // the relative size of signal to sideband is 1.0/3.0
+    > FSCut::defineCut("rmass",cutRMASS,cutRMASSSB,1.0/3.0);
+    > FSHistogram::getTH1F(fileName,treeName,"MASS(1,2)",
+        "(100,3.0,3.2)","CUTSB(chi2,rmass)")->Draw();
+\end{verbatim}
+
 
 \subsection{Basic Tree Utilities: the {\tt FSTree} class}
 \label{sec:tree}
