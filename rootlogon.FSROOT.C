@@ -103,6 +103,17 @@ cout << "Loading FSFit/FSFitUtilities.C..." << endl;
 gROOT->LoadMacro("FSFit/FSFitUtilities.C+");
 
 
+// *****************
+// DATA UTILITIES
+// *****************
+
+cout << "Loading FSData/FSDataSet.C..." << endl;
+gROOT->LoadMacro("FSData/FSDataSet.C+");
+
+cout << "Loading FSData/FSDataSetList.C..." << endl;
+gROOT->LoadMacro("FSData/FSDataSetList.C+");
+
+
 cout << "------------------------------------------" << endl;
 cout << "--- Finished loading the FSRoot Macros ---" << endl;
 cout << "------------------------------------------" << endl;

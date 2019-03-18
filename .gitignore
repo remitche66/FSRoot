@@ -1,6 +1,8 @@
 # FSRoot
 mklatex
 *RootMacros*
+*BESUtilities*
+*ProposalSimulations*
 *.pcm
 *.root
 .DS*
