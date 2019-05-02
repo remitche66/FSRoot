@@ -33,17 +33,17 @@ Alternatively, get a released version from the releases tab and unpack:
 
 (5) To load and unload FSRoot automatically when you open and close ROOT, you can also add lines like these to the .rootrc:
 
-    Rint.Logon:    $(FSROOT)/rootlogon.FSRoot.C
-    Rint.Logoff:   $(FSROOT)/rootlogoff.FSRoot.C
+    Rint.Logon:    $(FSROOT)/rootlogon.FSROOT.C
+    Rint.Logoff:   $(FSROOT)/rootlogoff.FSROOT.C
 
 Alternatively, you could have those lines point to other login and logoff files and then load and unload FSRoot from those files with lines like these [this is the method to use in the case that you want to load several different sets of macros]:
 
-    gROOT->ProcessLine(".x $FSROOT/rootlogon.FSRoot.C");
-    gROOT->ProcessLine(".x $FSROOT/rootlogoff.FSRoot.C");
+    gROOT->ProcessLine(".x $FSROOT/rootlogon.FSROOT.C");
+    gROOT->ProcessLine(".x $FSROOT/rootlogoff.FSROOT.C");
 
 As a third alternative, you could load FSRoot manually from ROOT:
 
-    .x $FSROOT/rootlogon.FSRoot.C
+    .x $FSROOT/rootlogon.FSROOT.C
 
 
 (6) When FSRoot is loaded and compiled, you should see a message saying "Loading the FSRoot Macros" along with the output of the compilation.  

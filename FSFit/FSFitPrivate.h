@@ -903,9 +903,9 @@ class FSFitMinuit {
         for (unsigned int idata = 0; idata < vx.size(); idata++){
           double x = vx[idata];
           double y = vy[idata];
-          double ey = vey[idata];
+          //double ey = vey[idata];
           double fx = func->fx(x);
-          double efx = func->efx(x);
+          //double efx = func->efx(x);
           if (fx < 0) fcn += 1.0e3;  // NOT SURE EXACTLY HOW TO DO THIS 
           //if (fx < 0) fx = fabs(fx); 
           if (fx > 0) fcn += 2.0*(fx - y*log(fx));
