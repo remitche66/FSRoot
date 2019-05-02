@@ -43,20 +43,7 @@ void
 FSCanvas::colorScheme(int i){
 
   if (i == 0){
-    //gStyle->SetPalette(1);
-    {int MAXCOLS = 250;  int COLSTART = 0;
-    int NCOLS = MAXCOLS - COLSTART;
-    TColor* pcols[MAXCOLS];
-    for (int ii = 0; ii < MAXCOLS; ii++){
-      float grey = ii / (float) MAXCOLS;
-      TString tmp("mycol"); tmp += (MAXCOLS-ii-1);
-      pcols[ii] = new TColor(1000+(MAXCOLS-ii-1),grey,grey,grey,tmp);
-    }   
-    int cols[NCOLS];
-    for (int ii = 0; ii < NCOLS; ii++){
-      cols[ii] = 1000+COLSTART+ii;
-    }
-    gStyle->SetPalette(NCOLS,cols);}
+    gStyle->SetPalette(1);
   }
 
   if (i == 1){
@@ -86,8 +73,8 @@ FSCanvas::colorScheme(int i){
     gStyle->SetNumberContours(NCont);
   }
 
-
 }
+
 
 void
 FSCanvas::testColorScheme(int i){

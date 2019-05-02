@@ -449,10 +449,10 @@ FSModeHistogram::getMCComponents(TString fileName, TString ntName,
         if (twoParts.size() != 2){cout << "PROBLEM with moreInfo in getMCComponents" << endl; exit(0);}
         mString = twoParts[0];
         vector<TString> extras = FSString::parseTString(twoParts[1],"_");
-        for (unsigned int i = 0; i < extras.size(); i++){
-          if (extras[i] == "0") continue;
-          extra += FSPhysics::pdgName(FSString::TString2int(extras[i]));
-          if (i != extras.size()-1) extra += " ";
+        for (unsigned int j = 0; j < extras.size(); j++){
+          if (extras[j] == "0") continue;
+          extra += FSPhysics::pdgName(FSString::TString2int(extras[j]));
+          if (j != extras.size()-1) extra += " ";
         }
       }
       cout << m_mcComponentsMap[component]
