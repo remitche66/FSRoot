@@ -6,6 +6,7 @@ mklatex
 .DS*
 ExampleProgram
 FSSkimTree
+*testing*
 
 # Prerequisites
 *.d

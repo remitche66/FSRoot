@@ -197,7 +197,8 @@ class FSModeInfo{
       // *************************************************************
 
     vector<TString> modeCombinatorics (TString varString, 
-                                       bool printCombinatorics = false);
+                                       bool printCombinatorics = false,
+                                       bool removeDuplicates = true);
 
 
       // *************************************************************
