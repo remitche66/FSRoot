@@ -4,6 +4,8 @@ mklatex
 *.pcm
 *.root
 .DS*
+ExampleProgram
+FSSkimTree
 
 # Prerequisites
 *.d

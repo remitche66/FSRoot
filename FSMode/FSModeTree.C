@@ -32,7 +32,8 @@
 void 
 FSModeTree::skimTree(TString fileNameInput, TString ntName, TString category,
                          TString fileNameOutput, TString cuts, 
-                	 unsigned int iModeStart, unsigned int iModeEnd){
+                	 unsigned int iModeStart, unsigned int iModeEnd,
+                         TString printCommandFile){
 
     // expand "cuts" using FSCut and check for multidimensional sidebands
 
@@ -65,14 +66,16 @@ FSModeTree::skimTree(TString fileNameInput, TString ntName, TString category,
       TString fileNameInput_i = modeVector[i]->modeString(fileNameInput);
       TString fileNameOutput_i = modeVector[i]->modeString(fileNameOutput);
       TString cuts_i = modeVector[i]->modeCuts(cuts);
-      FSTree::skimTree(fileNameInput_i,ntName_i,fileNameOutput_i,cuts_i);
+      TString printCommandFile_i = modeVector[i]->modeCuts(printCommandFile);
+      FSTree::skimTree(fileNameInput_i,ntName_i,fileNameOutput_i,
+                       cuts_i,"",printCommandFile_i);
     }
   }
 
     // otherwise do a simple skim
 
   if (!loopOverModes){
-    FSTree::skimTree(fileNameInput,ntName,fileNameOutput,cuts);
+    FSTree::skimTree(fileNameInput,ntName,fileNameOutput,cuts,"",printCommandFile);
   }
 
 }
@@ -82,7 +85,8 @@ void
 FSModeTree::skimTree(TString fileNameInput, TString ntName, TString category,
                             TString variable, TString bounds,
                             TString cuts, TString fileNameOutput, 
-                	    unsigned int iModeStart, unsigned int iModeEnd){
+                	    unsigned int iModeStart, unsigned int iModeEnd,
+                            TString printCommandFile){
 
     // parse the bounds variable
 
@@ -111,7 +115,8 @@ FSModeTree::skimTree(TString fileNameInput, TString ntName, TString category,
 
     // send this to the regular skimTree method
 
-  skimTree(fileNameInput,ntName,category,fileNameOutput,newCuts,iModeStart,iModeEnd);
+  skimTree(fileNameInput,ntName,category,fileNameOutput,newCuts,
+           iModeStart,iModeEnd,printCommandFile);
 
 }
 

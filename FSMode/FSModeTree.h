@@ -29,12 +29,14 @@ class FSModeTree{
 
     static void skimTree(TString fileNameInput, TString ntName, TString category,
                          TString fileNameOutput, TString cuts, 
-                	 unsigned int iModeStart = 1, unsigned int iModeEnd = 1000000);
+                	 unsigned int iModeStart = 1, unsigned int iModeEnd = 1000000,
+                         TString printCommandFile = "");
 
     static void skimTree(TString fileNameInput, TString ntName, TString category,
                             TString variable, TString bounds,
                             TString cuts, TString fileNameOutput, 
-                	    unsigned int iModeStart = 1, unsigned int iModeEnd = 1000000);
+                	    unsigned int iModeStart = 1, unsigned int iModeEnd = 1000000,
+                            TString printCommandFile = "");
 
 
       // ********************************************************

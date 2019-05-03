@@ -148,7 +148,21 @@ FSTree::getTFile(TString fileName){
 
 void
 FSTree::skimTree(TString fileNameInput, TString chainName, 
-                               TString fileNameOutput, TString cuts, TString newChainName){
+                 TString fileNameOutput, TString cuts, 
+                 TString newChainName, TString printCommandFile){
+
+  // just write the command to a file and return
+
+  if (printCommandFile != ""){
+    FSString::writeTStringToFile(printCommandFile,
+          "$FSROOT/Executables/FSSkimTree "
+          " -i \""    + fileNameInput  + "\""
+          " -o \""    + fileNameOutput + "\""
+          " -cuts \"" + cuts           + "\""
+          " -nt \""   + chainName      + "\"",
+          false);
+    return;
+  }
 
   // create an output file first (further set up later)
 
