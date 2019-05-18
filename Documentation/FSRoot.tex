@@ -79,17 +79,17 @@ and unpack:
 
 \item To load and unload \FSR\ automatically when you open and close \ROOT, you can also add lines like these to the {\tt .rootrc}:
 \begin{verbatim}
-    Rint.Logon:    $(FSROOT)/rootlogon.FSRoot.C
-    Rint.Logoff:   $(FSROOT)/rootlogoff.FSRoot.C
+    Rint.Logon:    $(FSROOT)/rootlogon.FSROOT.C
+    Rint.Logoff:   $(FSROOT)/rootlogoff.FSROOT.C
 \end{verbatim}
 Alternatively, you could have those lines point to other login and logoff files and then load and unload \FSR\ from those files with lines like these [this is the method to use in the case that you want to load several different sets of macros]:
 \begin{verbatim}
-    gROOT->ProcessLine(".x $FSROOT/rootlogon.FSRoot.C");
-    gROOT->ProcessLine(".x $FSROOT/rootlogoff.FSRoot.C");
+    gROOT->ProcessLine(".x $FSROOT/rootlogon.FSROOT.C");
+    gROOT->ProcessLine(".x $FSROOT/rootlogoff.FSROOT.C");
 \end{verbatim}
 As a third alternative, you could load \FSR\ manually from \ROOT:
 \begin{verbatim}
-    > .x $FSROOT/rootlogon.FSRoot.C
+    > .x $FSROOT/rootlogon.FSROOT.C
 \end{verbatim}
 
 \item When \FSR\ is loaded and compiled, you should see a message saying ``Loading the FSRoot Macros'' along with the output of the compilation.  The {\tt rootlogon.FSRoot.C} file also sets up default styles, which are not essential.  If these conflict with styles you have defined elsewhere, it could be worthwhile to tweak or remove these.

@@ -40,7 +40,8 @@ class FSTree{
 
     static void skimTree(TString fileNameInput, TString chainName, 
                          TString fileNameOutput, TString cuts, 
-                         TString newChainName = "");
+                         TString newChainName = "", 
+                         TString printCommandFile = "");
 
 
       // ********************************************************

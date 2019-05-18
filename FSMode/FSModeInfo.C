@@ -6,6 +6,7 @@
 #include <map>
 #include "FSBasic/FSControl.h"
 #include "FSBasic/FSString.h"
+#include "FSBasic/FSTree.h"
 #include "FSMode/FSModeInfo.h"
 
 // definitions of static variables
@@ -668,7 +669,7 @@ FSModeInfo::setSubmode (TString particleName,
 
 
 vector<TString>
-FSModeInfo::modeCombinatorics(TString varString, bool printCombinatorics){
+FSModeInfo::modeCombinatorics(TString varString, bool printCombinatorics, bool removeDuplicates){
 
   vector<TString> allCombinatorics;
 
@@ -887,6 +888,28 @@ FSModeInfo::modeCombinatorics(TString varString, bool printCombinatorics){
 
   }
 
+    // remove duplicate combinations
+
+  if (removeDuplicates && allCombinatorics.size() > 1){
+    vector<TString> copyOriginal = allCombinatorics;
+    vector<TString> copyExpanded = allCombinatorics;
+    allCombinatorics.clear();
+    for (unsigned int i = 0; i < copyExpanded.size(); i++){
+      copyExpanded[i] = FSTree::expandVariable(copyOriginal[i]);
+    }
+    for (unsigned int i = 0; i < copyExpanded.size(); i++){
+      if (copyExpanded[i] != ""){
+        for (unsigned int j = i+1; j < copyExpanded.size(); j++){
+          if (copyExpanded[j] != ""){
+            if (copyExpanded[i] == copyExpanded[j]) copyExpanded[j] = "";
+          }
+        }
+        allCombinatorics.push_back(copyOriginal[i]);
+      }
+    }
+  }
+
+    // print the combinatorics to the screen for debugging
 
   if (printCombinatorics){
     cout << "*** MODE COMBINATORICS TEST ***" << endl;
