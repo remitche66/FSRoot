@@ -389,7 +389,7 @@ FSString::parseTString(TString input, TString spacer){
   TString word("");
   for (int i = 0; i < input.Length(); i++){
     TString digit(input[i]);
-    if ((digit == spacer) || (spacer == " " && digit == "\t")){
+    if ((digit == spacer) || (spacer == " " && containsWhiteSpace(digit))){
       if (word != ""){
         words.push_back(word);
         word = "";
