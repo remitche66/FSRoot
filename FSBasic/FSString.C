@@ -461,7 +461,7 @@ FSString::parseLogicalTString(TString input){
   for (int ic = 0; ic < input.Length(); ic++){
     TString whitecheck(input[ic]);
     //if (!whitecheck.IsWhitespace()){
-    if (whitecheck != ' '){
+    if (!containsWhiteSpace(whitecheck)){
       if (input[ic] != '&' && input[ic] != ',' && (input[ic] != '!')) { 
 	cc += input[ic]; 
       }
@@ -508,6 +508,7 @@ FSString::parseLogicalTStringTest(TString input){
 
 bool
 FSString::evalLogicalTString(TString input, vector<TString> cats){
+  if (input == "") return true;
   vector< vector< pair<int,TString> > >  orcategories = FSString::parseLogicalTString(input);
   bool orpass = false;
   for (unsigned int ior = 0; ior < orcategories.size(); ior++){
@@ -527,8 +528,7 @@ FSString::evalLogicalTString(TString input, vector<TString> cats){
       if (andpass) orpass = true;
     }
   }
-  if (orpass || input == "") return true;
-  return false;
+  return orpass;
 }
 
 
@@ -857,6 +857,7 @@ FSString::parseBoundsBinSizeX(TString bounds){
 
 vector<TString>
 FSString::parseBounds(TString bounds){
+  bounds = FSString::removeWhiteSpace(bounds);
   vector<TString> boundVector = parseTString(bounds,",");
   vector<TString> emptyVector;
   if ((boundVector.size() != 3 && boundVector.size() != 6) ||
@@ -877,21 +878,30 @@ FSString::parseBounds(TString bounds){
   // STRIP EXTRA WHITESPACE AROUND STRINGS AND REMOVE TABS
   // ********************************************************
 
+bool
+FSString::containsWhiteSpace(TString input){
+  for (int i = 0; i < input.Length(); i++){
+    TString digit(input[i]);
+    if (digit.IsWhitespace()) return true;
+    if (digit == "\t") return true;
+    if (digit == " ")  return true;
+    //if (digit == "\ ") return true;
+  }
+  return false;
+}
+
 TString
 FSString::stripWhiteSpace(TString input){
-  int istart = -1;
-  int iend = -1;
-  for (int j = 0; j < input.Length(); j++){
-    TString digit(input[j]);
-    if (!digit.IsWhitespace() && istart == -1) istart = j;
+  TString output = input;
+  while ((output.Length() > 0) && (containsWhiteSpace(output[0]))){
+    TString tempstring("");
+    for (int i = 1; i < output.Length(); i++){ tempstring += output[i]; }
+    output = tempstring;
   }
-  for (int j = input.Length(); j > 0; j--){
-    TString digit(input[j-1]);
-    if (!digit.IsWhitespace() && iend == -1) iend = j;
-  }
-  TString output("");
-  for (int j = istart; j < iend; j++){
-    output += input[j];
+  while ((output.Length() > 0) && (containsWhiteSpace(output[output.Length()-1]))){
+    TString tempstring("");
+    for (int i = 0; i < output.Length()-1; i++){ tempstring += output[i]; }
+    output = tempstring;
   }
   return output;
 }
@@ -901,7 +911,7 @@ FSString::removeTabs(TString input){
   TString output("");
   for (int i = 0; i < input.Length(); i++){
     TString digit(input[i]);
-    if (digit.IsWhitespace() || digit == "\t"){ output += " ";}
+    if (containsWhiteSpace(digit)){ output += " "; }
     else{ output += digit; }
   }
   return output;
@@ -912,8 +922,7 @@ FSString::removeWhiteSpace(TString input){
   TString output("");
   for (int i = 0; i < input.Length(); i++){
     TString digit(input[i]);
-    if (digit.IsWhitespace() || digit == "\t"){ output += "";}
-    else{ output += digit; }
+    if (!containsWhiteSpace(digit)) output += digit;
   }
   return output;
 }
