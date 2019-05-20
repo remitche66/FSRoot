@@ -292,6 +292,12 @@ FSHistogram::getTHNF(int dimension,
                                    TString cuts,     TString options,
                                    float scale){
 
+    // remove white space
+
+  variable = FSString::removeWhiteSpace(variable);
+  bounds   = FSString::removeWhiteSpace(bounds);
+  cuts     = FSString::removeWhiteSpace(cuts);
+
 
     // expand "cuts" using FSCut and check for multidimensional sidebands
 
@@ -631,6 +637,9 @@ FSHistogram::getTHNFIndex(int dimension,
                                 TString cuts,     TString options,
                                 float scale){
   TString index;
+  variable = FSString::removeWhiteSpace(variable);
+  bounds   = FSString::removeWhiteSpace(bounds);
+  cuts     = FSString::removeWhiteSpace(cuts);
   if (dimension == 1) index += "1D";
   if (dimension == 2) index += "2D";
   index += "(fn)";  index += fileName;

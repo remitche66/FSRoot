@@ -150,6 +150,7 @@ void
 FSTree::skimTree(TString fileNameInput, TString chainName, 
                  TString fileNameOutput, TString cuts, 
                  TString newChainName, TString printCommandFile){
+  cuts = FSString::removeWhiteSpace(cuts);
 
   // just write the command to a file and return
 
