@@ -3,6 +3,7 @@
 #include <sstream>
 #include <fstream>
 #include "TString.h"
+#include "FSBasic/FSControl.h"
 #include "FSBasic/FSString.h"
 
 
@@ -434,103 +435,90 @@ FSString::parseTStringTest(TString input, TString spacer){
 
       // ********************************************************
       // PARSE VERY SIMPLE LOGIC 
-      //    (using "," for OR, "&" for AND, "!" for NOT)
-      //    (no parentheses, no nested structures)
-      //    parseLogicalTString:
-      //      * outer vector contains "OR"s
-      //      * inner vector contains "AND"s
-      //      * pair.first has int of 1 for NOT
-      //      * pair.second is a statemet
       //    evalLogicalTString:
       //      Determines whether or not a list of categories contains
-      //      what is in input.
+      //        what is in the input logic.
       //      For example, for categories = "A","B","C",
       //        input = "A&B" --> true
       //        input = "A&B&!C" --> false
       //        input = "A&D" --> false
       //        input = "D,!E" --> true
+      //      (parentheses are allowed)
       // ********************************************************
-
-
-vector< vector< pair<int,TString> > >
-FSString::parseLogicalTString(TString input){
-  vector< pair<int,TString> >            andstrings;
-  vector< vector< pair<int,TString> > >  orstrings;
-  TString cc("");
-  int inot = 0;
-  for (int ic = 0; ic < input.Length(); ic++){
-    TString whitecheck(input[ic]);
-    //if (!whitecheck.IsWhitespace()){
-    if (!containsWhiteSpace(whitecheck)){
-      if (input[ic] != '&' && input[ic] != ',' && (input[ic] != '!')) { 
-	cc += input[ic]; 
-      }
-      else if (input[ic] == '!') {
-	inot = 1;
-      } 
-      else if (input[ic] == '&') { 
-	andstrings.push_back(pair<int,TString>(inot,cc));  
-	cc = ""; 
-	inot = 0;
-      }
-      else if (input[ic] == ',') { 
-	andstrings.push_back(pair<int,TString>(inot,cc));  
-	orstrings.push_back(andstrings);  
-	andstrings.clear(); 
-	cc = ""; 
-	inot = 0;
-      }
-    }
-  }
-  andstrings.push_back(pair<int,TString>(inot,cc));
-  orstrings.push_back(andstrings);
-  return orstrings;
-}
-
-
-void
-FSString::parseLogicalTStringTest(TString input){
-  cout << "parseLogicalTStringTest:" << endl;
-  vector< vector< pair<int,TString> > > orlogic = parseLogicalTString(input);
-  for (unsigned int ior = 0; ior < orlogic.size(); ior++){
-    vector< pair<int,TString> > andlogic = orlogic[ior];
-    for (unsigned int iand = 0; iand < andlogic.size(); iand++){
-      TString cnot("");
-      if (andlogic[iand].first == 1) cnot += " NOT ";
-      cout << cnot << andlogic[iand].second;
-      if (iand != andlogic.size()-1) cout << " AND ";
-      else cout << endl;
-    }
-    if (ior != orlogic.size()-1) cout << "OR" << endl;
-  }
-}
 
 
 bool
 FSString::evalLogicalTString(TString input, vector<TString> cats){
+      if (FSControl::DEBUG){ cout << "FSString::evalLogicalTString (1) " << input << endl; }
+  input = FSString::removeWhiteSpace(input);
+      if (FSControl::DEBUG){ cout << "FSString::evalLogicalTString (2) " << input << endl; }
   if (input == "") return true;
-  vector< vector< pair<int,TString> > >  orcategories = FSString::parseLogicalTString(input);
-  bool orpass = false;
-  for (unsigned int ior = 0; ior < orcategories.size(); ior++){
-    if (!orpass){
-      vector< pair<int,TString> > andcategories = orcategories[ior];
-      bool andpass = true;
-      for (unsigned int iand = 0; iand < andcategories.size(); iand++){
-        if (andpass){
-          bool found = false;
-          for (unsigned int ic = 0; ic < cats.size(); ic++){
-            if (cats[ic] == andcategories[iand].second) found = true;
-          }
-          if (andcategories[iand].first == 0 && (!found)) andpass = false;
-          if (andcategories[iand].first == 1 &&  (found)) andpass = false;
-        }
+  input = ("("+input+")");
+      if (FSControl::DEBUG){ cout << "FSString::evalLogicalTString (3) " << input << endl; }
+      if (!FSString::checkParentheses(input)){
+        cout << "FSString::evalLogicalTString ERROR: parentheses problem in " << input << endl;
+        exit(1);
       }
-      if (andpass) orpass = true;
+  TString output("");
+  TString word("");
+  for (int i = 0; i < input.Length(); i++){
+    TString digit(input[i]);
+    if ((digit != "(") && 
+        (digit != ")") && 
+        (digit != ",") && 
+        (digit != "&") && 
+        (digit != "!")){
+      word += digit;
+    }
+    else{
+      if (word != ""){
+        bool found = false;
+        for (unsigned int ic = 0; ic < cats.size(); ic++){ if (cats[ic] == word) found = true; }
+        if  (found) output += "1";
+        if (!found) output += "0";
+      }
+      output += digit;
+      word = "";
     }
   }
-  return orpass;
+      if (FSControl::DEBUG){ cout << "FSString::evalLogicalTString (4) " << output << endl; }
+  return evalBooleanTString(output);
 }
 
+bool 
+FSString::evalBooleanTString(TString input){
+  while (input.Contains("()"))   { input.Replace(input.Index("()"),   2,""); }
+  while (input.Contains("!!"))   { input.Replace(input.Index("!!"),   2,""); }
+  while (input.Contains("(0)"))  { input.Replace(input.Index("(0)"),  3,"0"); }
+  while (input.Contains("(1)"))  { input.Replace(input.Index("(1)"),  3,"1"); }
+  while (input.Contains("!0") || 
+         input.Contains("!1")){    
+     if (input.Contains("!0"))     input.Replace(input.Index("!0"),   2,"1");
+     if (input.Contains("!1"))     input.Replace(input.Index("!1"),   2,"0"); }
+  while (input.Contains("0&0"))  { input.Replace(input.Index("0&0"),  3,"0"); }
+  while (input.Contains("0&1"))  { input.Replace(input.Index("0&1"),  3,"0"); }
+  while (input.Contains("1&0"))  { input.Replace(input.Index("1&0"),  3,"0"); }
+  while (input.Contains("1&1"))  { input.Replace(input.Index("1&1"),  3,"1"); }
+  while (input.Contains("(0,0)")){ input.Replace(input.Index("(0,0)"),5,"0"); }
+  while (input.Contains("(0,1)")){ input.Replace(input.Index("(0,1)"),5,"1"); }
+  while (input.Contains("(1,0)")){ input.Replace(input.Index("(1,0)"),5,"1"); }
+  while (input.Contains("(1,1)")){ input.Replace(input.Index("(1,1)"),5,"1"); }
+  while (input.Contains(",0,0)")){ input.Replace(input.Index(",0,0)"),5,",0)"); }
+  while (input.Contains(",0,1)")){ input.Replace(input.Index(",0,1)"),5,",1)"); }
+  while (input.Contains(",1,0)")){ input.Replace(input.Index(",1,0)"),5,",1)"); }
+  while (input.Contains(",1,1)")){ input.Replace(input.Index(",1,1)"),5,",1)"); }
+  while (input.Contains("(0,0,")){ input.Replace(input.Index("(0,0,"),5,"(0,"); }
+  while (input.Contains("(0,1,")){ input.Replace(input.Index("(0,1,"),5,"(1,"); }
+  while (input.Contains("(1,0,")){ input.Replace(input.Index("(1,0,"),5,"(1,"); }
+  while (input.Contains("(1,1,")){ input.Replace(input.Index("(1,1,"),5,"(1,"); }
+  if (FSControl::DEBUG){ cout << "FSString::evalBooleanTString  (p) " << input << endl; }
+  if (!(input.Contains("0") || input.Contains("1")) || (input.Length() == 0) ||
+       (input.Contains(",,")) || (input.Contains("!,")) || (input.Contains("&&"))){ 
+    cout << "FSString::evalBooleanTString ERROR..." << input << endl; exit(1); }
+  if ((input != "0") && (input != "1")) return evalBooleanTString(input);
+  if (input == "1") return true;
+  return false;
+}
 
 
   // ********************************************************
@@ -938,11 +926,13 @@ FSString::checkParentheses(TString input){
   for (int i = 0; i < input.Length(); i++){
     if ((TString)input[i] == "(") pcount++;
     if ((TString)input[i] == ")") pcount--;
+    if (pcount < 0){
+      cout << "FSString: problem with parentheses in input = " << input << endl;
+      return false;
+    }
   }
   if (pcount == 0) return true;
-  cout << "FSString:  OPENING AND CLOSING PARENTHESES ";
-  cout << "DO NOT MATCH IN" << endl;
-  cout << "\t" << input << endl;
+  cout << "FSString: problem with parentheses in input = " << input << endl;
   return false;
 }
 
