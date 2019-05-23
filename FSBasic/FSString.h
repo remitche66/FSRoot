@@ -100,26 +100,16 @@ class FSString{
 
       // ********************************************************
       // PARSE VERY SIMPLE LOGIC 
-      //    (using "," for OR, "&" for AND, "!" for NOT)
-      //    (no parentheses, no nested structures)
-      //    parseLogicalTString:
-      //      * outer vector contains "OR"s
-      //      * inner vector contains "AND"s
-      //      * pair.first has int of 1 for NOT
-      //      * pair.second is a statemet
       //    evalLogicalTString:
       //      Determines whether or not a list of categories contains
-      //      what is in input.
+      //        what is in the input logic.
       //      For example, for categories = "A","B","C",
       //        input = "A&B" --> true
       //        input = "A&B&!C" --> false
       //        input = "A&D" --> false
       //        input = "D,!E" --> true
+      //      (parentheses are allowed)
       // ********************************************************
-
-    static vector< vector< pair<int,TString> > >  parseLogicalTString(TString input);
-
-    static void parseLogicalTStringTest(TString input);
 
     static bool evalLogicalTString(TString input, vector<TString> categories);
 
@@ -211,6 +201,7 @@ class FSString{
 
     static vector<TString> parseBounds(TString bounds);
 
+    static bool evalBooleanTString(TString input);
 
       // helper functions for double2TString
 

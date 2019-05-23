@@ -197,35 +197,15 @@ FSModeCollection::modeVector(TString category){
 
     // loop over modes and keep modes that pass the category logic
   vector<FSModeInfo*> mVectorSelected;
-  vector< vector< pair<int,TString> > >  orcategories = 
-    FSString::parseLogicalTString(category);
   for (unsigned int i = 0; i < mVectorOriginal.size(); i++){
     FSModeInfo* mInfo = mVectorOriginal[i];
-    vector<TString> categories = mInfo->categories();
-    bool orpass = false;
-    for (unsigned int ior = 0; ior < orcategories.size(); ior++){
-      if (!orpass){
-        vector< pair<int,TString> > andcategories = orcategories[ior];
-        bool andpass = true;
-        for (unsigned int iand = 0; iand < andcategories.size(); iand++){
-          if (andpass){
-            bool found = false;
-            for (unsigned int ic = 0; ic < categories.size(); ic++){
-              if (categories[ic] == andcategories[iand].second) found = true;
-            }
-            if (andcategories[iand].first == 0 && (!found)) andpass = false;
-            if (andcategories[iand].first == 1 &&  (found)) andpass = false;
-          }
-	}
-	if (andpass) orpass = true;
-      }
-    }
-    if (orpass || category == "") mVectorSelected.push_back(mInfo);
+    if (FSString::evalLogicalTString(category,mInfo->categories()))
+      mVectorSelected.push_back(mInfo);
   }
 
   return mVectorSelected;
-
 }
+
 
 int 
 FSModeCollection::modeVectorSize(TString category){
