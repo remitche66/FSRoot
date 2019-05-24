@@ -71,9 +71,11 @@ FSDataSetList::addDataSetsFromFile(TString fileName){
         double fsLumSystError(FSString::TString2double(sLumSystError));
         if (relativeErrorStat) fsLumStatError = fsLumStatError*fsLum;
         if (relativeErrorSyst) fsLumSystError = fsLumSystError*fsLum;
+      vector<TString> fsCategories;
+        for (unsigned int i = 10; i < words.size(); i++){ fsCategories.push_back(words[i]); }
       FSDataSet* fsd = new FSDataSet(fsName, fsRunStart, fsRunEnd,
                                      fsEcm, fsEcmStatError, fsEcmSystError,
-                                     fsLum, fsLumStatError, fsLumSystError);
+                                     fsLum, fsLumStatError, fsLumSystError, fsCategories);
       fsd->display();
       m_vectorDataSets.push_back(fsd);
     }

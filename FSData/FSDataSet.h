@@ -59,7 +59,8 @@ class FSDataSet{
               double   ecmSystError,
               double   lum,
               double   lumStatError,
-              double   lumSystError);
+              double   lumSystError,
+              vector<TString> extraCategories);
 
     void addSubSet(FSDataSet* dataSet);
 

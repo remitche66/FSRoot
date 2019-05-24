@@ -34,7 +34,8 @@ FSDataSet::FSDataSet(TString  name,
                      double   ecmSystError,
                      double   lum,
                      double   lumStatError,
-                     double   lumSystError){
+                     double   lumSystError,
+                     vector<TString> extraCategories){
   m_name = name;
   m_runStart.push_back(runStart);
   m_runEnd.push_back(runEnd);
@@ -53,6 +54,9 @@ FSDataSet::FSDataSet(TString  name,
   }
   m_categories.clear();
   addCategory(m_name);
+  for (unsigned int i = 0; i < extraCategories.size(); i++){
+    addCategory(extraCategories[i]);
+  }
   //vector<TString> nameParts = FSString::parseTString(m_name,":");
   //for (unsigned int i = 0; i < nameParts.size(); i++){ addCategory(nameParts[i]); }  
 }
