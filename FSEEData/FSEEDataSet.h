@@ -1,21 +1,20 @@
-#if !defined(DATASET_H)
-#define DATASET_H
+#if !defined(FSEEDATASET_H)
+#define FSEEDATASET_H
 
 #include <utility>
 #include <map>
 #include <vector>
 #include "TString.h"
 
-
 using namespace std;
 
-// all errors absolute unless specified otherwise
+// NOTE: all errors absolute unless specified otherwise
 
-class FSDataSet{
+class FSEEDataSet{
 
   public:
 
-    TString     name()         { return m_name;}
+    TString     name()         { return m_name; }
     vector<int> runStart()     { return m_runStart; }
     vector<int> runEnd()       { return m_runEnd; }
     double      ecm()          { return m_ecm; }
@@ -39,19 +38,21 @@ class FSDataSet{
 
     vector<TString> categories()  { return m_categories; }
 
-    vector<FSDataSet*> subSets()  { return m_subSets; }
+    vector<FSEEDataSet*> subSets()  { return m_subSets; }
 
     TString     runCut();
 
     void display(int counter = -1);
 
-    friend class FSDataSetList;
+    friend class FSEEDataSetList;
+    friend class FSEEXS;
+    friend class FSEEXSList;
 
   private:
 
-    FSDataSet(TString name);
+    FSEEDataSet(TString name);
 
-    FSDataSet(TString  name,
+    FSEEDataSet(TString  name,
               int      runStart,
               int      runEnd,
               double   ecm,
@@ -62,10 +63,10 @@ class FSDataSet{
               double   lumSystError,
               vector<TString> extraCategories);
 
-    void addSubSet(FSDataSet* dataSet);
+    void addSubSet(FSEEDataSet* dataSet);
 
-    bool hasCategory(TString cat);
-    void addCategory(TString cat);
+    bool hasDSCategory(TString cat);
+    void addDSCategory(TString cat, bool propagateToSubsets);
 
     TString      m_name;
     vector<int>  m_runStart;
@@ -78,7 +79,7 @@ class FSDataSet{
     double       m_lum;
     double       m_lumStatError;
     double       m_lumSystError;
-    vector<FSDataSet*> m_subSets;
+    vector<FSEEDataSet*> m_subSets;
     vector<TString> m_categories;
 
 };

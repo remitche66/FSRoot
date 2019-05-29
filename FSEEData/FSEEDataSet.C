@@ -6,10 +6,10 @@
 #include "TChain.h"
 #include "TString.h"
 #include "FSBasic/FSString.h"
-#include "FSData/FSDataSet.h"
+#include "FSEEData/FSEEDataSet.h"
 
 
-FSDataSet::FSDataSet(TString  name){
+FSEEDataSet::FSEEDataSet(TString  name){
   m_name = name;
   m_runStart.clear();
   m_runEnd.clear();
@@ -26,7 +26,7 @@ FSDataSet::FSDataSet(TString  name){
 }
 
 
-FSDataSet::FSDataSet(TString  name,
+FSEEDataSet::FSEEDataSet(TString  name,
                      int      runStart,
                      int      runEnd,
                      double   ecm,
@@ -49,13 +49,13 @@ FSDataSet::FSDataSet(TString  name,
   m_lumSystError = lumSystError;
   m_subSets.clear();
   if (m_lum <= 0.0){ 
-    cout << "FSDataSet Error: no luminosity" << endl; 
+    cout << "FSEEDataSet Error: no luminosity" << endl; 
     exit(1);
   }
   m_categories.clear();
-  addCategory(m_name);
+  addDSCategory(m_name,false);
   for (unsigned int i = 0; i < extraCategories.size(); i++){
-    addCategory(extraCategories[i]);
+    addDSCategory(extraCategories[i],false);
   }
   //vector<TString> nameParts = FSString::parseTString(m_name,":");
   //for (unsigned int i = 0; i < nameParts.size(); i++){ addCategory(nameParts[i]); }  
@@ -63,7 +63,7 @@ FSDataSet::FSDataSet(TString  name,
 
 
 void
-FSDataSet::addSubSet(FSDataSet* dataSet){
+FSEEDataSet::addSubSet(FSEEDataSet* dataSet){
     // add to the run lists
   vector<int> runStart = dataSet->runStart();
   vector<int> runEnd   = dataSet->runEnd();
@@ -129,12 +129,18 @@ FSDataSet::addSubSet(FSDataSet* dataSet){
   m_lumStatError = sqrt(m_lumStatError*m_lumStatError
         + dataSet->lumStatError()*dataSet->lumStatError());
   m_lumSystError = m_lum * lumSystErrorRel; 
+    // add categories
+  vector<TString> subCategories = dataSet->categories();
+  for (unsigned int i = 0; i < subCategories.size(); i++){
+    addDSCategory(subCategories[i],false);
+  }
+    // done
   m_subSets.push_back(dataSet);
 }
 
 
 TString
-FSDataSet::runCut(){
+FSEEDataSet::runCut(){
   TString cut("");
   for (unsigned int i = 0; i < m_runStart.size(); i++){
     if (i == 0) cut += "(";
@@ -148,9 +154,9 @@ FSDataSet::runCut(){
 
 
 void
-FSDataSet::display(int counter){
+FSEEDataSet::display(int counter){
   if (counter >= 0) cout << counter << ". ";
-  cout << "FSDataSet: " << m_name << endl;
+  cout << "FSEEDataSet: " << m_name << endl;
   cout << "    categories: ";
   for (unsigned int j = 0; j < m_categories.size(); j++){
     if (j%4 == 0){  cout << endl;  cout << "        ";  }
@@ -176,18 +182,22 @@ FSDataSet::display(int counter){
 
 
 bool
-FSDataSet::hasCategory(TString category){
-  bool found = false;
+FSEEDataSet::hasDSCategory(TString category){
   for (unsigned int i = 0; i < m_categories.size(); i++){
-    if (m_categories[i] == category) found = true;
+    if (m_categories[i] == category) return true;
   }
-  return found;
+  return false;
 }
 
 
 void
-FSDataSet::addCategory(TString category){
-  if (!hasCategory(category) && category != "") m_categories.push_back(category);
+FSEEDataSet::addDSCategory(TString category, bool propagateToSubsets){
+  if (!hasDSCategory(category) && category != "")  m_categories.push_back(category);
+  if (propagateToSubsets){
+    for (unsigned int i = 0; i < m_subSets.size(); i++){
+      m_subSets[i]->addDSCategory(category,propagateToSubsets);
+    }
+  }
 }
 
 
