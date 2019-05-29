@@ -43,16 +43,16 @@ class FSEEXS{
     TString      dataSetName()   { return m_dataSetName; }
     FSEEDataSet* dataSet()       { return FSEEDataSetList::getDataSet(m_dataSetName); }
 
-    double ECM()  { return dataSet()->ecm(); }
-    double LUM()  { return dataSet()->lum(); }
-    double XS()   { return m_XS; }
-    double EXS()  { return m_EXS; }
-    double EFF()  { return m_EFF; }
-    double BGXS() { return m_BGXS; }
+    double ecm()  { return dataSet()->ecm(); }
+    double lum()  { return dataSet()->lum(); }
+    double xs()   { return m_XS; }
+    double exs()  { return m_EXS; }
+    double eff()  { return m_EFF; }
+    double bgxs() { return m_BGXS; }
 
-    double NSIGNAL()  { return XS()*LUM()*EFF(); }
-    double ENSIGNAL() { if (XS() != 0) return NSIGNAL()*EXS()/XS(); return 0.0; }
-    double NBG()      { return BGXS()*LUM(); }
+    double nsignal()  { return xs()*lum()*eff(); }
+    double ensignal() { if (xs() != 0) return nsignal()*exs()/xs(); return 0.0; }
+    double nbg()      { return bgxs()*lum(); }
 
     vector<TString> categories()  { return m_categories; }
 

@@ -22,12 +22,12 @@ FSEEXS::display(int counter){
     cout << m_categories[j] << "  ";
   }
   cout << endl;
-  cout << "  ECM    = " <<  ECM() << endl;
-  cout << "  LUM    = " <<  LUM() << endl;
-  cout << "   XS    = " <<   XS() << endl;
-  cout << "  EXS    = " <<  EXS() << endl;
-  cout << "  EFF    = " <<  EFF() << endl;
-  cout << " BGXS    = " << BGXS() << endl;
+  cout << "  ECM    = " <<  ecm() << endl;
+  cout << "  LUM    = " <<  lum() << endl;
+  cout << "   XS    = " <<   xs() << endl;
+  cout << "  EXS    = " <<  exs() << endl;
+  cout << "  EFF    = " <<  eff() << endl;
+  cout << " BGXS    = " << bgxs() << endl;
   cout << endl;
 }
 
@@ -57,14 +57,14 @@ FSEEXS::addXSCategory(TString category){
 void 
 FSEEXS::initWithXS1(double n_XS, double n_EXS, double n_NSIGNAL){
   clearXS();
-  if (LUM() <= 0)     { clearXS(); return; }
+  if (lum() <= 0)     { clearXS(); return; }
   if (n_XS == 0)      { clearXS(); return; }
   if (n_NSIGNAL == 0) { clearXS(); return; }
   m_XS = n_XS;
   m_EXS = n_EXS;
-  m_EFF = n_NSIGNAL / (LUM()*XS());
-  double nbg =  ENSIGNAL()*ENSIGNAL() - NSIGNAL();  if (nbg < 0) nbg = 0.0;
-  m_BGXS = nbg / LUM();
+  m_EFF = n_NSIGNAL / (lum()*xs());
+  double NBG =  ensignal()*ensignal() - nsignal();  if (NBG < 0) NBG = 0.0;
+  m_BGXS = NBG / lum();
 }
 
 
@@ -78,17 +78,17 @@ void
 FSEEXS::initWithXS2(double n_XS, int n_NSIGREGION, int n_NBGREGION, double n_SCALE,
                           double n_MANUALEFF){
   clearXS();
-  if (LUM() <= 0)     { clearXS(); return; }
+  if (lum() <= 0)     { clearXS(); return; }
   if (n_XS == 0)      { clearXS(); return; }
   m_XS = n_XS;
-  double nsignal = n_NSIGREGION - (n_SCALE * n_NBGREGION);
-  double ensignal = sqrt(n_NSIGREGION + (n_SCALE * n_SCALE * n_NBGREGION));
-  double nbg = n_SCALE * n_NBGREGION;
+  double NSIGNAL = n_NSIGREGION - (n_SCALE * n_NBGREGION);
+  double eNSIGNAL = sqrt(n_NSIGREGION + (n_SCALE * n_SCALE * n_NBGREGION));
+  double NBG = n_SCALE * n_NBGREGION;
   if (n_MANUALEFF > 0.0){ m_EFF = n_MANUALEFF; }
-  else{ m_EFF = nsignal / (LUM() * XS()); }
-  if (EFF() == 0)  { clearXS(); return; }
-  m_EXS = ensignal / (LUM()*EFF());
-  m_BGXS = nbg / LUM();
+  else{ m_EFF = NSIGNAL / (lum() * xs()); }
+  if (eff() == 0)  { clearXS(); return; }
+  m_EXS = eNSIGNAL / (lum()*eff());
+  m_BGXS = NBG / lum();
 }
 
 
@@ -101,15 +101,15 @@ FSEEXS::initWithXS2(double n_XS, int n_NSIGREGION, int n_NBGREGION, double n_SCA
 void 
 FSEEXS::initWithXS3(double n_XS, int n_EXShigh, double n_EFF){
   clearXS();
-  if (LUM() <= 0)     { clearXS(); return; }
+  if (lum() <= 0)     { clearXS(); return; }
   if (n_XS == 0)      { clearXS(); return; }
   if (n_EXShigh <= 0) { clearXS(); return; }
   if (n_EFF <= 0)     { clearXS(); return; }
   m_XS = n_XS;
   m_EXS = n_EXShigh - n_XS;
   m_EFF = n_EFF;
-  double nbg =  ENSIGNAL()*ENSIGNAL() - NSIGNAL();  if (nbg < 0) nbg = 0.0;
-  m_BGXS = nbg / LUM();
+  double NBG =  ensignal()*ensignal() - nsignal();  if (NBG < 0) NBG = 0.0;
+  m_BGXS = NBG / lum();
 }
 
 
@@ -122,14 +122,14 @@ FSEEXS::initWithXS3(double n_XS, int n_EXShigh, double n_EFF){
 void 
 FSEEXS::initWithXS4(double n_NSIGNAL, int n_ENSIGNAL, double n_EFF){
   clearXS();
-  if (LUM() <= 0)     { clearXS(); return; }
+  if (lum() <= 0)     { clearXS(); return; }
   if (n_NSIGNAL == 0) { clearXS(); return; }
   if (n_EFF <= 0)     { clearXS(); return; }
   m_EFF = n_EFF;
-  m_XS = n_NSIGNAL/(EFF()*LUM());
-  m_EXS = n_ENSIGNAL/(EFF()*LUM());
-  double nbg =  ENSIGNAL()*ENSIGNAL() - NSIGNAL();  if (nbg < 0) nbg = 0.0;
-  m_BGXS = nbg / LUM();
+  m_XS = n_NSIGNAL/(eff()*lum());
+  m_EXS = n_ENSIGNAL/(eff()*lum());
+  double NBG =  ensignal()*ensignal() - nsignal();  if (NBG < 0) NBG = 0.0;
+  m_BGXS = NBG / lum();
 }
 
 
@@ -142,18 +142,18 @@ FSEEXS::initWithXS4(double n_NSIGNAL, int n_ENSIGNAL, double n_EFF){
 
 void 
 FSEEXS::initWithPrediction(double n_XS, double n_EFF, double n_BGXS, bool n_fluctuate){
-  if (LUM() <= 0)     { clearXS(); return; }
+  if (lum() <= 0)     { clearXS(); return; }
   if (n_XS == 0)      { clearXS(); return; }
   if (n_EFF <= 0)     { clearXS(); return; }
   m_XS = n_XS;
   m_EFF = n_EFF;
   m_BGXS = n_BGXS;
   if (n_fluctuate){
-    double nsignal = gRandom->PoissonD(NSIGNAL()+NBG()) - NBG();
-    if (nsignal < 0) nsignal = 0;
-    m_XS = nsignal / (LUM()*EFF());
+    double NSIGNAL = gRandom->PoissonD(nsignal()+nbg()) - nbg();
+    if (NSIGNAL < 0) NSIGNAL = 0;
+    m_XS = NSIGNAL / (lum()*eff());
   }
-  double ensignal = sqrt(NSIGNAL() + NBG());
-  m_EXS = ensignal / (LUM()*EFF());
+  double eNSIGNAL = sqrt(nsignal() + nbg());
+  m_EXS = eNSIGNAL / (lum()*eff());
 }
 
