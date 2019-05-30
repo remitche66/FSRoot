@@ -14,11 +14,24 @@
 # COLUMN 10+:  list of any extra categories (optional)
 
 ######################
-# CATEGORY ENTRIES
+# DSCATEGORY ENTRIES
 # (adds addCategory to dataName1, dataName2, category1, ...)
 ######################
-# "category" addCategory dataName1 dataName2 category1 ....
+# "dsCategory" addCategory dataName1 dataName2 category1 ....
 
+######################
+# LUMCATEGORY ENTRIES
+# (adds the category addCategory to all data sets with luminosity 
+#  between lumMin and lumMax)
+# ("lumCategory" lines can be included anywhere and are applied to all
+#  data sets and composites of data sets)
+######################
+# "lumCategory" addCategory lumMin (lumMax)
+
+
+
+lumCategory lum100+ 100.0 
+lumCategory lum500+ 500.0 
 
 ###################################
 ###     2011 - 2014 XYZ Data    ###
@@ -47,11 +60,11 @@ data  2014:4530     36398  36588  4527.14  0.11  0.72   109.98  0.0 R0.01  2014
 data  2014:4575     36603  36699  4574.50  0.18  0.70    47.67  0.0 R0.01  2014
 data  2014:4600     35227  36213  4599.53  0.07  0.74   566.93  0.0 R0.01  2014
 
-category  2013:4230  2013:4230-1  2013:4230-2
-category  2013:4260  2013:4260-1  2013:4260-2
-category  201n:4420  2013:4420    2014:4420 
+dsCategory  2013:4230  2013:4230-1  2013:4230-2
+dsCategory  2013:4260  2013:4260-1  2013:4260-2
+dsCategory  201n:4420  2013:4420    2014:4420 
 
-category 2011-2014  2011 2013 2014
+dsCategory 2011-2014  2011 2013 2014
 
 
 
