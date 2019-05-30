@@ -3,6 +3,7 @@
 
 #include <iostream>
 #include "TH1F.h"
+#include "TF1.h"
 #include "FSEEData/FSEEDataSet.h"
 #include "FSEEData/FSEEXS.h"
 
@@ -24,24 +25,14 @@ class FSEEXSList{
     static TH1F* histXS(TString xsCat = "", TString dsCat = "", TString lumCat = "", 
                         TString histBounds = "(5000,0.0,5.0)");
 
+    static void addXSFromFunction(TString reactionName, TString sourceName, TF1* funcPrediction,
+                                  TString dsCatPredition, double ecmGrouping,
+                                  TString xsCatOld, TString dsCatOld, TString lumCatOld);
 
-/*
-    double BGXS() { return m_BGXS; }
+    static double bgxsAve(TString xsCat = "", TString dsCat = "", TString lumCat = "");
 
-    double EFF(double ecm){
-      if (ecm < m_measuredBig[0]->ECM()) return m_measuredBig[0]->EFF();
-      for (unsigned int i = 0; i < m_measuredBig.size()-1; i++){
-        double ecm1 = m_measuredBig[i]->ECM();
-        double ecm2 = m_measuredBig[i+1]->ECM();
-        if (ecm >= ecm1 && ecm <= ecm2){
-          double eff1 = m_measuredBig[i]->EFF();
-          double eff2 = m_measuredBig[i+1]->EFF();
-          return (eff2-eff1)/(ecm2-ecm1)*(ecm-ecm1)+eff1;
-        }
-      }
-      return m_measuredBig[m_measuredBig.size()-1]->EFF();
-    }
-*/
+    static double effEst(double ecm, TString xsCat = "", TString dsCat = "", TString lumCat = "");
+
 
   private:
 

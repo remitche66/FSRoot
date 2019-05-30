@@ -9,6 +9,22 @@ FSEEXS::clearXS(){
   m_BGXS = 0.0;
 }
 
+ 
+FSEEXS::FSEEXS(TString reactionName, TString dataSetName, TString sourceName){
+  clearXS();
+  m_reactionName = reactionName;
+  m_dataSetName = dataSetName;
+  m_sourceName = sourceName;
+  if (!dataSet()){
+    cout << "FSEEXS ERROR: no data set corresponding to " << dataSetName << endl;
+    exit(0);
+  }
+  addXSCategory(reactionName);
+  addXSCategory(sourceName);
+  dataSet()->addDSCategory(reactionName,true);
+  dataSet()->addDSCategory(reactionName+":"+sourceName,true);
+}
+
 
 void
 FSEEXS::display(int counter){

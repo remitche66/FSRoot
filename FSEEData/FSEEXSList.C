@@ -38,25 +38,17 @@ FSEEXSList::addXSFromFile(TString fileName){
       TString reactionName(words[1]);
       TString dataSetName(words[2]);
       TString sourceName(words[3]);
-      if (!FSEEDataSetList::getDataSet(dataSetName)){
-        cout << "FSEEXSList ERROR: no data set corresponding to " << dataSetName << endl;
-        exit(0);
-      }
+      FSEEXS* fsxs = addXS(reactionName,dataSetName,sourceName);
       double x[20];
       if (nWords[ixsType] > 4) x[4] = FSString::TString2double(words[4]); 
       if (nWords[ixsType] > 5) x[5] = FSString::TString2double(words[5]); 
       if (nWords[ixsType] > 6) x[6] = FSString::TString2double(words[6]); 
       if (nWords[ixsType] > 7) x[7] = FSString::TString2double(words[7]); 
       if (nWords[ixsType] > 8) x[8] = FSString::TString2double(words[8]); 
-      FSEEXS* fsxs = addXS(reactionName,dataSetName,sourceName);
       if (ixsType == 1) fsxs->initWithXS1(x[4],x[5],x[6]);
       if (ixsType == 2) fsxs->initWithXS2(x[4],x[5],x[6],x[7],x[8]);
       if (ixsType == 3) fsxs->initWithXS3(x[4],x[5],x[6]);
       if (ixsType == 4) fsxs->initWithXS4(x[4],x[5],x[6]);
-      fsxs->addXSCategory(reactionName);
-      fsxs->addXSCategory(sourceName);
-      fsxs->dataSet()->addDSCategory(reactionName,true);
-      fsxs->dataSet()->addDSCategory(reactionName+":"+sourceName,true);
       for (unsigned int i = nWords[ixsType]; i < words.size(); i++){
         fsxs->addXSCategory(words[i]);
       }
@@ -144,7 +136,7 @@ FSEEXSList::histXS(TString xsCat, TString dsCat, TString lumCat, TString histBou
   vector<FSEEXS*> vfsxs = getXSVector(xsCat,dsCat,lumCat);
   if (vfsxs.size()==0) return FSHistogram::getTH1F(hist);
   for (unsigned int i = 0; i < vfsxs.size(); i++){
-    double ecm = vfsxs[i]->ecm()/1000.0;
+    double ecm = vfsxs[i]->ecm();
     double xs = vfsxs[i]->xs();
     double exs = vfsxs[i]->exs();
     int iecm = 1 + (int)((ecm-hist->GetBinLowEdge(1))/hist->GetBinWidth(1));
@@ -156,6 +148,72 @@ FSEEXSList::histXS(TString xsCat, TString dsCat, TString lumCat, TString histBou
   return hist;
 }
 
+
+double
+FSEEXSList::bgxsAve(TString xsCat, TString dsCat, TString lumCat){
+  vector<FSEEXS*> vxs = getXSVector(xsCat,dsCat,lumCat);
+  if (vxs.size() == 0){
+    cout << "FSEEXSList::bgxsAve ERROR: no cross sections" << endl; 
+    exit(0);
+  }
+  double N = 0.0;
+  double D = 0.0;
+  for (unsigned int i = 0; i < vxs.size(); i++){
+    double L = vxs[i]->lum();
+    double B = vxs[i]->bgxs();
+    if (B >= 0){
+      N += L*B;
+      D += L;
+    }
+  }
+  if (D == 0){
+    cout << "FSEEXSList::bgxsAve ERROR: no luminosity" << endl; 
+    exit(0);
+  }
+  return N/D;
+}
+
+
+double
+FSEEXSList::effEst(double ecm, TString xsCat, TString dsCat, TString lumCat){
+  vector<FSEEXS*> vxs = getXSVector(xsCat,dsCat,lumCat);
+  if (vxs.size() == 0){
+    cout << "FSEEXSList::effExt ERROR: no cross sections" << endl; 
+    exit(0);
+  }
+  if (ecm < vxs[0]->ecm()) return vxs[0]->eff();
+  for (unsigned int i = 0; i < vxs.size()-1; i++){
+    double ecm1 = vxs[i]->ecm();
+    double ecm2 = vxs[i+1]->ecm();
+    if (ecm >= ecm1 && ecm < ecm2){
+      double eff1 = vxs[i]->eff();
+      double eff2 = vxs[i+1]->eff();
+      return (eff2-eff1)/(ecm2-ecm1)*(ecm-ecm1)+eff1;
+    }
+  }
+  return vxs[vxs.size()-1]->eff();
+}
+
+
+void
+FSEEXSList::addXSFromFunction(TString reactionName, TString sourceName, TF1* funcPrediction,
+                              TString dsCatPrediction, double ecmGrouping,
+                              TString xsCatOld, TString dsCatOld, TString lumCatOld){
+  FSEEDataSet* fsds = FSEEDataSetList::getDataSet(dsCatPrediction,"",ecmGrouping);
+  if (!fsds){
+    cout << "FSEEXSList::addXSFromFunction ERROR: no data sets" << endl;
+    exit(0);
+  }
+  vector<FSEEDataSet*> vfsds = fsds->subSets();
+  double bgxs = bgxsAve(xsCatOld,dsCatOld,lumCatOld);
+  for (unsigned int i = 0; i < vfsds.size(); i++){
+    TString dataSetName = vfsds[i]->name();
+    double ecm = vfsds[i]->ecm();
+    double eff = effEst(ecm,xsCatOld,dsCatOld,lumCatOld);
+    FSEEXS* fsxs = addXS(reactionName,dataSetName,sourceName);
+    fsxs->initWithPrediction(funcPrediction->Eval(ecm),eff,bgxs,false);
+  }
+}
 
 
 /*

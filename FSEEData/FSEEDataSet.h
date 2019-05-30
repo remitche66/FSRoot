@@ -10,7 +10,7 @@ using namespace std;
 
 // NOTES: 
 //  * all errors absolute unless specified otherwise
-//  * all ecm are MeV
+//  * all ecm are GeV
 //  * all xs are pb
 
 class FSEEDataSet{

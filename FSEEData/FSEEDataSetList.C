@@ -41,21 +41,29 @@ FSEEDataSetList::addDataSetsFromFile(TString fileName){
         }
       int fsRunStart(FSString::TString2int(words[2]));
       int fsRunEnd(FSString::TString2int(words[3]));
-      double fsEcm(FSString::TString2double(words[4]));
+      TString sEcm(words[4]);
       TString sEcmStatError(words[5]);
       TString sEcmSystError(words[6]);
+        bool convertFromMeVToGeV = false;
         bool relativeErrorStat = false;
         bool relativeErrorSyst = false;
+        while (sEcm.Contains("M")){
+          sEcm.Replace(sEcm.Index("M"),1,"");
+          convertFromMeVToGeV = true; }
         while (sEcmStatError.Contains("R")){
           sEcmStatError.Replace(sEcmStatError.Index("R"),1,"");
           relativeErrorStat = true; }
         while (sEcmSystError.Contains("R")){
           sEcmSystError.Replace(sEcmSystError.Index("R"),1,"");
           relativeErrorSyst = true; }
+        double fsEcm         (FSString::TString2double(sEcm));
         double fsEcmStatError(FSString::TString2double(sEcmStatError));
         double fsEcmSystError(FSString::TString2double(sEcmSystError));
         if (relativeErrorStat) fsEcmStatError = fsEcmStatError*fsEcm;
         if (relativeErrorSyst) fsEcmSystError = fsEcmSystError*fsEcm;
+        if (convertFromMeVToGeV) fsEcm = fsEcm/1000.0;
+        if (convertFromMeVToGeV) fsEcmStatError = fsEcmStatError/1000.0;
+        if (convertFromMeVToGeV) fsEcmSystError = fsEcmSystError/1000.0;
       double fsLum(FSString::TString2double(words[7]));
       TString sLumStatError(words[8]);
       TString sLumSystError(words[9]);
@@ -281,7 +289,7 @@ FSEEDataSetList::histLuminosity(TString dsCategory,
   if (!fsds) return FSHistogram::getTH1F(hist);
   vector<FSEEDataSet*> vfsds = fsds->subSets(); 
   for (unsigned int i = 0; i < vfsds.size(); i++){
-    double ecm = vfsds[i]->ecm()/1000.0;
+    double ecm = vfsds[i]->ecm();
     double lum = vfsds[i]->lum();
     double elum = vfsds[i]->lumError();
     int iecm = 1 + (int)((ecm-hist->GetBinLowEdge(1))/hist->GetBinWidth(1));
