@@ -107,11 +107,17 @@ gROOT->LoadMacro("FSFit/FSFitUtilities.C+");
 // DATA UTILITIES
 // *****************
 
-cout << "Loading FSData/FSDataSet.C..." << endl;
-gROOT->LoadMacro("FSData/FSDataSet.C+");
+cout << "Loading FSEEData/FSEEDataSet.C..." << endl;
+gROOT->LoadMacro("FSEEData/FSEEDataSet.C+");
 
-cout << "Loading FSData/FSDataSetList.C..." << endl;
-gROOT->LoadMacro("FSData/FSDataSetList.C+");
+cout << "Loading FSEEData/FSEEDataSetList.C..." << endl;
+gROOT->LoadMacro("FSEEData/FSEEDataSetList.C+");
+
+cout << "Loading FSEEData/FSEEXS.C..." << endl;
+gROOT->LoadMacro("FSEEData/FSEEXS.C+");
+
+cout << "Loading FSEEData/FSEEXSList.C..." << endl;
+gROOT->LoadMacro("FSEEData/FSEEXSList.C+");
 
 
 cout << "------------------------------------------" << endl;

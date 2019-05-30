@@ -16,10 +16,11 @@ FSEEXS::display(int counter){
   cout << "FSEEXS: " << endl;
   cout << "  reaction: " << reactionName() << endl;
   cout << "  dataSet:  " << dataSetName() << endl;
+  cout << "  source:   " << sourceName() << endl;
   cout << "    categories: ";
-  for (unsigned int j = 0; j < m_categories.size(); j++){
+  for (unsigned int j = 0; j < m_xsCategories.size(); j++){
     if (j%4 == 0){  cout << endl;  cout << "        ";  }
-    cout << m_categories[j] << "  ";
+    cout << m_xsCategories[j] << "  ";
   }
   cout << endl;
   cout << "  ECM    = " <<  ecm() << endl;
@@ -34,15 +35,15 @@ FSEEXS::display(int counter){
 
 bool
 FSEEXS::hasXSCategory(TString category){
-  for (unsigned int i = 0; i < m_categories.size(); i++){
-    if (m_categories[i] == category) return true;
+  for (unsigned int i = 0; i < m_xsCategories.size(); i++){
+    if (m_xsCategories[i] == category) return true;
   }
   return false;
 }
 
 void
 FSEEXS::addXSCategory(TString category){
-  if (!hasXSCategory(category) && category != "") m_categories.push_back(category);
+  if (!hasXSCategory(category) && category != "") m_xsCategories.push_back(category);
 }
 
 

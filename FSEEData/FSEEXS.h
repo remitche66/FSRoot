@@ -41,6 +41,7 @@ class FSEEXS{
 
     TString      reactionName()  { return m_reactionName; }
     TString      dataSetName()   { return m_dataSetName; }
+    TString      sourceName()    { return m_sourceName; }
     FSEEDataSet* dataSet()       { return FSEEDataSetList::getDataSet(m_dataSetName); }
 
     double ecm()  { return dataSet()->ecm(); }
@@ -54,19 +55,19 @@ class FSEEXS{
     double ensignal() { if (xs() != 0) return nsignal()*exs()/xs(); return 0.0; }
     double nbg()      { return bgxs()*lum(); }
 
-    vector<TString> categories()  { return m_categories; }
+    vector<TString> xsCategories()  { return m_xsCategories; }
 
     void display(int counter = -1);
 
-    friend class FSEEXSList;
 
   private:
 
     void clearXS();
 
-    FSEEXS(TString reactionName, TString dataSetName){
+    FSEEXS(TString reactionName, TString dataSetName, TString sourceName){
       m_reactionName = reactionName;
       m_dataSetName = dataSetName;
+      m_sourceName = sourceName;
       clearXS();
     }
 
@@ -83,13 +84,15 @@ class FSEEXS{
 
     TString m_reactionName;
     TString m_dataSetName;
-    vector<TString> m_categories;
+    TString m_sourceName;
+    vector<TString> m_xsCategories;
 
     double m_XS;
     double m_EXS;
     double m_EFF;
     double m_BGXS;
 
+    friend class FSEEXSList;
 
 };
 
