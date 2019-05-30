@@ -8,7 +8,10 @@
 
 using namespace std;
 
-// NOTE: all errors absolute unless specified otherwise
+// NOTES: 
+//  * all errors absolute unless specified otherwise
+//  * all ecm are MeV
+//  * all xs are pb
 
 class FSEEDataSet{
 
@@ -36,7 +39,8 @@ class FSEEDataSet{
                                     return m_lumSystError/m_lum; 
                                     return 0.0; }
 
-    vector<TString> categories()  { return m_categories; }
+    vector<TString> dsCategories()  { return m_dsCategories; }
+    vector<TString> lumCategories() { return m_lumCategories; }
 
     vector<FSEEDataSet*> subSets()  { return m_subSets; }
 
@@ -44,13 +48,11 @@ class FSEEDataSet{
 
     void display(int counter = -1);
 
-    friend class FSEEDataSetList;
-    friend class FSEEXS;
-    friend class FSEEXSList;
 
   private:
 
-    FSEEDataSet(TString name);
+    FSEEDataSet();
+    void setName(TString name);
 
     FSEEDataSet(TString  name,
               int      runStart,
@@ -61,12 +63,17 @@ class FSEEDataSet{
               double   lum,
               double   lumStatError,
               double   lumSystError,
-              vector<TString> extraCategories);
+              vector<TString> extraDSCategories);
 
     void addSubSet(FSEEDataSet* dataSet);
 
     bool hasDSCategory(TString cat);
     void addDSCategory(TString cat, bool propagateToSubsets);
+
+    bool hasLUMCategory(TString cat);
+    void addLUMCategory(TString cat);
+    void addLUMCategories();
+
 
     TString      m_name;
     vector<int>  m_runStart;
@@ -80,7 +87,14 @@ class FSEEDataSet{
     double       m_lumStatError;
     double       m_lumSystError;
     vector<FSEEDataSet*> m_subSets;
-    vector<TString> m_categories;
+    vector<TString> m_dsCategories;
+    vector<TString> m_lumCategories;
+
+    static vector< pair<TString, pair<double,double> > > m_vectorLumCategories;
+
+    friend class FSEEDataSetList;
+    friend class FSEEXS;
+    friend class FSEEXSList;
 
 };
 

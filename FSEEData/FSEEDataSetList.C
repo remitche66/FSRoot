@@ -8,7 +8,7 @@
 #include "FSEEData/FSEEDataSet.h"
 #include "FSEEData/FSEEDataSetList.h"
 #include "FSBasic/FSString.h"
-
+#include "FSBasic/FSHistogram.h"
 
 vector<FSEEDataSet*> FSEEDataSetList::m_vectorDataSets;
 map< TString, FSEEDataSet* > FSEEDataSetList::m_mapTempDataSets;
@@ -79,9 +79,9 @@ FSEEDataSetList::addDataSetsFromFile(TString fileName){
       fsd->display();
       m_vectorDataSets.push_back(fsd);
     }
-    else if (words[0] == "category"){
+    else if (words[0] == "dsCategory"){
       if (words.size() < 3){
-        cout << "FSEEDataSetList ERROR: problem with cateory command" << endl;
+        cout << "FSEEDataSetList ERROR: problem with dsCategory command" << endl;
         exit(0);
       }
       TString category = words[1];
@@ -90,6 +90,27 @@ FSEEDataSetList::addDataSetsFromFile(TString fileName){
         for (unsigned int idata = 0; idata < fsdv.size(); idata++){
           fsdv[idata]->addDSCategory(category,false);
         }
+      }
+    }
+    else if (words[0] == "lumCategory"){
+      if (words.size() < 3){
+        cout << "FSEEDataSetList ERROR: problem with lumCategory command" << endl;
+        exit(0);
+      }
+      TString category = words[1];
+      double lumMin = FSString::TString2double(words[2]);
+      double lumMax = -1.0;
+      if (words.size() > 3) lumMax = FSString::TString2double(words[3]);
+      for (unsigned int i = 0; i < FSEEDataSet::m_vectorLumCategories.size(); i++){
+        if (FSEEDataSet::m_vectorLumCategories[i].first == category){
+          cout << "FSEEDataSetList ERROR: duplicate lumCategory command" << endl;
+          exit(0);
+        }
+      }
+      pair<double,double> lumPair(lumMin,lumMax);
+      FSEEDataSet::m_vectorLumCategories.push_back(pair<TString, pair<double,double> >(category,lumPair));
+      for (unsigned int i = 0; i < m_vectorDataSets.size(); i++){
+        m_vectorDataSets[i]->addLUMCategories();
       }
     }
     else{
@@ -106,85 +127,102 @@ FSEEDataSetList::addDataSetsFromFile(TString fileName){
 
 
 FSEEDataSet*
-FSEEDataSetList::getDataSet(TString category, double ecmGrouping){
-  TString name = "(total)" + category;
+FSEEDataSetList::getDataSet(TString dsCategory, TString lumCategory, double ecmGrouping){
+  TString index = "(totalDS)" + dsCategory + "(totalLUM)" + lumCategory;
   if (ecmGrouping > 0.0){
-    name += "(ecmgroup)" + FSString::double2TString(ecmGrouping,8,true);
+    index += "(ecmgroup)" + FSString::double2TString(ecmGrouping,8,true);
   }
-  FSEEDataSet* fsd = findTempDataSet(name);
+  FSEEDataSet* fsd = findTempDataSet(index);
   if (fsd) return fsd;
-  vector<FSEEDataSet*> fsdv = getDataSetVector(category,ecmGrouping);
+  vector<FSEEDataSet*> fsdv = getDataSetVector(dsCategory,lumCategory,ecmGrouping);
   if (fsdv.size() == 0) return NULL;
-  fsd = new FSEEDataSet(name);
+  fsd = new FSEEDataSet();
+  TString name("[[composite]");
   for (unsigned int i = 0; i < fsdv.size(); i++){
     fsd->addSubSet(fsdv[i]);
+    name += fsdv[i]->name();
+    if (i != fsdv.size()-1) name += "+++";
   }
-  m_mapTempDataSets[name] = fsd;
+  name += "]";
+  fsd->setName(name);
+  fsd->addLUMCategories();
+  m_mapTempDataSets[index] = fsd;
   return fsd;
 }
 
 
 
 vector<FSEEDataSet*>
-FSEEDataSetList::getDataSetVector(TString category, double ecmGrouping){
-    // loop over data sets and keep those that pass the category logic
+FSEEDataSetList::getDataSetVector(TString dsCategory, TString lumCategory, double ecmGrouping){
+    // loop over data sets and keep those that pass the dsCategory logic
   vector<FSEEDataSet*> fsdVectorSelected;
   for (unsigned int i = 0; i < m_vectorDataSets.size(); i++){
     FSEEDataSet* fsd = m_vectorDataSets[i];
-    if (FSString::evalLogicalTString(category,fsd->categories()))
+    if (FSString::evalLogicalTString(dsCategory,fsd->dsCategories()))
       fsdVectorSelected.push_back(fsd);
   }
-  if (ecmGrouping <=  0.0) return fsdVectorSelected;
-  if (fsdVectorSelected.size() < 2) return fsdVectorSelected;
     // sort by ecm
-  for (unsigned int i = 0; i < fsdVectorSelected.size()-1; i++){
-  for (unsigned int j = i+1; j < fsdVectorSelected.size(); j++){
-    double ecmi = fsdVectorSelected[i]->ecm();
-    double ecmj = fsdVectorSelected[j]->ecm();
-    TString namei = fsdVectorSelected[i]->name();
-    TString namej = fsdVectorSelected[j]->name();
-    if ((ecmi > ecmj) || 
-        ((ecmi == ecmj) && (namei > namej))){
-      FSEEDataSet* tempDataSet = fsdVectorSelected[i];
-      fsdVectorSelected[i] = fsdVectorSelected[j];
-      fsdVectorSelected[j] = tempDataSet;
-    }
-  }}
-    // do the ecm grouping
-  vector<FSEEDataSet*> fsdVectorGrouped;
-  for (unsigned int i = 0; i < fsdVectorSelected.size(); i++){
-    TString groupCat = "(" + fsdVectorSelected[i]->name() + ")";
-    double ecmi = fsdVectorSelected[i]->ecm();
-    int iskip = 0;
+  if (fsdVectorSelected.size() > 1){
+    for (unsigned int i = 0; i < fsdVectorSelected.size()-1; i++){
     for (unsigned int j = i+1; j < fsdVectorSelected.size(); j++){
+      double ecmi = fsdVectorSelected[i]->ecm();
       double ecmj = fsdVectorSelected[j]->ecm();
-      if ((ecmj - ecmi) < ecmGrouping){
-        groupCat += ",(" + fsdVectorSelected[j]->name() + ")";
-        iskip++;
+      TString namei = fsdVectorSelected[i]->name();
+      TString namej = fsdVectorSelected[j]->name();
+      if ((ecmi > ecmj) || 
+          ((ecmi == ecmj) && (namei > namej))){
+        FSEEDataSet* tempDataSet = fsdVectorSelected[i];
+        fsdVectorSelected[i] = fsdVectorSelected[j];
+        fsdVectorSelected[j] = tempDataSet;
       }
-      else{ break; }
+    }}
+  }
+    // do the ecm grouping
+  if ((ecmGrouping > 0.0) && (fsdVectorSelected.size() > 1)){
+    vector<FSEEDataSet*> fsdVectorGrouped;
+    for (unsigned int i = 0; i < fsdVectorSelected.size(); i++){
+      TString groupCat = "(" + fsdVectorSelected[i]->name() + ")";
+      double ecmi = fsdVectorSelected[i]->ecm();
+      int iskip = 0;
+      for (unsigned int j = i+1; j < fsdVectorSelected.size(); j++){
+        double ecmj = fsdVectorSelected[j]->ecm();
+        if ((ecmj - ecmi) < ecmGrouping){
+          groupCat += ",(" + fsdVectorSelected[j]->name() + ")";
+          iskip++;
+        }
+        else{ break; }
+      }
+      FSEEDataSet* fsdGroup = getDataSet(groupCat);
+      if (!fsdGroup){ cout << "FSEEDataSetList ERROR" << endl; exit(1); }
+      vector<FSEEDataSet*> groupSubSets = fsdGroup->subSets();
+      if (groupSubSets.size() == 1){
+        fsdVectorGrouped.push_back(groupSubSets[0]);
+      }
+      else{
+        fsdVectorGrouped.push_back(fsdGroup);
+      }
+      i += iskip;
     }
-    FSEEDataSet* fsdGroup = getDataSet(groupCat);
-    if (!fsdGroup){ cout << "FSEEDataSetList ERROR" << endl; exit(1); }
-    vector<FSEEDataSet*> groupSubSets = fsdGroup->subSets();
-    if (groupSubSets.size() == 1){
-      fsdVectorGrouped.push_back(groupSubSets[0]);
-    }
-    else{
-      fsdVectorGrouped.push_back(fsdGroup);
-    }
-    i += iskip;
+    fsdVectorSelected = fsdVectorGrouped;
+  }
+    // now check the lumCategory logic
+  vector<FSEEDataSet*> fsdVectorFinal;
+  for (unsigned int i = 0; i < fsdVectorSelected.size(); i++){
+    FSEEDataSet* fsd = fsdVectorSelected[i];
+    if (FSString::evalLogicalTString(lumCategory,fsd->lumCategories()))
+      fsdVectorFinal.push_back(fsd);
   }
   // if gaps too big, error, ambiguity?
- return fsdVectorGrouped;
+ return fsdVectorFinal;
 }
 
 
 void 
-FSEEDataSetList::display(TString category, double ecmGrouping){
-  FSEEDataSet* fsd = getDataSet(category,ecmGrouping);
+FSEEDataSetList::display(TString dsCategory, TString lumCategory, double ecmGrouping){
+  FSEEDataSet* fsd = getDataSet(dsCategory,lumCategory,ecmGrouping);
   if (!fsd){
-    cout << "No data sets found for category: " << category << endl;
+    cout << "No data sets found for dsCategory: " << dsCategory << 
+                             " and lumCategory: " << lumCategory << endl;
     return;
   }
   vector<FSEEDataSet*> fsdv = fsd->subSets();
@@ -199,8 +237,8 @@ FSEEDataSetList::display(TString category, double ecmGrouping){
 
 
 FSEEDataSet*
-FSEEDataSetList::findTempDataSet(TString name){
-  map<TString,FSEEDataSet*>::iterator it = m_mapTempDataSets.find(name);
+FSEEDataSetList::findTempDataSet(TString index){
+  map<TString,FSEEDataSet*>::iterator it = m_mapTempDataSets.find(index);
   if (it != m_mapTempDataSets.end()) return (*it).second;
   FSEEDataSet* fsd = NULL;
   return fsd;
@@ -225,3 +263,33 @@ FSEEDataSetList::clearDataSets(){
   }
   m_vectorDataSets.clear();
 }
+
+
+TH1F* 
+FSEEDataSetList::histLuminosity(TString dsCategory,
+                                TString lumCategory, 
+                                TString histBounds){
+  double ecmGrouping = FSString::parseBoundsBinSizeX(histBounds);
+  int nbins = FSString::parseBoundsNBinsX(histBounds);
+  double x1 = FSString::parseBoundsLowerX(histBounds);
+  double x2 = FSString::parseBoundsUpperX(histBounds);
+  TH1F* hist = new TH1F("hist","histLuminosity",nbins,x1,x2);
+  hist->SetTitle("Integrated Luminosities");
+  hist->SetXTitle("Center-of-Mass Energy  (GeV)");
+  hist->SetYTitle("Integrated Luminosity  (pb^{-1})");
+  FSEEDataSet* fsds = getDataSet(dsCategory,lumCategory,ecmGrouping);
+  if (!fsds) return FSHistogram::getTH1F(hist);
+  vector<FSEEDataSet*> vfsds = fsds->subSets(); 
+  for (unsigned int i = 0; i < vfsds.size(); i++){
+    double ecm = vfsds[i]->ecm()/1000.0;
+    double lum = vfsds[i]->lum();
+    double elum = vfsds[i]->lumError();
+    int iecm = 1 + (int)((ecm-hist->GetBinLowEdge(1))/hist->GetBinWidth(1));
+    hist->SetBinContent(iecm,lum);
+    hist->SetBinError(iecm,elum);
+  }
+  hist = FSHistogram::getTH1F(hist);
+  FSHistogram::setHistogramMaxima(hist);
+  return hist;
+}
+

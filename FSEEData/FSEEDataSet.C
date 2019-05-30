@@ -8,11 +8,11 @@
 #include "FSBasic/FSString.h"
 #include "FSEEData/FSEEDataSet.h"
 
+vector< pair<TString, pair<double,double> > > FSEEDataSet::m_vectorLumCategories;
 
-FSEEDataSet::FSEEDataSet(TString  name){
-  m_name = name;
-  m_runStart.clear();
-  m_runEnd.clear();
+
+FSEEDataSet::FSEEDataSet(){
+  m_name = "";
   m_ecm = -1.0;
   m_ecmStatError = 0.0;
   m_ecmSystError = 0.0;
@@ -21,8 +21,16 @@ FSEEDataSet::FSEEDataSet(TString  name){
   m_lum = 0.0;
   m_lumStatError = 0.0;
   m_lumSystError = 0.0;
-  m_subSets.clear();
-  m_categories.clear();
+}
+
+void
+FSEEDataSet::setName(TString name){
+  if (m_name != ""){
+    cout << "FSEEDataSet::setName ERROR" << endl;
+    exit(0);
+  }
+  m_name = name;
+  addDSCategory(m_name,false);
 }
 
 
@@ -35,8 +43,8 @@ FSEEDataSet::FSEEDataSet(TString  name,
                      double   lum,
                      double   lumStatError,
                      double   lumSystError,
-                     vector<TString> extraCategories){
-  m_name = name;
+                     vector<TString> extraDSCategories){
+  setName(name);
   m_runStart.push_back(runStart);
   m_runEnd.push_back(runEnd);
   m_ecm = ecm;
@@ -47,18 +55,14 @@ FSEEDataSet::FSEEDataSet(TString  name,
   m_lum = lum;
   m_lumStatError = lumStatError;
   m_lumSystError = lumSystError;
-  m_subSets.clear();
   if (m_lum <= 0.0){ 
     cout << "FSEEDataSet Error: no luminosity" << endl; 
     exit(1);
   }
-  m_categories.clear();
-  addDSCategory(m_name,false);
-  for (unsigned int i = 0; i < extraCategories.size(); i++){
-    addDSCategory(extraCategories[i],false);
+  for (unsigned int i = 0; i < extraDSCategories.size(); i++){
+    addDSCategory(extraDSCategories[i],false);
   }
-  //vector<TString> nameParts = FSString::parseTString(m_name,":");
-  //for (unsigned int i = 0; i < nameParts.size(); i++){ addCategory(nameParts[i]); }  
+  addLUMCategories();
 }
 
 
@@ -130,7 +134,7 @@ FSEEDataSet::addSubSet(FSEEDataSet* dataSet){
         + dataSet->lumStatError()*dataSet->lumStatError());
   m_lumSystError = m_lum * lumSystErrorRel; 
     // add categories
-  vector<TString> subCategories = dataSet->categories();
+  vector<TString> subCategories = dataSet->dsCategories();
   for (unsigned int i = 0; i < subCategories.size(); i++){
     addDSCategory(subCategories[i],false);
   }
@@ -157,10 +161,16 @@ void
 FSEEDataSet::display(int counter){
   if (counter >= 0) cout << counter << ". ";
   cout << "FSEEDataSet: " << m_name << endl;
-  cout << "    categories: ";
-  for (unsigned int j = 0; j < m_categories.size(); j++){
+  cout << "    dsCategories: ";
+  for (unsigned int j = 0; j < m_dsCategories.size(); j++){
     if (j%4 == 0){  cout << endl;  cout << "        ";  }
-    cout << m_categories[j] << "  ";
+    cout << m_dsCategories[j] << "  ";
+  }
+  cout << endl;
+  cout << "    lumCategories: ";
+  for (unsigned int j = 0; j < m_lumCategories.size(); j++){
+    if (j%4 == 0){  cout << endl;  cout << "        ";  }
+    cout << m_lumCategories[j] << "  ";
   }
   cout << endl;
   cout << "    runs: " << endl;
@@ -183,8 +193,8 @@ FSEEDataSet::display(int counter){
 
 bool
 FSEEDataSet::hasDSCategory(TString category){
-  for (unsigned int i = 0; i < m_categories.size(); i++){
-    if (m_categories[i] == category) return true;
+  for (unsigned int i = 0; i < m_dsCategories.size(); i++){
+    if (m_dsCategories[i] == category) return true;
   }
   return false;
 }
@@ -192,7 +202,7 @@ FSEEDataSet::hasDSCategory(TString category){
 
 void
 FSEEDataSet::addDSCategory(TString category, bool propagateToSubsets){
-  if (!hasDSCategory(category) && category != "")  m_categories.push_back(category);
+  if (!hasDSCategory(category) && category != "")  m_dsCategories.push_back(category);
   if (propagateToSubsets){
     for (unsigned int i = 0; i < m_subSets.size(); i++){
       m_subSets[i]->addDSCategory(category,propagateToSubsets);
@@ -201,4 +211,30 @@ FSEEDataSet::addDSCategory(TString category, bool propagateToSubsets){
 }
 
 
+bool
+FSEEDataSet::hasLUMCategory(TString category){
+  for (unsigned int i = 0; i < m_lumCategories.size(); i++){
+    if (m_lumCategories[i] == category) return true;
+  }
+  return false;
+}
+
+
+void
+FSEEDataSet::addLUMCategory(TString category){
+  if (!hasLUMCategory(category) && category != "")
+    m_lumCategories.push_back(category);
+}
+
+
+void
+FSEEDataSet::addLUMCategories(){
+  for (unsigned int i = 0; i < m_vectorLumCategories.size(); i++){
+    TString category = m_vectorLumCategories[i].first;
+    pair<double,double> lumPair = m_vectorLumCategories[i].second;
+    if (((lumPair.first  < 0.0) || (lum() > lumPair.first )) &&
+        ((lumPair.second < 0.0) || (lum() < lumPair.second)))
+      addLUMCategory(category);
+  }
+}
 
