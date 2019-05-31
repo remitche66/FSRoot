@@ -19,7 +19,7 @@
 
 \title{Notes on the \FSR\ Package}
 \author{Ryan Mitchell}
-\date{\today~~~(v1.0 + working)}
+\date{\today~~~(v1.1)}
 \maketitle
 
 \abstract{
@@ -475,6 +475,8 @@ The friend tree is used automatically by {\tt FSModeHistogram} by setting:
 
 The fitting utilities (contained in the directory {\tt FSFit}) work, but are still under development.  See the examples in the directory {\tt Examples/Fitting} for the general idea.
 
+\section{Organizing Data Sets: the {\tt FSEEData} directory}
 
+The {\tt FSEEData} directory contains utilities to manipulate sets of $e^+e^-$ data and cross sections.  Data sets can be read from files using the {\tt FSEEDataSetList::addDataSetsFromFile} method.  Cross sections are read using the {\tt FSEEXSList::addXSFromFile} method.  Lists of data sets and cross sections can then be manipulated using ``categories'' (in a way similar to the way final states are manipulated by the {\tt FSMode} classes).  A selection of data sets and reactions from BESIII can be found in the files {\tt BESLUMINOSITIES.txt} and {\tt BESREACTIONS.txt}, respectively.
 
 \end{document}
