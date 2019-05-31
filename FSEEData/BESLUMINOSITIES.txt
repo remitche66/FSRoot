@@ -14,6 +14,15 @@
 # COLUMN 10+:  list of any extra categories (optional)
 
 ######################
+# SIMPLER DATA ENTRIES
+######################
+# COLUMN 0:    "data0"
+# COLUMN 1:    name
+# COLUMN 2:    center of mass energy, GeV (optional M for MeV)
+# COLUMN 3:    luminosity, pb-1
+# COLUMN 4+:   list of any extra categories (optional)
+
+######################
 # DSCATEGORY ENTRIES
 # (adds addCategory to dataName1, dataName2, category1, ...)
 ######################
@@ -30,6 +39,8 @@
 
 
 
+lumCategory lum40+   40.0 
+lumCategory lum50+   50.0 
 lumCategory lum100+ 100.0 
 lumCategory lum500+ 500.0 
 
