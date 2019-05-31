@@ -12,15 +12,7 @@ vector< pair<TString, pair<double,double> > > FSEEDataSet::m_vectorLumCategories
 
 
 FSEEDataSet::FSEEDataSet(){
-  m_name = "";
-  m_ecm = -1.0;
-  m_ecmStatError = 0.0;
-  m_ecmSystError = 0.0;
-  m_ecmLow = 1.0e10;
-  m_ecmHigh = -1.0e10;
-  m_lum = 0.0;
-  m_lumStatError = 0.0;
-  m_lumSystError = 0.0;
+  clearDS();
 }
 
 void
@@ -31,6 +23,24 @@ FSEEDataSet::setName(TString name){
   }
   m_name = name;
   addDSCategory(m_name,false);
+}
+
+void
+FSEEDataSet::clearDS(){
+  m_name = "";
+  m_runStart.clear();
+  m_runEnd.clear();
+  m_ecm = -1.0;
+  m_ecmStatError = 0.0;
+  m_ecmSystError = 0.0;
+  m_ecmLow = 1.0e10;
+  m_ecmHigh = -1.0e10;
+  m_lum = 0.0;
+  m_lumStatError = 0.0;
+  m_lumSystError = 0.0;
+  m_subSets.clear();
+  m_dsCategories.clear();
+  m_lumCategories.clear();
 }
 
 
@@ -44,6 +54,7 @@ FSEEDataSet::FSEEDataSet(TString  name,
                      double   lumStatError,
                      double   lumSystError,
                      vector<TString> extraDSCategories){
+  clearDS();
   setName(name);
   m_runStart.push_back(runStart);
   m_runEnd.push_back(runEnd);
@@ -55,6 +66,26 @@ FSEEDataSet::FSEEDataSet(TString  name,
   m_lum = lum;
   m_lumStatError = lumStatError;
   m_lumSystError = lumSystError;
+  if (m_lum <= 0.0){ 
+    cout << "FSEEDataSet Error: no luminosity" << endl; 
+    exit(1);
+  }
+  for (unsigned int i = 0; i < extraDSCategories.size(); i++){
+    addDSCategory(extraDSCategories[i],false);
+  }
+  addLUMCategories();
+}
+
+FSEEDataSet::FSEEDataSet(TString  name,
+                     double   ecm,
+                     double   lum,
+                     vector<TString> extraDSCategories){
+  clearDS();
+  setName(name);
+  m_ecm = ecm;
+  m_ecmLow  = ecm - ecmError();
+  m_ecmHigh = ecm + ecmError();
+  m_lum = lum;
   if (m_lum <= 0.0){ 
     cout << "FSEEDataSet Error: no luminosity" << endl; 
     exit(1);

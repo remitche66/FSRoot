@@ -87,6 +87,30 @@ FSEEDataSetList::addDataSetsFromFile(TString fileName){
       fsd->display();
       m_vectorDataSets.push_back(fsd);
     }
+    else if (words[0] == "data0"){
+      if (words.size() < 4){
+        cout << "FSEEDataSetList ERROR: problem with data0 command" << endl;
+        exit(0);
+      }
+      TString fsName(words[1]);
+        if (getDataSetVector(fsName).size() > 0){
+          cout << "FSEEDataSetList ERROR:  using the same data set name twice: " << fsName <<  endl;
+          exit(1);
+        }
+      TString sEcm(words[2]);
+        bool convertFromMeVToGeV = false;
+        while (sEcm.Contains("M")){
+          sEcm.Replace(sEcm.Index("M"),1,"");
+          convertFromMeVToGeV = true; }
+        double fsEcm         (FSString::TString2double(sEcm));
+        if (convertFromMeVToGeV) fsEcm = fsEcm/1000.0;
+      double fsLum(FSString::TString2double(words[3]));
+      vector<TString> fsCategories;
+        for (unsigned int i = 4; i < words.size(); i++){ fsCategories.push_back(words[i]); }
+      FSEEDataSet* fsd = new FSEEDataSet(fsName, fsEcm, fsLum, fsCategories);
+      fsd->display();
+      m_vectorDataSets.push_back(fsd);
+    }
     else if (words[0] == "dsCategory"){
       if (words.size() < 3){
         cout << "FSEEDataSetList ERROR: problem with dsCategory command" << endl;

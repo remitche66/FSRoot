@@ -53,6 +53,7 @@ class FSEEDataSet{
 
     FSEEDataSet();
     void setName(TString name);
+    void clearDS();
 
     FSEEDataSet(TString  name,
               int      runStart,
@@ -63,6 +64,11 @@ class FSEEDataSet{
               double   lum,
               double   lumStatError,
               double   lumSystError,
+              vector<TString> extraDSCategories);
+
+    FSEEDataSet(TString  name,
+              double   ecm,
+              double   lum,
               vector<TString> extraDSCategories);
 
     void addSubSet(FSEEDataSet* dataSet);
