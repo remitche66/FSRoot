@@ -316,6 +316,7 @@ FSEEDataSetList::histLuminosity(TString dsCategory,
     double ecm = vfsds[i]->ecm();
     double lum = vfsds[i]->lum();
     double elum = vfsds[i]->lumError();
+    if (elum < 1.0e-4*lum) elum = 1.0e-4*lum;
     int iecm = 1 + (int)((ecm-hist->GetBinLowEdge(1))/hist->GetBinWidth(1));
     hist->SetBinContent(iecm,lum);
     hist->SetBinError(iecm,elum);

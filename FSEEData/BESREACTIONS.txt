@@ -190,22 +190,22 @@ xs1  reactionPIPIJPSI  2014:4600  measured   6.4   0.7   143.4
 ###############
 
 # from the published paper
-xs1   reactionPIPIPSI2S  2011:4009  measured  482.0    0.0  0.5   0.2
-xs1   reactionPIPIPSI2S  2013:4090  measured  52.6     5.4  2.5   5.0
-xs1   reactionPIPIPSI2S  2013:4190  measured  43.1     7.3  3.3   6.6
-xs1   reactionPIPIPSI2S  2013:4210  measured  54.6    14.0  4.0   15.9
-xs1   reactionPIPIPSI2S  2013:4220  measured  54.1    17.8  4.9   13.0
-xs1   reactionPIPIPSI2S  2013:4230  measured  1091.7  21.3  1.1   456
-xs1   reactionPIPIPSI2S  2013:4245  measured  55.6    16.0  3.9   18.9
-xs1   reactionPIPIPSI2S  2013:4260  measured  825.7   20.9  1.2   325
-xs1   reactionPIPIPSI2S  2013:4310  measured  44.9    32.1  6.2   32.0
-xs1   reactionPIPIPSI2S  2013:4360  measured  539.8   61.0  2.4   714
-xs1   reactionPIPIPSI2S  2013:4390  measured  55.2    66.4  7.8   82.3 
-xs1   reactionPIPIPSI2S  201n:4420  measured  1073.6  42.8  1.4   1108
-xs1   reactionPIPIPSI2S  2014:4470  measured  109.9    8.9  2.2   23.4 
-xs1   reactionPIPIPSI2S  2014:4530  measured  110.0    7.7  2.0   20.4 
-xs1   reactionPIPIPSI2S  2014:4575  measured  47.7     7.3  3.0   10.2 
-xs1   reactionPIPIPSI2S  2014:4600  measured  566.9   14.6  1.1   177
+xs1   reactionPIPIPSI2S  2011:4009  measured   0.0  0.5   0.2
+xs1   reactionPIPIPSI2S  2013:4090  measured   5.4  2.5   5.0
+xs1   reactionPIPIPSI2S  2013:4190  measured   7.3  3.3   6.6
+xs1   reactionPIPIPSI2S  2013:4210  measured  14.0  4.0   15.9
+xs1   reactionPIPIPSI2S  2013:4220  measured  17.8  4.9   13.0
+xs1   reactionPIPIPSI2S  2013:4230  measured  21.3  1.1   456
+xs1   reactionPIPIPSI2S  2013:4245  measured  16.0  3.9   18.9
+xs1   reactionPIPIPSI2S  2013:4260  measured  20.9  1.2   325
+xs1   reactionPIPIPSI2S  2013:4310  measured  32.1  6.2   32.0
+xs1   reactionPIPIPSI2S  2013:4360  measured  61.0  2.4   714
+xs1   reactionPIPIPSI2S  2013:4390  measured  66.4  7.8   82.3 
+xs1   reactionPIPIPSI2S  201n:4420  measured  42.8  1.4   1108
+xs1   reactionPIPIPSI2S  2014:4470  measured   8.9  2.2   23.4 
+xs1   reactionPIPIPSI2S  2014:4530  measured   7.7  2.0   20.4 
+xs1   reactionPIPIPSI2S  2014:4575  measured   7.3  3.0   10.2 
+xs1   reactionPIPIPSI2S  2014:4600  measured  14.6  1.1   177
 
 
 ###############
