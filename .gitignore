@@ -1,13 +1,15 @@
 # FSRoot
-mklatex
-*RootMacros*
-*BESUtilities*
 *.pcm
 *.root
 .DS*
+*.log
+*.toc
+*.aux
 ExampleProgram
 FSSkimTree
 *testing*
+*RootMacros*
+*BESUtilities*
 
 # Prerequisites
 *.d

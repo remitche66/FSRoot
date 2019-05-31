@@ -1,7 +1,7 @@
 {
 
 cout << "--------------------------------------------------" << endl;
-cout << "--- Loading the FSRoot Macros (v1.0 + working) ---" << endl;
+cout << "--- Loading the FSRoot Macros (v1.1) ---" << endl;
 cout << "--------------------------------------------------" << endl;
 
 
@@ -124,33 +124,6 @@ cout << "------------------------------------------" << endl;
 cout << "--- Finished loading the FSRoot Macros ---" << endl;
 cout << "------------------------------------------" << endl;
 
-
-/*  
-
-// ********
-// old things
-// ********
-
-
-// *****************
-// HISTOGRAM ANALYSIS
-// *****************
-
-cout << "Loading Analysis/HistogramAnalysis.C..." << endl;
-gROOT->LoadMacro("Analysis/HistogramAnalysis.C+");
-
-
-// *****************
-// BES UTILITIES
-// *****************
-
-cout << "Loading BESUtilities/BESLuminosities.C..." << endl;
-gROOT->LoadMacro("BESUtilities/BESLuminosities.C+");
-
-
-cout << "Finished rootlogon" << endl;
-
-*/
 
 
 }
