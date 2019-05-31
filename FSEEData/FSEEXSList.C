@@ -215,3 +215,12 @@ FSEEXSList::addXSFromFunction(TString reactionName, TString sourceName, TF1* fun
   }
 }
 
+
+
+void
+FSEEXSList::clearXSList(){
+  for (unsigned int i = 0; i < m_vectorXS.size(); i++){
+    if (m_vectorXS[i]) delete m_vectorXS[i];
+  }
+  m_vectorXS.clear();
+}

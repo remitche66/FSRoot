@@ -20,7 +20,7 @@ class FSEEXSList{
 
     static void display(TString xsCat = "", TString dsCat = "", TString lumCat = "");
 
-    static void clearXSList() {}
+    static void clearXSList();
 
     static TH1F* histXS(TString xsCat = "", TString dsCat = "", TString lumCat = "", 
                         TString histBounds = "(5000,0.0,5.0)");
