@@ -4,8 +4,8 @@
 #include <iostream>
 #include "TH1F.h"
 #include "TF1.h"
-#include "FSEEData/FSEEDataSet.h"
-#include "FSEEData/FSEEXS.h"
+#include "FSData/FSEEDataSet.h"
+#include "FSData/FSEEXS.h"
 
 using namespace std;
 

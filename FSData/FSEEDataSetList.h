@@ -7,7 +7,7 @@
 #include "TString.h"
 #include "TH1F.h"
 #include "FSBasic/FSString.h"
-#include "FSEEData/FSEEDataSet.h"
+#include "FSData/FSEEDataSet.h"
 
 
 using namespace std;

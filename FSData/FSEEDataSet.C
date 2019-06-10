@@ -6,7 +6,7 @@
 #include "TChain.h"
 #include "TString.h"
 #include "FSBasic/FSString.h"
-#include "FSEEData/FSEEDataSet.h"
+#include "FSData/FSEEDataSet.h"
 
 vector< pair<TString, pair<double,double> > > FSEEDataSet::m_vectorLumCategories;
 

@@ -3,8 +3,8 @@
 
 #include <iostream>
 #include "TRandom3.h"
-#include "FSEEData/FSEEDataSet.h"
-#include "FSEEData/FSEEDataSetList.h"
+#include "FSData/FSEEDataSet.h"
+#include "FSData/FSEEDataSetList.h"
 
 
 using namespace std;

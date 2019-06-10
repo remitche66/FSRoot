@@ -4,7 +4,7 @@
 #include <complex>
 #include "FSBasic/FSString.h"
 #include "FSBasic/FSHistogram.h"
-#include "FSEEData/FSEEXSList.h"
+#include "FSData/FSEEXSList.h"
 
 
 vector<FSEEXS*> FSEEXSList::m_vectorXS;
