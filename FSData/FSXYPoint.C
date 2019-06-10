@@ -67,3 +67,27 @@ FSXYPoint::addCategory(TString category){
   if (!hasCategory(category) && category != "")  m_categories.push_back(category);
 }
 
+
+void
+FSXYPoint::setValuesFromString(TString sValues){
+  vector<TString> sExps = FSString::parseTString(sValues);
+  for (unsigned int i = 0; i < sExps.size(); i++){
+    TString sExp = FSString::removeWhiteSpace(sExps[i]);
+    vector<TString> sVals = FSString::parseTString(sExps[i],"=");
+    if (sVals.size() != 2){ cout << "ERROR" << endl; exit(0); }
+    TString sVar = sVals[0];
+    TString sVal = sVals[1];  double dVal = FSString::TString2double(sVal);
+         if (sVar == "xV"){ setXV(dVal); }
+    else if (sVar == "xVL"){ setXVL(dVal); }
+    else if (sVar == "xVH"){ setXVH(dVal); }
+    else{ cout << "ERROR" << endl; exit(0); }
+    cout << "sVar = " << sVar << endl;
+    cout << "dVal = " << dVal << endl;
+  }
+}
+
+
+void FSXYPoint::setXV(double val){ m_xValue = val; }
+void FSXYPoint::setXVL(double val){ m_xValueLow = val; }
+void FSXYPoint::setXVH(double val){ m_xValueHigh = val; }
+

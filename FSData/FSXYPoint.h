@@ -43,17 +43,19 @@ class FSXYPoint{
 
     void display(int counter = -1);
 
+    void setValuesFromString(TString sValues);
+
+    FSXYPoint();
 
   private:
 
-    FSXYPoint();
     void clear();
     bool hasCategory(TString cat);
     void addCategory(TString cat);
 
-    double  m_xValue;
-    double  m_xValueLow;
-    double  m_xValueHigh;
+    void setXV(double val);    double  m_xValue;
+    void setXVL(double val);   double  m_xValueLow;
+    void setXVH(double val);   double  m_xValueHigh;
 
     double  m_xError;
     double  m_xErrorLow;

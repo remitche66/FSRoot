@@ -28,57 +28,16 @@ FSXYPointList::addXYPointsFromFile(TString fileName){
     vector<TString> words = FSString::parseTString(line);
     if (words.size() == 0) continue;
     if (words[0][0] == '#') continue;
-    if (words[0] == "data"){
-/*
-      if (words.size() < 10){
-        cout << "FSXYPointList ERROR: problem with data command" << endl;
+    if (words[0] == "addXYPoint"){
+      if (words.size() < 2){
+        cout << "FSXYPointList ERROR: problem with addXYPoint command" << endl;
         exit(0);
       }
-      TString fsName(words[1]);
-        if (getXYPoints(fsName).size() > 0){
-          cout << "FSXYPointList ERROR:  using the same data set name twice: " << fsName <<  endl;
-          exit(1);
-        }
-      int fsRunStart(FSString::TString2int(words[2]));
-      int fsRunEnd(FSString::TString2int(words[3]));
-      TString sEcm(words[4]);
-        while (sEcmStatError.Contains("R")){
-          sEcmStatError.Replace(sEcmStatError.Index("R"),1,"");
-          relativeErrorStat = true; }
-        while (sEcmSystError.Contains("R")){
-          sEcmSystError.Replace(sEcmSystError.Index("R"),1,"");
-          relativeErrorSyst = true; }
-        double fsEcm         (FSString::TString2double(sEcm));
-        double fsEcmStatError(FSString::TString2double(sEcmStatError));
-        double fsEcmSystError(FSString::TString2double(sEcmSystError));
-        if (relativeErrorStat) fsEcmStatError = fsEcmStatError*fsEcm;
-        if (relativeErrorSyst) fsEcmSystError = fsEcmSystError*fsEcm;
-      vector<TString> fsCategories;
-        for (unsigned int i = 10; i < words.size(); i++){ fsCategories.push_back(words[i]); }
-*/
       FSXYPoint* xyp = new FSXYPoint();
-// addstuff
+      TString sVals = line;  while(sVals.Contains("addXYPoint")){ sVals.Replace(sVals.Index("addXYPoint"),10,""); }
+      xyp->setValuesFromString(sVals);
       xyp->display();
       m_vectorXYPoints.push_back(xyp);
-    }
-    else if (words[0] == "data0"){
-      if (words.size() < 4){
-        cout << "FSXYPointList ERROR: problem with data0 command" << endl;
-        exit(0);
-      }
-    }
-    else if (words[0] == "dsCategory"){
-      if (words.size() < 3){
-        cout << "FSXYPointList ERROR: problem with dsCategory command" << endl;
-        exit(0);
-      }
-      TString category = words[1];
-      for (unsigned int i = 2; i < words.size(); i++){
-        vector<FSXYPoint*> xypv = getXYPoints(words[i]);
-        for (unsigned int idata = 0; idata < xypv.size(); idata++){
-          //xypv[idata]->addCategory(category,false);
-        }
-      }
     }
     else{
       cout << "FSXYPointList ERROR: problem reading file " << fileName << endl;
