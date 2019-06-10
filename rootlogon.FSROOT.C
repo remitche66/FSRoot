@@ -107,6 +107,12 @@ gROOT->LoadMacro("FSFit/FSFitUtilities.C+");
 // DATA UTILITIES
 // *****************
 
+cout << "Loading FSData/FSXYPoint.C..." << endl;
+gROOT->LoadMacro("FSData/FSXYPoint.C+");
+
+cout << "Loading FSData/FSXYPointList.C..." << endl;
+gROOT->LoadMacro("FSData/FSXYPointList.C+");
+
 cout << "Loading FSData/FSEEDataSet.C..." << endl;
 gROOT->LoadMacro("FSData/FSEEDataSet.C+");
 
