@@ -15,73 +15,69 @@ class FSXYPoint{
 
   public:
 
-    double      xValue()         { return m_xValue; }
-    double      xValueLow()      { return m_xValueLow; }
-    double      xValueHigh()     { return m_xValueHigh; }
-
-    double      xError()         { return m_xError; }
-    double      xErrorLow()      { return m_xErrorLow; }
-    double      xErrorHigh()     { return m_xErrorHigh; }
-
-    double      xErrorSyst()     { return m_xErrorSyst; }
-    double      xErrorSystLow()  { return m_xErrorSystLow; }
-    double      xErrorSystHigh() { return m_xErrorSystHigh; }
-
-    double      yValue()         { return m_yValue; }
-    double      yValueLow()      { return m_yValueLow; }
-    double      yValueHigh()     { return m_yValueHigh; }
-
-    double      yError()         { return m_yError; }
-    double      yErrorLow()      { return m_yErrorLow; }
-    double      yErrorHigh()     { return m_yErrorHigh; }
-
-    double      yErrorSyst()     { return m_yErrorSyst; }
-    double      yErrorSystLow()  { return m_yErrorSystLow; }
-    double      yErrorSystHigh() { return m_yErrorSystHigh; }
+    double      xValue()         { return m_XV; }
+    TString     xLabel()         { return m_XL; }
+    double      xError()         { return (m_XEL + m_XEH)/2.0; }
+    double      xErrorLow()      { return m_XEL; }
+    double      xErrorHigh()     { return m_XEH; }
+    double      xErrorSyst()     { return (m_XESL + m_XESH)/2.0; }
+    double      xErrorSystLow()  { return m_XESL; }
+    double      xErrorSystHigh() { return m_XESH; }
+    double      yValue()         { return m_YV; }
+    double      yError()         { return (m_YEL + m_YEH)/2.0; }
+    double      yErrorLow()      { return m_YEL; }
+    double      yErrorHigh()     { return m_YEH; }
+    double      yErrorSyst()     { return (m_YESL + m_YESH)/2.0; }
+    double      yErrorSystLow()  { return m_YESL; }
+    double      yErrorSystHigh() { return m_YESH; }
 
     vector<TString> categories()  { return m_categories; }
 
     void display(int counter = -1);
 
-    void setValuesFromString(TString sValues);
-
-    FSXYPoint();
 
   private:
 
+    FSXYPoint();
+    FSXYPoint(TString category, double scale, FSXYPoint* xyp); 
+    FSXYPoint(TString category, TString operation, FSXYPoint* xyp1, FSXYPoint* xyp2); 
+
     void clear();
+    void setValuesFromString(TString sValues);
     bool hasCategory(TString cat);
     void addCategory(TString cat);
 
-    void setXV(double val);    double  m_xValue;
-    void setXVL(double val);   double  m_xValueLow;
-    void setXVH(double val);   double  m_xValueHigh;
+    void setXV  (double  val) { m_XV = val; }
+    void setXL  (TString lab) { m_XL = lab; }  
+    void setXE  (double  val) { setXEL(val); setXEH(val); }
+    void setXEL (double  val) { m_XEL = sqrt(m_XEL*m_XEL + val*val); }
+    void setXEH (double  val) { m_XEH = sqrt(m_XEH*m_XEH + val*val); }
+    void setXES (double  val) { setXESL(val); setXESH(val); }
+    void setXESL(double  val) { m_XESL = sqrt(m_XESL*m_XESL + val*val); }
+    void setXESH(double  val) { m_XESH = sqrt(m_XESH*m_XESH + val*val); }
+    void setYV  (double  val) { m_YV = val; }
+    void setYE  (double  val) { setYEL(val); setYEH(val); }
+    void setYEL (double  val) { m_YEL = sqrt(m_YEL*m_YEL + val*val); }
+    void setYEH (double  val) { m_YEH = sqrt(m_YEH*m_YEH + val*val); }
+    void setYES (double  val) { setYESL(val); setYESH(val); }
+    void setYESL(double  val) { m_YESL = sqrt(m_YESL*m_YESL + val*val); }
+    void setYESH(double  val) { m_YESH = sqrt(m_YESH*m_YESH + val*val); }
 
-    double  m_xError;
-    double  m_xErrorLow;
-    double  m_xErrorHigh;
-
-    double  m_xErrorSyst;
-    double  m_xErrorSystLow;
-    double  m_xErrorSystHigh;
-
-    double  m_yValue;
-    double  m_yValueLow;
-    double  m_yValueHigh;
-
-    double  m_yError;
-    double  m_yErrorLow;
-    double  m_yErrorHigh;
-
-    double  m_yErrorSyst;
-    double  m_yErrorSystLow;
-    double  m_yErrorSystHigh;
+    double  m_XV;
+    TString m_XL; 
+    double  m_XEL;
+    double  m_XEH;
+    double  m_XESL;
+    double  m_XESH;
+    double  m_YV;
+    double  m_YEL;
+    double  m_YEH;
+    double  m_YESL;
+    double  m_YESH;
 
     vector<TString> m_categories;
 
     friend class FSXYPointList;
-
-
 
 };
 

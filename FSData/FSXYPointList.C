@@ -16,7 +16,7 @@ vector<FSXYPoint*> FSXYPointList::m_vectorXYPoints;
 
 void
 FSXYPointList::addXYPointsFromFile(TString fileName){
-  cout << "FSXYPointList: Reading data from file: " << fileName << endl;
+  cout << "FSXYPointList: Reading points from file: " << fileName << endl;
   ifstream infile(FSString::TString2string(fileName).c_str());
   if (!infile.is_open()){
     cout << "FSXYPointList ERROR: cannot find file: " << fileName << endl;
@@ -61,28 +61,30 @@ FSXYPointList::getXYPoints(TString category){
     if (FSString::evalLogicalTString(category,xyp->categories()))
       xypVectorSelected.push_back(xyp);
   }
+  if (xypVectorSelected.size() < 2) return xypVectorSelected;
+    // sort points by their xValue or xLabel
+  for (unsigned int i = 0; i < xypVectorSelected.size()-1; i++){
+  for (unsigned int j = i+1; j < xypVectorSelected.size(); j++){
+    double xi = xypVectorSelected[i]->xValue();
+    double xj = xypVectorSelected[j]->xValue();
+    TString si = xypVectorSelected[i]->xLabel();
+    TString sj = xypVectorSelected[j]->xLabel();
+    if ((xj < xi) || ((xj == xi) && (sj < si))){
+      FSXYPoint* temp = xypVectorSelected[i];
+      xypVectorSelected[i] = xypVectorSelected[j];
+      xypVectorSelected[j] = temp;
+    }
+  }}
   return xypVectorSelected;
 }
 
 
 void 
 FSXYPointList::display(TString category){
-  cout << category << endl;
-/*
-  FSXYPoint* xyp = getXYPoint(dsCategory,lumCategory,ecmGrouping);
-  if (!xyp){
-    cout << "No data sets found for dsCategory: " << dsCategory << 
-                             " and lumCategory: " << lumCategory << endl;
-    return;
-  }
-  vector<FSXYPoint*> xypv = xyp->subSets();
-  cout << endl << "****** SUB DATA SETS ******" << endl << endl;
+  vector<FSXYPoint*> xypv = getXYPoints(category);
   for (unsigned int i = 0; i < xypv.size(); i++){
-    xypv[i]->display(i+1);
+    xypv[i]->display();
   }
-  cout << "****** TOTAL DATA SET ******" << endl << endl;
-  xyp->display();
-*/
 }
 
 
@@ -96,35 +98,61 @@ FSXYPointList::clearXYPoints(){
 }
 
 
-/*
 TH1F* 
-FSXYPointList::histLuminosity(TString dsCategory,
-                                TString lumCategory, 
-                                TString histBounds){
-  double ecmGrouping = FSString::parseBoundsBinSizeX(histBounds);
+FSXYPointList::getTH1F(TString category, TString histBounds){
   int nbins = FSString::parseBoundsNBinsX(histBounds);
   double x1 = FSString::parseBoundsLowerX(histBounds);
   double x2 = FSString::parseBoundsUpperX(histBounds);
-  TH1F* hist = new TH1F("hist","histLuminosity",nbins,x1,x2);
-  hist->SetTitle("Integrated Luminosities");
-  hist->SetXTitle("Center-of-Mass Energy  (GeV)");
-  hist->SetYTitle("Integrated Luminosity  (pb^{-1})");
-  FSXYPoint* xyps = getXYPoint(dsCategory,lumCategory,ecmGrouping);
-  if (!xyps) return FSHistogram::getTH1F(hist);
-  vector<FSXYPoint*> vxyps = xyps->subSets(); 
-  for (unsigned int i = 0; i < vxyps.size(); i++){
-    double ecm = vxyps[i]->ecm();
-    double lum = vxyps[i]->lum();
-    double elum = vxyps[i]->lumError();
-    if (elum < 1.0e-4*lum) elum = 1.0e-4*lum;
-    int iecm = 1 + (int)((ecm-hist->GetBinLowEdge(1))/hist->GetBinWidth(1));
-    hist->SetBinContent(iecm,lum);
-    hist->SetBinError(iecm,elum);
+  TH1F* hist = new TH1F("histXYPoint","histXYPoint",nbins,x1,x2);
+  hist->SetTitle("FSXYPointList (category = \""+category+"\")");
+  hist->SetXTitle("X Values");
+  hist->SetYTitle("Y Values");
+  vector<FSXYPoint*> vxyp = getXYPoints(category);
+  for (unsigned int i = 0; i < vxyp.size(); i++){
+    double x  = vxyp[i]->xValue();
+    double y  = vxyp[i]->yValue();
+    double ey = vxyp[i]->yError();
+    int ix = 1 + (int)((x-hist->GetBinLowEdge(1))/hist->GetBinWidth(1));
+    if (hist->GetBinContent(ix) != 0){ 
+      cout << "FSXYPointList WARNING: overwriting data in histogram" << endl; 
+    }
+    hist->SetBinContent(ix,y);
+    hist->SetBinError(ix,ey);
   }
   hist = FSHistogram::getTH1F(hist);
   FSHistogram::setHistogramMaxima(hist);
   return hist;
 }
-*/
+
+TH1F* 
+FSXYPointList::getEmptyTH1F(TString category, TString histBounds){
+  TH1F* hist = getTH1F(category,histBounds);
+  double max = hist->GetMaximum();
+  hist->Reset();
+  hist = FSHistogram::getTH1F(hist);
+  hist->SetMaximum(max);
+  return hist;
+}
+
+TGraphAsymmErrors*
+FSXYPointList::getTGraph(TString category){
+  static const int MAXPOINTS = 10000;
+  int n = 0;
+  double vx[MAXPOINTS];  double vxel[MAXPOINTS];  double vxeh[MAXPOINTS];
+  double vy[MAXPOINTS];  double vyel[MAXPOINTS];  double vyeh[MAXPOINTS];
+  vector<FSXYPoint*> vxyp = getXYPoints(category);
+  for (unsigned int i = 0; i < vxyp.size(); i++){
+    vx[n]   = vxyp[i]->xValue();
+    vxel[n] = vxyp[i]->xErrorLow();
+    vxeh[n] = vxyp[i]->xErrorHigh();
+    vy[n]   = vxyp[i]->yValue();
+    vyel[n] = vxyp[i]->yErrorLow();
+    vyeh[n] = vxyp[i]->yErrorHigh();
+    n++;
+  }
+  TGraphAsymmErrors* tgraph = new TGraphAsymmErrors(n,vx,vy,vxel,vxeh,vyel,vyeh);
+  return tgraph;
+}
+
 
 

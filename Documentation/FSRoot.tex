@@ -479,6 +479,7 @@ The fitting utilities (contained in the directory {\tt FSFit}) work, but are sti
 
 The {\tt FSData} directory contains utilities to manipulate data and data sets.  The {\tt FSXYPoint} classes are general, while the {\tt FSEEDataSet} and {\tt FSEEXS} classes are specific to $e^+e^-$ data sets and cross sections, respectively.
 
-Data sets~(for $e^+e^-$) can be read from files using the {\tt FSEEDataSetList::addDataSetsFromFile} method.  Cross sections~(for $e^+e^-$) are read using the {\tt FSEEXSList::addXSFromFile} method.  Lists of data sets and cross sections can then be manipulated using ``categories'' (in a way similar to the way final states are manipulated by the {\tt FSMode} classes).  A selection of data sets and reactions from BESIII can be found in the files {\tt BESLUMINOSITIES.txt} and {\tt BESREACTIONS.txt}, respectively.
+Points can be read from files using the {\tt FSXYPointList::addXYPointsFromFile} method.
+Data sets~(for $e^+e^-$) can be read from files using the {\tt FSEEDataSetList::addDataSetsFromFile} method.  Cross sections~(for $e^+e^-$) are read using the {\tt FSEEXSList::addXSFromFile} method.  The resulting lists can then be manipulated using ``categories'' (in a way similar to the way final states are manipulated by the {\tt FSMode} classes).  A selection of data sets and reactions from BESIII can be found in the files {\tt BESLUMINOSITIES.txt} and {\tt BESREACTIONS.txt}, respectively.
 
 \end{document}
