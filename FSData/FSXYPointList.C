@@ -57,6 +57,11 @@ FSXYPointList::addXYPointsFromFile(TString fileName){
 void
 FSXYPointList::addDerivedXYPoints(TString newCategory, TString oldCategory1, TString operation, 
                                   TString oldCategory2, double xTolerance){
+  cout << newCategory << endl;
+  cout << oldCategory1 << endl;
+  cout << oldCategory2 << endl;
+  cout << xTolerance << endl;
+  cout << operation << endl;
     // test for overlaps
   TString ctest("");
   if (oldCategory1!="") ctest += "("+oldCategory1+")";
