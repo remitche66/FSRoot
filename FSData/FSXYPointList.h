@@ -18,10 +18,10 @@ class FSXYPointList{
 
   public:
 
-//addDerivedXYPoints
-
-
     static void addXYPointsFromFile(TString fileName);
+
+    static void addDerivedXYPoints(TString newCategory, TString oldCategory1, TString operation, 
+                                   TString oldCategory2, double xTolerance = 1.0e-8);
 
     static vector<FSXYPoint*> getXYPoints(TString category = "");
 

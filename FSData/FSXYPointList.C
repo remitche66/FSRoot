@@ -39,6 +39,10 @@ FSXYPointList::addXYPointsFromFile(TString fileName){
       xyp->display();
       m_vectorXYPoints.push_back(xyp);
     }
+// come back to these:  derive newCat = oldCat1 */+- oldCat2
+//    else if (words[0] == "derive"){
+// category cat cat1 cat2 etc.
+//    else if (words[0] == "category"){
     else{
       cout << "FSXYPointList ERROR: problem reading file " << fileName << endl;
       cout << "  line:" << endl << line << endl;  exit(1);
@@ -50,6 +54,37 @@ FSXYPointList::addXYPointsFromFile(TString fileName){
 }
 
 
+void
+FSXYPointList::addDerivedXYPoints(TString newCategory, TString oldCategory1, TString operation, 
+                                  TString oldCategory2, double xTolerance){
+    // test for overlaps
+  TString ctest("");
+  if (oldCategory1!="") ctest += "("+oldCategory1+")";
+  if (oldCategory1!=""&&oldCategory2!="") ctest += "&";
+  if (oldCategory2!="") ctest += "("+oldCategory2+")";
+  vector<FSXYPoint*> vtest = getXYPoints(ctest);
+  if (vtest.size() != 0){
+    cout << "FSXYPointList ERROR:  category overlap in addDerivedXYPoints" << endl;
+    exit(0);
+  }
+    // test for ambiguities
+  vector<FSXYPoint*> vxyp1 = getXYPoints(oldCategory1);
+  vector<FSXYPoint*> vxyp2 = getXYPoints(oldCategory2);
+  bool ambiguityError = false;
+  for (unsigned int i = 1; i < vxyp1.size(); i++){
+    if ((vxyp1[i-1]->xLabel() == "") && (vxyp1[i]->xLabel() == "") &&
+        (vxyp1[i]->xValue() - vxyp1[i-1]->xValue()) < xTolerance) ambiguityError = true; }
+  for (unsigned int i = 1; i < vxyp2.size(); i++){
+    if ((vxyp2[i-1]->xLabel() == "") && (vxyp2[i]->xLabel() == "") &&
+        (vxyp2[i]->xValue() - vxyp2[i-1]->xValue()) < xTolerance) ambiguityError = true; }
+  if (ambiguityError){
+    cout << "FSXYPointList ERROR:  ambiguity in addDerivedXYPoints" << endl;
+    exit(0);
+  }
+//    FSXYPoint(TString category, double scale, FSXYPoint* xyp); 
+//    FSXYPoint(TString category, TString operation, FSXYPoint* xyp1, FSXYPoint* xyp2); 
+//  NOTE:  needs some more thought -- do averages from oldCategories and then use those for newCategory?
+}
 
 
 vector<FSXYPoint*>
