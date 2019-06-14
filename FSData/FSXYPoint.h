@@ -50,7 +50,8 @@ class FSXYPoint{
     void addCategory(TString cat);
 
     void setXV  (double  val) { m_XV = val; }
-    void setXV  ()            { if (m_XVH > m_XVL) setXV((m_XVH+m_XVL)/2.0); }
+    void setXV  ()            { if (m_XVH > m_XVL){ setXV((m_XVH+m_XVL)/2.0); } 
+                                              else{ setXVL(m_XV); setXVH(m_XV); } }
     void setXVL (double  val) { m_XVL = val; }
     void setXVH (double  val) { m_XVH = val; }
     void setXL  (TString lab) { m_XL = lab; }  
