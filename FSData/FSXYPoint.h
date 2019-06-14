@@ -16,6 +16,8 @@ class FSXYPoint{
   public:
 
     double      xValue()         { return m_XV; }
+    double      xValueLow()      { return m_XVL; }
+    double      xValueHigh()     { return m_XVH; }
     TString     xLabel()         { return m_XL; }
     double      xError()         { return (m_XEL + m_XEH)/2.0; }
     double      xErrorLow()      { return m_XEL; }
@@ -48,6 +50,9 @@ class FSXYPoint{
     void addCategory(TString cat);
 
     void setXV  (double  val) { m_XV = val; }
+    void setXV  ()            { if (m_XVH > m_XVL) setXV((m_XVH+m_XVL)/2.0); }
+    void setXVL (double  val) { m_XVL = val; }
+    void setXVH (double  val) { m_XVH = val; }
     void setXL  (TString lab) { m_XL = lab; }  
     void setXE  (double  val) { setXEL(val); setXEH(val); }
     void setXEL (double  val) { m_XEL = sqrt(m_XEL*m_XEL + val*val); }
@@ -64,6 +69,8 @@ class FSXYPoint{
     void setYESH(double  val) { m_YESH = sqrt(m_YESH*m_YESH + val*val); }
 
     double  m_XV;
+    double  m_XVL;
+    double  m_XVH;
     TString m_XL; 
     double  m_XEL;
     double  m_XEH;

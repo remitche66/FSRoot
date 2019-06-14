@@ -81,6 +81,8 @@ FSXYPoint::FSXYPoint(TString category, TString operation, FSXYPoint* xyp1, FSXYP
 void
 FSXYPoint::clear(){
   m_XV = 0.0;
+  m_XVL = 0.0;
+  m_XVH = 0.0;
   m_XL = "";
   m_XEL = 0.0;
   m_XEH = 0.0;
@@ -144,6 +146,8 @@ FSXYPoint::setValuesFromString(TString sValues){
          if ((hasR) && (sVar.Contains("XE"))){ dVal *= xValue(); }
          if ((hasR) && (sVar.Contains("YE"))){ dVal *= yValue(); }
            if (sVar == "XV")  { if (ipass == 0) { setXV  (dVal);     }}
+      else if (sVar == "XVL") { if (ipass == 0) { setXVL (dVal);     }}
+      else if (sVar == "XVH") { if (ipass == 0) { setXVH (dVal);     }}
       else if (sVar == "XL")  { if (ipass == 0) { setXL  (sVal);     }}
       else if (sVar == "XE")  { if (ipass == 1) { setXE  (dVal);     }}
       else if (sVar == "XEL") { if (ipass == 1) { setXEL (dVal);     }}
@@ -164,6 +168,7 @@ FSXYPoint::setValuesFromString(TString sValues){
         exit(0);
       }
     }
+    if (ipass == 0) setXV();
   }
 }
 
