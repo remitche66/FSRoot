@@ -129,34 +129,40 @@ FSXYPoint::addCategory(TString category){
 void
 FSXYPoint::setValuesFromString(TString sValues){
   vector<TString> sExps = FSString::parseTString(sValues);
-  for (unsigned int i = 0; i < sExps.size(); i++){
-    vector<TString> sVals = FSString::parseTString(sExps[i],":");
-    if (sVals.size() != 2){
-      cout << "FSXYPoint ERROR: problem parsing values from: " << sValues << endl;
-      exit(0);
-    }
-    TString sVar = sVals[0]; sVar.ToUpper();
-    TString sVal = sVals[1];
-     double dVal = FSString::TString2double(sVal);
-         if (sVar == "XV")  { setXV  (dVal); }
-    else if (sVar == "XL")  { setXL  (sVal); }
-    else if (sVar == "XE")  { setXE  (dVal); }
-    else if (sVar == "XEL") { setXEL (dVal); }
-    else if (sVar == "XEH") { setXEH (dVal); }
-    else if (sVar == "XES") { setXES (dVal); }
-    else if (sVar == "XESL"){ setXESL(dVal); }
-    else if (sVar == "XESH"){ setXESH(dVal); }
-    else if (sVar == "YV")  { setYV  (dVal); }
-    else if (sVar == "YE")  { setYE  (dVal); }
-    else if (sVar == "YEL") { setYEL (dVal); }
-    else if (sVar == "YEH") { setYEH (dVal); }
-    else if (sVar == "YES") { setYES (dVal); }
-    else if (sVar == "YESL"){ setYESL(dVal); }
-    else if (sVar == "YESH"){ setYESH(dVal); }
-    else if (sVar == "CAT") { addCategory(sVal); }
-    else{
-      cout << "FSXYPoint ERROR: problem parsing variable named: " << sVar << endl;
-      exit(0);
+  for (int ipass = 0; ipass < 2; ipass++){
+    for (unsigned int i = 0; i < sExps.size(); i++){
+      vector<TString> sVals = FSString::parseTString(sExps[i],":");
+      if (sVals.size() != 2){
+        cout << "FSXYPoint ERROR: problem parsing values from: " << sValues << endl;
+        exit(0);
+      }
+      TString sVar = sVals[0]; sVar.ToUpper();
+      TString sVal = sVals[1];
+       double dVal = FSString::TString2double(sVal);
+         bool hasR = false;  while (sVal.Contains("R")){ hasR = true; sVal.Replace(sVal.Index("R"),1,""); }
+                             while (sVal.Contains("r")){ hasR = true; sVal.Replace(sVal.Index("r"),1,""); }
+         if ((hasR) && (sVar.Contains("XE"))){ dVal *= xValue(); }
+         if ((hasR) && (sVar.Contains("YE"))){ dVal *= yValue(); }
+           if (sVar == "XV")  { if (ipass == 0) { setXV  (dVal);     }}
+      else if (sVar == "XL")  { if (ipass == 0) { setXL  (sVal);     }}
+      else if (sVar == "XE")  { if (ipass == 1) { setXE  (dVal);     }}
+      else if (sVar == "XEL") { if (ipass == 1) { setXEL (dVal);     }}
+      else if (sVar == "XEH") { if (ipass == 1) { setXEH (dVal);     }}
+      else if (sVar == "XES") { if (ipass == 1) { setXES (dVal);     }}
+      else if (sVar == "XESL"){ if (ipass == 1) { setXESL(dVal);     }}
+      else if (sVar == "XESH"){ if (ipass == 1) { setXESH(dVal);     }}
+      else if (sVar == "YV")  { if (ipass == 0) { setYV  (dVal);     }}
+      else if (sVar == "YE")  { if (ipass == 1) { setYE  (dVal);     }}
+      else if (sVar == "YEL") { if (ipass == 1) { setYEL (dVal);     }}
+      else if (sVar == "YEH") { if (ipass == 1) { setYEH (dVal);     }}
+      else if (sVar == "YES") { if (ipass == 1) { setYES (dVal);     }}
+      else if (sVar == "YESL"){ if (ipass == 1) { setYESL(dVal);     }}
+      else if (sVar == "YESH"){ if (ipass == 1) { setYESH(dVal);     }}
+      else if (sVar == "CAT") { if (ipass == 0) { addCategory(sVal); }}
+      else{
+        cout << "FSXYPoint ERROR: problem parsing variable named: " << sVar << endl;
+        exit(0);
+      }
     }
   }
 }
