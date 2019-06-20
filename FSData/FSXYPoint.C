@@ -141,10 +141,12 @@ FSXYPoint::setValuesFromString(TString sValues){
       TString sVar = sVals[0]; sVar.ToUpper();
       TString sVal = sVals[1];
        double dVal = FSString::TString2double(sVal);
-         bool hasR = false;  while (sVal.Contains("R")){ hasR = true; sVal.Replace(sVal.Index("R"),1,""); }
-                             while (sVal.Contains("r")){ hasR = true; sVal.Replace(sVal.Index("r"),1,""); }
-         if ((hasR) && (sVar.Contains("XE"))){ dVal *= xValue(); }
-         if ((hasR) && (sVar.Contains("YE"))){ dVal *= yValue(); }
+      if (sVar.Contains("XE") || sVar.Contains("YE")){
+        bool hasR = false;  while (sVal.Contains("R")){ hasR = true; sVal.Replace(sVal.Index("R"),1,""); }
+                            while (sVal.Contains("r")){ hasR = true; sVal.Replace(sVal.Index("r"),1,""); }
+        if ((hasR) && (sVar.Contains("XE"))){ dVal *= xValue(); }
+        if ((hasR) && (sVar.Contains("YE"))){ dVal *= yValue(); }
+      }
            if (sVar == "XV")  { if (ipass == 0) { setXV  (dVal);     }}
       else if (sVar == "XVL") { if (ipass == 0) { setXVL (dVal);     }}
       else if (sVar == "XVH") { if (ipass == 0) { setXVH (dVal);     }}
