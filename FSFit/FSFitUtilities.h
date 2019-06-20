@@ -193,10 +193,14 @@ class FSFitUtilities{
     //  METHODS FOR DATA (to be fitted)
     // *************************
 
-      // Create a data set from a histogram.  
+      // Create a data set from a histogram or a vector<FSXYPoint*>
 
     static void createDataSet(TString dName, TH1F* hist){
       FSFitDataSetList::addDataSet(dName,hist);
+    }
+
+    static void createDataSet(TString dName, vector<FSXYPoint*> points){
+      FSFitDataSetList::addDataSet(dName,points);
     }
 
 
