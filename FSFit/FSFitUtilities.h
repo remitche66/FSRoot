@@ -269,10 +269,23 @@ class FSFitUtilities{
       return FSFitMinuitList::getMinuit(mName)->chisquare();
     }
 
+      // Get the number of points
+
+    static int nDataPoints(TString mName){
+      return FSFitMinuitList::getMinuit(mName)->nDataPoints();
+    }
+
       // Get the number of free parameters.
 
     static int nFreeParameters(TString mName){
       return FSFitMinuitList::getMinuit(mName)->nFreeParameters();
+    }
+
+      // Get the number of degrees of freedom.
+
+    static int nDOF(TString mName){
+      return FSFitMinuitList::getMinuit(mName)->nDataPoints()
+              - FSFitMinuitList::getMinuit(mName)->nFreeParameters();
     }
 
       // Get the status of the covariance matrix.

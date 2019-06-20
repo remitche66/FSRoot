@@ -963,6 +963,17 @@ class FSFitMinuit {
       return fcn;
     }
 
+    int nDataPoints(){
+      int n = 0;
+      vector< pair<TString,TString> > comps = fitComponents();
+      for (unsigned int i = 0; i < comps.size(); i++){
+        TString dName = comps[i].first;
+        TString fName = comps[i].second;
+        vector<double> vx  = FSFitDataSetList::getDataSet(dName)->x();
+        n += vx.size();
+      }
+      return n;
+    }
 
 
 
