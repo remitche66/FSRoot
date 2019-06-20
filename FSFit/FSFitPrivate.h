@@ -806,6 +806,20 @@ class FSFitDataSetList {
 
     static void addDataSet(TString dName, TH1F* hist){ 
       FSFitDataSet* data = new FSFitDataSet(dName,hist);
+      addDataSet(data);
+    }
+
+    static void addDataSet(TString dName, vector<FSXYPoint*> points){ 
+      FSFitDataSet* data = new FSFitDataSet(dName,points);
+      addDataSet(data);
+    }
+
+    static void addDataSet(FSFitDataSet* data){
+      if (!data){
+        cout << "FSFitDataSetList ERROR: data=NULL in addDataSet" << endl;
+        exit(0);
+      }
+      TString dName = data->dName();
       map<TString,FSFitDataSet*>::iterator it = m_fitDataSetMap.find(dName);
       if (it != m_fitDataSetMap.end()){
         cout << "FSFitDataSetList WARNING:  overwriting data set " << dName << endl;
