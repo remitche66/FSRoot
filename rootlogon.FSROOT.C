@@ -89,19 +89,6 @@ cout << "Loading FSMode/FSModeHistogram.C..." << endl;
 gROOT->LoadMacro("FSMode/FSModeHistogram.C+");
 
 
-// *****************
-// FITTING UTILITIES
-// *****************
-
-cout << "Loading FSFit/FSFitPrivate.C..." << endl;
-gROOT->LoadMacro("FSFit/FSFitPrivate.C+");
-
-cout << "Loading FSFit/FSFitFunctions.C..." << endl;
-gROOT->LoadMacro("FSFit/FSFitFunctions.C+");
-
-cout << "Loading FSFit/FSFitUtilities.C..." << endl;
-gROOT->LoadMacro("FSFit/FSFitUtilities.C+");
-
 
 // *****************
 // DATA UTILITIES
@@ -124,6 +111,20 @@ gROOT->LoadMacro("FSData/FSEEXS.C+");
 
 cout << "Loading FSData/FSEEXSList.C..." << endl;
 gROOT->LoadMacro("FSData/FSEEXSList.C+");
+
+
+// *****************
+// FITTING UTILITIES
+// *****************
+
+cout << "Loading FSFit/FSFitPrivate.C..." << endl;
+gROOT->LoadMacro("FSFit/FSFitPrivate.C+");
+
+cout << "Loading FSFit/FSFitFunctions.C..." << endl;
+gROOT->LoadMacro("FSFit/FSFitFunctions.C+");
+
+cout << "Loading FSFit/FSFitUtilities.C..." << endl;
+gROOT->LoadMacro("FSFit/FSFitUtilities.C+");
 
 
 cout << "------------------------------------------" << endl;
