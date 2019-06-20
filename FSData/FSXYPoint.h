@@ -25,6 +25,9 @@ class FSXYPoint{
     double      xErrorSyst()     { return (m_XESL + m_XESH)/2.0; }
     double      xErrorSystLow()  { return m_XESL; }
     double      xErrorSystHigh() { return m_XESH; }
+    double      xErrorTot()      { return sqrt(xError()    *xError()     + xErrorSyst()    *xErrorSyst()); }
+    double      xErrorTotLow()   { return sqrt(xErrorLow() *xErrorLow()  + xErrorSystLow() *xErrorSystLow()); }
+    double      xErrorTotHigh()  { return sqrt(xErrorHigh()*xErrorHigh() + xErrorSystHigh()*xErrorSystHigh()); }
     double      yValue()         { return m_YV; }
     double      yError()         { return (m_YEL + m_YEH)/2.0; }
     double      yErrorLow()      { return m_YEL; }
@@ -32,6 +35,9 @@ class FSXYPoint{
     double      yErrorSyst()     { return (m_YESL + m_YESH)/2.0; }
     double      yErrorSystLow()  { return m_YESL; }
     double      yErrorSystHigh() { return m_YESH; }
+    double      yErrorTot()      { return sqrt(yError()    *yError()     + yErrorSyst()    *yErrorSyst()); }
+    double      yErrorTotLow()   { return sqrt(yErrorLow() *yErrorLow()  + yErrorSystLow() *yErrorSystLow()); }
+    double      yErrorTotHigh()  { return sqrt(yErrorHigh()*yErrorHigh() + yErrorSystHigh()*yErrorSystHigh()); }
 
     vector<TString> categories()  { return m_categories; }
 
