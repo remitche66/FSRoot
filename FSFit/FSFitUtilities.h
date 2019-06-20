@@ -199,8 +199,8 @@ class FSFitUtilities{
       FSFitDataSetList::addDataSet(dName,hist);
     }
 
-    static void createDataSet(TString dName, vector<FSXYPoint*> points){
-      FSFitDataSetList::addDataSet(dName,points);
+    static void createDataSet(TString dName, vector<FSXYPoint*> points, bool includeSystErrors = false){
+      FSFitDataSetList::addDataSet(dName,points,includeSystErrors);
     }
 
 

@@ -725,12 +725,13 @@ class FSFitDataSet {
       fillSelected();
     }
 
-    FSFitDataSet(TString n_dName, vector<FSXYPoint*> points) : 
+    FSFitDataSet(TString n_dName, vector<FSXYPoint*> points, bool includeSystErrors) : 
         m_dName(n_dName){
       for (unsigned int i = 0; i < points.size(); i++){
         m_x.push_back(points[i]->xValue());
         m_y.push_back(points[i]->yValue());
-        m_ey.push_back(points[i]->yError());
+        if (!includeSystErrors) m_ey.push_back(points[i]->yError());
+        if  (includeSystErrors) m_ey.push_back(points[i]->yErrorTot());
       }
       clearLimits();
       fillSelected();
@@ -809,8 +810,8 @@ class FSFitDataSetList {
       addDataSet(data);
     }
 
-    static void addDataSet(TString dName, vector<FSXYPoint*> points){ 
-      FSFitDataSet* data = new FSFitDataSet(dName,points);
+    static void addDataSet(TString dName, vector<FSXYPoint*> points, bool includeSystErrors){ 
+      FSFitDataSet* data = new FSFitDataSet(dName,points,includeSystErrors);
       addDataSet(data);
     }
 
