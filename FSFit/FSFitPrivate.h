@@ -17,6 +17,7 @@
 #include "TMinuit.h"
 #include "TMath.h"
 #include "FSBasic/FSString.h"
+#include "FSData/FSXYPoint.h"
 
 class FSFitParameterList;
 class FSFitFunctionList;
@@ -719,6 +720,17 @@ class FSFitDataSet {
         m_x.push_back(hist->GetBinCenter(i));
         m_y.push_back(hist->GetBinContent(i));
         m_ey.push_back(hist->GetBinError(i));
+      }
+      clearLimits();
+      fillSelected();
+    }
+
+    FSFitDataSet(TString n_dName, vector<FSXYPoint*> points) : 
+        m_dName(n_dName){
+      for (unsigned int i = 0; i < points.size(); i++){
+        m_x.push_back(points[i]->xValue());
+        m_y.push_back(points[i]->yValue());
+        m_ey.push_back(points[i]->yError());
       }
       clearLimits();
       fillSelected();
