@@ -139,7 +139,7 @@ FSXYPointList::clearXYPoints(){
 
 
 TH1F* 
-FSXYPointList::getTH1F(TString category, TString histBounds){
+FSXYPointList::getTH1F(TString category, TString histBounds, bool includeSystErrors){
   int nbins = FSString::parseBoundsNBinsX(histBounds);
   double x1 = FSString::parseBoundsLowerX(histBounds);
   double x2 = FSString::parseBoundsUpperX(histBounds);
@@ -151,7 +151,7 @@ FSXYPointList::getTH1F(TString category, TString histBounds){
   for (unsigned int i = 0; i < vxyp.size(); i++){
     double x  = vxyp[i]->xValue();
     double y  = vxyp[i]->yValue();
-    double ey = vxyp[i]->yError();
+    double ey = vxyp[i]->yError();  if (includeSystErrors) ey = vxyp[i]->yErrorTot();
     int ix = 1 + (int)((x-hist->GetBinLowEdge(1))/hist->GetBinWidth(1));
     if (hist->GetBinContent(ix) != 0){ 
       cout << "FSXYPointList WARNING: overwriting data in histogram" << endl; 
@@ -175,7 +175,7 @@ FSXYPointList::getEmptyTH1F(TString category, TString histBounds){
 }
 
 TGraphAsymmErrors*
-FSXYPointList::getTGraph(TString category){
+FSXYPointList::getTGraph(TString category, bool includeSystErrors){
   static const int MAXPOINTS = 10000;
   int n = 0;
   double vx[MAXPOINTS];  double vxel[MAXPOINTS];  double vxeh[MAXPOINTS];
@@ -183,11 +183,11 @@ FSXYPointList::getTGraph(TString category){
   vector<FSXYPoint*> vxyp = getXYPoints(category);
   for (unsigned int i = 0; i < vxyp.size(); i++){
     vx[n]   = vxyp[i]->xValue();
-    vxel[n] = vxyp[i]->xErrorLow();
-    vxeh[n] = vxyp[i]->xErrorHigh();
+    vxel[n] = vxyp[i]->xErrorLow();   if (includeSystErrors) vxel[n] = vxyp[i]->xErrorTotLow();
+    vxeh[n] = vxyp[i]->xErrorHigh();  if (includeSystErrors) vxeh[n] = vxyp[i]->xErrorTotHigh();
     vy[n]   = vxyp[i]->yValue();
-    vyel[n] = vxyp[i]->yErrorLow();
-    vyeh[n] = vxyp[i]->yErrorHigh();
+    vyel[n] = vxyp[i]->yErrorLow();   if (includeSystErrors) vyel[n] = vxyp[i]->yErrorTotLow();
+    vyeh[n] = vxyp[i]->yErrorHigh();  if (includeSystErrors) vyeh[n] = vxyp[i]->yErrorTotHigh();
     n++;
   }
   TGraphAsymmErrors* tgraph = new TGraphAsymmErrors(n,vx,vy,vxel,vxeh,vyel,vyeh);

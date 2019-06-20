@@ -27,11 +27,11 @@ class FSXYPointList{
 
     static void display(TString category = "");
 
-    static TH1F* getTH1F(TString category = "", TString histBounds = "(5000,0.0,5.0)");
+    static TH1F* getTH1F(TString category = "", TString histBounds = "(5000,0.0,5.0)", bool includeSystErrors = false);
 
     static TH1F* getEmptyTH1F(TString category = "", TString histBounds = "(5000,0.0,5.0)");
 
-    static TGraphAsymmErrors* getTGraph(TString category = "");
+    static TGraphAsymmErrors* getTGraph(TString category = "", bool includeSystErrors = false);
 
     static void clearXYPoints();
 
