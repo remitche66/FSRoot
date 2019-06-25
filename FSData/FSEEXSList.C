@@ -176,22 +176,33 @@ FSEEXSList::bgxsAve(TString xsCat, TString dsCat, TString lumCat){
 
 double
 FSEEXSList::effEst(double ecm, TString xsCat, TString dsCat, TString lumCat){
+    // get an original list of cross sections
   vector<FSEEXS*> vxs = getXSVector(xsCat,dsCat,lumCat);
   if (vxs.size() == 0){
     cout << "FSEEXSList::effExt ERROR: no cross sections" << endl; 
     exit(0);
   }
-  if (ecm < vxs[0]->ecm()) return vxs[0]->eff();
-  for (unsigned int i = 0; i < vxs.size()-1; i++){
-    double ecm1 = vxs[i]->ecm();
-    double ecm2 = vxs[i+1]->ecm();
+    // make a list with non-zero efficiency
+  vector<FSEEXS*> vxsEff;
+  for (unsigned int i = 0; i < vxs.size(); i++){
+    if (vxs[i]->eff() > 0) vxsEff.push_back(vxs[i]);
+  }
+  if (vxsEff.size() == 0){
+    cout << "FSEEXSList::effExt ERROR: no cross sections with non-zero efficiency" << endl; 
+    exit(0);
+  }
+    // interpololate
+  if (ecm < vxsEff[0]->ecm()) return vxsEff[0]->eff();
+  for (unsigned int i = 0; i < vxsEff.size()-1; i++){
+    double ecm1 = vxsEff[i]->ecm();
+    double ecm2 = vxsEff[i+1]->ecm();
     if (ecm >= ecm1 && ecm < ecm2){
-      double eff1 = vxs[i]->eff();
-      double eff2 = vxs[i+1]->eff();
+      double eff1 = vxsEff[i]->eff();
+      double eff2 = vxsEff[i+1]->eff();
       return (eff2-eff1)/(ecm2-ecm1)*(ecm-ecm1)+eff1;
     }
   }
-  return vxs[vxs.size()-1]->eff();
+  return vxsEff[vxsEff.size()-1]->eff();
 }
 
 
