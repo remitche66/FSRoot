@@ -161,16 +161,53 @@ FSEEXSList::bgxsAve(TString xsCat, TString dsCat, TString lumCat){
   for (unsigned int i = 0; i < vxs.size(); i++){
     double L = vxs[i]->lum();
     double B = vxs[i]->bgxs();
+    double nsigma = 0.0;
+    if (vxs[i]->exs() > 0.0) nsigma = vxs[i]->xs()/vxs[i]->exs();
+    if (nsigma < 1.5) continue;
     if (B >= 0){
       N += L*B;
       D += L;
     }
   }
   if (D == 0){
-    cout << "FSEEXSList::bgxsAve ERROR: no luminosity" << endl; 
-    exit(0);
+    cout << "FSEEXSList::bgxsAve WARNING: problem determining bgxsAve, returning 0" << endl; 
+    return 0.0;
   }
   return N/D;
+}
+
+
+
+double
+FSEEXSList::bgxsEst(double ecm, TString xsCat, TString dsCat, TString lumCat){
+    // get an original list of cross sections
+  vector<FSEEXS*> vxs = getXSVector(xsCat,dsCat,lumCat);
+  if (vxs.size() == 0){
+    cout << "FSEEXSList::bgxsEst ERROR: no cross sections" << endl; 
+    exit(0);
+  }
+    // make a select list with good measurements
+  vector<FSEEXS*> selectvxs;
+  for (unsigned int i = 0; i < vxs.size(); i++){
+    double nsigma = 0.0;
+    if (vxs[i]->exs() > 0.0) nsigma = vxs[i]->xs()/vxs[i]->exs();
+    if (nsigma < 1.5) continue;
+    selectvxs.push_back(vxs[i]);
+  }
+    // find the closest
+  double bgxs = 0.0;
+  double closestecm = 10000.0;
+  for (unsigned int i = 0; i < selectvxs.size(); i++){
+    double ecmdiff = fabs(selectvxs[i]->ecm() - ecm);
+    if (ecmdiff < closestecm){
+      closestecm = ecmdiff;
+      bgxs = selectvxs[i]->bgxs();
+    }
+  }
+  if (bgxs == 0.0){
+    cout << "FSEEXSList::bgxsEst WARNING: problem determining bgxsEst, returning 0" << endl; 
+  }
+  return bgxs;
 }
 
 
@@ -216,11 +253,12 @@ FSEEXSList::addXSFromFunction(TString reactionName, TString sourceName, TF1* fun
     exit(0);
   }
   vector<FSEEDataSet*> vfsds = fsds->subSets();
-  double bgxs = bgxsAve(xsCatOld,dsCatOld,lumCatOld);
+  //double bgxs = bgxsAve(xsCatOld,dsCatOld,lumCatOld);
   for (unsigned int i = 0; i < vfsds.size(); i++){
     TString dataSetName = vfsds[i]->name();
     double ecm = vfsds[i]->ecm();
     double eff = effEst(ecm,xsCatOld,dsCatOld,lumCatOld);
+    double bgxs = bgxsEst(ecm,xsCatOld,dsCatOld,lumCatOld);
     FSEEXS* fsxs = addXS(reactionName,dataSetName,sourceName);
     fsxs->initWithPrediction(funcPrediction->Eval(ecm),eff,bgxs,false);
   }

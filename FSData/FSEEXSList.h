@@ -31,6 +31,8 @@ class FSEEXSList{
 
     static double bgxsAve(TString xsCat = "", TString dsCat = "", TString lumCat = "");
 
+    static double bgxsEst(double ecm, TString xsCat = "", TString dsCat = "", TString lumCat = "");
+
     static double effEst(double ecm, TString xsCat = "", TString dsCat = "", TString lumCat = "");
 
 
