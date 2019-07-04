@@ -278,25 +278,3 @@ xs1  reactionX3872  2013:4360  measured   0.09  0.10   1.7
 xs1  reactionX3872  201n:4420  measured   0.00  0.03   0.0
 xs1  reactionX3872  2014:4600  measured   0.00  0.03   0.0
 
-
-###############
-#  Ds Ds
-###############
-
-# from Li Ke's September 2015 talk
-#   measurements from slide 25
-#   efficiencies from slide 21
-xs3  reactionDsDs  2013:4190  measured   32.684  46.598  0.02
-xs3  reactionDsDs  2013:4210  measured   42.290  55.037  0.02
-xs3  reactionDsDs  2013:4220  measured   22.409  33.426  0.02
-xs3  reactionDsDs  2013:4230  measured   14.635  16.527  0.02
-xs3  reactionDsDs  2013:4245  measured   44.649  58.432  0.02
-xs3  reactionDsDs  2013:4260  measured   43.878  46.995  0.02
-xs3  reactionDsDs  2013:4310  measured   50.812  64.443  0.02
-xs3  reactionDsDs  2013:4360  measured   30.748  34.039  0.02
-xs3  reactionDsDs  2013:4390  measured   43.340  55.820  0.02
-xs3  reactionDsDs  201n:4420  measured   32.537  34.989  0.02
-xs3  reactionDsDs  2014:4470  measured   36.622  44.310  0.02
-xs3  reactionDsDs  2014:4530  measured   25.681  32.382  0.02
-xs3  reactionDsDs  2014:4575  measured   33.281  44.558  0.02
-xs3  reactionDsDs  2014:4600  measured   19.834  22.465  0.02
