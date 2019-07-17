@@ -280,6 +280,7 @@ FSTree::expandVariable(TString variable){
   TString MOMMARK         ("MOMENTUM(");
   TString ENMARK          ("ENERGY(");
   TString DOTPRODUCT      ("DOTPRODUCT(");
+  TString HELCOSINE       ("HELCOSINE(");
   TString COSINE          ("COSINE(");
 
   while (variable.Contains(RECOILMASSMARK) ||
@@ -293,6 +294,7 @@ FSTree::expandVariable(TString variable){
          variable.Contains(MOMMARK)  ||
          variable.Contains(ENMARK)   ||
          variable.Contains(DOTPRODUCT) ||
+         variable.Contains(HELCOSINE) ||
          variable.Contains(COSINE)){
 
     int index = 0;
@@ -314,6 +316,7 @@ FSTree::expandVariable(TString variable){
     else if (variable.Contains(MOMMARK))         mark = MOMMARK;
     else if (variable.Contains(ENMARK))          mark = ENMARK;
     else if (variable.Contains(DOTPRODUCT))      mark = DOTPRODUCT;
+    else if (variable.Contains(HELCOSINE))       mark = HELCOSINE;
     else if (variable.Contains(COSINE))          mark = COSINE;
 
 
@@ -540,6 +543,29 @@ FSTree::expandVariable(TString variable){
                                     "(" + PzM + ")**2)))";
       }
     }
+    else if (mark == HELCOSINE){
+         TString pmag = "(sqrt((" + PxM + ")**2+" +
+                              "(" + PyM + ")**2+" +
+                              "(" + PzM + ")**2))";
+         TString bmag = "(sqrt((" + PxN + ")**2+" +
+                              "(" + PyN + ")**2+" +
+                              "(" + PzN + ")**2))";
+         TString Ep   = "(" + EnM + ")";
+         TString Eb   = "(" + EnN + ")";
+         TString costheta = "(((" + PxN + ")*(" + PxM + ")+" +
+                              "(" + PyN + ")*(" + PyM + ")+" +
+                              "(" + PzN + ")*(" + PzM + "))/" +
+                                 "(" + pmag + "*" + bmag + "))";
+         TString sintheta = "(sqrt(1.0-" + costheta + "**2))";
+         TString ppar  = "("+pmag+"*"+costheta+")";
+         TString pperp = "("+pmag+"*"+sintheta+")";
+         TString beta = "(("+bmag+")/("+Eb+"))";
+         TString gamma = "(1.0/sqrt(1.0-"+beta+"**2))";
+         TString pparp = "("+gamma+"*"+ppar+ "-" +gamma+"*"+beta+"*"+Ep+")";
+         TString pmagp = "(sqrt("+pparp+"**2+"+pperp+"**2))";
+         substitute += "("+pperp+"/"+pmagp+")";
+    }
+
 
     variable.Replace(index,size,substitute);
 

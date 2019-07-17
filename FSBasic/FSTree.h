@@ -63,10 +63,10 @@ class FSTree{
       //     FSTree::defineFourVector("SPECIAL","spe","spx","spy","spz")
       //   then 
       //     FSTree::expandVariable("1+XXMASS(SPECIAL,2,3)")
-      //   --> "1+(sqrt((XXspe+XXEnP2+XXEnP3)**2
-      //               -(XXspx+XXPxP2+XXPxP3)**2
-      //               -(XXspy+XXPyP2+XXPyP3)**2
-      //               -(XXspz+XXPzP2+XXPzP3)**2))"
+      //   --> "1+(sqrt((spe+XXEnP2+XXEnP3)**2
+      //               -(spx+XXPxP2+XXPxP3)**2
+      //               -(spy+XXPyP2+XXPyP3)**2
+      //               -(spz+XXPzP2+XXPzP3)**2))"
       // ********************************************************
 
     static void defineFourVector(TString indexName, TString En, TString Px, TString Py, TString Pz);
