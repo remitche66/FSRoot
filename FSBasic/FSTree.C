@@ -401,10 +401,10 @@ FSTree::expandVariable(TString variable){
         PzPN.push_back(m_mapDefinedPz[pN[i]]);
       }
       else{
-        EnPN.push_back(TString("EnP")+pN[i]);
-        PxPN.push_back(TString("PxP")+pN[i]);
-        PyPN.push_back(TString("PyP")+pN[i]);
-        PzPN.push_back(TString("PzP")+pN[i]);
+        EnPN.push_back(PREFIXMARK+TString("EnP")+pN[i]);
+        PxPN.push_back(PREFIXMARK+TString("PxP")+pN[i]);
+        PyPN.push_back(PREFIXMARK+TString("PyP")+pN[i]);
+        PzPN.push_back(PREFIXMARK+TString("PzP")+pN[i]);
       }
     }
 
@@ -422,33 +422,30 @@ FSTree::expandVariable(TString variable){
         PzPM.push_back(m_mapDefinedPz[pM[i]]);
       }
       else{
-        EnPM.push_back(TString("EnP")+pM[i]);
-        PxPM.push_back(TString("PxP")+pM[i]);
-        PyPM.push_back(TString("PyP")+pM[i]);
-        PzPM.push_back(TString("PzP")+pM[i]);
+        EnPM.push_back(PREFIXMARK+TString("EnP")+pM[i]);
+        PxPM.push_back(PREFIXMARK+TString("PxP")+pM[i]);
+        PyPM.push_back(PREFIXMARK+TString("PyP")+pM[i]);
+        PzPM.push_back(PREFIXMARK+TString("PzP")+pM[i]);
       }
     }
 
 
 
-    TString pre("");
     TString operation("");
-    if (hasprefixmark)   pre =  PREFIXMARK;
-    if (pre == "TR") pre = "MCDecayParticle";
       // make the sum of N four-vectors
     for (unsigned int i = 0;   i < pN.size(); i++) { if (i == 0) operation = "";
                                                      if (i != 0) operation = "+";
-                                                     EnN += operation+pre+EnPN[i];
-			  		             PxN += operation+pre+PxPN[i];
-					             PyN += operation+pre+PyPN[i];
-					             PzN += operation+pre+PzPN[i]; }
+                                                     EnN += operation+EnPN[i];
+			  		             PxN += operation+PxPN[i];
+					             PyN += operation+PyPN[i];
+					             PzN += operation+PzPN[i]; }
       // make the sum of M four-vectors
     for (unsigned int i = 0;   i < pM.size(); i++) { if (i == 0) operation = "";
                                                      if (i != 0) operation = "+";
-                                                     EnM += operation+pre+EnPM[i];
-			  		             PxM += operation+pre+PxPM[i];
-					             PyM += operation+pre+PyPM[i];
-					             PzM += operation+pre+PzPM[i]; }
+                                                     EnM += operation+EnPM[i];
+			  		             PxM += operation+PxPM[i];
+					             PyM += operation+PyPM[i];
+					             PzM += operation+PzPM[i]; }
      // make the difference between N and M four-vectors
     EnD = EnN + "-(" + EnM +")";
     PxD = PxN + "-(" + PxM +")";
