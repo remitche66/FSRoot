@@ -47,15 +47,30 @@ class FSTree{
       // ********************************************************
       // EXPAND VARIABLE MACROS
       //   For example:
-      //     "XXMASS(2,3)"
-      //   --> "(sqrt((XXEnP2+XXEnP3)*(XXEnP2+XXEnP3)
-      //             -(XXPxP2+XXPxP3)*(XXPxP2+XXPxP3)
-      //             -(XXPyP2+XXPyP3)*(XXPyP2+XXPyP3)
-      //             -(XXPzP2+XXPzP3)*(XXPzP2+XXPzP3)))"
+      //     FSTree::expandVariable("1+XXMASS(2,3)")
+      //   --> "1+(sqrt((XXEnP2+XXEnP3)**2
+      //               -(XXPxP2+XXPxP3)**2
+      //               -(XXPyP2+XXPyP3)**2
+      //               -(XXPzP2+XXPzP3)**2))"
       // ********************************************************
 
     static TString expandVariable(TString variable);
 
+      // ********************************************************
+      // DEFINE SPECIAL FOUR-VECTORS
+      //   These are used by expandVariable.
+      //   For example:
+      //     FSTree::defineFourVector("SPECIAL","spe","spx","spy","spz")
+      //   then 
+      //     FSTree::expandVariable("1+XXMASS(SPECIAL,2,3)")
+      //   --> "1+(sqrt((XXspe+XXEnP2+XXEnP3)**2
+      //               -(XXspx+XXPxP2+XXPxP3)**2
+      //               -(XXspy+XXPyP2+XXPyP3)**2
+      //               -(XXspz+XXPzP2+XXPzP3)**2))"
+      // ********************************************************
+
+    static void defineFourVector(TString indexName, TString En, TString Px, TString Py, TString Pz);
+  
 
       // ********************************************************
       // CLEAR GLOBAL CACHES
@@ -71,6 +86,13 @@ class FSTree{
 
     static map< TString, TChain*> m_chainCache;
     static map< TString, TFile*> m_fileCache;
+
+      // defined four-vectors
+
+    static map< TString, TString > m_mapDefinedPx;
+    static map< TString, TString > m_mapDefinedPy;
+    static map< TString, TString > m_mapDefinedPz;
+    static map< TString, TString > m_mapDefinedEn;
 
 
 };

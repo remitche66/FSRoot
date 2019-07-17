@@ -20,6 +20,11 @@
 map< TString, TChain*> FSTree::m_chainCache;
 map< TString, TFile*> FSTree::m_fileCache;
 
+map< TString, TString > FSTree::m_mapDefinedPx;
+map< TString, TString > FSTree::m_mapDefinedPy;
+map< TString, TString > FSTree::m_mapDefinedPz;
+map< TString, TString > FSTree::m_mapDefinedEn;
+
 
   // ********************************************************
   // GET A TCHAIN FROM THE CACHE OR CREATE A NEW ONE
@@ -293,10 +298,10 @@ FSTree::expandVariable(TString variable){
     int index = 0;
     int size = 0;
     bool hasprefixmark = false;
-    TString EnN("");  TString EnM("");  TString En("");
-    TString PxN("");  TString PxM("");	TString Px("");
-    TString PyN("");  TString PyM("");	TString Py("");
-    TString PzN("");  TString PzM("");	TString Pz("");
+    TString EnN("");  TString EnM("");  TString EnD("");
+    TString PxN("");  TString PxM("");	TString PxD("");
+    TString PyN("");  TString PyM("");	TString PyD("");
+    TString PzN("");  TString PzM("");	TString PzD("");
     TString mark("");
          if (variable.Contains(RECOILMASSMARK))  mark = RECOILMASSMARK;
     else if (variable.Contains(RECOILMASS2MARK)) mark = RECOILMASS2MARK;
@@ -311,6 +316,8 @@ FSTree::expandVariable(TString variable){
     else if (variable.Contains(DOTPRODUCT))      mark = DOTPRODUCT;
     else if (variable.Contains(COSINE))          mark = COSINE;
 
+
+      // determine if there is a prefix and set markers
     if (variable.Contains(mark) && 
              variable.Index(mark) >= 1 &&
              TString(variable[variable.Index(mark)-1]).IsAlpha()){
@@ -328,8 +335,10 @@ FSTree::expandVariable(TString variable){
 	   size = (mark).Length()+1;
     }
 
-    vector<TString> pN;
-    vector<TString> pM;
+
+      // make vectors of indices
+    vector<TString> pN;  // indices before the semicolon
+    vector<TString> pM;  // indices after the semicolon
     bool usevectorM = false;
     TString pIndex("");
     for (int i = index+size-1; (variable[i] != ')' && i < variable.Length()); i++){
@@ -348,51 +357,8 @@ FSTree::expandVariable(TString variable){
     if (pIndex.Length() > 0 &&  usevectorM) pM.push_back(pIndex);
 
 
-    TString CROSSINGANGLE("-0.003");
-    if (pN[0] == "B3BEAM") CROSSINGANGLE = "0.011";
-    if (pN[0] == "CCBEAM") CROSSINGANGLE = "-0.003";
-    unsigned int ipN = 0;
-    if (pN[0] == "P1S")     pN[0] = "3.096916";
-    if (pN[0] == "P2S")     pN[0] = "3.68609";
-    if (pN[0] == "P3770")   pN[0] = "3.774";
-    if (pN[0] == "Y1S")     pN[0] = "9.4603";
-    if (pN[0] == "Y2S")     pN[0] = "10.02326";
-    if (pN[0] == "Y3S")     pN[0] = "10.3552";
-    if (pN[0] == "BEAM")    pN[0] = "(2.0*BeamEnergy)";
-    if (pN[0] == "B3BEAM")  pN[0] = "(2.0*BeamEnergy)";
-    if (pN[0] == "CCBEAM")  pN[0] = "(2.0*BeamEnergy)";
-    if (pN[0].Contains(".")){
-      EnN += pN[0];		             
-      PxN += "1.0*sin("+CROSSINGANGLE+")*"+pN[0];
-      PyN += "0.0";
-      PzN += "0.0";
-      ipN++;
-    }
-    //if (pN[0] == "GBEAM"){
-    //  EnN += "(BeamEnergy+0.938)";		             
-    //  PxN += "0.0";
-    //  PyN += "0.0";
-    //  PzN += "(BeamEnergy)";
-    //  ipN++;
-    //}
-    if (pN[0] == "GBEAM"){
-      EnN += "(EnPB+0.938272)";		             
-      PxN += "PxPB";
-      PyN += "PyPB";
-      PzN += "PzPB";
-      ipN++;
-    }
-    if (pN[0] == "RGBEAM"){
-      EnN += "(REnPB+0.938272)";		             
-      PxN += "RPxPB";
-      PyN += "RPyPB";
-      PzN += "RPzPB";
-      ipN++;
-    }
-
-
       // sort the pN vector
-    for (unsigned int i = ipN; (pN.size() != 0) && (i < pN.size()-1); i++){
+    for (unsigned int i = 0; (pN.size() != 0) && (i < pN.size()-1); i++){
       for (unsigned int j = i+1; j < pN.size(); j++){
         if (FSString::TString2string(pN[j]) < FSString::TString2string(pN[i])){
           TString tmp = pN[i];
@@ -413,75 +379,124 @@ FSTree::expandVariable(TString variable){
       }
     }
 
+      // hard-code a few special vectors
+    if (m_mapDefinedEn.find("B3BEAM") == m_mapDefinedEn.end()){
+      defineFourVector("B3BEAM","(2.0*BeamEnergy)","1.0*sin(0.011)*(2.0*BeamEnergy)","0.0","0.0");
+      defineFourVector("CCBEAM","(2.0*BeamEnergy)","1.0*sin(-0.003)*(2.0*BeamEnergy)","0.0","0.0");
+      defineFourVector("GBEAM","(EnPB+0.938272)","PxPB","PyPB","PzPB");
+    }
+
+
+      // make substitutions in the pN vector
+    vector<TString> EnPN;
+    vector<TString> PxPN;
+    vector<TString> PyPN;
+    vector<TString> PzPN;
+    for (unsigned int i = 0; i < pN.size(); i++){
+      map<TString,TString>::const_iterator mapItr = m_mapDefinedEn.find(pN[i]);
+      if (mapItr != m_mapDefinedEn.end()){
+        EnPN.push_back(m_mapDefinedEn[pN[i]]);
+        PxPN.push_back(m_mapDefinedPx[pN[i]]);
+        PyPN.push_back(m_mapDefinedPy[pN[i]]);
+        PzPN.push_back(m_mapDefinedPz[pN[i]]);
+      }
+      else{
+        EnPN.push_back(TString("EnP")+pN[i]);
+        PxPN.push_back(TString("PxP")+pN[i]);
+        PyPN.push_back(TString("PyP")+pN[i]);
+        PzPN.push_back(TString("PzP")+pN[i]);
+      }
+    }
+
+      // make substitutions in the pM vector
+    vector<TString> EnPM;
+    vector<TString> PxPM;
+    vector<TString> PyPM;
+    vector<TString> PzPM;
+    for (unsigned int i = 0; i < pM.size(); i++){
+      map<TString,TString>::const_iterator mapItr = m_mapDefinedEn.find(pM[i]);
+      if (mapItr != m_mapDefinedEn.end()){
+        EnPM.push_back(m_mapDefinedEn[pM[i]]);
+        PxPM.push_back(m_mapDefinedPx[pM[i]]);
+        PyPM.push_back(m_mapDefinedPy[pM[i]]);
+        PzPM.push_back(m_mapDefinedPz[pM[i]]);
+      }
+      else{
+        EnPM.push_back(TString("EnP")+pM[i]);
+        PxPM.push_back(TString("PxP")+pM[i]);
+        PyPM.push_back(TString("PyP")+pM[i]);
+        PzPM.push_back(TString("PzP")+pM[i]);
+      }
+    }
+
+
 
     TString pre("");
-    TString post("");
     TString operation("");
     if (hasprefixmark)   pre =  PREFIXMARK;
     if (pre == "TR") pre = "MCDecayParticle";
-    for (unsigned int i = ipN; i < pN.size(); i++) { if (i == 0) operation = "";
+      // make the sum of N four-vectors
+    for (unsigned int i = 0;   i < pN.size(); i++) { if (i == 0) operation = "";
                                                      if (i != 0) operation = "+";
-                                                     EnN += operation+pre+"EnP"+pN[i]+post;
-			  		             PxN += operation+pre+"PxP"+pN[i]+post;
-					             PyN += operation+pre+"PyP"+pN[i]+post;
-					             PzN += operation+pre+"PzP"+pN[i]+post; }
+                                                     EnN += operation+pre+EnPN[i];
+			  		             PxN += operation+pre+PxPN[i];
+					             PyN += operation+pre+PyPN[i];
+					             PzN += operation+pre+PzPN[i]; }
+      // make the sum of M four-vectors
     for (unsigned int i = 0;   i < pM.size(); i++) { if (i == 0) operation = "";
                                                      if (i != 0) operation = "+";
-                                                     EnM += operation+pre+"EnP"+pM[i]+post;
-			  		             PxM += operation+pre+"PxP"+pM[i]+post;
-					             PyM += operation+pre+"PyP"+pM[i]+post;
-					             PzM += operation+pre+"PzP"+pM[i]+post; }
+                                                     EnM += operation+pre+EnPM[i];
+			  		             PxM += operation+pre+PxPM[i];
+					             PyM += operation+pre+PyPM[i];
+					             PzM += operation+pre+PzPM[i]; }
+     // make the difference between N and M four-vectors
+    EnD = EnN + "-(" + EnM +")";
+    PxD = PxN + "-(" + PxM +")";
+    PyD = PyN + "-(" + PyM +")";
+    PzD = PzN + "-(" + PzM +")";
 
 
     TString substitute("");
 
          if (mark == RECOILMASSMARK){
-           En = EnN + "-(" + EnM +")";
-           Px = PxN + "-(" + PxM +")";
-           Py = PyN + "-(" + PyM +")";
-           Pz = PzN + "-(" + PzM +")";
-	   //substitute += "(sqrt((" + En + ")*(" + En + ")-" +
-           //                    "(" + Px + ")*(" + Px + ")-" +
-           //                    "(" + Py + ")*(" + Py + ")-" +
-           //                    "(" + Pz + ")*(" + Pz + ")))";
-	   substitute += "(sqrt((" + En + ")**2-" +
-                               "(" + Px + ")**2-" +
-                               "(" + Py + ")**2-" +
-                               "(" + Pz + ")**2))";
+	   substitute += "(sqrt((" + EnD + ")**2-" +
+                               "(" + PxD + ")**2-" +
+                               "(" + PyD + ")**2-" +
+                               "(" + PzD + ")**2))";
     }
     else if (mark == RECOILMASS2MARK){
-           En = EnN + "-(" + EnM +")";
-           Px = PxN + "-(" + PxM +")";
-           Py = PyN + "-(" + PyM +")";
-           Pz = PzN + "-(" + PzM +")";
-	   //substitute += "((" + En + ")*(" + En + ")-" +
-           //               "(" + Px + ")*(" + Px + ")-" +
-           //               "(" + Py + ")*(" + Py + ")-" +
-           //               "(" + Pz + ")*(" + Pz + "))";
-	   substitute += "((" + En + ")**2-" +
-                          "(" + Px + ")**2-" +
-                          "(" + Py + ")**2-" +
-                          "(" + Pz + ")**2)";
+	   substitute += "((" + EnD + ")**2-" +
+                          "(" + PxD + ")**2-" +
+                          "(" + PyD + ")**2-" +
+                          "(" + PzD + ")**2)";
     }
     else if (mark == MASSMARK){
-	   //substitute += "(sqrt((" + EnN + ")*(" + EnN + ")-" +
-           //                    "(" + PxN + ")*(" + PxN + ")-" +
-           //                    "(" + PyN + ")*(" + PyN + ")-" +
-           //                    "(" + PzN + ")*(" + PzN + ")))";
+      if (pM.size()==0){
 	   substitute += "(sqrt((" + EnN + ")**2-" +
                                "(" + PxN + ")**2-" +
                                "(" + PyN + ")**2-" +
                                "(" + PzN + ")**2))";
+      }
+      else{
+	   substitute += "(sqrt((" + EnD + ")**2-" +
+                               "(" + PxD + ")**2-" +
+                               "(" + PyD + ")**2-" +
+                               "(" + PzD + ")**2))";
+      }
     }
     else if (mark == MASS2MARK){
-	   //substitute += "((" + EnN + ")*(" + EnN + ")-" +
-           //               "(" + PxN + ")*(" + PxN + ")-" +
-           //               "(" + PyN + ")*(" + PyN + ")-" +
-           //               "(" + PzN + ")*(" + PzN + "))";
+      if (pM.size()==0){
 	   substitute += "((" + EnN + ")**2-" +
                           "(" + PxN + ")**2-" +
                           "(" + PyN + ")**2-" +
                           "(" + PzN + ")**2)";
+      }
+      else{
+	   substitute += "((" + EnD + ")**2-" +
+                          "(" + PxD + ")**2-" +
+                          "(" + PyD + ")**2-" +
+                          "(" + PzD + ")**2)";
+      }
     }
     else if (mark == MOMXMARK){
 	   substitute += "(" + PxN + ")";
@@ -497,9 +512,6 @@ FSTree::expandVariable(TString variable){
                                "(" + PyN + ")**2))";
     }
     else if (mark == MOMMARK){
-	   //substitute += "(sqrt((" + PxN + ")*(" + PxN + ")+" +
-           //                    "(" + PyN + ")*(" + PyN + ")+" +
-           //                    "(" + PzN + ")*(" + PzN + ")))";
 	   substitute += "(sqrt((" + PxN + ")**2+" +
                                "(" + PyN + ")**2+" +
                                "(" + PzN + ")**2))";
@@ -514,25 +526,12 @@ FSTree::expandVariable(TString variable){
     }
     else if (mark == COSINE){
       if (pM.size()==0){
-	   //substitute += "((" + PzN + ")/" +
-           //         "(sqrt((" + PxN + ")*(" + PxN + ")+" +
-           //               "(" + PyN + ")*(" + PyN + ")+" +
-           //               "(" + PzN + ")*(" + PzN + "))))"; 
 	   substitute += "((" + PzN + ")/" +
                     "(sqrt((" + PxN + ")**2+" +
                           "(" + PyN + ")**2+" +
                           "(" + PzN + ")**2)))"; 
       }
       else{
-	   //substitute += "(((" + PxN + ")*(" + PxM + ")+" +
-           //                "(" + PyN + ")*(" + PyM + ")+" +
-           //                "(" + PzN + ")*(" + PzM + "))/" +
-	   //                   "(sqrt((" + PxN + ")*(" + PxN + ")+" +
-           //                         "(" + PyN + ")*(" + PyN + ")+" +
-           //                         "(" + PzN + ")*(" + PzN + ")))/" + 
-	   //                   "(sqrt((" + PxM + ")*(" + PxM + ")+" +
-           //                         "(" + PyM + ")*(" + PyM + ")+" +
-           //                         "(" + PzM + ")*(" + PzM + "))))";
 	   substitute += "(((" + PxN + ")*(" + PxM + ")+" +
                            "(" + PyN + ")*(" + PyM + ")+" +
                            "(" + PzN + ")*(" + PzM + "))/" +
@@ -551,6 +550,23 @@ FSTree::expandVariable(TString variable){
 
   return variable;
 
+}
+
+
+    // ********************************************************
+    // DEFINE SPECIAL FOUR-VECTORS
+    // ********************************************************
+
+void
+FSTree::defineFourVector(TString indexName, TString En, TString Px, TString Py, TString Pz){
+  map<TString,TString>::const_iterator mapItr = m_mapDefinedEn.find(indexName);
+  if (mapItr != m_mapDefinedEn.end()){
+    cout << "FSTree WARNING:  overwriting defined four-vector named " << indexName << endl;
+  }
+  m_mapDefinedEn[indexName] = En;
+  m_mapDefinedPx[indexName] = Px;
+  m_mapDefinedPy[indexName] = Py;
+  m_mapDefinedPz[indexName] = Pz;
 }
 
 
