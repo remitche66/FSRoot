@@ -563,7 +563,7 @@ FSTree::expandVariable(TString variable){
          TString gamma = "(1.0/sqrt(1.0-"+beta+"**2))";
          TString pparp = "("+gamma+"*"+ppar+ "-" +gamma+"*"+beta+"*"+Ep+")";
          TString pmagp = "(sqrt("+pparp+"**2+"+pperp+"**2))";
-         substitute += "("+pperp+"/"+pmagp+")";
+         substitute += "("+pparp+"/"+pmagp+")";
     }
 
 
