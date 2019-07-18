@@ -299,7 +299,6 @@ FSTree::expandVariable(TString variable){
 
     int index = 0;
     int size = 0;
-    bool hasprefixmark = false;
     TString EnN("");  TString EnM("");  TString EnD("");
     TString PxN("");  TString PxM("");	TString PxD("");
     TString PyN("");  TString PyM("");	TString PyD("");
@@ -332,7 +331,6 @@ FSTree::expandVariable(TString variable){
            PREFIXMARK += variable[variable.Index(mark)-1];
 	   index = variable.Index(PREFIXMARK+mark);
 	   size = (PREFIXMARK+mark).Length()+1;
-	   hasprefixmark = true;
     }
     else if (variable.Contains(mark)){
 	   index = variable.Index(mark);
