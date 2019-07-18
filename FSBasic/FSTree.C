@@ -321,6 +321,7 @@ FSTree::expandVariable(TString variable){
 
 
       // determine if there is a prefix and set markers
+    PREFIXMARK = "";
     if (variable.Contains(mark) && 
              variable.Index(mark) >= 1 &&
              TString(variable[variable.Index(mark)-1]).IsAlpha()){
