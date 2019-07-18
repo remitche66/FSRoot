@@ -23,12 +23,14 @@ map < TString, vector<TString> > FSModeInfo::m_submodeMap;
 FSModeInfo::FSModeInfo(pair<int,int> mCode){
   m_modeCode = mCode;
   addStandardCategories();
+  if (particles().size() == 0){ cout << "FSModeInfo WARNING: creating mode with no particles" << endl; }
 }
 
 
 FSModeInfo::FSModeInfo(int mCode1, int mCode2){
   m_modeCode = pair<int,int>(mCode1,mCode2);
   addStandardCategories();
+  if (particles().size() == 0){ cout << "FSModeInfo WARNING: creating mode with no particles" << endl; }
 }
 
 
@@ -175,6 +177,7 @@ FSModeInfo::FSModeInfo(TString mString){
   addStandardCategories();
   addCategory(extendedCategories);
   addCategory(extraCategories);
+  if (particles().size() == 0){ cout << "FSModeInfo WARNING: creating mode with no particles" << endl; }
 }
 
 
