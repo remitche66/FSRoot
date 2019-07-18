@@ -67,6 +67,7 @@ FSModeTree::skimTree(TString fileNameInput, TString ntName, TString category,
       TString fileNameOutput_i = modeVector[i]->modeString(fileNameOutput);
       TString cuts_i = modeVector[i]->modeCuts(cuts);
       TString printCommandFile_i = modeVector[i]->modeString(printCommandFile);
+        if (printCommandFile == "") printCommandFile_i = "";
       FSTree::skimTree(fileNameInput_i,ntName_i,fileNameOutput_i,
                        cuts_i,"",printCommandFile_i);
     }
