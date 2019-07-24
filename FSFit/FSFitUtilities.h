@@ -225,6 +225,7 @@ class FSFitUtilities{
     // *************************
 
       // Create a minuit object (optionally add a data set to fit and a function to fit it with).
+      //  Options for fcnName are "CHI2" or "LIKELIHOOD".
 
     static void createMinuit(TString mName, TString dName = "", TString fName = "", 
                                TString fcnName = "CHI2"){

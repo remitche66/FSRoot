@@ -28,6 +28,231 @@ TString FSOR("||");
 TString FSNOT("!");
 
 
+      // ********************************************************
+      // CREATE A TREE IN THE SAME WAY A HISTOGRAM IS CREATED ABOVE
+      //   the tree is called "tree" and includes one variable "x"
+      // ********************************************************
+
+TTree* getTTree(TString fileName, TString ntName, TString category,
+               TString variable, TString cuts){
+ return NULL;
+}
+
+/* CODE FROM JOSH
+
+#include "../PART01_Setup.h"
+#include "../PART02_Cuts.h"
+#include "../PART03_Histograms.h"
+
+#include <fstream>
+
+using namespace std;
+using namespace RooFit;
+
+
+// Add new line to open file
+void nl(ofstream f, const char* text = "")
+{
+    f << text << endl;
+}
+
+void pl(const char* text = "")
+{
+    cout << text << endl;
+}
+
+
+TString getTreeIndexGeneral(TString fileName, TString ntName, TString category,
+                             TString variable, TString cuts)
+{
+    TString index;
+      index += "tree";
+      index += "(fn)";  index += fileName;
+      index += "(nt)";  index += ntName;
+      index += "(va)";  index += HistogramUtilities::expandVariable(variable);
+      index += "(cu)";  index += HistogramUtilities::expandVariable(cuts);
+    return index;
+}
+
+
+TTree* getTree(TString fileName, TString ntName, TString category,
+               TString variable, TString cuts, bool save = false)
+{
+    
+    TTree* finTree = new TTree("OBSERVABLE", "Observable TTree generated with \'datasetter.C\'.");
+    Double_t x;
+     finTree->Branch("x", &x, "x/D");
+
+     //vector<TString> indices;
+
+    vector<ModeInfo*> modeVector = ModeCollection::modeVector(category);
+      if (modeVector.size() == 0){
+        cout << "ModeHistogram:  there are no modes associated with this category..." << endl;
+        cout << "                ... returning NULL" << endl;
+      }
+
+      for (unsigned int i = 0; i < modeVector.size(); i++)
+      {
+        if (!ControlVariables::QUIET) { cout << endl; modeVector[i]->display(i+1); }
+
+        TString fileName_i = modeVector[i]->modeString(fileName);
+        TString ntName_i   = modeVector[i]->modeString(ntName);
+        TString variable_i = modeVector[i]->modeString(variable);
+        TString cuts_i("");  if (cuts != "") cuts_i = modeVector[i]->modeString(cuts);
+                                             cuts_i = modeVector[i]->modeCuts(cuts_i);
+
+        vector<TString> indices;
+        vector<TString> combinatorics = modeVector[i]->modeCombinatorics((variable_i+" "+cuts_i),ControlVariables::DEBUG);
+
+        if (!ControlVariables::QUIET) cout << "Creating new file object..." << endl;
+
+        TFile* fi_i = new TFile(fileName_i, "read");
+        TTree* nt_i = (TTree*)fi_i->Get(ntName_i);
+
+        if (!ControlVariables::QUIET) cout << "File object created successfully..." << endl;
+
+        // loop over all combinatorics within this mode
+
+        for (unsigned int j = 0; j < combinatorics.size(); j++)
+        {
+            TString variable_j("");
+              TString cuts_j("");
+              vector<TString> parts = StringUtilities::parseTString(combinatorics[j]," ");
+              if (parts.size() >= 1) variable_j = parts[0];
+              if (parts.size() >= 2) cuts_j     = parts[1];
+
+              if (!ControlVariables::QUIET) {
+                  cout << "MODE " << i << "." << j << ": " << endl;
+                  cout << "   Variable: " << variable_j << endl;
+                  cout << "   Cuts: " << cuts_j << endl;
+              }
+
+              TString index_j = getTreeIndexGeneral(fileName_i, ntName_i, category, variable_j, cuts_j);
+
+              bool usedIndex = false;
+              for (int k = 0; k < indices.size(); k++)
+              {
+                  if (indices[k] == index_j)
+                  {
+                      usedIndex = true;
+                      break;
+                  }
+              }
+              if (usedIndex) continue;
+
+              indices.push_back(index_j);
+
+              TTreeFormula cutsFormula_j("cutsFormula_j", HistogramUtilities::expandVariable(cuts_j), nt_i);
+              TTreeFormula varFormula_j("varFormula_j", HistogramUtilities::expandVariable(variable_j), nt_i);
+
+              Int_t totalEvents = 0;
+
+            for (unsigned int k = 0; k < nt_i->GetEntries(); k++)
+            {
+                x = -999;
+
+                nt_i->GetEntry(k);
+
+                if (cuts_j)
+                {
+                    if (!cutsFormula_j.EvalInstance())
+                    {
+                        continue;
+                    }
+                }
+
+                x = varFormula_j.EvalInstance();
+                finTree->Fill();
+                totalEvents++;
+
+                if (!ControlVariables::QUIET) cout << "(*) Event " << k << " passed!" << endl;
+            }
+            if (!ControlVariables::QUIET) cout << "Total events passing selection: " << totalEvents << endl << endl;
+          }
+
+          // SHOULD CLOSE THE FILE HERE TO PREVENT MEMORY LEAKS, BUT CLOSING THE FILE BREAKS ROOT!
+          if (!ControlVariables::QUIET) cout << "Closing file..." << endl;
+          delete nt_i;
+          fi_i->Close();
+          delete fi_i;
+          //delete nt_i;
+          if (!ControlVariables::QUIET) cout << "File closed!" << endl;
+      }
+
+      // UNCOMMENT THIS BLOCK TO ADD SAVING TO FILE BACK IN!
+      //TFile* finFile = new TFile("DATASETTER_X.root", "create");
+      //if (save) 
+    //{
+    //    finFile->cd();
+    //    finTree->Write();
+    //    finFile->Close();
+    //}
+    //delete finFile;
+
+      return finTree;
+}
+
+
+//void generateRooDataSetScript()
+//{
+//    ofstream fs("getRooDataSet.C");
+//
+//    TString dir("~/ANALYSIS/PI0PI0CHIC/FITS/");
+//    TString mode("11000_2000002");
+//    TString prefix("TOYDATA_");
+//    TString ext(".root");
+//    TString nt("ntEXC_PI0PI0CHIC_");
+//
+//    TFile* fi = new TFile(dir+prefix+mode+ext, "read");
+//    TTree* tree = (TTree*)fi->Get(nt+mode);
+//
+//    TObjArray* branches = tree->GetListOfBranches();
+//    //branches->Print();
+//
+//    // Construct script header
+//    nl(fs, "#include \"../PART01_Setup.h\"");
+//    nl(fs, "#include \"../PART02_Cuts.h\"");
+//    nl(fs, "#include \"../PART03_Histograms.h\"");
+//    nl(fs);
+//    nl(fs, "using namespace std;");
+//    nl(fs, "using namespace RooFit;");
+//    nl(fs);
+//    nl(fs, "void getRooDataSet()");
+//    nl(fs, "{");
+//
+//
+//    TIter iter(branches);
+//    TObject* obj;
+//    while((obj = iter.Next()))
+//    {
+//        cout << obj->GetName() << endl;
+//    }
+//
+//
+//    // End the script
+//    nl(fs, "}");    
+//
+//    fs.close();
+//}
+
+
+void datasetter()
+{
+    ControlVariables::DEBUG = false;
+    // ControlVariables::CHAINFRIEND = "chi";
+    ControlVariables::QUIET = true;
+
+    ModeCollection::addModeInfo(SEARCH_EE.code);
+    ModeCollection::addModeInfo(SEARCH_MM.code);
+
+    getTree("../TOYDATA_MODECODE.root", "ntEXC_PI0PI0CHIC_MODECODE", "", "RECOILMASS(B3BEAM;Xgamma1X)", CutsFor("DATASIG"));
+}
+
+
+*/
+
+
+
   // ********************************************************
   // GET A HISTOGRAM FROM THE CACHE OR RETURN NULL (private)
   // ********************************************************

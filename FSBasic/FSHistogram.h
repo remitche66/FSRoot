@@ -56,6 +56,14 @@ class FSHistogram{
                                 TString cuts,     TString options = "",
                                 float scale = 1.0);
 
+      // ********************************************************
+      // CREATE A TREE IN THE SAME WAY A HISTOGRAM IS CREATED ABOVE
+      //   the tree is called "tree" and includes one variable "x"
+      // ********************************************************
+
+TTree* getTTree(TString fileName, TString ntName, TString category,
+               TString variable, TString cuts);
+
 
       // ********************************************************
       // SET MAXIMA/MINIMA SO HISTOGRAMS CAN BE SHOWN TOGETHER
