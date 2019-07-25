@@ -397,6 +397,23 @@ class FSFitFunction{
     virtual double efx(double x) { return 0.0*x; }
 
 
+      // the integral of the function
+
+    virtual double integral(double x1, double x2) {
+      cout << "FSFitFunction ERROR: integral is not defined" << endl;
+      exit(0); 
+      return -1.0 + 0.0*(x2-x1);
+    }
+
+    double integral(vector< pair<double,double> > xLimits){
+      double total = 0.0;
+      for (unsigned int i = 0; i < xLimits.size(); i++){
+        if (xLimits[i].first < xLimits[i].second)
+          total += integral(xLimits[i].first,xLimits[i].second);
+      }
+      return total;
+    }
+
       // interface to TF1 (either of these works, I think)
 
     //Double_t rootFunction(Double_t* x, Double_t* par) { if (par == NULL) par = NULL; return fx(x[0]); }
@@ -737,6 +754,14 @@ class FSFitDataSet {
       fillSelected();
     }
 
+    FSFitDataSet(TString n_dName, vector<double> xUnbinnedData) : 
+        m_dName(n_dName), m_x(xUnbinnedData){
+      m_y.clear();
+      m_ey.clear();
+      clearLimits();
+      fillSelected();
+    }
+
     void clearLimits() { 
       m_xLimits.clear(); 
       fillSelected();
@@ -758,6 +783,10 @@ class FSFitDataSet {
     vector<double>  y() { return m_ySelected; }
     vector<double> ey() { return m_eySelected; }
 
+    bool hasY()  { return m_ySelected.size(); }
+    bool hasEY() { return m_eySelected.size(); }
+
+    vector< pair<double,double> > xLimits() { return m_xLimits; }
 
   private:
 
@@ -774,20 +803,22 @@ class FSFitDataSet {
       m_xSelected.clear();
       m_ySelected.clear();
       m_eySelected.clear();
-      for (unsigned int i = 0; i < m_x.size(); i++){
-        bool select = true;
-        if (m_xLimits.size() > 0){
-          select = false;
+      if (m_xLimits.size() == 0){
+        m_xSelected = m_x;
+        m_ySelected = m_y;
+        m_eySelected = m_ey;
+      }
+      else{
+        for (unsigned int i = 0; i < m_x.size(); i++){
           for (unsigned int j = 0; j < m_xLimits.size(); j++){
             double lowLimit = m_xLimits[j].first;
             double highLimit = m_xLimits[j].second;
-            if ((m_x[i] > lowLimit) && (m_x[i] < highLimit)) select = true;
+            if ((m_x[i] > lowLimit) && (m_x[i] < highLimit)){
+              m_xSelected.push_back(m_x[i]);
+              if (hasY())  m_ySelected.push_back(m_y[i]);
+              if (hasEY()) m_eySelected.push_back(m_ey[i]);
+            }
           }
-        }
-        if (select){
-          m_xSelected.push_back(m_x[i]);
-          m_ySelected.push_back(m_y[i]);
-          m_eySelected.push_back(m_ey[i]);
         }
       }
     }
@@ -925,14 +956,11 @@ class FSFitMinuit {
         TString fName = comps[i].second;
         vector<double> vx  = FSFitDataSetList::getDataSet(dName)->x();
         vector<double> vy  = FSFitDataSetList::getDataSet(dName)->y();
-        vector<double> vey = FSFitDataSetList::getDataSet(dName)->ey();
         FSFitFunction* func = FSFitFunctionList::getFunction(fName);
         for (unsigned int idata = 0; idata < vx.size(); idata++){
           double x = vx[idata];
           double y = vy[idata];
-          //double ey = vey[idata];
           double fx = func->fx(x);
-          //double efx = func->efx(x);
           if (fx < 0) fcn += 1.0e3;  // NOT SURE EXACTLY HOW TO DO THIS 
           //if (fx < 0) fx = fabs(fx); 
           if (fx > 0) fcn += 2.0*(fx - y*log(fx));
@@ -941,6 +969,32 @@ class FSFitMinuit {
       }
       return fcn;
     }
+
+
+    double unbinned(){
+      double fcn = 0.0;
+      vector< pair<TString,TString> > comps = fitComponents();
+      for (unsigned int i = 0; i < comps.size(); i++){
+        TString dName = comps[i].first;
+        TString fName = comps[i].second;
+        vector<double> vx  = FSFitDataSetList::getDataSet(dName)->x();
+        FSFitFunction* func = FSFitFunctionList::getFunction(fName);
+        double mu = func->integral(FSFitDataSetList::getDataSet(dName)->xLimits());
+        if (mu <= 0){
+          cout << "FSFitMinuit::unbinned ERROR: problem with normalization of function " 
+               << func->fName() << endl;
+          exit(0);
+        }
+        for (unsigned int idata = 0; idata < vx.size(); idata++){
+          double x = vx[idata];
+          double fx = func->fx(x);
+          if (fx < 0) fcn += 1.0e3;  // NOT SURE EXACTLY HOW TO DO THIS 
+          if (fx > 0) fcn += 2.0*(mu - log(fx));
+        }
+      }
+      return fcn;
+    }
+
 
     double chisquare(){
       double fcn = 0.0;
@@ -1155,6 +1209,13 @@ class FSFitFCN{
       FSFitMinuit* minuit = FSFitMinuitList::getMinuit(FSFitFCN::MNAME);
       minuit->setParameters(par);
       fcn = minuit->likelihood();
+    }
+
+    static void FCN_UNBINNED(Int_t& npar, Double_t* grad, Double_t& fcn, Double_t* par, Int_t iflag){
+      npar = npar; grad = grad; iflag = iflag;  // to suppress warnings
+      FSFitMinuit* minuit = FSFitMinuitList::getMinuit(FSFitFCN::MNAME);
+      minuit->setParameters(par);
+      fcn = minuit->unbinned();
     }
 
 };

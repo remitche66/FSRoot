@@ -24,9 +24,19 @@ class FSFitPOLY : public FSFitFunction{
       return (a + b*x + c*x*x);
     }
 
+    double integral(double x1, double x2){
+      double a = getParameterValue("a");
+      double b = getParameterValue("b");
+      double c = getParameterValue("c");
+      return (   a*x2 + 1.0/2.0*b*x2*x2 + 1.0/3.0*c*x2*x2*x2
+               - a*x1 - 1.0/2.0*b*x1*x1 - 1.0/3.0*c*x1*x1*x1 );
+    }
+
     FSFitPOLY* clone(){ return new FSFitPOLY("",m_xLow,m_xHigh); }
 
 };
+
+
 
 class FSFitGAUS : public FSFitFunction{
   public:
@@ -44,6 +54,16 @@ class FSFitGAUS : public FSFitFunction{
       double W = getParameterValue("W");
       if (W == 0.0) return 1.0e-6;
       return N/W/sqrt(2.0*3.141592654)*exp(-0.5*(x-M)*(x-M)/W/W);
+    }
+
+    double integral (double x1, double x2){
+      double N = getParameterValue("N");
+      double M = getParameterValue("M");
+      double W = getParameterValue("W");
+      if ((x1 < M - 5.0*W) && (x2 > M + 5.0*W)) return N;
+      cout << "FSFitGAUS ERROR:  integral is not defined" << endl;
+      exit(0);
+      return -1.0;
     }
 
     FSFitGAUS* clone(){ return new FSFitGAUS("",m_xLow,m_xHigh); }
@@ -96,6 +116,16 @@ class FSFitHIST : public FSFitFunction{
       double S = getParameterValue("S");
       int iBin = (int) ((x-m_xLow)/((m_xHigh-m_xLow)/m_nBins)) + 1;
       return S*m_hist->GetBinError(iBin);
+    }
+
+    double integral (double x1, double x2){
+      double S = getParameterValue("S");
+      double total = 0.0;
+      for (int iBin = 1; iBin <= m_nBins; iBin++){
+        double x = m_hist->GetBinCenter(iBin);
+        if ((x >= x1) && (x <= x2)) total += m_hist->GetBinContent(iBin);
+      }
+      return S*m_hist->GetBinWidth(1)*total;
     }
 
     FSFitHIST* clone(){ return new FSFitHIST("",m_hist); }
