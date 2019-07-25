@@ -203,6 +203,10 @@ class FSFitUtilities{
       FSFitDataSetList::addDataSet(dName,points,includeSystErrors);
     }
 
+    static void createDataSet(TString dName, vector<double> xUnbinnedData){
+      FSFitDataSetList::addDataSet(dName,xUnbinnedData);
+    }
+
 
       // Manage fit ranges for different data sets.
       //   Multiple fit ranges can be added to each data set.

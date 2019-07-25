@@ -630,6 +630,18 @@ class FSFitFunctionComposite : public FSFitFunction{
       return 0.0;
     }
 
+    double integral(double x1, double x2){
+      FSFitFunction* fun1 = otherFunction(m_fName1);
+      FSFitFunction* fun2 = otherFunction(m_fName2);
+      if (m_sign == "+") return (fun1->integral(x1,x2) + fun2->integral(x1,x2));
+      if (m_sign == "-") return (fun1->integral(x1,x2) - fun2->integral(x1,x2));
+      if ((m_sign == "*") || (m_sign == "/")){
+        cout << "FSFitFunction ERROR: integral is not defined for * or /" << endl;
+        exit(0);
+      }
+      return -1.0;
+    }
+
     FSFitFunctionComposite* clone() { 
       FSFitFunction* fun1 = otherFunction(m_fName1)->cloneBASE();
       FSFitFunction* fun2 = otherFunction(m_fName2)->cloneBASE();
@@ -846,6 +858,11 @@ class FSFitDataSetList {
       addDataSet(data);
     }
 
+    static void addDataSet(TString dName, vector<double> xUnbinnedData){ 
+      FSFitDataSet* data = new FSFitDataSet(dName,xUnbinnedData);
+      addDataSet(data);
+    }
+
     static void addDataSet(FSFitDataSet* data){
       if (!data){
         cout << "FSFitDataSetList ERROR: data=NULL in addDataSet" << endl;
@@ -956,6 +973,10 @@ class FSFitMinuit {
         TString fName = comps[i].second;
         vector<double> vx  = FSFitDataSetList::getDataSet(dName)->x();
         vector<double> vy  = FSFitDataSetList::getDataSet(dName)->y();
+        if (vy.size() == 0){
+          cout << "FSFit likelihood ERROR: no y values" << endl;
+          exit(0);
+        }
         FSFitFunction* func = FSFitFunctionList::getFunction(fName);
         for (unsigned int idata = 0; idata < vx.size(); idata++){
           double x = vx[idata];
@@ -1005,6 +1026,10 @@ class FSFitMinuit {
         vector<double> vx  = FSFitDataSetList::getDataSet(dName)->x();
         vector<double> vy  = FSFitDataSetList::getDataSet(dName)->y();
         vector<double> vey = FSFitDataSetList::getDataSet(dName)->ey();
+        if ((vy.size() == 0) || (vey.size() == 0)){
+          cout << "FSFit chi2 ERROR: no y or ey values" << endl;
+          exit(0);
+        }
         FSFitFunction* func = FSFitFunctionList::getFunction(fName);
         for (unsigned int idata = 0; idata < vx.size(); idata++){
           double x = vx[idata];
