@@ -28,8 +28,7 @@ map<TString, map<TString, float> > FSModeHistogram::m_cacheComponentsMap;
 
 
       // ********************************************************
-      // CREATE A TREE IN THE SAME WAY A HISTOGRAM IS CREATED ABOVE
-      //   the tree is called "tree" and includes one variable "x"
+      // CREATE A TREE IN THE SAME WAY AS A HISTOGRAM
       // ********************************************************
 
 
@@ -40,6 +39,17 @@ FSModeHistogram::getTH1FContents(TString fileName, TString ntName, TString categ
   Double_t x;  histTree->Branch("x",  &x,  "x/D");
   Double_t wt; histTree->Branch("wt", &wt, "wt/D");
   getTHNF(1,fileName,ntName,category,variable,bounds,cuts,options,scale,histTree);
+  return histTree;
+}
+
+TTree*
+FSModeHistogram::getTH2FContents(TString fileName, TString ntName, TString category, 
+       TString variable, TString bounds, TString cuts, TString options, float scale){
+  TTree* histTree = new TTree("TH1FContents", "TH1FContents");
+  Double_t x;  histTree->Branch("x",  &x,  "x/D");
+  Double_t y;  histTree->Branch("y",  &y,  "y/D");
+  Double_t wt; histTree->Branch("wt", &wt, "wt/D");
+  getTHNF(2,fileName,ntName,category,variable,bounds,cuts,options,scale,histTree);
   return histTree;
 }
 

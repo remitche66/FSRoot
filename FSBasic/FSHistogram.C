@@ -29,11 +29,10 @@ TString FSOR("||");
 TString FSNOT("!");
 
 
-      // ********************************************************
-      // CREATE A TREE IN THE SAME WAY A HISTOGRAM IS CREATED ABOVE
-      //   the tree is called "tree" and includes one variable "x"
-      // ********************************************************
 
+      // ********************************************************
+      // CREATE A TREE IN THE SAME WAY AS A HISTOGRAM
+      // ********************************************************
 
 TTree*
 FSHistogram::getTH1FContents(TString fileName, TString ntName, TString variable, TString bounds, 
@@ -62,31 +61,45 @@ FSHistogram::addTHNFContents(TTree* histTree, int dimension,
                              TString fileName, TString ntName, TString variable, TString bounds, 
                              TString cuts, float scale){
 
-  Double_t x;  if (dimension >= 1) histTree->SetBranchAddress("x",  &x);
-  Double_t y;  if (dimension == 2) histTree->SetBranchAddress("y",  &y);
-  Double_t wt; if (dimension >= 1) histTree->SetBranchAddress("wt", &wt);
+  vector<TString> vars = FSString::parseTString(variable,":");
+  if ((int)vars.size() != dimension){
+    cout << "FSHistogram contents ERROR:  bad variable format" << endl;
+    exit(0);
+  }
+  TString varX("");  if (dimension >= 1)  varX = vars[0];
+  TString varY("");  if (dimension == 2){ varX = vars[1]; varY = vars[0]; }
+
+  Double_t x = 0.0;  if (dimension >= 1) histTree->SetBranchAddress("x",  &x);
+  Double_t y = 0.0;  if (dimension == 2) histTree->SetBranchAddress("y",  &y);
+  Double_t wt = 0.0; if (dimension >= 1) histTree->SetBranchAddress("wt", &wt);
 
   TTree* nt = FSTree::getTChain(fileName,ntName);
 
   if (cuts == "") cuts = "(1==1)";
-  TTreeFormula cutsFormula("cutsFormula", cuts, nt);
-  TTreeFormula varFormula("varFormula", variable, nt);
-TTreeFormula varFormulaY;
+  TTreeFormula* cutsF = NULL; if (dimension >= 1) cutsF = new TTreeFormula("cutsF", cuts, nt);
+  TTreeFormula* varXF = NULL; if (dimension >= 1) varXF = new TTreeFormula("varXF", varX, nt);
+  TTreeFormula* varYF = NULL; if (dimension == 2) varYF = new TTreeFormula("varYF", varY, nt);
 
-// xxxxxx COME BACK TO HERE
-
-  double xLow  = FSString::parseBoundsLowerX(bounds);
-  double xHigh = FSString::parseBoundsUpperX(bounds);
+  double xLow  = 0.0;  if (dimension >= 1)  xLow = FSString::parseBoundsLowerX(bounds);
+  double xHigh = 0.0;  if (dimension >= 1) xHigh = FSString::parseBoundsUpperX(bounds);
+  double yLow  = 0.0;  if (dimension == 2)  yLow = FSString::parseBoundsLowerY(bounds);
+  double yHigh = 0.0;  if (dimension == 2) yHigh = FSString::parseBoundsUpperY(bounds);
 
   unsigned int nEvents = nt->GetEntries();
   for (unsigned int i = 0; i < nEvents; i++){
     nt->GetEntry(i);
-    if (!cutsFormula.EvalInstance()) continue;
-    x = varFormula.EvalInstance();
-    wt = scale;
-    if ((x < xLow) || (x > xHigh)) continue;      
+    if (!cutsF->EvalInstance()) continue;
+    if (dimension >= 1) x = varXF->EvalInstance();
+    if (dimension == 2) y = varYF->EvalInstance();
+    if (dimension >= 1) wt = scale;
+    if ((dimension >= 1) && ((x < xLow) || (x > xHigh))) continue;      
+    if ((dimension == 2) && ((y < yLow) || (y > yHigh))) continue;      
     histTree->Fill();  
   }
+
+  if (cutsF) delete cutsF;
+  if (varXF) delete varXF;
+  if (varYF) delete varYF;
 
   return histTree;
 }
