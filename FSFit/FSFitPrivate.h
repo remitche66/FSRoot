@@ -994,6 +994,7 @@ class FSFitMinuit {
 
     double unbinned(){
       double fcn = 0.0;
+      bool fcnProblem = false;
       vector< pair<TString,TString> > comps = fitComponents();
       for (unsigned int i = 0; i < comps.size(); i++){
         TString dName = comps[i].first;
@@ -1012,13 +1013,15 @@ class FSFitMinuit {
           double lnfx = 0.0;
           if (fx  > 0) lnfx = log(fx);
           if (fx <= 0){
-            lnfx = 1.0e3; // NOT SURE EXACTLY HOW TO DO THIS
-            cout << "FSFitMinuit::unbinned WARNING: negative fit function... adding 1.0e3 to lnL" << endl;
+            fcnProblem = true;
+            //lnfx = -1.0e3; // NOT SURE EXACTLY HOW TO DO THIS
+            cout << "FSFitMinuit::unbinned WARNING: negative fit function" << endl;
           }
           sumlnfx += lnfx;
         }
         fcn += 2.0*(mu - sumlnfx);
       }
+      if (fcnProblem) fcn += 1.0e3;
       return fcn;
     }
 
