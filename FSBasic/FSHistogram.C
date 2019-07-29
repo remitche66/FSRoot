@@ -38,10 +38,21 @@ TString FSNOT("!");
 TTree*
 FSHistogram::getTH1FContents(TString fileName, TString ntName, TString variable, TString bounds, 
                              TString cuts, TString options, float scale){
-  TTree* histTree = new TTree("TH1FContents", "TH1FContents");
+  TTree* histTree = new TTree("HistContents", "HistContents");
   Double_t x;  histTree->Branch("x",  &x,  "x/D");
   Double_t wt; histTree->Branch("wt", &wt, "wt/D");
   getTHNF(1,fileName,ntName,variable,bounds,cuts,options,scale,histTree);
+  return histTree;
+}
+
+TTree*
+FSHistogram::getTH2FContents(TString fileName, TString ntName, TString variable, TString bounds, 
+                             TString cuts, TString options, float scale){
+  TTree* histTree = new TTree("HistContents", "HistContents");
+  Double_t x;  histTree->Branch("x",  &x,  "x/D");
+  Double_t y;  histTree->Branch("y",  &y,  "y/D");
+  Double_t wt; histTree->Branch("wt", &wt, "wt/D");
+  getTHNF(2,fileName,ntName,variable,bounds,cuts,options,scale,histTree);
   return histTree;
 }
 
@@ -60,6 +71,9 @@ FSHistogram::addTHNFContents(TTree* histTree, int dimension,
   if (cuts == "") cuts = "(1==1)";
   TTreeFormula cutsFormula("cutsFormula", cuts, nt);
   TTreeFormula varFormula("varFormula", variable, nt);
+TTreeFormula varFormulaY;
+
+// xxxxxx COME BACK TO HERE
 
   double xLow  = FSString::parseBoundsLowerX(bounds);
   double xHigh = FSString::parseBoundsUpperX(bounds);
@@ -427,6 +441,9 @@ FSHistogram::getTHNF(int dimension,
   if (!histTree){
     pair<TH1F*,TH2F*> histPair = getHistogramFromCache(index);
     if (histPair.first || histPair.second) return histPair;
+  }
+  else{
+    cout << "FSHistogram:  MAKING TREE WITH HISTOGRAM CONTENTS" << endl;
   }
 
 
