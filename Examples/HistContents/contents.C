@@ -5,7 +5,7 @@ double mK = 0.493677;
 TString FN1("test_nt0_220.root");     TString NT1("nt0_220");
 TString FN2("test_nt0_112.root");     TString NT2("nt0_112");
 TString FN3("test_nt0_110002.root");  TString NT3("nt0_110002");
-TString FNT("testHistContents.root"); TString NTT("TH1FContents");
+TString FNT("testHistContents.root"); TString NTT("HistContents");
 
 
 void makeTree(double mParent, double mChild1, double mChild2, 
@@ -51,7 +51,7 @@ void step4_WriteHistTree(){
   histTree->Write();
   tfile->Close();
     // draw the histogram from the new TTree
-  TString FNT("testHistContents.root");  TString NTT("TH1FContents");
+  TString FNT("testHistContents.root");  TString NTT("HistContents");
   FSHistogram::getTH1F(FNT,NTT,"x","(60,0.0,6.0)","x<3.0")->Draw("hist,same");
 }
 
