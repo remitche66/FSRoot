@@ -454,7 +454,7 @@ FSHistogram::getTHNF(int dimension,
     if (dimension == 2) hist2d = (TH2F*) gDirectory->FindObject(hname); 
 
     if (histTree) histTree = addTHNFContents(histTree, dimension, fileName,
-                      ntName,variable,bounds,cuts,scale);
+                      ntName,fullVariable,bounds,fullCuts,scale);
 
   }
 
