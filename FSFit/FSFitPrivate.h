@@ -1006,12 +1006,15 @@ class FSFitMinuit {
                << func->fName() << endl;
           exit(0);
         }
+        double sumlnfx = 0.0;
         for (unsigned int idata = 0; idata < vx.size(); idata++){
           double x = vx[idata];
           double fx = func->fx(x);
-          if (fx < 0) fcn += 1.0e3;  // NOT SURE EXACTLY HOW TO DO THIS 
-          if (fx > 0) fcn += 2.0*(mu - log(fx));
+          double lnfx = 1.0e3;    // NOT SURE EXACTLY HOW TO DO THIS
+          if (fx > 0) lnfx = log(fx);
+          sumlnfx += lnfx;
         }
+        fcn += 2.0*(mu - sumlnfx);        
       }
       return fcn;
     }

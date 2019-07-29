@@ -456,7 +456,7 @@ FSHistogram::getTHNF(int dimension,
     if (histTree) histTree = addTHNFContents(histTree, dimension, fileName,
                       ntName,variable,bounds,cuts,scale);
 
-}
+  }
 
     // otherwise create an empty histogram
 
