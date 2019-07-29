@@ -203,6 +203,10 @@ class FSFitUtilities{
       FSFitDataSetList::addDataSet(dName,points,includeSystErrors);
     }
 
+    static void createDataSet(TString dName, vector<double> xUnbinnedData){
+      FSFitDataSetList::addDataSet(dName,xUnbinnedData);
+    }
+
 
       // Manage fit ranges for different data sets.
       //   Multiple fit ranges can be added to each data set.
@@ -225,6 +229,7 @@ class FSFitUtilities{
     // *************************
 
       // Create a minuit object (optionally add a data set to fit and a function to fit it with).
+      //  Options for fcnName are "CHI2", "LIKELIHOOD", or "UNBINNED".
 
     static void createMinuit(TString mName, TString dName = "", TString fName = "", 
                                TString fcnName = "CHI2"){

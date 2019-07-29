@@ -35,8 +35,10 @@ FSFitFunction* FSFitFunction::cloneBASE(){
 void FSFitMinuit::setFCN(TString fcnName){
        if (fcnName == "CHI2")       m_minuit->SetFCN(FSFitFCN::FCN_CHI2);
   else if (fcnName == "LIKELIHOOD") m_minuit->SetFCN(FSFitFCN::FCN_LIKELIHOOD);
+  else if (fcnName == "UNBINNED")   m_minuit->SetFCN(FSFitFCN::FCN_UNBINNED);
   else {
-    cout << "FSFitMinuit ERROR:  right now only CHI2 and LIKELIHOOD are defined for FCN" << endl;
+    cout << "FSFitMinuit ERROR:  no option for FCN with fcnName = " << fcnName << endl;
+    cout << "                    options for FCN currently include CHI2, LIKELIHOOD, and UNBINNED" << endl;
     exit(0);
   }
 }

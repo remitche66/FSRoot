@@ -56,6 +56,24 @@ class FSHistogram{
                                 TString cuts,     TString options = "",
                                 float scale = 1.0);
 
+      // ********************************************************
+      // CREATE A TREE IN THE SAME WAY A HISTOGRAM IS CREATED ABOVE
+      //   the tree is called "HistContents" and includes variables:
+      //       "x" for the x variable
+      //       "y" for the y variable (2d only)
+      //       "wt" for a weight (set by scale and FSCut)
+      // ********************************************************
+
+    static TTree*  getTH1FContents(TString fileName, TString ntName,
+                                   TString variable, TString bounds, 
+                                   TString cuts, TString options = "",
+                                   float scale = 1.0);
+
+    static TTree*  getTH2FContents(TString fileName, TString ntName,
+                                   TString variable, TString bounds, 
+                                   TString cuts, TString options = "",
+                                   float scale = 1.0);
+
 
       // ********************************************************
       // SET MAXIMA/MINIMA SO HISTOGRAMS CAN BE SHOWN TOGETHER
@@ -139,7 +157,7 @@ class FSHistogram{
                                 TString fileName, TString ntName,
                                 TString variable, TString bounds,
                                 TString cuts,     TString options,
-                                float scale);
+                                float scale, TTree* histTree);
 
     static TString getTHNFIndex(int dimension,
                                 TString fileName, TString ntName,
@@ -161,6 +179,13 @@ class FSHistogram{
                                      TH1F* hist1d, TH2F* hist2d, 
                                      float scale);
 
+      // helper function for getTHNFContents
+
+    static TTree*  addTHNFContents(TTree* histTree, int dimension,
+                                   TString fileName, TString ntName,
+                                   TString variable, TString bounds, 
+                                   TString cuts, // TString options = "" 
+                                   float scale = 1.0);
 
       // global caches
 
