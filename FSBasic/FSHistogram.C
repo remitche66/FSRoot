@@ -9,6 +9,7 @@
 #include "TH1F.h"
 #include "TH2F.h"
 #include "TFile.h"
+#include "TTreeFormula.h"
 #include "FSBasic/FSControl.h"
 #include "FSBasic/FSString.h"
 #include "FSBasic/FSTree.h"
@@ -33,223 +34,48 @@ TString FSNOT("!");
       //   the tree is called "tree" and includes one variable "x"
       // ********************************************************
 
-TTree* getTTree(TString fileName, TString ntName, TString category,
-               TString variable, TString cuts){
- return NULL;
-}
 
-/* CODE FROM JOSH
-
-#include "../PART01_Setup.h"
-#include "../PART02_Cuts.h"
-#include "../PART03_Histograms.h"
-
-#include <fstream>
-
-using namespace std;
-using namespace RooFit;
-
-
-// Add new line to open file
-void nl(ofstream f, const char* text = "")
-{
-    f << text << endl;
-}
-
-void pl(const char* text = "")
-{
-    cout << text << endl;
+TTree*
+FSHistogram::getTH1FContents(TString fileName, TString ntName, TString variable, TString bounds, 
+                             TString cuts, TString options, float scale){
+  TTree* histTree = new TTree("TH1FContents", "TH1FContents");
+  Double_t x;  histTree->Branch("x",  &x,  "x/D");
+  Double_t wt; histTree->Branch("wt", &wt, "wt/D");
+  getTHNF(1,fileName,ntName,variable,bounds,cuts,options,scale,histTree);
+  return histTree;
 }
 
 
-TString getTreeIndexGeneral(TString fileName, TString ntName, TString category,
-                             TString variable, TString cuts)
-{
-    TString index;
-      index += "tree";
-      index += "(fn)";  index += fileName;
-      index += "(nt)";  index += ntName;
-      index += "(va)";  index += HistogramUtilities::expandVariable(variable);
-      index += "(cu)";  index += HistogramUtilities::expandVariable(cuts);
-    return index;
+TTree*
+FSHistogram::addTHNFContents(TTree* histTree, int dimension, 
+                             TString fileName, TString ntName, TString variable, TString bounds, 
+                             TString cuts, float scale){
+
+  Double_t x;  if (dimension >= 1) histTree->SetBranchAddress("x",  &x);
+  Double_t y;  if (dimension == 2) histTree->SetBranchAddress("y",  &y);
+  Double_t wt; if (dimension >= 1) histTree->SetBranchAddress("wt", &wt);
+
+  TTree* nt = FSTree::getTChain(fileName,ntName);
+
+  if (cuts == "") cuts = "(1==1)";
+  TTreeFormula cutsFormula("cutsFormula", cuts, nt);
+  TTreeFormula varFormula("varFormula", variable, nt);
+
+  double xLow  = FSString::parseBoundsLowerX(bounds);
+  double xHigh = FSString::parseBoundsUpperX(bounds);
+
+  unsigned int nEvents = nt->GetEntries();
+  for (unsigned int i = 0; i < nEvents; i++){
+    nt->GetEntry(i);
+    if (!cutsFormula.EvalInstance()) continue;
+    x = varFormula.EvalInstance();
+    wt = scale;
+    if ((x < xLow) || (x > xHigh)) continue;      
+    histTree->Fill();  
+  }
+
+  return histTree;
 }
-
-
-TTree* getTree(TString fileName, TString ntName, TString category,
-               TString variable, TString cuts, bool save = false)
-{
-    
-    TTree* finTree = new TTree("OBSERVABLE", "Observable TTree generated with \'datasetter.C\'.");
-    Double_t x;
-     finTree->Branch("x", &x, "x/D");
-
-     //vector<TString> indices;
-
-    vector<ModeInfo*> modeVector = ModeCollection::modeVector(category);
-      if (modeVector.size() == 0){
-        cout << "ModeHistogram:  there are no modes associated with this category..." << endl;
-        cout << "                ... returning NULL" << endl;
-      }
-
-      for (unsigned int i = 0; i < modeVector.size(); i++)
-      {
-        if (!ControlVariables::QUIET) { cout << endl; modeVector[i]->display(i+1); }
-
-        TString fileName_i = modeVector[i]->modeString(fileName);
-        TString ntName_i   = modeVector[i]->modeString(ntName);
-        TString variable_i = modeVector[i]->modeString(variable);
-        TString cuts_i("");  if (cuts != "") cuts_i = modeVector[i]->modeString(cuts);
-                                             cuts_i = modeVector[i]->modeCuts(cuts_i);
-
-        vector<TString> indices;
-        vector<TString> combinatorics = modeVector[i]->modeCombinatorics((variable_i+" "+cuts_i),ControlVariables::DEBUG);
-
-        if (!ControlVariables::QUIET) cout << "Creating new file object..." << endl;
-
-        TFile* fi_i = new TFile(fileName_i, "read");
-        TTree* nt_i = (TTree*)fi_i->Get(ntName_i);
-
-        if (!ControlVariables::QUIET) cout << "File object created successfully..." << endl;
-
-        // loop over all combinatorics within this mode
-
-        for (unsigned int j = 0; j < combinatorics.size(); j++)
-        {
-            TString variable_j("");
-              TString cuts_j("");
-              vector<TString> parts = StringUtilities::parseTString(combinatorics[j]," ");
-              if (parts.size() >= 1) variable_j = parts[0];
-              if (parts.size() >= 2) cuts_j     = parts[1];
-
-              if (!ControlVariables::QUIET) {
-                  cout << "MODE " << i << "." << j << ": " << endl;
-                  cout << "   Variable: " << variable_j << endl;
-                  cout << "   Cuts: " << cuts_j << endl;
-              }
-
-              TString index_j = getTreeIndexGeneral(fileName_i, ntName_i, category, variable_j, cuts_j);
-
-              bool usedIndex = false;
-              for (int k = 0; k < indices.size(); k++)
-              {
-                  if (indices[k] == index_j)
-                  {
-                      usedIndex = true;
-                      break;
-                  }
-              }
-              if (usedIndex) continue;
-
-              indices.push_back(index_j);
-
-              TTreeFormula cutsFormula_j("cutsFormula_j", HistogramUtilities::expandVariable(cuts_j), nt_i);
-              TTreeFormula varFormula_j("varFormula_j", HistogramUtilities::expandVariable(variable_j), nt_i);
-
-              Int_t totalEvents = 0;
-
-            for (unsigned int k = 0; k < nt_i->GetEntries(); k++)
-            {
-                x = -999;
-
-                nt_i->GetEntry(k);
-
-                if (cuts_j)
-                {
-                    if (!cutsFormula_j.EvalInstance())
-                    {
-                        continue;
-                    }
-                }
-
-                x = varFormula_j.EvalInstance();
-                finTree->Fill();
-                totalEvents++;
-
-                if (!ControlVariables::QUIET) cout << "(*) Event " << k << " passed!" << endl;
-            }
-            if (!ControlVariables::QUIET) cout << "Total events passing selection: " << totalEvents << endl << endl;
-          }
-
-          // SHOULD CLOSE THE FILE HERE TO PREVENT MEMORY LEAKS, BUT CLOSING THE FILE BREAKS ROOT!
-          if (!ControlVariables::QUIET) cout << "Closing file..." << endl;
-          delete nt_i;
-          fi_i->Close();
-          delete fi_i;
-          //delete nt_i;
-          if (!ControlVariables::QUIET) cout << "File closed!" << endl;
-      }
-
-      // UNCOMMENT THIS BLOCK TO ADD SAVING TO FILE BACK IN!
-      //TFile* finFile = new TFile("DATASETTER_X.root", "create");
-      //if (save) 
-    //{
-    //    finFile->cd();
-    //    finTree->Write();
-    //    finFile->Close();
-    //}
-    //delete finFile;
-
-      return finTree;
-}
-
-
-//void generateRooDataSetScript()
-//{
-//    ofstream fs("getRooDataSet.C");
-//
-//    TString dir("~/ANALYSIS/PI0PI0CHIC/FITS/");
-//    TString mode("11000_2000002");
-//    TString prefix("TOYDATA_");
-//    TString ext(".root");
-//    TString nt("ntEXC_PI0PI0CHIC_");
-//
-//    TFile* fi = new TFile(dir+prefix+mode+ext, "read");
-//    TTree* tree = (TTree*)fi->Get(nt+mode);
-//
-//    TObjArray* branches = tree->GetListOfBranches();
-//    //branches->Print();
-//
-//    // Construct script header
-//    nl(fs, "#include \"../PART01_Setup.h\"");
-//    nl(fs, "#include \"../PART02_Cuts.h\"");
-//    nl(fs, "#include \"../PART03_Histograms.h\"");
-//    nl(fs);
-//    nl(fs, "using namespace std;");
-//    nl(fs, "using namespace RooFit;");
-//    nl(fs);
-//    nl(fs, "void getRooDataSet()");
-//    nl(fs, "{");
-//
-//
-//    TIter iter(branches);
-//    TObject* obj;
-//    while((obj = iter.Next()))
-//    {
-//        cout << obj->GetName() << endl;
-//    }
-//
-//
-//    // End the script
-//    nl(fs, "}");    
-//
-//    fs.close();
-//}
-
-
-void datasetter()
-{
-    ControlVariables::DEBUG = false;
-    // ControlVariables::CHAINFRIEND = "chi";
-    ControlVariables::QUIET = true;
-
-    ModeCollection::addModeInfo(SEARCH_EE.code);
-    ModeCollection::addModeInfo(SEARCH_MM.code);
-
-    getTree("../TOYDATA_MODECODE.root", "ntEXC_PI0PI0CHIC_MODECODE", "", "RECOILMASS(B3BEAM;Xgamma1X)", CutsFor("DATASIG"));
-}
-
-
-*/
 
 
 
@@ -496,7 +322,7 @@ FSHistogram::getTH1F(TString fileName, TString ntName,
                                    TString variable, TString bounds,
                                    TString cuts,     TString options,
                                    float scale){
-  TH1F* hist = getTHNF(1,fileName,ntName,variable,bounds,cuts,options,scale).first;
+  TH1F* hist = getTHNF(1,fileName,ntName,variable,bounds,cuts,options,scale,NULL).first;
   return getTH1F(hist);
 } 
 
@@ -505,7 +331,7 @@ FSHistogram::getTH2F(TString fileName, TString ntName,
                                    TString variable, TString bounds,
                                    TString cuts,     TString options,
                                    float scale){
-  TH2F* hist = getTHNF(2,fileName,ntName,variable,bounds,cuts,options,scale).second;
+  TH2F* hist = getTHNF(2,fileName,ntName,variable,bounds,cuts,options,scale,NULL).second;
   return getTH2F(hist);
 } 
 
@@ -515,7 +341,7 @@ FSHistogram::getTHNF(int dimension,
                                    TString fileName, TString ntName,
                                    TString variable, TString bounds,
                                    TString cuts,     TString options,
-                                   float scale){
+                                   float scale, TTree* histTree){
 
     // remove white space
 
@@ -541,14 +367,14 @@ FSHistogram::getTHNF(int dimension,
     for (unsigned int i = 0; i < fsCuts.size(); i++){
       TString cuts_i = fsCuts[i].first;
       double scale_i = scale * fsCuts[i].second;
+      pair<TH1F*,TH2F*> histPair = FSHistogram::getTHNF(dimension, fileName, ntName, 
+                                     variable, bounds, cuts_i, options, scale_i, histTree);
       if (dimension == 1){
-        TH1F* hi = FSHistogram::getTH1F(fileName, ntName, variable, bounds,
-                                        cuts_i, options, scale_i);
+        TH1F* hi = histPair.first;
         hist1d = FSHistogram::addTH1F("FSCUTTOTAL",hi);
       }
       if (dimension == 2){
-        TH2F* hi = FSHistogram::getTH2F(fileName, ntName, variable, bounds,
-                                        cuts_i, options, scale_i);
+        TH2F* hi = histPair.second;
         hist2d = FSHistogram::addTH2F("FSCUTTOTAL",hi);
       }
     }
@@ -590,6 +416,7 @@ FSHistogram::getTHNF(int dimension,
     cout << "\t  EXPANDED  = " << fullCuts << endl;
     cout << "\tOPTIONS     = " << options << endl;
     cout << "\tSCALE       = " << scale << endl;
+    cout << "\tFILL TREE?  = " << (bool) histTree << endl;
     cout << "\tINDEX       = " << index << endl;
     cout << "***************************************" << endl;
   }
@@ -597,8 +424,10 @@ FSHistogram::getTHNF(int dimension,
 
     // first search the cache and return if the histogram is found
 
-  pair<TH1F*,TH2F*> histPair = getHistogramFromCache(index);
-  if (histPair.first || histPair.second) return histPair;
+  if (!histTree){
+    pair<TH1F*,TH2F*> histPair = getHistogramFromCache(index);
+    if (histPair.first || histPair.second) return histPair;
+  }
 
 
     // set up the chain
@@ -624,7 +453,10 @@ FSHistogram::getTHNF(int dimension,
     if (dimension == 1) hist1d = (TH1F*) gDirectory->FindObject(hname); 
     if (dimension == 2) hist2d = (TH2F*) gDirectory->FindObject(hname); 
 
-  }
+    if (histTree) histTree = addTHNFContents(histTree, dimension, fileName,
+                      ntName,variable,bounds,cuts,scale);
+
+}
 
     // otherwise create an empty histogram
 

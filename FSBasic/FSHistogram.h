@@ -58,11 +58,13 @@ class FSHistogram{
 
       // ********************************************************
       // CREATE A TREE IN THE SAME WAY A HISTOGRAM IS CREATED ABOVE
-      //   the tree is called "tree" and includes one variable "x"
+      //   xxxxx the tree is called "tree" and includes one variable "x"
       // ********************************************************
 
-TTree* getTTree(TString fileName, TString ntName, TString category,
-               TString variable, TString cuts);
+    static TTree*  getTH1FContents(TString fileName, TString ntName,
+                                   TString variable, TString bounds, 
+                                   TString cuts, TString options = "",
+                                   float scale = 1.0);
 
 
       // ********************************************************
@@ -147,7 +149,7 @@ TTree* getTTree(TString fileName, TString ntName, TString category,
                                 TString fileName, TString ntName,
                                 TString variable, TString bounds,
                                 TString cuts,     TString options,
-                                float scale);
+                                float scale, TTree* histTree);
 
     static TString getTHNFIndex(int dimension,
                                 TString fileName, TString ntName,
@@ -169,6 +171,13 @@ TTree* getTTree(TString fileName, TString ntName, TString category,
                                      TH1F* hist1d, TH2F* hist2d, 
                                      float scale);
 
+      // helper function for getTHNFContents
+
+    static TTree*  addTHNFContents(TTree* histTree, int dimension,
+                                   TString fileName, TString ntName,
+                                   TString variable, TString bounds, 
+                                   TString cuts, // TString options = "" 
+                                   float scale = 1.0);
 
       // global caches
 
