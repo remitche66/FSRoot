@@ -38,6 +38,16 @@ class FSModeHistogram{
                                 TString cuts,     TString options = "",
                                 float scale = 1.0);
 
+      // ********************************************************
+      // CREATE A TREE IN THE SAME WAY A HISTOGRAM IS CREATED ABOVE
+      //   xxxxx the tree is called "tree" and includes one variable "x"
+      // ********************************************************
+
+    static TTree*  getTH1FContents(TString fileName, TString ntName, TString category,
+                                   TString variable, TString bounds, 
+                                   TString cuts, TString options = "",
+                                   float scale = 1.0);
+
 
       // ********************************************************
       // DRAW HISTOGRAMS SEPARATELY FOR EACH MODE
@@ -99,7 +109,7 @@ class FSModeHistogram{
                                    TString fileName, TString ntName, TString category,
                                    TString variable, TString bounds,
                                    TString cuts,     TString options,
-                                   float scale);
+                                   float scale,      TTree* histTree);
 
     static void drawTHNF(int dimension,
                          TString fileName, TString ntName, TString category,
