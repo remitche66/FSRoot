@@ -536,7 +536,7 @@ class FSFitFunction{
     }
 
     double getParameterValue(TString pName){
-      return FSFitParameterList::getParameter(fName(),pName)->value();
+      return FSFitParameterList::getParameter(m_fName,pName)->value();
     }
 
 };
@@ -1161,7 +1161,7 @@ class FSFitMinuit {
 
     void setMNAME();
 
-    vector< pair<TString,TString> >  fitComponents();
+    const vector< pair<TString,TString> >&  fitComponents();
 
 };
 
@@ -1206,12 +1206,12 @@ class FSFitMinuitList {
       m_fitComponentMap[mName] = comps;
     }
 
-    static vector< pair<TString,TString> > getFitComponents(TString mName){
+    const static vector< pair<TString,TString> >& getFitComponents(TString mName){
       map<TString,vector< pair<TString,TString> > >::iterator it = m_fitComponentMap.find(mName);
       if (it != m_fitComponentMap.end()) return it->second;
       cout << "FSFitMinuitList ERROR:  cannot find fit components for minuit fit named " << mName << endl;
       exit(0);
-      return vector< pair<TString,TString> >();
+      return it->second;
     }
 
 
