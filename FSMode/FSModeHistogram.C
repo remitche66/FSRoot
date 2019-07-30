@@ -35,7 +35,7 @@ map<TString, map<TString, float> > FSModeHistogram::m_cacheComponentsMap;
 TTree*
 FSModeHistogram::getTH1FContents(TString fileName, TString ntName, TString category, 
        TString variable, TString bounds, TString cuts, TString options, float scale){
-  TTree* histTree = new TTree("TH1FContents", "TH1FContents");
+  TTree* histTree = new TTree("HistContents", "HistContents");
   Double_t x;  histTree->Branch("x",  &x,  "x/D");
   Double_t wt; histTree->Branch("wt", &wt, "wt/D");
   getTHNF(1,fileName,ntName,category,variable,bounds,cuts,options,scale,histTree);
@@ -45,7 +45,7 @@ FSModeHistogram::getTH1FContents(TString fileName, TString ntName, TString categ
 TTree*
 FSModeHistogram::getTH2FContents(TString fileName, TString ntName, TString category, 
        TString variable, TString bounds, TString cuts, TString options, float scale){
-  TTree* histTree = new TTree("TH1FContents", "TH1FContents");
+  TTree* histTree = new TTree("HistContents", "HistContents");
   Double_t x;  histTree->Branch("x",  &x,  "x/D");
   Double_t y;  histTree->Branch("y",  &y,  "y/D");
   Double_t wt; histTree->Branch("wt", &wt, "wt/D");
