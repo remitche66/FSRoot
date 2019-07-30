@@ -91,7 +91,7 @@ FSHistogram::addTHNFContents(TTree* histTree, int dimension,
     if (!cutsF->EvalInstance()) continue;
     if (dimension >= 1) x = varXF->EvalInstance();
     if (dimension == 2) y = varYF->EvalInstance();
-    if (dimension >= 1) wt = scale;
+    if (dimension >= 1) wt = scale * cutsF->EvalInstance();
     if ((dimension >= 1) && ((x < xLow) || (x > xHigh))) continue;      
     if ((dimension == 2) && ((y < yLow) || (y > yHigh))) continue;      
     histTree->Fill();  
@@ -478,7 +478,12 @@ FSHistogram::getTHNF(int dimension,
 
   if ((chain) && (chain->GetEntries() > 0) && (chain->GetNbranches() > 0)){
 
-    chain->Project(hbounds, fullVariable, fullCuts, options);
+    TString extraScale(FSString::double2TString(scale,8,true));
+    TString scaleTimesCuts(fullCuts);
+    if (scaleTimesCuts != "") scaleTimesCuts = "*("+scaleTimesCuts+")";
+    scaleTimesCuts = extraScale+scaleTimesCuts;
+
+    chain->Project(hbounds, fullVariable, scaleTimesCuts, options);
 
     if (dimension == 1) hist1d = (TH1F*) gDirectory->FindObject(hname); 
     if (dimension == 2) hist2d = (TH2F*) gDirectory->FindObject(hname); 
@@ -507,8 +512,6 @@ FSHistogram::getTHNF(int dimension,
 
     // add to the histogram cache and return
 
-  if (hist1d && hist1d->GetSum() != 0.0) hist1d->Scale(scale*hist1d->GetEntries()/hist1d->GetSum());
-  if (hist2d && hist2d->GetSum() != 0.0) hist2d->Scale(scale*hist2d->GetEntries()/hist2d->GetSum());
   addHistogramToCache(index,hist1d,hist2d);
   return pair<TH1F*,TH2F*>(hist1d,hist2d);
 
@@ -736,8 +739,6 @@ FSHistogram::getTHNFIndex(int dimension,
   index += "(cu)";  index += FSTree::expandVariable(cuts);
   index += "(op)";  index += options;
   index += "(sc)";  index += FSString::double2TString(scale,8,true);
-  //options = "";
-  //scale = 0.0;
   return index;
 }
 

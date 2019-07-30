@@ -87,7 +87,7 @@ void step6_TestModeContents(TString cat, TString variable, TString bounds, TStri
   histTree->Write();
   tfile->Close();
     // draw the histogram from the new TTree
-  FSHistogram::getTH1F(FNT,NTT,"x",bounds,"")->Draw("hist,same");
+  FSHistogram::getTH1F(FNT,NTT,"x",bounds,"wt")->Draw("hist,same");
 }
 
 
@@ -109,7 +109,7 @@ void step7_TestModeContents2(TString cat, TString variable, TString bounds, TStr
   tfile->Close();
     // draw the histogram from the new TTree
   c1->cd(2);
-  FSHistogram::getTH2F(FNT,NTT,"y:x",bounds,"")->Draw("colz");
+  FSHistogram::getTH2F(FNT,NTT,"y:x",bounds,"wt")->Draw("colz");
 }
 
 
