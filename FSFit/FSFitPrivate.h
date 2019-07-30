@@ -791,14 +791,14 @@ class FSFitDataSet {
 
     int numPoints() { return m_x.size(); }
 
-    vector<double>  x() { return m_xSelected; }
-    vector<double>  y() { return m_ySelected; }
-    vector<double> ey() { return m_eySelected; }
+    const vector<double>&  x() { return m_xSelected; }
+    const vector<double>&  y() { return m_ySelected; }
+    const vector<double>& ey() { return m_eySelected; }
 
     bool hasY()  { return m_ySelected.size(); }
     bool hasEY() { return m_eySelected.size(); }
 
-    vector< pair<double,double> > xLimits() { return m_xLimits; }
+    const vector< pair<double,double> >& xLimits() { return m_xLimits; }
 
   private:
 
