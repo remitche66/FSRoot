@@ -916,18 +916,20 @@ class FSFitMinuit {
 
     TString mName() { return m_mName; }
 
-    void migrad(){
+    void migrad(int strategy = 1){
       preFSFitSetup();
         Double_t calls[1];  calls[0] = 10000;
         Int_t err;
+        m_minuit->Command("SET STRategy "+FSString::int2TString(strategy));
         m_minuit->mnexcm("MIGRAD",calls,1,err);
       postFSFitSetup(false);
     }
 
-    void minos(){
+    void minos(int strategy = 1){
       preFSFitSetup();
         Double_t calls[1];  calls[0] = 10000;
         Int_t err;
+        m_minuit->Command("SET STRategy "+FSString::int2TString(strategy));
         m_minuit->mnexcm("MINOS",calls,1,err);
       postFSFitSetup(true);
     }

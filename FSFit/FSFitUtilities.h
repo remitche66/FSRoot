@@ -246,14 +246,14 @@ class FSFitUtilities{
 
       // Do a migrad fit.
 
-    static void migrad(TString mName){
-      FSFitMinuitList::getMinuit(mName)->migrad();
+    static void migrad(TString mName, int strategy = 1){
+      FSFitMinuitList::getMinuit(mName)->migrad(strategy);
     }
 
       // Do a minos fit.
 
-    static void minos(TString mName){
-      FSFitMinuitList::getMinuit(mName)->minos();
+    static void minos(TString mName, int strategy = 1){
+      FSFitMinuitList::getMinuit(mName)->minos(strategy);
     }
 
       // Get the value of the FCN (only works after a fit).
