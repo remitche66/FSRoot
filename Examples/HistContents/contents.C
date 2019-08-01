@@ -79,7 +79,12 @@ void step6_TestModeContents(TString cat, TString variable, TString bounds, TStri
     // make a normal histogram and draw it
   FSModeHistogram::getTH1F(FN1,NT1,cat,variable,bounds,cuts,"",scale)->Draw();
     // put the contents of the histogram in a TTree
-  TTree* histTree = FSModeHistogram::getTH1FContents(FN1,NT1,cat,variable,bounds,cuts,"",scale);
+  vector< pair<TString,TString> > extraTreeContents;
+  pair<TString,TString> extra1 = pair<TString,TString>("one","1.0");
+  pair<TString,TString> extra2 = pair<TString,TString>("mass12","MASS(1,2)");
+  extraTreeContents.push_back(extra1);
+  extraTreeContents.push_back(extra2);
+  TTree* histTree = FSModeHistogram::getTH1FContents(FN1,NT1,cat,variable,bounds,cuts,"",scale,extraTreeContents);
   //histTree->Print();
     // write the TTree to a file
   TFile* tfile = new TFile("testHistContents.root","recreate");
@@ -87,7 +92,8 @@ void step6_TestModeContents(TString cat, TString variable, TString bounds, TStri
   histTree->Write();
   tfile->Close();
     // draw the histogram from the new TTree
-  FSHistogram::getTH1F(FNT,NTT,"x",bounds,"wt")->Draw("hist,same");
+  FSHistogram::getTH1F(FNT,NTT,"x*one",bounds,"wt*one")->Draw("hist,same");
+  //FSHistogram::getTH1F(FNT,NTT,"mass12",bounds,"wt*one")->Draw("hist,same");
 }
 
 
@@ -112,8 +118,9 @@ void step7_TestModeContents2(TString cat, TString variable, TString bounds, TStr
   FSHistogram::getTH2F(FNT,NTT,"y:x",bounds,"wt")->Draw("colz");
 }
 
-
-
+void quickTest(){
+  step6_TestModeContents("M1","MASS(1,2)","(100,0.0,4.0)","",2.0);
+}
 
 
 

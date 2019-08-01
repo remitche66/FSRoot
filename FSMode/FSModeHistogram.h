@@ -44,17 +44,26 @@ class FSModeHistogram{
       //       "x" for the x variable
       //       "y" for the y variable (2d only)
       //       "wt" for a weight (set by scale and FSCut)
+      //   as well as optional extra variables in extraTreeContents,
+      //     where pair<TString,TString> = 
+      //      pair< extra variable name, formula to calculate extra variable >
       // ********************************************************
 
     static TTree*  getTH1FContents(TString fileName, TString ntName, TString category,
                                    TString variable, TString bounds, 
                                    TString cuts, TString options = "",
-                                   float scale = 1.0);
+                                   float scale = 1.0,
+                                   vector< pair<TString,TString> > extraTreeContents = 
+                                     vector< pair<TString,TString> >());
+
 
     static TTree*  getTH2FContents(TString fileName, TString ntName, TString category,
                                    TString variable, TString bounds, 
                                    TString cuts, TString options = "",
-                                   float scale = 1.0);
+                                   float scale = 1.0,
+                                   vector< pair<TString,TString> > extraTreeContents = 
+                                     vector< pair<TString,TString> >());
+
 
 
       // ********************************************************
@@ -117,7 +126,10 @@ class FSModeHistogram{
                                    TString fileName, TString ntName, TString category,
                                    TString variable, TString bounds,
                                    TString cuts,     TString options,
-                                   float scale,      TTree* histTree);
+                                   float scale,      TTree* histTree,
+                                   vector< pair<TString,TString> > extraTreeContents = 
+                                     vector< pair<TString,TString> >());
+
 
     static void drawTHNF(int dimension,
                          TString fileName, TString ntName, TString category,

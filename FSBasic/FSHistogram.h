@@ -62,17 +62,24 @@ class FSHistogram{
       //       "x" for the x variable
       //       "y" for the y variable (2d only)
       //       "wt" for a weight (set by scale and FSCut)
+      //   as well as optional extra variables in extraTreeContents,
+      //     where pair<TString,TString> = 
+      //      pair< extra variable name, formula to calculate extra variable >
       // ********************************************************
 
     static TTree*  getTH1FContents(TString fileName, TString ntName,
                                    TString variable, TString bounds, 
                                    TString cuts, TString options = "",
-                                   float scale = 1.0);
+                                   float scale = 1.0,
+                                   vector< pair<TString,TString> > extraTreeContents = 
+                                     vector< pair<TString,TString> >());
 
     static TTree*  getTH2FContents(TString fileName, TString ntName,
                                    TString variable, TString bounds, 
                                    TString cuts, TString options = "",
-                                   float scale = 1.0);
+                                   float scale = 1.0,
+                                   vector< pair<TString,TString> > extraTreeContents = 
+                                     vector< pair<TString,TString> >());
 
 
       // ********************************************************
@@ -157,7 +164,9 @@ class FSHistogram{
                                 TString fileName, TString ntName,
                                 TString variable, TString bounds,
                                 TString cuts,     TString options,
-                                float scale, TTree* histTree);
+                                float scale, TTree* histTree,
+                                vector< pair<TString,TString> > extraTreeContents = 
+                                  vector< pair<TString,TString> >());
 
     static TString getTHNFIndex(int dimension,
                                 TString fileName, TString ntName,
@@ -179,13 +188,19 @@ class FSHistogram{
                                      TH1F* hist1d, TH2F* hist2d, 
                                      float scale);
 
-      // helper function for getTHNFContents
+      // helper functions for getTHNFContents
 
     static TTree*  addTHNFContents(TTree* histTree, int dimension,
                                    TString fileName, TString ntName,
                                    TString variable, TString bounds, 
                                    TString cuts, // TString options = "" 
-                                   float scale = 1.0);
+                                   float scale = 1.0,
+                                   vector< pair<TString,TString> > extraTreeContents = 
+                                     vector< pair<TString,TString> >());
+
+    static TTree* setTHNFContents(int dimension,
+                                vector< pair<TString,TString> > extraTreeContents = 
+                                 vector< pair<TString,TString> >());
 
       // global caches
 

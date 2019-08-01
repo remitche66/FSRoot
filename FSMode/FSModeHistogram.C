@@ -34,22 +34,19 @@ map<TString, map<TString, float> > FSModeHistogram::m_cacheComponentsMap;
 
 TTree*
 FSModeHistogram::getTH1FContents(TString fileName, TString ntName, TString category, 
-       TString variable, TString bounds, TString cuts, TString options, float scale){
-  TTree* histTree = new TTree("HistContents", "HistContents");
-  Double_t x;  histTree->Branch("x",  &x,  "x/D");
-  Double_t wt; histTree->Branch("wt", &wt, "wt/D");
-  getTHNF(1,fileName,ntName,category,variable,bounds,cuts,options,scale,histTree);
+       TString variable, TString bounds, TString cuts, TString options, float scale,
+       vector< pair<TString,TString> > extraTreeContents){
+  TTree* histTree = FSHistogram::setTHNFContents(1,extraTreeContents);
+  getTHNF(1,fileName,ntName,category,variable,bounds,cuts,options,scale,histTree,extraTreeContents);
   return histTree;
 }
 
 TTree*
 FSModeHistogram::getTH2FContents(TString fileName, TString ntName, TString category, 
-       TString variable, TString bounds, TString cuts, TString options, float scale){
-  TTree* histTree = new TTree("HistContents", "HistContents");
-  Double_t x;  histTree->Branch("x",  &x,  "x/D");
-  Double_t y;  histTree->Branch("y",  &y,  "y/D");
-  Double_t wt; histTree->Branch("wt", &wt, "wt/D");
-  getTHNF(2,fileName,ntName,category,variable,bounds,cuts,options,scale,histTree);
+       TString variable, TString bounds, TString cuts, TString options, float scale,
+       vector< pair<TString,TString> > extraTreeContents){
+  TTree* histTree = FSHistogram::setTHNFContents(2,extraTreeContents);
+  getTHNF(2,fileName,ntName,category,variable,bounds,cuts,options,scale,histTree,extraTreeContents);
   return histTree;
 }
 
@@ -83,7 +80,8 @@ FSModeHistogram::getTHNF(int dimension,
                        TString fileName, TString ntName, TString category,
                        TString variable, TString bounds,
                        TString cuts,     TString options,
-                       float scale,      TTree* histTree){
+                       float scale,      TTree* histTree,
+                       vector< pair<TString,TString> > extraTreeContents){
 
 
   vector<FSModeInfo*> modeVector = FSModeCollection::modeVector(category);
@@ -113,7 +111,8 @@ FSModeHistogram::getTHNF(int dimension,
       TString cuts_i = fsCuts[i].first;
       double scale_i = scale * fsCuts[i].second;
       pair<TH1F*,TH2F*> histPair = FSModeHistogram::getTHNF(dimension, fileName, ntName,
-                       category, variable, bounds, cuts_i, options, scale_i, histTree);
+                       category, variable, bounds, cuts_i, options, scale_i, histTree,
+                       extraTreeContents);
       if (dimension == 1){
         TH1F* hi = histPair.first;
         hist1d = FSHistogram::addTH1F("FSMODECUTTOTAL",hi);
@@ -173,7 +172,8 @@ FSModeHistogram::getTHNF(int dimension,
         if (usedIndex) continue;
         indices.push_back(index);
         TH1F* hij = FSHistogram::getTHNF(dimension,fileName_i,ntName_i,variable_j,
-                                              bounds,cuts_j,options,scale,histTree).first;
+                                              bounds,cuts_j,options,scale,histTree,
+                                              extraTreeContents).first;
         hist1d = FSHistogram::addTH1F("MODEHISTOGRAMTOTAL",hij);
       }
 
@@ -187,7 +187,8 @@ FSModeHistogram::getTHNF(int dimension,
         if (usedIndex) continue;
         indices.push_back(index);
         TH2F* hij = FSHistogram::getTHNF(dimension,fileName_i,ntName_i,variable_j,
-                                              bounds,cuts_j,options,scale,histTree).second;
+                                              bounds,cuts_j,options,scale,histTree,
+                                              extraTreeContents).second;
         hist2d = FSHistogram::addTH2F("MODEHISTOGRAMTOTAL",hij);
       }
 

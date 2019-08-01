@@ -34,32 +34,48 @@ TString FSNOT("!");
       // CREATE A TREE IN THE SAME WAY AS A HISTOGRAM
       // ********************************************************
 
+
 TTree*
 FSHistogram::getTH1FContents(TString fileName, TString ntName, TString variable, TString bounds, 
-                             TString cuts, TString options, float scale){
-  TTree* histTree = new TTree("HistContents", "HistContents");
-  Double_t x;  histTree->Branch("x",  &x,  "x/D");
-  Double_t wt; histTree->Branch("wt", &wt, "wt/D");
-  getTHNF(1,fileName,ntName,variable,bounds,cuts,options,scale,histTree);
+                             TString cuts, TString options, float scale,
+                             vector< pair<TString,TString> > extraTreeContents){
+  TTree* histTree = setTHNFContents(1,extraTreeContents);
+  getTHNF(1,fileName,ntName,variable,bounds,cuts,options,scale,histTree,extraTreeContents);
   return histTree;
 }
 
 TTree*
 FSHistogram::getTH2FContents(TString fileName, TString ntName, TString variable, TString bounds, 
-                             TString cuts, TString options, float scale){
-  TTree* histTree = new TTree("HistContents", "HistContents");
-  Double_t x;  histTree->Branch("x",  &x,  "x/D");
-  Double_t y;  histTree->Branch("y",  &y,  "y/D");
-  Double_t wt; histTree->Branch("wt", &wt, "wt/D");
-  getTHNF(2,fileName,ntName,variable,bounds,cuts,options,scale,histTree);
+                             TString cuts, TString options, float scale,
+                             vector< pair<TString,TString> > extraTreeContents){
+  TTree* histTree = setTHNFContents(2,extraTreeContents);
+  getTHNF(2,fileName,ntName,variable,bounds,cuts,options,scale,histTree,extraTreeContents);
   return histTree;
 }
 
+TTree*
+FSHistogram::setTHNFContents(int dimension,
+                             vector< pair<TString,TString> > extraTreeContents){
+  TTree* histTree = new TTree("HistContents", "HistContents");
+  Double_t x;  if (dimension >= 1) histTree->Branch("x",  &x,  "x/D");
+  Double_t y;  if (dimension == 2) histTree->Branch("y",  &y,  "y/D");
+  Double_t wt; if (dimension >= 1) histTree->Branch("wt", &wt, "wt/D");
+  vector<Double_t> tempDoubles;
+  for (unsigned int i = 0; i < extraTreeContents.size(); i++){
+    tempDoubles.push_back(0.0);
+    TString contentName = extraTreeContents[i].first;
+    histTree->Branch(contentName,&tempDoubles[i],contentName+"/D");
+  }
+  return histTree;
+}
 
 TTree*
 FSHistogram::addTHNFContents(TTree* histTree, int dimension, 
                              TString fileName, TString ntName, TString variable, TString bounds, 
-                             TString cuts, float scale){
+                             TString cuts, float scale,
+                             vector< pair<TString,TString> > extraTreeContents){
+
+    // get the x and y variable names
 
   vector<TString> vars = FSString::parseTString(variable,":");
   if ((int)vars.size() != dimension){
@@ -69,21 +85,45 @@ FSHistogram::addTHNFContents(TTree* histTree, int dimension,
   TString varX("");  if (dimension >= 1)  varX = vars[0];
   TString varY("");  if (dimension == 2){ varX = vars[1]; varY = vars[0]; }
 
+    // set the addresses of the values to add to histTree
+
   Double_t x = 0.0;  if (dimension >= 1) histTree->SetBranchAddress("x",  &x);
   Double_t y = 0.0;  if (dimension == 2) histTree->SetBranchAddress("y",  &y);
   Double_t wt = 0.0; if (dimension >= 1) histTree->SetBranchAddress("wt", &wt);
+  Double_t extraValues[200];
+  if (extraTreeContents.size() > 200){
+    cout << "FSHistogram::addTHNFContents ERROR: too many extra branches" << endl;
+    exit(0);
+  }
+  for (unsigned int i = 0; i < extraTreeContents.size(); i++){
+    TString contentName = extraTreeContents[i].first;
+    histTree->SetBranchAddress(contentName,&extraValues[i]);
+  }
+
+    // get the old tree
 
   TTree* nt = FSTree::getTChain(fileName,ntName);
+
+    // set up the TTreeFormula objects
 
   if (cuts == "") cuts = "(1==1)";
   TTreeFormula* cutsF = NULL; if (dimension >= 1) cutsF = new TTreeFormula("cutsF", cuts, nt);
   TTreeFormula* varXF = NULL; if (dimension >= 1) varXF = new TTreeFormula("varXF", varX, nt);
   TTreeFormula* varYF = NULL; if (dimension == 2) varYF = new TTreeFormula("varYF", varY, nt);
+  vector<TTreeFormula*> varEF;
+  for (unsigned int i = 0; i < extraTreeContents.size(); i++){
+    TString varName("varEF"); varName += i;
+    varEF.push_back(new TTreeFormula(varName,extraTreeContents[i].second,nt));
+  }
+
+    // get cut values according to the histogram bounds
 
   double xLow  = 0.0;  if (dimension >= 1)  xLow = FSString::parseBoundsLowerX(bounds);
   double xHigh = 0.0;  if (dimension >= 1) xHigh = FSString::parseBoundsUpperX(bounds);
   double yLow  = 0.0;  if (dimension == 2)  yLow = FSString::parseBoundsLowerY(bounds);
   double yHigh = 0.0;  if (dimension == 2) yHigh = FSString::parseBoundsUpperY(bounds);
+
+    // loop over events
 
   unsigned int nEvents = nt->GetEntries();
   for (unsigned int i = 0; i < nEvents; i++){
@@ -92,14 +132,22 @@ FSHistogram::addTHNFContents(TTree* histTree, int dimension,
     if (dimension >= 1) x = varXF->EvalInstance();
     if (dimension == 2) y = varYF->EvalInstance();
     if (dimension >= 1) wt = scale * cutsF->EvalInstance();
+    for (unsigned int i = 0; i < varEF.size(); i++){
+      extraValues[i] = varEF[i]->EvalInstance();
+    }
     if ((dimension >= 1) && ((x < xLow) || (x > xHigh))) continue;      
     if ((dimension == 2) && ((y < yLow) || (y > yHigh))) continue;      
     histTree->Fill();  
   }
 
+    // delete the TTreeFormula objects
+
   if (cutsF) delete cutsF;
   if (varXF) delete varXF;
   if (varYF) delete varYF;
+  for (unsigned int i = 0; i < varEF.size(); i++){
+    if (varEF[i]) delete varEF[i];
+  }
 
   return histTree;
 }
@@ -368,14 +416,18 @@ FSHistogram::getTHNF(int dimension,
                                    TString fileName, TString ntName,
                                    TString variable, TString bounds,
                                    TString cuts,     TString options,
-                                   float scale, TTree* histTree){
+                                   float scale, TTree* histTree,
+                                   vector< pair<TString,TString> > extraTreeContents){
 
     // remove white space
 
   variable = FSString::removeWhiteSpace(variable);
   bounds   = FSString::removeWhiteSpace(bounds);
   cuts     = FSString::removeWhiteSpace(cuts);
-
+  for (unsigned int i = 0; i < extraTreeContents.size(); i++){
+    extraTreeContents[i].first  = FSString::removeWhiteSpace(extraTreeContents[i].first);
+    extraTreeContents[i].second = FSString::removeWhiteSpace(extraTreeContents[i].second);
+  }
 
     // expand "cuts" using FSCut and check for multidimensional sidebands
 
@@ -395,7 +447,7 @@ FSHistogram::getTHNF(int dimension,
       TString cuts_i = fsCuts[i].first;
       double scale_i = scale * fsCuts[i].second;
       pair<TH1F*,TH2F*> histPair = FSHistogram::getTHNF(dimension, fileName, ntName, 
-                                     variable, bounds, cuts_i, options, scale_i, histTree);
+                                     variable, bounds, cuts_i, options, scale_i, histTree, extraTreeContents);
       if (dimension == 1){
         TH1F* hi = histPair.first;
         hist1d = FSHistogram::addTH1F("FSCUTTOTAL",hi);
@@ -419,6 +471,9 @@ FSHistogram::getTHNF(int dimension,
 
   TString fullVariable = FSTree::expandVariable(variable);
   TString fullCuts     = FSTree::expandVariable(cuts);
+  for (unsigned int i = 0; i < extraTreeContents.size(); i++){
+    extraTreeContents[i].second = FSTree::expandVariable(extraTreeContents[i].second);
+  }
 
 
     // create an index
@@ -489,7 +544,7 @@ FSHistogram::getTHNF(int dimension,
     if (dimension == 2) hist2d = (TH2F*) gDirectory->FindObject(hname); 
 
     if (histTree) histTree = addTHNFContents(histTree, dimension, fileName,
-                      ntName,fullVariable,bounds,fullCuts,scale);
+                      ntName,fullVariable,bounds,fullCuts,scale,extraTreeContents);
 
   }
 
