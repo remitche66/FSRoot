@@ -313,6 +313,59 @@ FSModeHistogram::getMCComponents(TString fileName, TString ntName,
   }
   else{
 
+      // create a new tree with MC information
+
+    vector< pair<TString,TString> > extraTreeContents;
+    extraTreeContents.push_back(pair<TString,TString>("MCDecayCode1","MCDecayCode1"));
+    extraTreeContents.push_back(pair<TString,TString>("MCDecayCode2","MCDecayCode2"));
+    if (moreInfo){
+      extraTreeContents.push_back(pair<TString,TString>("MCDecayParticle1","MCDecayParticle1"));
+      extraTreeContents.push_back(pair<TString,TString>("MCDecayParticle2","MCDecayParticle2"));
+      extraTreeContents.push_back(pair<TString,TString>("MCDecayParticle3","MCDecayParticle3"));
+      extraTreeContents.push_back(pair<TString,TString>("MCDecayParticle4","MCDecayParticle4"));
+      extraTreeContents.push_back(pair<TString,TString>("MCDecayParticle5","MCDecayParticle5"));
+      extraTreeContents.push_back(pair<TString,TString>("MCDecayParticle6","MCDecayParticle6"));
+    }
+    TTree* histTree = getTH1FContents(fileName,ntName,category,"1.234","(10,1.0,2.0)",cuts,options,scale,extraTreeContents);
+
+      // set the branch addresses for the new tree
+
+    Double_t dcode1 = 0.0, dcode2 = 0.0;
+    Double_t dp1 = 0.0, dp2 = 0.0, dp3 = 0.0, 
+             dp4 = 0.0, dp5 = 0.0, dp6 = 0.0;
+    histTree->SetBranchAddress("MCDecayCode1",&dcode1);
+    histTree->SetBranchAddress("MCDecayCode2",&dcode2);
+    if (moreInfo){
+      histTree->SetBranchAddress("MCDecayParticle1",&dp1);
+      histTree->SetBranchAddress("MCDecayParticle2",&dp2);
+      histTree->SetBranchAddress("MCDecayParticle3",&dp3);
+      histTree->SetBranchAddress("MCDecayParticle4",&dp4);
+      histTree->SetBranchAddress("MCDecayParticle5",&dp5);
+      histTree->SetBranchAddress("MCDecayParticle6",&dp6);
+    }
+
+      // loop over the new tree and count MC components
+
+    for (int ientry = 0; ientry < histTree->GetEntries(); ientry++){
+      histTree->GetEntry(ientry);
+      TString modeString = FSModeInfo((int)dcode1,(int)dcode2).modeString();
+      if (moreInfo){
+        modeString += ":";
+        modeString += (int)dp1;  modeString += "_";
+        modeString += (int)dp2;  modeString += "_";
+        modeString += (int)dp3;  modeString += "_";
+        modeString += (int)dp4;  modeString += "_";
+        modeString += (int)dp5;  modeString += "_";
+        modeString += (int)dp6;
+      }
+      map<TString,float>::const_iterator mapItrx = m_mcComponentsMap.find(modeString);
+      if (mapItrx == m_mcComponentsMap.end()){
+        m_mcComponentsMap[modeString] = 0.0;
+      }
+      m_mcComponentsMap[modeString] += scale;
+    }
+
+/*
       // expand "cuts" using FSCut and check for multidimensional sidebands
 
     vector< pair<TString,double> > fsCuts = FSCut::expandCuts(cuts);
@@ -443,6 +496,8 @@ FSModeHistogram::getMCComponents(TString fileName, TString ntName,
       delete dummyTFile;
 
     }
+
+*/
 
       // cache the new m_mcComponentsMap
 
