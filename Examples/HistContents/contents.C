@@ -146,6 +146,8 @@ void makeTree(double mParent, double mChild1, double mChild2,
   double PyPn[5];
   double PzPn[5];
   double EnPn[5];
+  double mcdecaycode1;
+  double mcdecaycode2;
 
   tree.Branch("Run",    &run,      "Run/D");
   tree.Branch("Event",  &event,    "Event/D");
@@ -154,6 +156,8 @@ void makeTree(double mParent, double mChild1, double mChild2,
   tree.Branch("PyPCM",  &PyPn[0],  "PyPCM/D");
   tree.Branch("PzPCM",  &PzPn[0],  "PzPCM/D");
   tree.Branch("EnPCM",  &EnPn[0],  "EnPCM/D");
+  tree.Branch("MCDecayCode1", &mcdecaycode1, "MCDecayCode1/D");
+  tree.Branch("MCDecayCode2", &mcdecaycode2, "MCDecayCode2/D");
   for (int i = 1; i <= 4; i++){
     TString si(""); si += i;
     tree.Branch("PxP"+si,  &PxPn[i],  "PxP"+si+"/D");  
@@ -185,6 +189,9 @@ void makeTree(double mParent, double mChild1, double mChild2,
     PyPn[0] = pParent.Py();
     PzPn[0] = pParent.Pz();
     EnPn[0] = pParent.E();
+    mcdecaycode1 = 1000110; mcdecaycode2 = 0;
+    if (gRandom->Rndm() < 0.5){ mcdecaycode1 = 110; mcdecaycode2 = 0; }
+    if (gRandom->Rndm() < 0.1){ mcdecaycode1 = 110000; mcdecaycode2 = 0; }
     for (int ip = 1; ip <= 4; ip++){
       PxPn[ip] = generator.GetDecay(ip-1)->Px();
       PyPn[ip] = generator.GetDecay(ip-1)->Py();
