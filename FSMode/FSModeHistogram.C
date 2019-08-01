@@ -365,140 +365,6 @@ FSModeHistogram::getMCComponents(TString fileName, TString ntName,
       m_mcComponentsMap[modeString] += scale;
     }
 
-/*
-      // expand "cuts" using FSCut and check for multidimensional sidebands
-
-    vector< pair<TString,double> > fsCuts = FSCut::expandCuts(cuts);
-    if (fsCuts.size() == 1){ cuts = fsCuts[0].first; scale *= fsCuts[0].second; }
-    if (fsCuts.size() > 1){
-      cout << "FSModeHistogram::getMCComponents ERROR: multidimensional sidebands are not supported (yet)" << endl;
-      exit(0);
-    }
-
-      // extract FSModeInfo (only use the first mode from this category)
-      //  and replace any special names
-
-    vector<FSModeInfo*> modeVector = FSModeCollection::modeVector(category);
-    if (modeVector.size() == 0) return components;
-    FSModeInfo* modeInfo = modeVector[0];
-    fileName = modeInfo->modeString(fileName);
-    ntName   = modeInfo->modeString(ntName);
-    variable = modeInfo->modeString(variable);
-    if (cuts != "") cuts = modeInfo->modeString(cuts);
-                    cuts = modeInfo->modeCuts(cuts);
-
-      // set up the original TChain
-
-    TChain* nt = FSTree::getTChain(fileName,ntName);
-
-      // loop over combinatorics
-
-    vector<TString> indices;
-    vector<TString> combinatorics = 
-      modeInfo->modeCombinatorics((variable+" "+cuts),FSControl::DEBUG);
-    for (unsigned int icombo = 0; icombo < combinatorics.size(); icombo++){
-
-	// set up the variables and cuts for this combination
-
-      TString variable_i("");
-      TString cuts_i("");
-      vector<TString> parts = FSString::parseTString(combinatorics[icombo]," ");
-      if (parts.size() >= 1) variable_i = parts[0];
-      if (parts.size() >= 2) cuts_i     = parts[1];
-      variable_i = FSTree::expandVariable(variable_i);
-      cuts_i = FSTree::expandVariable(cuts_i);
-
-	// add cuts derived from bounds
-
-      if (cuts_i != "") cuts_i += "&&";
-      cuts_i += "(";
-      cuts_i += variable_i;
-      cuts_i += ">";
-      cuts_i += FSString::double2TString(FSString::parseBoundsLowerX(bounds),8);
-      cuts_i += ")&&(";
-      cuts_i += variable_i;
-      cuts_i += "<";
-      cuts_i += FSString::double2TString(FSString::parseBoundsUpperX(bounds),8);
-      cuts_i += ")";
-
-
-        // make sure this combination isn't a duplicate
-
-      TString checkIndex = FSHistogram::getTH1FIndex(fileName,ntName,variable_i,
-                                                         bounds,cuts_i,options,scale);
-      bool usedIndex = false;
-      for (unsigned int iindex = 0; iindex < indices.size(); iindex++){
-        if (indices[iindex] == checkIndex){ usedIndex = true; break; }
-      }
-      if (usedIndex) continue;
-      indices.push_back(checkIndex);
-
-
-	// set up a new TTree
-
-      TFile* dummyTFile = new TFile("tempMCCompenents.root","recreate");
-      dummyTFile->cd();
-      TTree* nt2 = nt->CopyTree(cuts_i);
-      Double_t dcode1 = 0.0, dcode2 = 0.0;
-      Float_t fcode1 = 0.0, fcode2 = 0.0;
-      Double_t dp1 = 0.0, dp2 = 0.0, dp3 = 0.0, 
-               dp4 = 0.0, dp5 = 0.0, dp6 = 0.0;
-      if (ntName.Contains("StandardDecayProc")){
-        nt2->SetBranchAddress("MCDecayCode1",&fcode1);
-        nt2->SetBranchAddress("MCDecayCode2",&fcode2);
-      }
-      else{
-        nt2->SetBranchAddress("MCDecayCode1",&dcode1);
-        nt2->SetBranchAddress("MCDecayCode2",&dcode2);
-        if (moreInfo){
-          nt2->SetBranchAddress("MCDecayParticle1",&dp1);
-          nt2->SetBranchAddress("MCDecayParticle2",&dp2);
-          nt2->SetBranchAddress("MCDecayParticle3",&dp3);
-          nt2->SetBranchAddress("MCDecayParticle4",&dp4);
-          nt2->SetBranchAddress("MCDecayParticle5",&dp5);
-          nt2->SetBranchAddress("MCDecayParticle6",&dp6);
-        }
-      }
-
-	// loop over the TTree and count MC components
-
-      for (int ientry = 0; ientry < nt2->GetEntries(); ientry++){
-	nt2->GetEntry(ientry);
-        int code1;
-        int code2;
-        if (ntName.Contains("StandardDecayProc")){
-          code1 = (int)fcode1;
-          code2 = (int)fcode2;
-        }
-        else{
-          code1 = (int)dcode1;
-          code2 = (int)dcode2;
-        }
-
-	TString modeString = FSModeInfo(code1,code2).modeString();
-        if (moreInfo){
-          modeString += ":";
-          modeString += (int)dp1;  modeString += "_";
-          modeString += (int)dp2;  modeString += "_";
-          modeString += (int)dp3;  modeString += "_";
-          modeString += (int)dp4;  modeString += "_";
-          modeString += (int)dp5;  modeString += "_";
-          modeString += (int)dp6;
-        }
-	map<TString,float>::const_iterator mapItrx = m_mcComponentsMap.find(modeString);
-	if (mapItrx == m_mcComponentsMap.end()){
-          m_mcComponentsMap[modeString] = 0.0;
-	}
-	m_mcComponentsMap[modeString] += scale;
-      }
-
-      dummyTFile->Close();
-      delete dummyTFile;
-
-    }
-
-*/
-
       // cache the new m_mcComponentsMap
 
     m_cacheComponentsMap[index] = m_mcComponentsMap;
@@ -512,7 +378,7 @@ FSModeHistogram::getMCComponents(TString fileName, TString ntName,
     float max = 0;
     TString maxMode("");
     for (map<TString,float>::iterator mapItr2 = m_mcComponentsMap.begin();
-	 mapItr2 != m_mcComponentsMap.end(); mapItr2++){
+      mapItr2 != m_mcComponentsMap.end(); mapItr2++){
       bool found = false;
       for (unsigned int i = 0; i < components.size(); i++){
         if (mapItr2->first == components[i]) found = true; 
@@ -576,16 +442,14 @@ FSModeHistogram::drawMCComponents(TString fileName, TString ntName,
     // create the original histogram
 
   vector<FSModeInfo*> modeVector = FSModeCollection::modeVector(category);
-  if (modeVector.size() != 1){
-    cout << "FSModeHistogram:  you can only draw MC components for one mode at a time..." << endl;
-    cout << "                ... there are " << modeVector.size() << " modes associated" << endl;
-    cout << "                    with category " << category << endl << endl;
-    FSModeCollection::display(category);
-    return (TH1F*) NULL;
+  if (modeVector.size() == 0){
+    cout << "FSModeHistogram::drawMCComponents ERROR: no modes for category = " << category << endl;
+    exit(0);
   }
   TH1F* htot = getTH1F(fileName,ntName,category,variable,bounds,cuts,options,scale);
   FSModeInfo* modeInfo = modeVector[0];
   htot->SetTitle(FSModeString::rootSymbols(modeInfo->modeDescription()));
+  if (modeVector.size() > 1) htot->SetTitle("category = "+category);
   float totsize = htot->Integral(1,FSString::parseBoundsNBinsX(bounds));
 
     // make a new TCanvas if one isn't passed in
