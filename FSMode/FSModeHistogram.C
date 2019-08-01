@@ -312,6 +312,15 @@ FSModeHistogram::getMCComponents(TString fileName, TString ntName,
   }
   else{
 
+      // expand "cuts" using FSCut and check for multidimensional sidebands
+
+    vector< pair<TString,double> > fsCuts = FSCut::expandCuts(cuts);
+    if (fsCuts.size() == 1){ cuts = fsCuts[0].first; scale *= fsCuts[0].second; }
+    if (fsCuts.size() > 1){
+      cout << "FSModeHistogram::getMCComponents ERROR: multidimensional sidebands are not supported (yet)" << endl;
+      exit(0);
+    }
+
       // extract FSModeInfo (only use the first mode from this category)
       //  and replace any special names
 
