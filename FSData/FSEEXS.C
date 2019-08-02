@@ -10,19 +10,19 @@ FSEEXS::clearXS(){
 }
 
  
-FSEEXS::FSEEXS(TString reactionName, TString dataSetName, TString sourceName){
+FSEEXS::FSEEXS(TString n_reactionName, TString n_dataSetName, TString n_sourceName){
   clearXS();
-  m_reactionName = reactionName;
-  m_dataSetName = dataSetName;
-  m_sourceName = sourceName;
+  m_reactionName = n_reactionName;
+  m_dataSetName = n_dataSetName;
+  m_sourceName = n_sourceName;
   if (!dataSet()){
-    cout << "FSEEXS ERROR: no data set corresponding to " << dataSetName << endl;
+    cout << "FSEEXS ERROR: no data set corresponding to " << n_dataSetName << endl;
     exit(0);
   }
-  addXSCategory(reactionName);
-  addXSCategory(sourceName);
-  dataSet()->addDSCategory(reactionName,true);
-  dataSet()->addDSCategory(reactionName+":"+sourceName,true);
+  addXSCategory(n_reactionName);
+  addXSCategory(n_sourceName);
+  dataSet()->addDSCategory(n_reactionName,true);
+  dataSet()->addDSCategory(n_reactionName+":"+n_sourceName,true);
 }
 
 

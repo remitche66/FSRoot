@@ -132,8 +132,8 @@ FSHistogram::addTHNFContents(TTree* histTree, int dimension,
     if (dimension >= 1) x = varXF->EvalInstance();
     if (dimension == 2) y = varYF->EvalInstance();
     if (dimension >= 1) wt = scale * cutsF->EvalInstance();
-    for (unsigned int i = 0; i < varEF.size(); i++){
-      extraValues[i] = varEF[i]->EvalInstance();
+    for (unsigned int j = 0; j < varEF.size(); j++){
+      extraValues[j] = varEF[j]->EvalInstance();
     }
     if ((dimension >= 1) && ((x < xLow) || (x > xHigh))) continue;      
     if ((dimension == 2) && ((y < yLow) || (y > yHigh))) continue;      

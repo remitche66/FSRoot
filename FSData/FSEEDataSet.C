@@ -16,12 +16,12 @@ FSEEDataSet::FSEEDataSet(){
 }
 
 void
-FSEEDataSet::setName(TString name){
+FSEEDataSet::setName(TString n_name){
   if (m_name != ""){
     cout << "FSEEDataSet::setName ERROR" << endl;
     exit(0);
   }
-  m_name = name;
+  m_name = n_name;
   addDSCategory(m_name,false);
 }
 
@@ -44,54 +44,54 @@ FSEEDataSet::clearDS(){
 }
 
 
-FSEEDataSet::FSEEDataSet(TString  name,
-                     int      runStart,
-                     int      runEnd,
-                     double   ecm,
-                     double   ecmStatError,
-                     double   ecmSystError,
-                     double   lum,
-                     double   lumStatError,
-                     double   lumSystError,
-                     vector<TString> extraDSCategories){
+FSEEDataSet::FSEEDataSet(TString  n_name,
+                     int      n_runStart,
+                     int      n_runEnd,
+                     double   n_ecm,
+                     double   n_ecmStatError,
+                     double   n_ecmSystError,
+                     double   n_lum,
+                     double   n_lumStatError,
+                     double   n_lumSystError,
+                     vector<TString> n_extraDSCategories){
   clearDS();
-  setName(name);
-  m_runStart.push_back(runStart);
-  m_runEnd.push_back(runEnd);
-  m_ecm = ecm;
-  m_ecmStatError = ecmStatError;
-  m_ecmSystError = ecmSystError;
-  m_ecmLow  = ecm - ecmError();
-  m_ecmHigh = ecm + ecmError();
-  m_lum = lum;
-  m_lumStatError = lumStatError;
-  m_lumSystError = lumSystError;
+  setName(n_name);
+  m_runStart.push_back(n_runStart);
+  m_runEnd.push_back(n_runEnd);
+  m_ecm = n_ecm;
+  m_ecmStatError = n_ecmStatError;
+  m_ecmSystError = n_ecmSystError;
+  m_ecmLow  = n_ecm - ecmError();
+  m_ecmHigh = n_ecm + ecmError();
+  m_lum = n_lum;
+  m_lumStatError = n_lumStatError;
+  m_lumSystError = n_lumSystError;
   if (m_lum <= 0.0){ 
     cout << "FSEEDataSet Error: no luminosity" << endl; 
     exit(1);
   }
-  for (unsigned int i = 0; i < extraDSCategories.size(); i++){
-    addDSCategory(extraDSCategories[i],false);
+  for (unsigned int i = 0; i < n_extraDSCategories.size(); i++){
+    addDSCategory(n_extraDSCategories[i],false);
   }
   addLUMCategories();
 }
 
-FSEEDataSet::FSEEDataSet(TString  name,
-                     double   ecm,
-                     double   lum,
-                     vector<TString> extraDSCategories){
+FSEEDataSet::FSEEDataSet(TString  n_name,
+                     double   n_ecm,
+                     double   n_lum,
+                     vector<TString> n_extraDSCategories){
   clearDS();
-  setName(name);
-  m_ecm = ecm;
-  m_ecmLow  = ecm - ecmError();
-  m_ecmHigh = ecm + ecmError();
-  m_lum = lum;
+  setName(n_name);
+  m_ecm = n_ecm;
+  m_ecmLow  = n_ecm - ecmError();
+  m_ecmHigh = n_ecm + ecmError();
+  m_lum = n_lum;
   if (m_lum <= 0.0){ 
     cout << "FSEEDataSet Error: no luminosity" << endl; 
     exit(1);
   }
-  for (unsigned int i = 0; i < extraDSCategories.size(); i++){
-    addDSCategory(extraDSCategories[i],false);
+  for (unsigned int i = 0; i < n_extraDSCategories.size(); i++){
+    addDSCategory(n_extraDSCategories[i],false);
   }
   addLUMCategories();
 }
@@ -100,11 +100,11 @@ FSEEDataSet::FSEEDataSet(TString  name,
 void
 FSEEDataSet::addSubSet(FSEEDataSet* dataSet){
     // add to the run lists
-  vector<int> runStart = dataSet->runStart();
-  vector<int> runEnd   = dataSet->runEnd();
-  for (unsigned int i = 0; i < runStart.size(); i++){
-    m_runStart.push_back(runStart[i]);
-    m_runEnd.push_back(runEnd[i]);
+  vector<int> n_runStart = dataSet->runStart();
+  vector<int> n_runEnd   = dataSet->runEnd();
+  for (unsigned int i = 0; i < n_runStart.size(); i++){
+    m_runStart.push_back(n_runStart[i]);
+    m_runEnd.push_back(n_runEnd[i]);
   }
       // try to shorten the run lists a bit
     if (m_runStart.size() > 1){
@@ -157,13 +157,13 @@ FSEEDataSet::addSubSet(FSEEDataSet* dataSet){
     // add lum info
   double oldLumSystErrorRel = lumSystErrorRel();
   double newLumSystErrorRel = dataSet->lumSystErrorRel();
-  double lumSystErrorRel = oldLumSystErrorRel;
+  double n_lumSystErrorRel = oldLumSystErrorRel;
   if (newLumSystErrorRel > oldLumSystErrorRel) 
-    lumSystErrorRel = newLumSystErrorRel;
+    n_lumSystErrorRel = newLumSystErrorRel;
   m_lum += dataSet->lum();
   m_lumStatError = sqrt(m_lumStatError*m_lumStatError
         + dataSet->lumStatError()*dataSet->lumStatError());
-  m_lumSystError = m_lum * lumSystErrorRel; 
+  m_lumSystError = m_lum * n_lumSystErrorRel; 
     // add categories
   vector<TString> subCategories = dataSet->dsCategories();
   for (unsigned int i = 0; i < subCategories.size(); i++){

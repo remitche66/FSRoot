@@ -52,24 +52,24 @@ class FSEEDataSet{
   private:
 
     FSEEDataSet();
-    void setName(TString name);
+    void setName(TString n_name);
     void clearDS();
 
-    FSEEDataSet(TString  name,
-              int      runStart,
-              int      runEnd,
-              double   ecm,
-              double   ecmStatError,
-              double   ecmSystError,
-              double   lum,
-              double   lumStatError,
-              double   lumSystError,
-              vector<TString> extraDSCategories);
+    FSEEDataSet(TString  n_name,
+              int      n_runStart,
+              int      n_runEnd,
+              double   n_ecm,
+              double   n_ecmStatError,
+              double   n_ecmSystError,
+              double   n_lum,
+              double   n_lumStatError,
+              double   n_lumSystError,
+              vector<TString> n_extraDSCategories);
 
-    FSEEDataSet(TString  name,
-              double   ecm,
-              double   lum,
-              vector<TString> extraDSCategories);
+    FSEEDataSet(TString  n_name,
+              double   n_ecm,
+              double   n_lum,
+              vector<TString> n_extraDSCategories);
 
     void addSubSet(FSEEDataSet* dataSet);
 

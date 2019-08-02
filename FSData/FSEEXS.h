@@ -64,7 +64,7 @@ class FSEEXS{
 
     void clearXS();
 
-    FSEEXS(TString reactionName, TString dataSetName, TString sourceName);
+    FSEEXS(TString n_reactionName, TString n_dataSetName, TString n_sourceName);
 
     void initWithXS1(double n_XS, double n_EXS, double n_NSIGNAL);
     void initWithXS2(double n_XS, int n_NSIGREGION, int n_NBGREGION, double n_SCALE,
