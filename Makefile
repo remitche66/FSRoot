@@ -1,7 +1,7 @@
 #! gnumake
 
 ROOTFLAGS     = $(shell root-config --cflags)
-ROOTLIBS      = $(shell root-config --libs) -lMinuit -lMathCore -lMathMore -lgsl -lgslcblas
+ROOTLIBS      = $(shell root-config --libs) -lMinuit -lMathCore -lMathMore -lTreePlayer -lgsl -lgslcblas
 
 FSBASIC_LIBS = FSBasic/FSControl.o FSBasic/FSCanvas.o FSBasic/FSTree.o FSBasic/FSHistogram.o FSBasic/FSCut.o FSBasic/FSString.o FSBasic/FSPhysics.o
 FSMODE_LIBS = FSMode/FSModeInfo.o FSMode/FSModeTree.o FSMode/FSModeHistogram.o FSMode/FSModeCollection.o FSMode/FSModeString.o
