@@ -1,0 +1,80 @@
+--------------------------------------------------
+--- Loading the FSRoot Macros (v1.1) ---
+--------------------------------------------------
+Loading FSBasic/FSControl.h...
+Loading FSBasic/FSCanvas.C...
+Loading FSBasic/FSString.h...
+Info in <TUnixSystem::ACLiC>: creating shared library /afs/ihep.ac.cn/users/r/remitche/FSRoot/./FSBasic/FSString_C.so
+Loading FSBasic/FSPhysics.C...
+Loading FSBasic/FSCut.C...
+Info in <TUnixSystem::ACLiC>: creating shared library /afs/ihep.ac.cn/users/r/remitche/FSRoot/./FSBasic/FSCut_C.so
+Loading FSBasic/FSTree.C...
+Info in <TUnixSystem::ACLiC>: creating shared library /afs/ihep.ac.cn/users/r/remitche/FSRoot/./FSBasic/FSTree_C.so
+Loading FSBasic/FSHistogram.C...
+Info in <TUnixSystem::ACLiC>: creating shared library /afs/ihep.ac.cn/users/r/remitche/FSRoot/./FSBasic/FSHistogram_C.so
+In file included from /afs/ihep.ac.cn/users/r/remitche/FSRoot/./FSBasic/FSHistogram_C_ACLiC_dict.h:34:0,
+                 from /afs/ihep.ac.cn/users/r/remitche/FSRoot/./FSBasic/FSHistogram_C_ACLiC_dict.cxx:17:
+/afs/ihep.ac.cn/users/r/remitche/FSRoot/./FSBasic/FSHistogram.C: In static member function ‘static TTree* FSHistogram::addTHNFContents(TTree*, int, TString, TString, TString, TString, TString, float, std::vector<std::pair<TString, TString> >)’:
+/afs/ihep.ac.cn/users/r/remitche/FSRoot/./FSBasic/FSHistogram.C:135:23: warning: declaration of ‘i’ shadows a previous local [-Wshadow]
+/afs/ihep.ac.cn/users/r/remitche/FSRoot/./FSBasic/FSHistogram.C:129:21: warning: shadowed declaration is here [-Wshadow]
+Loading FSMode/FSModeString.C...
+Info in <TUnixSystem::ACLiC>: creating shared library /afs/ihep.ac.cn/users/r/remitche/FSRoot/./FSMode/FSModeString_C.so
+Loading FSMode/FSModeInfo.C...
+Info in <TUnixSystem::ACLiC>: creating shared library /afs/ihep.ac.cn/users/r/remitche/FSRoot/./FSMode/FSModeInfo_C.so
+Loading FSMode/FSModeCollection.C...
+Info in <TUnixSystem::ACLiC>: creating shared library /afs/ihep.ac.cn/users/r/remitche/FSRoot/./FSMode/FSModeCollection_C.so
+Loading FSMode/FSModeTree.C...
+Info in <TUnixSystem::ACLiC>: creating shared library /afs/ihep.ac.cn/users/r/remitche/FSRoot/./FSMode/FSModeTree_C.so
+Loading FSMode/FSModeHistogram.C...
+Info in <TUnixSystem::ACLiC>: creating shared library /afs/ihep.ac.cn/users/r/remitche/FSRoot/./FSMode/FSModeHistogram_C.so
+Loading FSData/FSXYPoint.C...
+Info in <TUnixSystem::ACLiC>: creating shared library /afs/ihep.ac.cn/users/r/remitche/FSRoot/./FSData/FSXYPoint_C.so
+Loading FSData/FSXYPointList.C...
+Info in <TUnixSystem::ACLiC>: creating shared library /afs/ihep.ac.cn/users/r/remitche/FSRoot/./FSData/FSXYPointList_C.so
+Loading FSData/FSEEDataSet.C...
+Info in <TUnixSystem::ACLiC>: creating shared library /afs/ihep.ac.cn/users/r/remitche/FSRoot/./FSData/FSEEDataSet_C.so
+In file included from /afs/ihep.ac.cn/users/r/remitche/FSRoot/./FSData/FSEEDataSet_C_ACLiC_dict.h:34:0,
+                 from /afs/ihep.ac.cn/users/r/remitche/FSRoot/./FSData/FSEEDataSet_C_ACLiC_dict.cxx:17:
+/afs/ihep.ac.cn/users/r/remitche/FSRoot/./FSData/FSEEDataSet.C: In member function ‘void FSEEDataSet::setName(TString)’:
+/afs/ihep.ac.cn/users/r/remitche/FSRoot/./FSData/FSEEDataSet.C:19:34: warning: declaration of ‘name’ shadows a member of 'this' [-Wshadow]
+/afs/ihep.ac.cn/users/r/remitche/FSRoot/./FSData/FSEEDataSet.C: In constructor ‘FSEEDataSet::FSEEDataSet(TString, int, int, double, double, double, double, double, double, std::vector<TString>)’:
+/afs/ihep.ac.cn/users/r/remitche/FSRoot/./FSData/FSEEDataSet.C:56:55: warning: declaration of ‘lumSystError’ shadows a member of 'this' [-Wshadow]
+/afs/ihep.ac.cn/users/r/remitche/FSRoot/./FSData/FSEEDataSet.C:56:55: warning: declaration of ‘lumStatError’ shadows a member of 'this' [-Wshadow]
+/afs/ihep.ac.cn/users/r/remitche/FSRoot/./FSData/FSEEDataSet.C:56:55: warning: declaration of ‘lum’ shadows a member of 'this' [-Wshadow]
+/afs/ihep.ac.cn/users/r/remitche/FSRoot/./FSData/FSEEDataSet.C:56:55: warning: declaration of ‘ecmSystError’ shadows a member of 'this' [-Wshadow]
+/afs/ihep.ac.cn/users/r/remitche/FSRoot/./FSData/FSEEDataSet.C:56:55: warning: declaration of ‘ecmStatError’ shadows a member of 'this' [-Wshadow]
+/afs/ihep.ac.cn/users/r/remitche/FSRoot/./FSData/FSEEDataSet.C:56:55: warning: declaration of ‘ecm’ shadows a member of 'this' [-Wshadow]
+/afs/ihep.ac.cn/users/r/remitche/FSRoot/./FSData/FSEEDataSet.C:56:55: warning: declaration of ‘runEnd’ shadows a member of 'this' [-Wshadow]
+/afs/ihep.ac.cn/users/r/remitche/FSRoot/./FSData/FSEEDataSet.C:56:55: warning: declaration of ‘runStart’ shadows a member of 'this' [-Wshadow]
+/afs/ihep.ac.cn/users/r/remitche/FSRoot/./FSData/FSEEDataSet.C:56:55: warning: declaration of ‘name’ shadows a member of 'this' [-Wshadow]
+/afs/ihep.ac.cn/users/r/remitche/FSRoot/./FSData/FSEEDataSet.C: In constructor ‘FSEEDataSet::FSEEDataSet(TString, double, double, std::vector<TString>)’:
+/afs/ihep.ac.cn/users/r/remitche/FSRoot/./FSData/FSEEDataSet.C:82:55: warning: declaration of ‘lum’ shadows a member of 'this' [-Wshadow]
+/afs/ihep.ac.cn/users/r/remitche/FSRoot/./FSData/FSEEDataSet.C:82:55: warning: declaration of ‘ecm’ shadows a member of 'this' [-Wshadow]
+/afs/ihep.ac.cn/users/r/remitche/FSRoot/./FSData/FSEEDataSet.C:82:55: warning: declaration of ‘name’ shadows a member of 'this' [-Wshadow]
+/afs/ihep.ac.cn/users/r/remitche/FSRoot/./FSData/FSEEDataSet.C: In member function ‘void FSEEDataSet::addSubSet(FSEEDataSet*)’:
+/afs/ihep.ac.cn/users/r/remitche/FSRoot/./FSData/FSEEDataSet.C:103:15: warning: declaration of ‘runStart’ shadows a member of 'this' [-Wshadow]
+/afs/ihep.ac.cn/users/r/remitche/FSRoot/./FSData/FSEEDataSet.C:104:15: warning: declaration of ‘runEnd’ shadows a member of 'this' [-Wshadow]
+/afs/ihep.ac.cn/users/r/remitche/FSRoot/./FSData/FSEEDataSet.C:160:10: warning: declaration of ‘lumSystErrorRel’ shadows a member of 'this' [-Wshadow]
+Loading FSData/FSEEDataSetList.C...
+Info in <TUnixSystem::ACLiC>: creating shared library /afs/ihep.ac.cn/users/r/remitche/FSRoot/./FSData/FSEEDataSetList_C.so
+Loading FSData/FSEEXS.C...
+Info in <TUnixSystem::ACLiC>: creating shared library /afs/ihep.ac.cn/users/r/remitche/FSRoot/./FSData/FSEEXS_C.so
+In file included from /afs/ihep.ac.cn/users/r/remitche/FSRoot/./FSData/FSEEXS_C_ACLiC_dict.h:34:0,
+                 from /afs/ihep.ac.cn/users/r/remitche/FSRoot/./FSData/FSEEXS_C_ACLiC_dict.cxx:17:
+/afs/ihep.ac.cn/users/r/remitche/FSRoot/./FSData/FSEEXS.C: In constructor ‘FSEEXS::FSEEXS(TString, TString, TString)’:
+/afs/ihep.ac.cn/users/r/remitche/FSRoot/./FSData/FSEEXS.C:13:77: warning: declaration of ‘sourceName’ shadows a member of 'this' [-Wshadow]
+/afs/ihep.ac.cn/users/r/remitche/FSRoot/./FSData/FSEEXS.C:13:77: warning: declaration of ‘dataSetName’ shadows a member of 'this' [-Wshadow]
+/afs/ihep.ac.cn/users/r/remitche/FSRoot/./FSData/FSEEXS.C:13:77: warning: declaration of ‘reactionName’ shadows a member of 'this' [-Wshadow]
+Loading FSData/FSEEXSList.C...
+Info in <TUnixSystem::ACLiC>: creating shared library /afs/ihep.ac.cn/users/r/remitche/FSRoot/./FSData/FSEEXSList_C.so
+Loading FSFit/FSFitPrivate.C...
+Info in <TUnixSystem::ACLiC>: creating shared library /afs/ihep.ac.cn/users/r/remitche/FSRoot/./FSFit/FSFitPrivate_C.so
+Loading FSFit/FSFitFunctions.C...
+Info in <TUnixSystem::ACLiC>: creating shared library /afs/ihep.ac.cn/users/r/remitche/FSRoot/./FSFit/FSFitFunctions_C.so
+Loading FSFit/FSFitUtilities.C...
+Info in <TUnixSystem::ACLiC>: creating shared library /afs/ihep.ac.cn/users/r/remitche/FSRoot/./FSFit/FSFitUtilities_C.so
+------------------------------------------
+--- Finished loading the FSRoot Macros ---
+------------------------------------------
+
+
