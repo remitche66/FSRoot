@@ -353,6 +353,11 @@ FSTree::expandVariable(TString variable){
       }
       else{
         pIndex += variable[i];
+        TString testVariable(variable[i]);
+        if (!testVariable.IsAlnum()){
+          cout << "FSTtree::expandVariable WARNING: variable contains a special ";
+          cout << "character: " << variable << endl;
+        }
       }
     }
     if (pIndex.Length() > 0 && !usevectorM) pN.push_back(pIndex);
