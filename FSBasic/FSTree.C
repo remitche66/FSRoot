@@ -100,6 +100,12 @@ FSTree::getTChain(TString fileName, TString ntName,
     friendNTName += "_";
     friendNTName += FSControl::CHAINFRIEND;
 
+      if (FSControl::DEBUG){
+	cout << "FSTree: adding friend tree... " << endl;
+        cout << "            friend tree name = " << friendNTName << endl;
+        cout << "            friend tree file = " << friendFileName << endl;
+      }
+
     nt->AddFriend(friendNTName,friendFileName);
 
   }
