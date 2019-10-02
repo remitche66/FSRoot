@@ -795,8 +795,8 @@ class FSFitDataSet {
     const vector<double>&  y() { return m_ySelected; }
     const vector<double>& ey() { return m_eySelected; }
 
-    bool hasY()  { return m_ySelected.size(); }
-    bool hasEY() { return m_eySelected.size(); }
+    bool hasY()  { return m_y.size(); }
+    bool hasEY() { return m_ey.size(); }
 
     const vector< pair<double,double> >& xLimits() { return m_xLimits; }
 
