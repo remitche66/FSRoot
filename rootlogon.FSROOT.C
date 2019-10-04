@@ -127,6 +127,14 @@ cout << "Loading FSFit/FSFitUtilities.C..." << endl;
 gROOT->LoadMacro("FSFit/FSFitUtilities.C+");
 
 
+// *****************
+// ANALYSIS UTILITIES
+// *****************
+
+cout << "Loading FSAnalysis/FSHistogramAnalysis.C..." << endl;
+gROOT->LoadMacro("FSAnalysis/FSHistogramAnalysis.C+");
+
+
 cout << "------------------------------------------" << endl;
 cout << "--- Finished loading the FSRoot Macros ---" << endl;
 cout << "------------------------------------------" << endl;
