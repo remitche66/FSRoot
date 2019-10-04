@@ -4,6 +4,7 @@
 #include <utility>
 #include <map>
 #include <vector>
+#include <cmath>
 #include "TString.h"
 #include "TH1F.h"
 #include "TGraphAsymmErrors.h"

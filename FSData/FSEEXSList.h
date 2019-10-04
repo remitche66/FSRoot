@@ -2,6 +2,7 @@
 #define FSEEXSLIST_H
 
 #include <iostream>
+#include <cmath>
 #include "TH1F.h"
 #include "TF1.h"
 #include "FSData/FSEEDataSet.h"

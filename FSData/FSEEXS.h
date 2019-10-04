@@ -2,6 +2,7 @@
 #define FSEEXS_H
 
 #include <iostream>
+#include <cmath>
 #include "TRandom3.h"
 #include "FSData/FSEEDataSet.h"
 #include "FSData/FSEEDataSetList.h"
