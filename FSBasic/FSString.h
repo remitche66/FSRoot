@@ -201,7 +201,7 @@ class FSString{
       // VARIOUS CHECKS TO HELP DEBUGGING
       // ********************************************************
 
-    static bool checkParentheses(TString input);
+    static bool checkParentheses(TString input, TString opening = "(", TString closing = ")");
 
 
   private:

@@ -1023,11 +1023,11 @@ FSString::removeWhiteSpace(TString input){
   // ********************************************************
 
 bool
-FSString::checkParentheses(TString input){
+FSString::checkParentheses(TString input, TString opening, TString closing){
   int pcount = 0;
   for (int i = 0; i < input.Length(); i++){
-    if ((TString)input[i] == "(") pcount++;
-    if ((TString)input[i] == ")") pcount--;
+    if ((TString)input[i] == opening) pcount++;
+    if ((TString)input[i] == closing) pcount--;
     if (pcount < 0){
       cout << "FSString: problem with parentheses in input = " << input << endl;
       return false;
