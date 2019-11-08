@@ -1056,11 +1056,15 @@ FSString::expandSUM(TString inputString){
         TString word2("");
         int pcount = 0;
         int jstop = 0;
-        for (int j = i+3; j < inputString.Length(); j++){
+        for (int j = i+3; j < inputString.Length()-1; j++){
           if (inputString[j] == '{'){ pcount++; }
           else if (inputString[j] == '}'){ pcount--; }
           word1 += inputString[j];
           if (pcount == 0){ jstop = j; break; }
+        }
+        if ((jstop == 0) || (inputString[jstop+1] != '{')){
+          cout << "FSString::expandSUM ERROR: formatting problem" << endl;
+          exit(0);
         }
         for (int j = jstop+1; j < inputString.Length(); j++){
           if (inputString[j] == '{'){ pcount++; }
@@ -1092,7 +1096,7 @@ FSString::expandSUM(TString inputString){
             if (id != defns.size()-1) newword2 += "+";
           }
           inputString.Replace(inputString.Index(bigword1),bigword1.Length(),"");
-          inputString.Replace(inputString.Index(bigword2),bigword2.Length(),newword2);
+          inputString.Replace(inputString.Index(bigword2),bigword2.Length(),"("+newword2+")");
           break;
         }
       }
