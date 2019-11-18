@@ -573,6 +573,72 @@ FSHistogram::getTHNF(int dimension,
 } 
 
 
+    // ********************************************
+    //  CREATE HISTOGRAMS FROM FUNCTIONS
+    // ********************************************
+
+TH1F*
+FSHistogram::getTH1FFormula(TString formula, TString bounds){
+  return getTHNFFormula(1,formula,bounds).first;
+}
+
+TH2F*
+FSHistogram::getTH2FFormula(TString formula, TString bounds){
+  return getTHNFFormula(2,formula,bounds).second;
+}
+
+TH1F*
+FSHistogram::getTH1FFormula(TF1* function, TString bounds){
+  return getTHNFFormula(1,function->GetFormula()->GetExpFormula(),bounds).first;
+}
+
+TH2F*
+FSHistogram::getTH2FFormula(TF2* function, TString bounds){
+  return getTHNFFormula(2,function->GetFormula()->GetExpFormula(),bounds).second;
+}
+
+
+pair<TH1F*,TH2F*>
+FSHistogram::getTHNFFormula(int dimension, TString formula, TString bounds){
+  TString index = "(d)" + FSString::int2TString(dimension) +
+                  "(form)" + formula +
+                  "(bounds)" + bounds;
+  pair<TH1F*,TH2F*> histPair = getHistogramFromCache(index);
+  if (histPair.first || histPair.second) return histPair;
+  formula = FSString::removeWhiteSpace(formula);
+  formula = FSString::expandSUM(formula);
+  TFormula rootFormula("FSRootTempFormula",formula);
+  int nbinsx = 1; int nbinsy = 1;
+  double lowx = 0.0; double lowy = 0.0;
+  double highx = 10.0; double highy = 10.0;
+  if (dimension >= 1) nbinsx = FSString::parseBoundsNBinsX(bounds);
+  if (dimension == 2) nbinsy = FSString::parseBoundsNBinsY(bounds);
+  if (dimension >= 1)   lowx = FSString::parseBoundsLowerX(bounds);
+  if (dimension == 2)   lowy = FSString::parseBoundsLowerY(bounds);
+  if (dimension >= 1)  highx = FSString::parseBoundsUpperX(bounds);
+  if (dimension == 2)  highy = FSString::parseBoundsUpperY(bounds);
+  TH1F* hist1d = NULL;  TH2F* hist2d = NULL;
+  if (dimension == 1) hist1d = new TH1F("FSRootTempHist","",nbinsx,lowx,highx);
+  if (dimension == 2) hist2d = new TH2F("FSRootTempHist","",nbinsx,lowx,highx,nbinsy,lowy,highy);
+  double x = 0.0; double y = 0.0;  double f = 0.0;
+  for (int ix = 1; ix <= nbinsx; ix++){
+    for (int iy = 1; iy <= nbinsy; iy++){
+      if (dimension >= 1) x = lowx + (highx-lowx)*(ix-0.5)/nbinsx;
+      if (dimension == 2) y = lowy + (highy-lowy)*(iy-0.5)/nbinsy;
+      if (dimension == 1) f = rootFormula.Eval(x);
+      if (dimension == 2) f = rootFormula.Eval(x,y);
+      if (dimension == 1){ hist1d->SetBinContent(ix,   f); hist1d->SetBinError(ix,   0.0); }
+      if (dimension == 2){ hist2d->SetBinContent(ix,iy,f); hist2d->SetBinError(ix,iy,0.0); }
+    }
+  }
+  hist1d = FSHistogram::getTH1F(hist1d);
+  hist2d = FSHistogram::getTH2F(hist2d);
+  addHistogramToCache(index, hist1d, hist2d);
+  return pair<TH1F*,TH2F*>(hist1d,hist2d);
+}
+
+
+
   // ********************************************************
   // GIVE A SET OF HISTOGRAMS A COMMON MAXIMUM
   // ********************************************************

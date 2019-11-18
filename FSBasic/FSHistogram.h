@@ -11,6 +11,9 @@
 #include "TString.h"
 #include "TH1F.h"
 #include "TH2F.h"
+#include "TF1.h"
+#include "TF2.h"
+#include "TFormula.h"
 
 using namespace std;
 
@@ -80,6 +83,16 @@ class FSHistogram{
                                    float scale = 1.0,
                                    vector< pair<TString,TString> > extraTreeContents = 
                                      vector< pair<TString,TString> >());
+
+
+      // ********************************************
+      //  CREATE HISTOGRAMS FROM FUNCTIONS
+      // ********************************************
+
+    static TH1F* getTH1FFormula(TString formula, TString bounds);
+    static TH2F* getTH2FFormula(TString formula, TString bounds);
+    static TH1F* getTH1FFormula(TF1* function, TString bounds);
+    static TH2F* getTH2FFormula(TF2* function, TString bounds);
 
 
       // ********************************************************
@@ -187,6 +200,10 @@ class FSHistogram{
     static pair<TH1F*,TH2F*> addTHNF(TString addName, 
                                      TH1F* hist1d, TH2F* hist2d, 
                                      float scale);
+
+      // helper function for making histograms from functions
+
+    static pair<TH1F*,TH2F*> getTHNFFormula(int dimension, TString formula, TString bounds);
 
       // helper functions for getTHNFContents
 
