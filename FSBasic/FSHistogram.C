@@ -638,6 +638,46 @@ FSHistogram::getTHNFFormula(int dimension, TString formula, TString bounds){
 }
 
 
+  // ********************************************
+  //  MAKE PROJECTIONS
+  // ********************************************
+
+TH1F*
+FSHistogram::getTH1F(TH2F* hist2d, TString projectionAxis, bool average){
+  TH1F* hist = NULL;
+  if (projectionAxis == "x") projectionAxis = "X";
+  if (projectionAxis == "y") projectionAxis = "Y";
+  if ((projectionAxis != "X") && (projectionAxis != "Y")) return hist;
+  int nbins1 = hist2d->GetNbinsX();
+  int nbins2 = hist2d->GetNbinsY();
+  double low  = getLowX(hist2d);
+  double high = getHighX(hist2d);
+  if (projectionAxis == "Y"){
+    nbins1 = hist2d->GetNbinsY();
+    nbins2 = hist2d->GetNbinsX();
+    low  = getLowY(hist2d);
+    high = getHighY(hist2d);
+  }
+  hist = new TH1F("histProject","",nbins1,low,high);
+  for (int i1 = 1; i1 <= nbins1; i1++){
+    double proj = 0.0;
+    for (int i2 = 1; i2 <= nbins2; i2++){
+      if (projectionAxis == "X") proj += hist2d->GetBinContent(i1,i2);
+      if (projectionAxis == "Y") proj += hist2d->GetBinContent(i2,i1);
+    }
+    if (average) proj = proj/nbins2;
+    hist->SetBinContent(i1,proj);
+    hist->SetBinError(i1,0.0);
+  }
+  addTempHistToCache(hist,NULL);
+  hist = getTH1F(hist);
+  hist->SetTitle(hist2d->GetTitle());
+  if (projectionAxis == "X"){ TAxis* axis = hist2d->GetXaxis(); hist->SetXTitle(axis->GetTitle()); }
+  if (projectionAxis == "Y"){ TAxis* axis = hist2d->GetYaxis(); hist->SetXTitle(axis->GetTitle()); }
+  return hist;
+}
+
+
 
   // ********************************************************
   // GIVE A SET OF HISTOGRAMS A COMMON MAXIMUM
@@ -718,14 +758,63 @@ FSHistogram::getNBins(TH1F* hist){
   return hist->GetNbinsX();
 }
 
+int
+FSHistogram::getNBinsX(TH1F* hist){
+  return hist->GetNbinsX();
+}
+
+int
+FSHistogram::getNBinsX(TH2F* hist){
+  return hist->GetNbinsX();
+}
+
+int
+FSHistogram::getNBinsY(TH2F* hist){
+  return hist->GetNbinsY();
+}
+
 double
 FSHistogram::getLow  (TH1F* hist){
   return hist->GetBinLowEdge(1);
 }
 
 double
+FSHistogram::getLowX (TH1F* hist){
+  return hist->GetBinLowEdge(1);
+}
+
+double
+FSHistogram::getLowX (TH2F* hist){
+  TAxis* axis = hist->GetXaxis();
+  return axis->GetBinLowEdge(1);
+}
+
+double
+FSHistogram::getLowY (TH2F* hist){
+  TAxis* axis = hist->GetYaxis();
+  return axis->GetBinLowEdge(1);
+}
+
+double
 FSHistogram::getHigh (TH1F* hist){
   return hist->GetBinLowEdge(hist->GetNbinsX())+hist->GetBinWidth(hist->GetNbinsX());
+}
+
+double
+FSHistogram::getHighX(TH1F* hist){
+  return hist->GetBinLowEdge(hist->GetNbinsX())+hist->GetBinWidth(hist->GetNbinsX());
+}
+
+double
+FSHistogram::getHighX(TH2F* hist){
+  TAxis* axis = hist->GetXaxis();
+  return axis->GetBinLowEdge(hist->GetNbinsX())+axis->GetBinWidth(hist->GetNbinsX());
+}
+
+double
+FSHistogram::getHighY(TH2F* hist){
+  TAxis* axis = hist->GetYaxis();
+  return axis->GetBinLowEdge(hist->GetNbinsY())+axis->GetBinWidth(hist->GetNbinsY());
 }
 
 

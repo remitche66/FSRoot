@@ -95,6 +95,13 @@ class FSHistogram{
     static TH2F* getTH2FFormula(TF2* function, TString bounds);
 
 
+      // ********************************************
+      //  MAKE PROJECTIONS
+      // ********************************************
+
+    static TH1F* getTH1F(TH2F* hist2d, TString projectionAxis = "X", bool average = true);
+
+
       // ********************************************************
       // SET MAXIMA/MINIMA SO HISTOGRAMS CAN BE SHOWN TOGETHER
       // ********************************************************
@@ -116,9 +123,18 @@ class FSHistogram{
       // GET USEFUL INFORMATION ABOUT A HISTOGRAM
       // ********************************************************
 
-    static int    getNBins(TH1F* hist);
-    static double getLow  (TH1F* hist);
-    static double getHigh (TH1F* hist);
+    static int    getNBins (TH1F* hist);
+    static int    getNBinsX(TH1F* hist);
+    static int    getNBinsX(TH2F* hist);
+    static int    getNBinsY(TH2F* hist);
+    static double getLow   (TH1F* hist);
+    static double getLowX  (TH1F* hist);
+    static double getLowX  (TH2F* hist);
+    static double getLowY  (TH2F* hist);
+    static double getHigh  (TH1F* hist);
+    static double getHighX (TH1F* hist);
+    static double getHighX (TH2F* hist);
+    static double getHighY (TH2F* hist);
     
 
       // ********************************************************
