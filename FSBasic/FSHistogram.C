@@ -661,13 +661,19 @@ FSHistogram::getTH1F(TH2F* hist2d, TString projectionAxis, bool average){
   hist = new TH1F("histProject","",nbins1,low,high);
   for (int i1 = 1; i1 <= nbins1; i1++){
     double proj = 0.0;
+    double eproj = 0.0;
+    double eproj2 = 0.0;
     for (int i2 = 1; i2 <= nbins2; i2++){
-      if (projectionAxis == "X") proj += hist2d->GetBinContent(i1,i2);
-      if (projectionAxis == "Y") proj += hist2d->GetBinContent(i2,i1);
+      int ix = i1; int iy = i2;
+      if (projectionAxis == "Y"){ ix = i2; iy = i1; }
+      proj += hist2d->GetBinContent(ix,iy); 
+      eproj = hist2d->GetBinError(ix,iy);
+      eproj2 += (eproj*eproj);
     }
-    if (average) proj = proj/nbins2;
+    eproj = sqrt(eproj2);
+    if (average){ proj = proj/nbins2; eproj = eproj/nbins2; }
     hist->SetBinContent(i1,proj);
-    hist->SetBinError(i1,0.0);
+    hist->SetBinError(i1,eproj);
   }
   addTempHistToCache(hist,NULL);
   hist = getTH1F(hist);
