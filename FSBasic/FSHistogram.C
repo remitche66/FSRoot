@@ -600,7 +600,7 @@ FSHistogram::getTH2FFormula(TF2* function, TString bounds){
 
 pair<TH1F*,TH2F*>
 FSHistogram::getTHNFFormula(int dimension, TString formula, TString bounds){
-  TString index = "(d)" + FSString::int2TString(dimension) +
+  TString index = FSString::int2TString(dimension) + "D" +
                   "(form)" + formula +
                   "(bounds)" + bounds;
   pair<TH1F*,TH2F*> histPair = getHistogramFromCache(index);
