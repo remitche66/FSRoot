@@ -643,22 +643,23 @@ FSHistogram::getTHNFFormula(int dimension, TString formula, TString bounds){
   // ********************************************
 
 TH1F*
-FSHistogram::getTH1F(TH2F* hist2d, TString projectionAxis, bool average){
+FSHistogram::getTH1F(TH2F* hist2d, TString projectionAxis, bool function){
   TH1F* hist = NULL;
   if (projectionAxis == "x") projectionAxis = "X";
   if (projectionAxis == "y") projectionAxis = "Y";
   if ((projectionAxis != "X") && (projectionAxis != "Y")) return hist;
   int nbins1 = hist2d->GetNbinsX();
   int nbins2 = hist2d->GetNbinsY();
-  double low  = getLowX(hist2d);
-  double high = getHighX(hist2d);
+  double low1  = getLowX(hist2d);
+  double high1 = getHighX(hist2d);
+  double low2  = getLowY(hist2d);
+  double high2 = getHighY(hist2d);
   if (projectionAxis == "Y"){
-    nbins1 = hist2d->GetNbinsY();
-    nbins2 = hist2d->GetNbinsX();
-    low  = getLowY(hist2d);
-    high = getHighY(hist2d);
+    int iswap = nbins1; nbins1 = nbins2; nbins2 = iswap;
+    double dswap = low1; low1 = low2; low2 = dswap;
+    dswap = high1; high1 = high2; high2 = dswap;
   }
-  hist = new TH1F("histProject","",nbins1,low,high);
+  hist = new TH1F("histProject","",nbins1,low1,high1);
   for (int i1 = 1; i1 <= nbins1; i1++){
     double proj = 0.0;
     double eproj = 0.0;
@@ -671,7 +672,7 @@ FSHistogram::getTH1F(TH2F* hist2d, TString projectionAxis, bool average){
       eproj2 += (eproj*eproj);
     }
     eproj = sqrt(eproj2);
-    if (average){ proj = proj/nbins2; eproj = eproj/nbins2; }
+    if (function){ proj = proj/nbins2*(high2-low2); eproj = eproj/nbins2*(high2-low2); }
     hist->SetBinContent(i1,proj);
     hist->SetBinError(i1,eproj);
   }

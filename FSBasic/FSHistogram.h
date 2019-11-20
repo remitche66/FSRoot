@@ -99,7 +99,7 @@ class FSHistogram{
       //  MAKE PROJECTIONS
       // ********************************************
 
-    static TH1F* getTH1F(TH2F* hist2d, TString projectionAxis = "X", bool average = true);
+    static TH1F* getTH1F(TH2F* hist2d, TString projectionAxis = "X", bool function = false);
 
 
       // ********************************************************
