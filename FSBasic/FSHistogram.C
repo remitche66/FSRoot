@@ -684,6 +684,31 @@ FSHistogram::getTH1F(TH2F* hist2d, TString projectionAxis, bool function){
   return hist;
 }
 
+pair<double,double>
+FSHistogram::integral(TH1F* hist, bool function){
+  if (!hist) return pair<double,double> (0.0,0.0);
+  int nbins = hist->GetNbinsX();
+  double low  = getLowX(hist);
+  double high = getHighX(hist);
+  double total = 0.0;
+  double etotal = 0.0;
+  double etotal2 = 0.0;
+  for (int i = 1; i <= nbins; i++){
+    total += hist->GetBinContent(i);
+    etotal = hist->GetBinError(i);
+    etotal2 += etotal*etotal;
+  }
+  etotal = sqrt(etotal2);
+  if (function){ total = total/nbins*(high-low); etotal = etotal/nbins*(high-low); }
+  return pair<double,double> (total,etotal);
+}
+
+pair<double,double>
+FSHistogram::integral(TH2F* hist, bool function){
+  if (!hist) return pair<double,double> (0.0,0.0);
+  TH1F* hist1d = getTH1F(hist,"X",function);
+  return integral(hist1d,function);
+}
 
 
   // ********************************************************

@@ -101,6 +101,9 @@ class FSHistogram{
 
     static TH1F* getTH1F(TH2F* hist2d, TString projectionAxis = "X", bool function = false);
 
+    static pair<double,double> integral(TH1F* hist, bool function = false);
+    static pair<double,double> integral(TH2F* hist, bool function = false);
+
 
       // ********************************************************
       // SET MAXIMA/MINIMA SO HISTOGRAMS CAN BE SHOWN TOGETHER
