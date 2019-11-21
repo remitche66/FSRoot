@@ -89,10 +89,10 @@ class FSHistogram{
       //  CREATE HISTOGRAMS FROM FUNCTIONS
       // ********************************************
 
-    static TH1F* getTH1FFormula(TString formula, TString bounds);
-    static TH2F* getTH2FFormula(TString formula, TString bounds);
-    static TH1F* getTH1FFormula(TF1* function, TString bounds);
-    static TH2F* getTH2FFormula(TF2* function, TString bounds);
+    static TH1F* getTH1FFormula(TString formula, TString bounds, int numRandomTrials = -1);
+    static TH2F* getTH2FFormula(TString formula, TString bounds, int numRandomTrials = -1);
+    static TH1F* getTH1FFormula(TF1* function, TString bounds, int numRandomTrials = -1);
+    static TH2F* getTH2FFormula(TF2* function, TString bounds, int numRandomTrials = -1);
 
 
       // ********************************************
@@ -222,7 +222,9 @@ class FSHistogram{
 
       // helper function for making histograms from functions
 
-    static pair<TH1F*,TH2F*> getTHNFFormula(int dimension, TString formula, TString bounds);
+    static pair<TH1F*,TH2F*> getTHNFFormula(int dimension, TString formula, TString bounds, int numRandomTrials = -1);
+    static pair<TH1F*,TH2F*> getTHNFFormulaRandom(int dimension, TString formula, TString bounds, int numRandomTrials = -1);
+
 
       // helper functions for getTHNFContents
 

@@ -10,6 +10,7 @@
 #include "TH2F.h"
 #include "TFile.h"
 #include "TTreeFormula.h"
+#include "TRandom.h"
 #include "FSBasic/FSControl.h"
 #include "FSBasic/FSString.h"
 #include "FSBasic/FSTree.h"
@@ -578,28 +579,92 @@ FSHistogram::getTHNF(int dimension,
     // ********************************************
 
 TH1F*
-FSHistogram::getTH1FFormula(TString formula, TString bounds){
-  return getTHNFFormula(1,formula,bounds).first;
+FSHistogram::getTH1FFormula(TString formula, TString bounds, int numRandomTrials){
+  return getTHNFFormula(1,formula,bounds,numRandomTrials).first;
 }
 
 TH2F*
-FSHistogram::getTH2FFormula(TString formula, TString bounds){
-  return getTHNFFormula(2,formula,bounds).second;
+FSHistogram::getTH2FFormula(TString formula, TString bounds, int numRandomTrials){
+  return getTHNFFormula(2,formula,bounds,numRandomTrials).second;
 }
 
 TH1F*
-FSHistogram::getTH1FFormula(TF1* function, TString bounds){
-  return getTHNFFormula(1,function->GetFormula()->GetExpFormula(),bounds).first;
+FSHistogram::getTH1FFormula(TF1* function, TString bounds, int numRandomTrials){
+  return getTHNFFormula(1,function->GetFormula()->GetExpFormula(),bounds,numRandomTrials).first;
 }
 
 TH2F*
-FSHistogram::getTH2FFormula(TF2* function, TString bounds){
-  return getTHNFFormula(2,function->GetFormula()->GetExpFormula(),bounds).second;
+FSHistogram::getTH2FFormula(TF2* function, TString bounds, int numRandomTrials){
+  return getTHNFFormula(2,function->GetFormula()->GetExpFormula(),bounds,numRandomTrials).second;
 }
 
 
 pair<TH1F*,TH2F*>
-FSHistogram::getTHNFFormula(int dimension, TString formula, TString bounds){
+FSHistogram::getTHNFFormulaRandom(int dimension, TString formula, TString bounds, int numRandomTrials){
+  int nbins = 10000;  if (dimension == 2) nbins = 1000;
+  int nbinsx = 1; int nbinsy = 1;
+  double lowx = 0.0; double lowy = 0.0;
+  double highx = 10.0; double highy = 10.0;
+  if (dimension >= 1) nbinsx = FSString::parseBoundsNBinsX(bounds);
+  if (dimension == 2) nbinsy = FSString::parseBoundsNBinsY(bounds);
+  if (dimension >= 1)   lowx = FSString::parseBoundsLowerX(bounds);
+  if (dimension == 2)   lowy = FSString::parseBoundsLowerY(bounds);
+  if (dimension >= 1)  highx = FSString::parseBoundsUpperX(bounds);
+  if (dimension == 2)  highy = FSString::parseBoundsUpperY(bounds);
+  TString newBounds("");
+  if (dimension == 1) newBounds = FSString::makeBounds(nbins,lowx,highx);
+  if (dimension == 2) newBounds = FSString::makeBounds(nbins,lowx,highx,nbins,lowy,highy);
+  pair<TH1F*,TH2F*> histMax = getTHNFFormula(dimension,formula,newBounds,-1);
+  double fMax = 0.0;
+  if (dimension == 1){
+    TH1F* hist = histMax.first;
+    fMax = hist->GetBinContent(1);
+    for (int ix = 1; ix <= nbins; ix++){
+      if (hist->GetBinContent(ix) > fMax) fMax = hist->GetBinContent(ix);
+    }
+  }
+  if (dimension == 2){
+    TH2F* hist = histMax.second;
+    fMax = hist->GetBinContent(1,1);
+    for (int ix = 1; ix <= nbins; ix++){
+    for (int iy = 1; iy <= nbins; iy++){
+      if (hist->GetBinContent(ix,iy) > fMax) fMax = hist->GetBinContent(ix,iy);
+    }}
+  }
+  formula = FSString::removeWhiteSpace(formula);
+  formula = FSString::expandSUM(formula);
+  TFormula rootFormula("FSRootTempFormula",formula);
+  TH1F* hist1d = NULL;  TH2F* hist2d = NULL;
+  if (dimension == 1) hist1d = new TH1F("FSRootTempHist","",nbinsx,lowx,highx);
+  if (dimension == 2) hist2d = new TH2F("FSRootTempHist","",nbinsx,lowx,highx,nbinsy,lowy,highy);
+  int numAccepted = 0;
+  int numAttempts = 0;
+  while ((numAccepted < numRandomTrials) && (numAttempts < numRandomTrials*100000)){
+    numAttempts++;
+    double x0 = 0.0; double y0 = 0.0; double f0 = 0.0;  double f = 0.0;
+    if (dimension >= 1) x0 = gRandom->Uniform(lowx,highx);
+    if (dimension == 2) y0 = gRandom->Uniform(lowy,highy);
+    f0 = gRandom->Uniform(0.0,fMax);
+    if (dimension == 1) f = rootFormula.Eval(x0);
+    if (dimension == 2) f = rootFormula.Eval(x0,y0);
+    if (f0 <= f){
+      numAccepted++;
+      if (dimension == 1) hist1d->Fill(x0);
+      if (dimension == 2) hist2d->Fill(x0,y0);
+    }
+  }
+  if (hist1d) hist1d = FSHistogram::getTH1F(hist1d);
+  if (hist2d) hist2d = FSHistogram::getTH2F(hist2d);
+  if (hist1d){ hist1d->SetTitle("Random from f(x) = "+formula); hist1d->SetXTitle("x"); }
+  if (hist2d){ hist2d->SetTitle("Random from f(x,y) = "+formula); hist2d->SetXTitle("x"); hist2d->SetYTitle("y"); }
+  addTempHistToCache(hist1d,hist2d);
+  return pair<TH1F*,TH2F*>(hist1d,hist2d);
+}
+
+
+pair<TH1F*,TH2F*>
+FSHistogram::getTHNFFormula(int dimension, TString formula, TString bounds, int numRandomTrials){
+  if (numRandomTrials > 0) return getTHNFFormulaRandom(dimension,formula,bounds,numRandomTrials);
   TString index = FSString::int2TString(dimension) + "D" +
                   "(form)" + formula +
                   "(bounds)" + bounds;
@@ -633,6 +698,8 @@ FSHistogram::getTHNFFormula(int dimension, TString formula, TString bounds){
   }
   hist1d = FSHistogram::getTH1F(hist1d);
   hist2d = FSHistogram::getTH2F(hist2d);
+  if (hist1d){ hist1d->SetTitle("f(x) = "+formula); hist1d->SetXTitle("x"); }
+  if (hist2d){ hist2d->SetTitle("f(x,y) = "+formula); hist2d->SetXTitle("x"); hist2d->SetYTitle("y"); }
   addHistogramToCache(index, hist1d, hist2d);
   return pair<TH1F*,TH2F*>(hist1d,hist2d);
 }
