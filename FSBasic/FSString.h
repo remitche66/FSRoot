@@ -183,8 +183,9 @@ class FSString{
     static int    parseBoundsNBinsY(TString bounds);
     static double parseBoundsLowerY(TString bounds);
     static double parseBoundsUpperY(TString bounds);
-
     static double parseBoundsBinSizeX(TString bounds);
+    static TString makeBounds(int nbinsX,      double lowerX,      double upperX,
+                              int nbinsY = -1, double lowerY = -1, double upperY = -1);
 
 
       // ********************************************************

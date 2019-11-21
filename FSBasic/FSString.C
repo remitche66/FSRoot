@@ -961,7 +961,21 @@ FSString::parseBounds(TString bounds){
   boundVector[boundVector.size()-1].Replace(boundVector[boundVector.size()-1].Index(")"),1,"");
   return boundVector;
 }
- 
+
+TString
+FSString::makeBounds(int nbinsX, double lowerX, double upperX, int nbinsY, double lowerY, double upperY){
+  TString newBounds("");
+  if (nbinsY < 0)  newBounds = "(" + FSString::int2TString(nbinsX) + ","
+                                   + FSString::double2TString(lowerX,8) + ","
+                                   + FSString::double2TString(upperX,8) + ")";
+  if (nbinsY >= 0) newBounds = "(" + FSString::int2TString(nbinsX) + ","
+                                   + FSString::double2TString(lowerX,8) + ","
+                                   + FSString::double2TString(upperX,8) + ","
+                                   + FSString::int2TString(nbinsY) + ","
+                                   + FSString::double2TString(lowerY,8) + ","
+                                   + FSString::double2TString(upperY,8) + ")";
+  return newBounds;
+}
 
 
   // ********************************************************
