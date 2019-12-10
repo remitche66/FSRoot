@@ -40,7 +40,7 @@ class FSModeTree{
 
 
       // ********************************************************
-      // RANK EVENTS ACCORDING TO Chi2DOF
+      // RANK EVENTS ACCORDING TO Chi2DOF (OR Chi2, depends, check code)
       //    To Use:
       //      1.  First create skims of events that are to be ranked.
       //             (For better organization, put these in a new directory.)
