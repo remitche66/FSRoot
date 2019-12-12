@@ -151,6 +151,23 @@ FSModeCollection::modeInfo(TString mString){
   return modeInfo(FSModeInfo(mString).modeCode());
 }
 
+FSModeInfo*
+FSModeCollection::modeInfoForCategory(TString category){
+  vector<FSModeInfo*> mvec = modeVector(category);
+  if (mvec.size() > 1){ 
+    cout << "FSModeCollection::modeInfoForCategory WARNING: " << endl;
+    cout << "   more than one mode for category = " << category << endl;
+    cout << "   only returning the first" << endl;
+    return mvec[0];
+  }
+  if (mvec.size() == 0){ 
+    cout << "FSModeCollection::modeInfoForCategory WARNING: " << endl;
+    cout << "   no modes for category = " << category << endl;
+    cout << "   returning NULL" << endl;
+    return NULL;
+  }
+  return mvec[0];
+}
 
 
   // *******************************************************

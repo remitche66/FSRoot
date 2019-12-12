@@ -45,6 +45,7 @@ class FSModeCollection{
     static FSModeInfo* modeInfo(pair<int,int> mCode);
     static FSModeInfo* modeInfo(int mCode1, int mCode2);
     static FSModeInfo* modeInfo(TString mString);
+    static FSModeInfo* modeInfoForCategory(TString category = "");
 
 
       // *******************************************************
