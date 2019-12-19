@@ -1081,36 +1081,14 @@ FSString::expandSUM(TString inputString){
   }
   while (inputString.Contains("SUM{")){
     for (int i = 0; i < inputString.Length()-4; i++){
-      if ((inputString[i]   == 'S')&&
-          (inputString[i+1] == 'U')&&
-          (inputString[i+2] == 'M')&&
-          (inputString[i+3] == '{')){
-        TString word1("");
-        TString word2("");
-        int pcount = 0;
-        int jstop = 0;
-        for (int j = i+3; j < inputString.Length()-1; j++){
-          if (inputString[j] == '{'){ pcount++; }
-          else if (inputString[j] == '}'){ pcount--; }
-          word1 += inputString[j];
-          if (pcount == 0){ jstop = j; break; }
-        }
-        if ((jstop == 0) || (inputString[jstop+1] != '{')){
+      if (FSString::subString(inputString,i,i+4) == "SUM{"){
+        TString word1 = captureParentheses(inputString,i+3,"{","}");
+        TString word2 = captureParentheses(inputString,i+4+word1.Length()+1,"{","}");
+        if (((TString)inputString[i+4+word1.Length()+1] != "{") ||
+            (word1 == "") || (word2 == "")){ 
           cout << "FSString::expandSUM ERROR: formatting problem" << endl;
           exit(0);
         }
-        for (int j = jstop+1; j < inputString.Length(); j++){
-          if (inputString[j] == '{'){ pcount++; }
-          else if (inputString[j] == '}'){ pcount--; }
-          word2 += inputString[j];
-          if (pcount == 0){ break; }
-        }
-        if ((word1 == "") || (word2 == "")){
-          cout << "FSString::expandSUM ERROR: formatting problem" << endl;
-          exit(0);
-        }
-        word1.Replace(0,1,""); word1.Replace(word1.Length()-1,1,"");
-        word2.Replace(0,1,""); word2.Replace(word2.Length()-1,1,"");
         TString bigword1 = "SUM{" + word1 + "}";
         TString bigword2 =    "{" + word2 + "}";
         if ((!word1.Contains("SUM{")) && (!word2.Contains("SUM{"))){
@@ -1124,7 +1102,9 @@ FSString::expandSUM(TString inputString){
           TString newword2("");
           for (unsigned int id = 0; id < defns.size(); id++){
             TString word2temp = word2;
-            while (word2temp.Contains(name)){ word2temp.Replace(word2temp.Index(name),name.Length(),defns[id]); }
+            while (word2temp.Contains(name)){
+              word2temp.Replace(word2temp.Index(name),name.Length(),defns[id]);
+            }
             newword2 += word2temp;
             if (id != defns.size()-1) newword2 += "+";
           }
