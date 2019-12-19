@@ -3,6 +3,7 @@
 #include <sstream>
 #include <fstream>
 #include "TString.h"
+#include "TFormula.h"
 #include "FSBasic/FSControl.h"
 #include "FSBasic/FSString.h"
 
@@ -487,51 +488,22 @@ FSString::parseString(string input, string spacer){
 
 vector<TString>
 FSString::parseTString(TString input, TString spacer){
-  if (spacer == " ") input = FSString::removeTabs(input);
+  input = FSString::removeTabs(input);
+  spacer = FSString::removeTabs(spacer);
   vector<TString> words;
-  TString word("");
-  for (int i = 0; i < input.Length(); i++){
-    TString digit(input[i]);
-    if ((digit == spacer) || (spacer == " " && containsWhiteSpace(digit))){
-      if (word != ""){
-        words.push_back(word);
-        word = "";
-      }
-    }
-    else{
-      word += digit;
-      if (i == input.Length()-1){
-        words.push_back(word);
-      }
-    }
+  while (input.Contains(spacer)){
+    int index = input.Index(spacer);
+    int size = spacer.Length();
+    TString s1("");  TString s2("");
+    for (int i = 0;          i < index;          i++){ TString digit(input[i]); s1 += digit; }
+    for (int i = index+size; i < input.Length(); i++){ TString digit(input[i]); s2 += digit; }
+    if (!s1.Contains(spacer) && (s1.Length() > 0)) words.push_back(s1);
+    if (!s2.Contains(spacer) && (s2.Length() > 0)) words.push_back(s2);
+    input = s2;
   }
+  if (words.size() == 0) words.push_back(input);
   return words;
-}
-
-
-int
-FSString::parseTStringSize(TString input, TString spacer){
-  return parseTString(input,spacer).size();
-}
-
-TString
-FSString::parseTStringElement(TString input, int element, TString spacer){
-  return parseTString(input,spacer)[element];
-}
-
-void
-FSString::parseStringTest(string input, string spacer){
-  parseTStringTest(string2TString(input), string2TString(spacer));
-}
-
-void
-FSString::parseTStringTest(TString input, TString spacer){
-  cout << "parseTStringTest:" << endl;
-  vector<TString> words = parseTString(input,spacer);
-  for (unsigned int i = 0; i < words.size(); i++){
-    cout << words[i] << endl;
-  }
-}
+}    
 
 
 
@@ -551,16 +523,12 @@ FSString::parseTStringTest(TString input, TString spacer){
 
 bool
 FSString::evalLogicalTString(TString input, vector<TString> cats){
-      if (FSControl::DEBUG){ cout << "FSString::evalLogicalTString (1) " << input << endl; }
   input = FSString::removeWhiteSpace(input);
-      if (FSControl::DEBUG){ cout << "FSString::evalLogicalTString (2) " << input << endl; }
   if (input == "") return true;
-  input = ("("+input+")");
-      if (FSControl::DEBUG){ cout << "FSString::evalLogicalTString (3) " << input << endl; }
-      if (!FSString::checkParentheses(input)){
-        cout << "FSString::evalLogicalTString ERROR: parentheses problem in " << input << endl;
-        exit(1);
-      }
+  if (!FSString::checkParentheses(input)){
+    cout << "FSString::evalLogicalTString ERROR: parentheses problem in " << input << endl;
+    exit(1);
+  }
   TString output("");
   TString word("");
   for (int i = 0; i < input.Length(); i++){
@@ -569,6 +537,7 @@ FSString::evalLogicalTString(TString input, vector<TString> cats){
         (digit != ")") && 
         (digit != ",") && 
         (digit != "&") && 
+        (digit != "|") && 
         (digit != "!")){
       word += digit;
     }
@@ -589,6 +558,12 @@ FSString::evalLogicalTString(TString input, vector<TString> cats){
 
 bool 
 FSString::evalBooleanTString(TString input){
+/*
+  TFormula f("ftemp",input);
+  double y = f.Eval(0);
+  if (y < 0.1) return false;
+  return true;
+*/
   while (input.Contains("()"))   { input.Replace(input.Index("()"),   2,""); }
   while (input.Contains("!!"))   { input.Replace(input.Index("!!"),   2,""); }
   while (input.Contains("(0)"))  { input.Replace(input.Index("(0)"),  3,"0"); }
