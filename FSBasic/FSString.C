@@ -573,32 +573,27 @@ FSString::evalLogicalTString(TString input, vector<TString> cats){
     cout << "FSString::evalLogicalTString ERROR: parentheses problem in " << input << endl;
     exit(1);
   }
-  TString output("");
-  TString word("");
-  for (int i = 0; i < input.Length(); i++){
-    TString digit(input[i]);
-    if ((digit != "(") && 
-        (digit != ")") && 
-        (digit != ",") && 
-        (digit != "&") && 
-        (digit != "|") && 
-        (digit != "!")){
-      word += digit;
+  vector<TString> spacers = {"(",")",",","&","|","!"};
+  vector<TString> words = FSString::parseTString(input,spacers);
+  for (unsigned int i = 0; i < words.size(); i++){
+  for (unsigned int j = i+1; j < words.size(); j++){
+    if (words[i].Length() < words[j].Length()){ 
+      TString temp = words[i]; words[i] = words[j]; words[j] = temp; }
+  }}
+  for (unsigned int i = 0; i < words.size(); i++){
+    TString found("0");
+    for (unsigned int ic = 0; ic < cats.size(); ic++){
+      if (cats[ic] == words[i]){ found = "1";  break; }
     }
-    else{
-      if (word != ""){
-        bool found = false;
-        for (unsigned int ic = 0; ic < cats.size(); ic++){ if (cats[ic] == word) found = true; }
-        if  (found) output += "1";
-        if (!found) output += "0";
-      }
-      output += digit;
-      word = "";
+    while (input.Contains(words[i])){
+      input.Replace(input.Index(words[i]),words[i].Length(),found);
     }
   }
-      if (FSControl::DEBUG){ cout << "FSString::evalLogicalTString (4) " << output << endl; }
-  return evalBooleanTString(output);
+  input = ("("+input+")");
+  return evalBooleanTString(input);
 }
+
+
 
 bool 
 FSString::evalBooleanTString(TString input){
@@ -608,6 +603,7 @@ FSString::evalBooleanTString(TString input){
   if (y < 0.1) return false;
   return true;
 */
+cout << "in here with " << input << endl;
   while (input.Contains("()"))   { input.Replace(input.Index("()"),   2,""); }
   while (input.Contains("!!"))   { input.Replace(input.Index("!!"),   2,""); }
   while (input.Contains("(0)"))  { input.Replace(input.Index("(0)"),  3,"0"); }
