@@ -98,6 +98,7 @@ class FSString{
 
     static vector<TString> parseString(string input, string spacer = " ");
     static vector<TString> parseTString(TString input, TString spacer = " ");
+    static vector<TString> parseTString(TString input, vector<TString> spacers);
 
 
       // ********************************************************

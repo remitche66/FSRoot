@@ -505,6 +505,21 @@ FSString::parseTString(TString input, TString spacer){
   return words;
 }    
 
+vector<TString>
+FSString::parseTString(TString input, vector<TString> spacers){
+  input = FSString::removeTabs(input);
+  vector<TString> words;
+  words.push_back(input);
+  for (unsigned int ispacer = 0; ispacer < spacers.size(); ispacer++){
+    vector<TString> newWords;
+    for (unsigned int iword = 0; iword < words.size(); iword++){
+      vector<TString> tempWords = parseTString(words[iword],spacers[ispacer]);
+      for (unsigned int i = 0; i < tempWords.size(); i++){ newWords.push_back(tempWords[i]); }
+    }
+    words = newWords;
+  }
+  return words;
+}
 
 
       // ********************************************************
