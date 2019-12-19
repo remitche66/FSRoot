@@ -102,6 +102,15 @@ class FSString{
 
 
       // ********************************************************
+      // CAPTURE SUBSTRINGS
+      // ********************************************************
+
+    static TString subString(TString input, int startIndex, int endIndex);
+    static TString captureParentheses(TString input, int startIndex, 
+                                      TString opening = "(", TString closing = ")");
+
+
+      // ********************************************************
       // PARSE VERY SIMPLE LOGIC 
       //    evalLogicalTString:
       //      Determines whether or not a list of categories contains

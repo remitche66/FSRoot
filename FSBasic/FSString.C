@@ -522,6 +522,35 @@ FSString::parseTString(TString input, vector<TString> spacers){
 }
 
 
+TString
+FSString::subString(TString input, int startIndex, int endIndex){
+  TString output("");
+  if (startIndex < 0) return output;
+  for (int i = startIndex; i < input.Length() && i < endIndex; i++){
+    output += (TString)input[i];
+  }
+  return output;
+}
+
+
+TString
+FSString::captureParentheses(TString input, int startIndex, TString opening, TString closing){
+  if (startIndex < 0) return TString("");
+  TString searchInput = FSString::subString(input,startIndex,input.Length());
+  if (!searchInput.Contains(opening)) return TString("");
+  if (!searchInput.Contains(closing)) return TString("");
+  int index1 = searchInput.Index(opening);
+  int index2 = -1;
+  int pcount = 1;
+  for (int i = index1+opening.Length(); i < searchInput.Length(); i++){
+    if (FSString::subString(searchInput,i,i+opening.Length()) == opening) pcount++;
+    if (FSString::subString(searchInput,i,i+closing.Length()) == closing) pcount--;
+    if (pcount == 0){ index2 = i; break; }
+  }
+  return FSString::subString(searchInput,index1+opening.Length(),index2);
+}
+
+
       // ********************************************************
       // PARSE VERY SIMPLE LOGIC 
       //    evalLogicalTString:
@@ -1030,8 +1059,8 @@ bool
 FSString::checkParentheses(TString input, TString opening, TString closing){
   int pcount = 0;
   for (int i = 0; i < input.Length(); i++){
-    if ((TString)input[i] == opening) pcount++;
-    if ((TString)input[i] == closing) pcount--;
+    if (FSString::subString(input,i,i+opening.Length()) == opening) pcount++;
+    if (FSString::subString(input,i,i+closing.Length()) == closing) pcount--;
     if (pcount < 0){
       cout << "FSString: problem with parentheses in input = " << input << endl;
       return false;
