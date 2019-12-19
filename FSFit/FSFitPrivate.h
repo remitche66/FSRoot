@@ -557,9 +557,10 @@ class FSFitFunctionComposite : public FSFitFunction{
         if (i == 2) m_sign = "-";
         if (i == 3) m_sign = "*";
         if (i == 4) m_sign = "/";
-        if (FSString::parseTStringSize(n_formula,m_sign) == 2){
-          m_fName1 = FSString::parseTStringElement(n_formula,0,m_sign);
-          m_fName2 = FSString::parseTStringElement(n_formula,1,m_sign);
+        vector<TString> parsedFormula = FSString::parseTString(n_formula,m_sign);
+        if (parsedFormula.size() == 2){
+          m_fName1 = parsedFormula[0];
+          m_fName2 = parsedFormula[1];
           break;
         }
         m_sign = "";
