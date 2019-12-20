@@ -56,55 +56,40 @@ FSCut::display(TString cutName){
 
 vector< pair<TString,double> > 
 FSCut::expandCuts(TString cuts, bool showDetails){
+  cuts = FSString::removeWhiteSpace(cuts);
+  vector< pair<TString,double> > newCuts;
 
   if (FSControl::DEBUG){
     cout << "FSCut: expanding cut... " << endl;
     cout << "  " << cuts << endl;
   }
 
-  vector< pair<TString,double> > newCuts;
-
+    // loop over all CUT and CUTSB markers
   TString CUTMARK   ("CUT(");
   TString CUTSBMARK ("CUTSB(");
-
   while (cuts.Contains(CUTMARK) ||
          cuts.Contains(CUTSBMARK)){
 
-    int index = 0;
-    int size = 0;
+      // find a CUT(...) or a CUTSB(...)
     TString mark("");
-         if (cuts.Contains(CUTMARK))   mark = CUTMARK;
-    else if (cuts.Contains(CUTSBMARK)) mark = CUTSBMARK;
+         if (cuts.Contains(CUTMARK))  { mark = CUTMARK; }
+    else if (cuts.Contains(CUTSBMARK)){ mark = CUTSBMARK; }
+    int index = cuts.Index(mark);
+    int size = (mark).Length()+1;
 
-    if (cuts.Contains(mark)){
-      index = cuts.Index(mark);
-      size = (mark).Length()+1;
-    }
-
-    vector<TString> cutList;
-    TString cutIndex("");
-    for (int i = index+size-1; (cuts[i] != ')' && i < cuts.Length()); i++){
-      size++;
-      if (cuts[i] == ',' || cuts[i] == ';'){
-        cutList.push_back(cutIndex);
-        cutIndex = "";
-      }
-      else{
-        cutIndex += cuts[i];
-      }
-    }
-    if (cutIndex.Length() > 0) cutList.push_back(cutIndex);
-
+      // make a list of the cuts within the parentheses
+    TString cutsInParentheses = FSString::captureParentheses(cuts,index);
+    size += cutsInParentheses.Length();
+    vector<TString> spacers = {",",";"};
+    vector<TString> cutList = FSString::parseTString(cutsInParentheses,spacers);
 
       // sort the cutList vector
-    for (unsigned int i = 0; (cutList.size() != 0) && (i < cutList.size()-1); i++){
+    if (cutList.size() != 0){
+      for (unsigned int i = 0; i < cutList.size(); i++){
       for (unsigned int j = i+1; j < cutList.size(); j++){
         if (FSString::TString2string(cutList[j]) < FSString::TString2string(cutList[i])){
-          TString tmp = cutList[i];
-          cutList[i] = cutList[j];
-          cutList[j] = tmp;
-        }
-      }
+          TString tmp = cutList[i]; cutList[i] = cutList[j]; cutList[j] = tmp; }
+      }}
     }
 
     if (FSControl::DEBUG){
@@ -114,15 +99,13 @@ FSCut::expandCuts(TString cuts, bool showDetails){
       }
     }
 
+      // make the substitute cuts for this mark
     vector< pair<TString,double> > substitutes;
+         if (mark == CUTMARK)  { substitutes = makeCut(cutList); }
+    else if (mark == CUTSBMARK){ substitutes = makeCutSB(cutList); }
 
-    if (mark == CUTMARK){
-      substitutes = makeCut(cutList);
-    }
-    else if (mark == CUTSBMARK){
-      substitutes = makeCutSB(cutList);
-    }
 
+      // replace the old cuts with the new
     if (substitutes.size() > 0){
       double oldWT = 1.0;
       if (newCuts.size() > 1){
