@@ -501,7 +501,7 @@ FSString::parseTString(TString input, TString spacer){
     if (!s2.Contains(spacer) && (s2.Length() > 0)) words.push_back(s2);
     input = s2;
   }
-  if (words.size() == 0) words.push_back(input);
+  if ((words.size() == 0) && (input.Length() > 0)) words.push_back(input);
   return words;
 }    
 
@@ -552,16 +552,7 @@ FSString::captureParentheses(TString input, int startIndex, TString opening, TSt
 
 
       // ********************************************************
-      // PARSE VERY SIMPLE LOGIC 
-      //    evalLogicalTString:
-      //      Determines whether or not a list of categories contains
-      //        what is in the input logic.
-      //      For example, for categories = "A","B","C",
-      //        input = "A&B" --> true
-      //        input = "A&B&!C" --> false
-      //        input = "A&D" --> false
-      //        input = "D,!E" --> true
-      //      (parentheses are allowed)
+      // PARSE LOGIC 
       // ********************************************************
 
 
@@ -581,60 +572,27 @@ FSString::evalLogicalTString(TString input, vector<TString> cats){
       TString temp = words[i]; words[i] = words[j]; words[j] = temp; }
   }}
   for (unsigned int i = 0; i < words.size(); i++){
-    TString found("0");
+    TString found("(1==0)");
     for (unsigned int ic = 0; ic < cats.size(); ic++){
-      if (cats[ic] == words[i]){ found = "1";  break; }
+      if (cats[ic] == words[i]){ found = "(1==1)";  break; }
     }
     while (input.Contains(words[i])){
       input.Replace(input.Index(words[i]),words[i].Length(),found);
     }
   }
-  input = ("("+input+")");
   return evalBooleanTString(input);
 }
 
 
-
 bool 
 FSString::evalBooleanTString(TString input){
-/*
-  TFormula f("ftemp",input);
-  double y = f.Eval(0);
-  if (y < 0.1) return false;
+  while (input.Contains("&&")) input.Replace(input.Index("&&"),2,"%%");
+  while (input.Contains("&"))  input.Replace(input.Index("&"), 1,"%%");
+  while (input.Contains("%%")) input.Replace(input.Index("%%"),2,"&&");
+  while (input.Contains(","))  input.Replace(input.Index(","), 1,"||");
+  TFormula fBool("fBool",input);
+  if (fBool.Eval(0) < 0.1) return false;
   return true;
-*/
-cout << "in here with " << input << endl;
-  while (input.Contains("()"))   { input.Replace(input.Index("()"),   2,""); }
-  while (input.Contains("!!"))   { input.Replace(input.Index("!!"),   2,""); }
-  while (input.Contains("(0)"))  { input.Replace(input.Index("(0)"),  3,"0"); }
-  while (input.Contains("(1)"))  { input.Replace(input.Index("(1)"),  3,"1"); }
-  while (input.Contains("!0") || 
-         input.Contains("!1")){    
-     if (input.Contains("!0"))     input.Replace(input.Index("!0"),   2,"1");
-     if (input.Contains("!1"))     input.Replace(input.Index("!1"),   2,"0"); }
-  while (input.Contains("0&0"))  { input.Replace(input.Index("0&0"),  3,"0"); }
-  while (input.Contains("0&1"))  { input.Replace(input.Index("0&1"),  3,"0"); }
-  while (input.Contains("1&0"))  { input.Replace(input.Index("1&0"),  3,"0"); }
-  while (input.Contains("1&1"))  { input.Replace(input.Index("1&1"),  3,"1"); }
-  while (input.Contains("(0,0)")){ input.Replace(input.Index("(0,0)"),5,"0"); }
-  while (input.Contains("(0,1)")){ input.Replace(input.Index("(0,1)"),5,"1"); }
-  while (input.Contains("(1,0)")){ input.Replace(input.Index("(1,0)"),5,"1"); }
-  while (input.Contains("(1,1)")){ input.Replace(input.Index("(1,1)"),5,"1"); }
-  while (input.Contains(",0,0)")){ input.Replace(input.Index(",0,0)"),5,",0)"); }
-  while (input.Contains(",0,1)")){ input.Replace(input.Index(",0,1)"),5,",1)"); }
-  while (input.Contains(",1,0)")){ input.Replace(input.Index(",1,0)"),5,",1)"); }
-  while (input.Contains(",1,1)")){ input.Replace(input.Index(",1,1)"),5,",1)"); }
-  while (input.Contains("(0,0,")){ input.Replace(input.Index("(0,0,"),5,"(0,"); }
-  while (input.Contains("(0,1,")){ input.Replace(input.Index("(0,1,"),5,"(1,"); }
-  while (input.Contains("(1,0,")){ input.Replace(input.Index("(1,0,"),5,"(1,"); }
-  while (input.Contains("(1,1,")){ input.Replace(input.Index("(1,1,"),5,"(1,"); }
-  if (FSControl::DEBUG){ cout << "FSString::evalBooleanTString  (p) " << input << endl; }
-  if (!(input.Contains("0") || input.Contains("1")) || (input.Length() == 0) ||
-       (input.Contains(",,")) || (input.Contains("!,")) || (input.Contains("&&"))){ 
-    cout << "FSString::evalBooleanTString ERROR..." << input << endl; exit(1); }
-  if ((input != "0") && (input != "1")) return evalBooleanTString(input);
-  if (input == "1") return true;
-  return false;
 }
 
 

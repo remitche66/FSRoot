@@ -111,16 +111,17 @@ class FSString{
 
 
       // ********************************************************
-      // PARSE VERY SIMPLE LOGIC 
+      // PARSE LOGIC 
       //    evalLogicalTString:
       //      Determines whether or not a list of categories contains
       //        what is in the input logic.
-      //      For example, for categories = "A","B","C",
-      //        input = "A&B" --> true
-      //        input = "A&B&!C" --> false
-      //        input = "A&D" --> false
-      //        input = "D,!E" --> true
-      //      (parentheses are allowed)
+      //      For "and" use "&" or "&&".
+      //      For "or"  use "," or "||".
+      //      For "not" use "!".
+      //      For example, for categories = {"A","B","C"}:
+      //        input = "(A&B),D"  returns true
+      //        input = "(A&B)&D"  returns false
+      //        input = "(A&B)&!D" returns true
       // ********************************************************
 
     static bool evalLogicalTString(TString input, vector<TString> categories);
