@@ -50,7 +50,6 @@ class FSCut{
     static vector< pair<TString,double> > makeCut(vector<TString> cutList);
     static vector< pair<TString,double> > makeCutSB(vector<TString> cutList);
     static pair< pair<TString,TString>, double> getCut(TString cutName);
-    static vector<TString> getCutList(TString cutName = "");
 
 
       // global caches

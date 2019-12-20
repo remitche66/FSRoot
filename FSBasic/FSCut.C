@@ -24,10 +24,7 @@ FSCut::defineCut(TString cutName, TString cut,
   m_cutCache[cutName] = cutPairWt;
   if (FSControl::DEBUG){
     cout << "FSCut: created cut..." << endl;
-    cout << "  name = " << cutName << endl;
-    cout << "  cut = " << cut << endl;
-    cout << "  cutSideBand = " << cutSideBand << endl;
-    cout << "  weight = " << weight << endl;
+    display(cutName);
   }
 }
 
@@ -38,16 +35,17 @@ FSCut::defineCut(TString cutName, TString cut,
 
 void 
 FSCut::display(TString cutName){
-  vector<TString> cutList = getCutList(cutName);
-  cout << "FSCut: LIST OF DEFINED CUTS" << endl;
-  for (unsigned int i = 0; i < cutList.size(); i++){
-    cout << "    " << cutList[i] << ":" << endl;
-    TString cutSig  = getCut(cutList[i]).first.first;
-    TString cutSide = getCut(cutList[i]).first.second;
-    double cutWT    = getCut(cutList[i]).second;
-    cout << "        " << cutSig << endl;
-    cout << "        " << cutSide << endl;
-    cout << "        " << cutWT << endl;
+  if (cutName == ""){
+    cout << "FSCut: LIST OF DEFINED CUTS" << endl;
+    map< TString, pair< pair<TString,TString>, double > >::iterator it = m_cutCache.begin();
+    for (; it != m_cutCache.end(); it++){ display(it->first); }
+  }
+  else{
+    pair< pair<TString,TString>, double> cutInfo = getCut(cutName);
+    cout << "  FSCut " << cutName << ":" << endl;
+    cout << "    signal:   " << cutInfo.first.first << endl;
+    cout << "    sideband: " << cutInfo.first.second << endl;
+    cout << "    sideband scale: " << cutInfo.second << endl;
   }
 }
 
@@ -234,29 +232,6 @@ FSCut::getCut(TString cutName){
   }
   return m_cutCache[cutName];
 }
-
-vector<TString>
-FSCut::getCutList(TString cutName){
-  vector<TString> cutList;
-  if (cutName != ""){ getCut(cutName); cutList.push_back(cutName); }
-  else{
-    map< TString, pair< pair<TString,TString>, double > >::iterator it = m_cutCache.begin();
-    for (; it != m_cutCache.end(); it++){
-      cutList.push_back(it->first);
-    }
-  }
-  for (unsigned int i = 0; (cutList.size() != 0) && (i < cutList.size()-1); i++){
-    for (unsigned int j = i+1; j < cutList.size(); j++){
-      if (FSString::TString2string(cutList[j]) < FSString::TString2string(cutList[i])){
-        TString tmp = cutList[i];
-        cutList[i] = cutList[j];
-        cutList[j] = tmp;
-      }
-    }
-  }
-  return cutList; 
-}
-
 
 
 
