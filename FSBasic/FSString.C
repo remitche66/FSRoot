@@ -14,8 +14,7 @@
 
 TString
 FSString::string2TString(string input){
-  TString output("");
-  output += input;
+  TString output(input);
   return output;
 }
 
@@ -27,6 +26,31 @@ FSString::TString2string(TString input){
   }
   return output;
 }
+
+
+  // ********************************************************
+  // COMPARE TSTRINGS WITH WILDCARDS (* and ?)
+  // ********************************************************
+
+bool
+FSString::compareTStrings(TString inputNoWildCards, TString inputWithWildCards, bool caseSensitive){
+  while (inputWithWildCards.Contains("**")){
+    inputWithWildCards.Replace(inputWithWildCards.Index("**"),2,"*"); }
+  if (!caseSensitive){ inputNoWildCards.ToUpper(); inputWithWildCards.ToUpper(); }
+  string sNone = FSString::TString2string(inputNoWildCards);
+  string sWith = FSString::TString2string(inputWithWildCards);
+  return compareChars(sNone.c_str(),sWith.c_str());
+}
+
+bool
+FSString::compareChars(const char* cNone, const char* cWith) { 
+  if (*cNone == '\0' && *cWith == '\0') return true;
+  if (*cNone == '\0' && *cWith == '*' && *(cWith+1) == '\0') return true;
+  if (*cNone == '\0' || *cWith == '\0') return false;
+  if (*cNone == *cWith || *cWith == '?') return compareChars(cNone+1,cWith+1); 
+  if (*cWith == '*') return compareChars(cNone,cWith+1) || compareChars(cNone+1,cWith); 
+  return false;
+} 
 
 
   // ********************************************************
@@ -574,7 +598,7 @@ FSString::evalLogicalTString(TString input, vector<TString> cats){
   for (unsigned int i = 0; i < words.size(); i++){
     TString found("(1==0)");
     for (unsigned int ic = 0; ic < cats.size(); ic++){
-      if (cats[ic] == words[i]){ found = "(1==1)";  break; }
+      if (FSString::compareTStrings(cats[ic],words[i])){ found = "(1==1)";  break; }
     }
     while (input.Contains(words[i])){
       input.Replace(input.Index(words[i]),words[i].Length(),found);

@@ -17,11 +17,18 @@ class FSString{
   public:
 
       // ********************************************************
-      // CONVERSIONS FROM STRING TO TSTRING AND BACK
+      // CONVERT FROM STRING TO TSTRING AND BACK
       // ********************************************************
 
     static TString string2TString(string input);
     static string TString2string(TString input);
+
+
+      // ********************************************************
+      // COMPARE TSTRINGS WITH WILDCARDS (* and ?)
+      // ********************************************************
+
+    static bool compareTStrings(TString inputNoWildCards, TString inputWithWildCards, bool caseSensitive = true);
 
 
       // ********************************************************
@@ -221,6 +228,8 @@ class FSString{
 
 
   private:
+
+    static bool compareChars(const char* cNone, const char* cWith);
 
     static vector<TString> parseBounds(TString bounds);
 
