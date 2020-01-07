@@ -34,9 +34,11 @@ FSString::TString2string(TString input){
 
 bool
 FSString::compareTStrings(TString inputNoWildCards, TString inputWithWildCards, bool caseSensitive){
+  if (!caseSensitive){ inputNoWildCards.ToUpper(); inputWithWildCards.ToUpper(); }
+  if (!inputWithWildCards.Contains("*")&&!inputWithWildCards.Contains("?"))
+    return (inputNoWildCards == inputWithWildCards);
   while (inputWithWildCards.Contains("**")){
     inputWithWildCards.Replace(inputWithWildCards.Index("**"),2,"*"); }
-  if (!caseSensitive){ inputNoWildCards.ToUpper(); inputWithWildCards.ToUpper(); }
   string sNone = FSString::TString2string(inputNoWildCards);
   string sWith = FSString::TString2string(inputWithWildCards);
   return compareChars(sNone.c_str(),sWith.c_str());
