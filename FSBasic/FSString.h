@@ -103,9 +103,10 @@ class FSString{
       // PARSE STRINGS INTO WORDS
       // ********************************************************
 
-    static vector<TString> parseString(string input, string spacer = " ");
-    static vector<TString> parseTString(TString input, TString spacer = " ");
-    static vector<TString> parseTString(TString input, vector<TString> spacers);
+    static vector<TString> parseTString(TString input, TString spacer = " ", 
+                                        bool recordSpacers = false, bool display = false);
+    static vector<TString> parseTString(TString input, vector<TString> spacers,
+                                        bool recordSpacers = false, bool display = false);
 
 
       // ********************************************************

@@ -508,12 +508,8 @@ FSString::rootSymbols(TString input){
   // ********************************************************
 
 vector<TString>
-FSString::parseString(string input, string spacer){
-  return parseTString(string2TString(input),string2TString(spacer));
-}
-
-vector<TString>
-FSString::parseTString(TString input, TString spacer){
+FSString::parseTString(TString input, TString spacer, bool recordSpacers, bool display){
+  if (display) cout << "Parsing string: " << input << endl;
   input = FSString::removeTabs(input);
   spacer = FSString::removeTabs(spacer);
   vector<TString> words;
@@ -524,26 +520,30 @@ FSString::parseTString(TString input, TString spacer){
     for (int i = 0;          i < index;          i++){ TString digit(input[i]); s1 += digit; }
     for (int i = index+size; i < input.Length(); i++){ TString digit(input[i]); s2 += digit; }
     if (!s1.Contains(spacer) && (s1.Length() > 0)) words.push_back(s1);
+    if (recordSpacers) words.push_back(spacer);
     if (!s2.Contains(spacer) && (s2.Length() > 0)) words.push_back(s2);
     input = s2;
   }
   if ((words.size() == 0) && (input.Length() > 0)) words.push_back(input);
+  if (display) for (unsigned int i = 0; i < words.size(); i++){ cout << " " << words[i] << endl; }
   return words;
 }    
 
 vector<TString>
-FSString::parseTString(TString input, vector<TString> spacers){
+FSString::parseTString(TString input, vector<TString> spacers, bool recordSpacers, bool display){
+  if (display) cout << "Parsing string: " << input << endl;
   input = FSString::removeTabs(input);
   vector<TString> words;
   words.push_back(input);
   for (unsigned int ispacer = 0; ispacer < spacers.size(); ispacer++){
     vector<TString> newWords;
     for (unsigned int iword = 0; iword < words.size(); iword++){
-      vector<TString> tempWords = parseTString(words[iword],spacers[ispacer]);
+      vector<TString> tempWords = parseTString(words[iword],spacers[ispacer],recordSpacers);
       for (unsigned int i = 0; i < tempWords.size(); i++){ newWords.push_back(tempWords[i]); }
     }
     words = newWords;
   }
+  if (display) for (unsigned int i = 0; i < words.size(); i++){ cout << " " << words[i] << endl; }
   return words;
 }
 
@@ -749,7 +749,7 @@ FSString::readTStringFromFile(TString filename, int line, int word){
   string instring;
   for (int i = 0; i < line; i++){ getline(infile,instring); }
   infile.close();
-  vector<TString> words = parseString(instring);
+  vector<TString> words = parseTString(string2TString(instring));
   if (word >= (int)words.size()) return TString("");
   if (word < -1*(int)words.size()) return TString("");
   if (word < 0) word += (int)words.size();
