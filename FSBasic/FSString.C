@@ -530,18 +530,25 @@ FSString::parseTString(TString input, TString spacer, bool recordSpacers, bool d
 }    
 
 vector<TString>
+FSString::parseTString(vector<TString> inputs, TString spacer, bool recordSpacers, bool display){
+  vector<TString> words;
+  for (unsigned int i = 0; i < inputs.size(); i++){
+    vector<TString> wordsTemp = FSString::parseTString(inputs[i],spacer,recordSpacers,display);
+    for (unsigned int j = 0; j < wordsTemp.size(); j++){ words.push_back(wordsTemp[j]); }
+  }
+  if (display) cout << "Final parsing result: " << endl;
+  if (display) for (unsigned int i = 0; i < words.size(); i++){ cout << " " << words[i] << endl; }
+  return words;
+}
+
+vector<TString>
 FSString::parseTString(TString input, vector<TString> spacers, bool recordSpacers, bool display){
   if (display) cout << "Parsing string: " << input << endl;
   input = FSString::removeTabs(input);
   vector<TString> words;
   words.push_back(input);
-  for (unsigned int ispacer = 0; ispacer < spacers.size(); ispacer++){
-    vector<TString> newWords;
-    for (unsigned int iword = 0; iword < words.size(); iword++){
-      vector<TString> tempWords = parseTString(words[iword],spacers[ispacer],recordSpacers);
-      for (unsigned int i = 0; i < tempWords.size(); i++){ newWords.push_back(tempWords[i]); }
-    }
-    words = newWords;
+  for (unsigned int i = 0; i < spacers.size(); i++){
+    words = FSString::parseTString(words,spacers[i],recordSpacers);
   }
   if (display) for (unsigned int i = 0; i < words.size(); i++){ cout << " " << words[i] << endl; }
   return words;
