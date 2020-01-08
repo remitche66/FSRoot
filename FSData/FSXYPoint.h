@@ -16,7 +16,7 @@ class FSXYPoint{
 
   public:
 
-    double      xValue()         { return m_XV; }
+    double      xValue()         { return (m_XVL + m_XVH)/2.0; }
     double      xValueLow()      { return m_XVL; }
     double      xValueHigh()     { return m_XVH; }
     TString     xLabel()         { return m_XL; }
@@ -53,15 +53,19 @@ class FSXYPoint{
 
     void clear();
     void setValuesFromString(TString sValues);
-    vector< pair<TString,TString> > processValuesFromString(TString sValues);
+    bool setValuesFromMap(map<TString, vector<TString> > mValues);
+
+    bool checkKey(TString key);
+    bool checkMap(map<TString, vector<TString> > mValues);
+    map<TString, vector<TString> > parseValuesFromString(TString sValues);
+
     bool hasCategory(TString cat);
     void addCategory(TString cat);
+    void addCategories(vector<TString> cat);
 
-    void setXV  (double  val) { m_XV = val; }
-    void setXV  ()            { if (m_XVH > m_XVL){ setXV((m_XVH+m_XVL)/2.0); } 
-                                              else{ setXVL(m_XV); setXVH(m_XV); } }
-    void setXVL (double  val) { m_XVL = val; }
-    void setXVH (double  val) { m_XVH = val; }
+    void setXV  (double  val) { m_XVL = val;  m_XVH = val; }
+    void setXVL (double  val) { m_XVL = val; if (m_XVL > m_XVH) m_XVH = m_XVL;}
+    void setXVH (double  val) { m_XVH = val; if (m_XVH < m_XVL) m_XVL = m_XVH;}
     void setXL  (TString lab) { m_XL = lab; }  
     void setXE  (double  val) { setXEL(val); setXEH(val); }
     void setXEL (double  val) { m_XEL = sqrt(m_XEL*m_XEL + val*val); }
@@ -77,7 +81,11 @@ class FSXYPoint{
     void setYESL(double  val) { m_YESL = sqrt(m_YESL*m_YESL + val*val); }
     void setYESH(double  val) { m_YESH = sqrt(m_YESH*m_YESH + val*val); }
 
-    double  m_XV;
+    bool setXYV (TString XY, TString sVal);
+    bool setXYV (TString XY, vector<TString> sVals);
+    bool setXYE (TString XYE, TString sVal);
+    bool setXYE (TString XYE, vector<TString> sVals);
+
     double  m_XVL;
     double  m_XVH;
     TString m_XL; 

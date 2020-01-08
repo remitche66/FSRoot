@@ -16,7 +16,8 @@ FSXYPoint::FSXYPoint(){
 FSXYPoint::FSXYPoint(TString category, double scale, FSXYPoint* xyp){
   clear();
   addCategory(category);
-  m_XV   =         xyp->xValue();
+  m_XVL  =         xyp->xValueLow();
+  m_XVH  =         xyp->xValueHigh();
   m_XL   =         xyp->xLabel();
   m_XEL  =         xyp->xErrorLow();
   m_XEH  =         xyp->xErrorHigh();
@@ -41,7 +42,8 @@ FSXYPoint::FSXYPoint(TString category, TString operation, FSXYPoint* xyp1, FSXYP
     exit(0);
   }
   addCategory(category);
-  m_XV   = xyp1->xValue();
+  m_XVL  = xyp1->xValueLow();
+  m_XVH  = xyp1->xValueHigh();
   m_XL   = xyp1->xLabel();
   m_XEL  = xyp1->xErrorLow();
   m_XEH  = xyp1->xErrorHigh();
@@ -80,7 +82,6 @@ FSXYPoint::FSXYPoint(TString category, TString operation, FSXYPoint* xyp1, FSXYP
 
 void
 FSXYPoint::clear(){
-  m_XV = 0.0;
   m_XVL = 0.0;
   m_XVH = 0.0;
   m_XL = "";
@@ -117,6 +118,181 @@ FSXYPoint::display(int counter){
   cout << endl;
 }
 
+void
+FSXYPoint::setValuesFromString(TString sValues){
+  if (!setValuesFromMap(parseValuesFromString(sValues))){
+    cout << "FSXYPoint ERROR: problem setting values from string: " << endl << "  " << sValues << endl;
+    exit(0);
+  }
+}
+
+bool
+FSXYPoint::setValuesFromMap(map<TString, vector<TString> > mValues){
+  if (!checkMap(mValues)){ return false; }
+  if (mValues.find("XV") != mValues.end()){ if (!setXYV("X",mValues["XV"])) return false; }
+  if (mValues.find("YV") != mValues.end()){ if (!setXYV("Y",mValues["YV"])) return false; }
+  if (mValues.find("XE")   != mValues.end()){ if (!setXYE("XE",  mValues["XE"]  )) return false; } 
+  if (mValues.find("XEH")  != mValues.end()){ if (!setXYE("XEH", mValues["XEH"] )) return false; } 
+  if (mValues.find("XEL")  != mValues.end()){ if (!setXYE("XEL", mValues["XEL"] )) return false; } 
+  if (mValues.find("XES")  != mValues.end()){ if (!setXYE("XES", mValues["XES"] )) return false; } 
+  if (mValues.find("XESH") != mValues.end()){ if (!setXYE("XESH",mValues["XESH"])) return false; } 
+  if (mValues.find("XESL") != mValues.end()){ if (!setXYE("XESL",mValues["XESL"])) return false; } 
+  if (mValues.find("YE")   != mValues.end()){ if (!setXYE("YE",  mValues["YE"]  )) return false; } 
+  if (mValues.find("YEH")  != mValues.end()){ if (!setXYE("YEH", mValues["YEH"] )) return false; } 
+  if (mValues.find("YEL")  != mValues.end()){ if (!setXYE("YEL", mValues["YEL"] )) return false; } 
+  if (mValues.find("YES")  != mValues.end()){ if (!setXYE("YES", mValues["YES"] )) return false; } 
+  if (mValues.find("YESH") != mValues.end()){ if (!setXYE("YESH",mValues["YESH"])) return false; } 
+  if (mValues.find("YESL") != mValues.end()){ if (!setXYE("YESL",mValues["YESL"])) return false; } 
+  if (mValues.find("XVL") != mValues.end()){ setXVL(FSString::TString2double(mValues["XVL"][0])); }
+  if (mValues.find("XVH") != mValues.end()){ setXVH(FSString::TString2double(mValues["XVH"][0])); }
+  if (mValues.find("XL")  != mValues.end()){ setXL(mValues["XL"][0]); }
+  if (mValues.find("CAT") != mValues.end()){ addCategories(mValues["CAT"]); }
+  return true;
+}
+
+
+bool
+FSXYPoint::checkKey(TString key){
+  if (key == "XV")   return true;
+  if (key == "XVL")  return true;
+  if (key == "XVH")  return true;
+  if (key == "XL")   return true;
+  if (key == "XE")   return true;
+  if (key == "XEL")  return true;
+  if (key == "XEH")  return true;
+  if (key == "XES")  return true;
+  if (key == "XESL") return true;
+  if (key == "XESH") return true;
+  if (key == "YV")   return true;
+  if (key == "YE")   return true;
+  if (key == "YEL")  return true;
+  if (key == "YEH")  return true;
+  if (key == "YES")  return true;
+  if (key == "YESL") return true;
+  if (key == "YESH") return true;
+  if (key == "CAT")  return true;
+  return false;
+}
+
+
+bool
+FSXYPoint::checkMap(map<TString, vector<TString> > mValues){
+  if (mValues.size() == 0){
+    cout << "FSXYPoint ERROR: empty map" << endl;
+    return false;
+  }
+  for (map<TString, vector<TString> >::iterator it = mValues.begin(); it != mValues.end(); it++){
+    TString key = it->first;
+    vector<TString> values = it->second;
+    if (!checkKey(key)){
+      cout << "FSXYPoint ERROR: undefined key: " << key << endl;
+      return false;
+    }
+    if (values.size() == 0){
+      cout << "FSXYPoint ERROR: no values for key: " << key << endl;
+      return false;
+    }
+    for (unsigned int i = 0; i < values.size(); i++){
+      if (values[i].Length() == 0){
+        cout << "FSXYPoint ERROR: empty values for key: " << key << endl;
+        return false;
+      }
+    }
+  }
+  return true;
+}
+
+
+
+map<TString, vector<TString> >
+FSXYPoint::parseValuesFromString(TString sValues){
+  map<TString, vector<TString> > mValues;
+  sValues = FSString::removeTabs(sValues);
+  vector<TString> words = FSString::parseTString(sValues);
+  words = FSString::parseTString(words,":",true);
+  if ((words.size() < 3) || (words[1] != ":") || (words[0] == ":")) return mValues;
+  TString key("");
+  for (unsigned int i = 0; i < words.size(); i++){
+    if (words[i] == ":"){
+      key = words[i-1];  key.ToUpper();
+    }
+    else if ((key != "") && ((i == words.size()-1) || (words[i+1] != ":"))) {
+      mValues[key].push_back(words[i]);
+    }
+  }
+  return mValues;
+}
+
+
+
+bool
+FSXYPoint::setXYV(TString XY, TString sVal){
+  vector<TString> sVals;  sVals.push_back(sVal);
+  return setXYV(XY,sVals);
+}
+
+bool
+FSXYPoint::setXYV(TString XY, vector<TString> sVals){
+  sVals = FSString::parseTString(sVals);
+  if ((sVals.size() == 0) || (sVals[0].Length() == 0)) return false;
+  TString sSign = ""; TString d(sVals[0][0]); if (d == "-"){ sSign = "-"; sVals[0].Replace(0,1,""); }
+  vector<TString> spacers = {"+","-"};
+  sVals = FSString::parseTString(sVals,spacers,true);
+  if (sVals.size() == 0) return false;
+  sVals[0] = sSign + sVals[0];
+  if (XY == "X") setXV(FSString::TString2double(sVals[0])); 
+  if (XY == "Y") setYV(FSString::TString2double(sVals[0])); 
+  if (sVals.size() == 1) return true;
+  if ((sVals.size() == 4) && (sVals[1] == "+") && (sVals[2] == "-")){ setXYE(XY+"E",  sVals[3]); return true;}
+  if ((sVals.size() == 5) && (sVals[1] == "+") && (sVals[3] == "-")){ setXYE(XY+"EH", sVals[2]);
+                                                                      setXYE(XY+"EL", sVals[4]); return true;}
+  if ((sVals.size() == 7) && (sVals[1] == "+") && (sVals[2] == "-")
+                          && (sVals[4] == "+") && (sVals[5] == "-")){ setXYE(XY+"E",  sVals[3]);
+                                                                      setXYE(XY+"ES", sVals[6]); return true;}
+  if ((sVals.size() == 8) && (sVals[1] == "+") && (sVals[2] == "-")
+                          && (sVals[4] == "+") && (sVals[6] == "-")){ setXYE(XY+"E",  sVals[3]);
+                                                                      setXYE(XY+"ESH",sVals[5]);
+                                                                      setXYE(XY+"ESL",sVals[7]); return true;}
+  if ((sVals.size() == 8) && (sVals[1] == "+") && (sVals[3] == "-")
+                          && (sVals[5] == "+") && (sVals[6] == "-")){ setXYE(XY+"EH", sVals[2]);
+                                                                      setXYE(XY+"EL", sVals[4]);
+                                                                      setXYE(XY+"ES", sVals[7]); return true;}
+  if ((sVals.size() == 9) && (sVals[1] == "+") && (sVals[3] == "-")
+                          && (sVals[5] == "+") && (sVals[7] == "-")){ setXYE(XY+"EH", sVals[2]);
+                                                                      setXYE(XY+"EL", sVals[4]);
+                                                                      setXYE(XY+"ESH",sVals[6]);
+                                                                      setXYE(XY+"ESL",sVals[8]); return true;}
+  cout << "FSXYPoint ERROR: problem setting values" << endl;
+  return false;
+}
+
+
+bool
+FSXYPoint::setXYE (TString XYE, vector<TString> sVals){
+  for (unsigned int i = 0; i < sVals.size(); i++){ if (!setXYE(XYE,sVals[i])) return false; }
+  return true;
+}
+
+bool
+FSXYPoint::setXYE (TString XYE, TString sVal){
+  double dVal = FSString::TString2double(sVal);
+  if (XYE.Contains("XE") && (sVal.Contains("r")||sVal.Contains("R"))){ dVal *= xValue(); }
+  if (XYE.Contains("YE") && (sVal.Contains("r")||sVal.Contains("R"))){ dVal *= yValue(); }
+  if (XYE == "XE"  ){ setXE  (dVal); return true; }
+  if (XYE == "XEL" ){ setXEL (dVal); return true; }
+  if (XYE == "XEH" ){ setXEH (dVal); return true; }
+  if (XYE == "XES" ){ setXES (dVal); return true; }
+  if (XYE == "XESL"){ setXESL(dVal); return true; }
+  if (XYE == "XESH"){ setXESH(dVal); return true; }
+  if (XYE == "YE"  ){ setYE  (dVal); return true; }
+  if (XYE == "YEL" ){ setYEL (dVal); return true; }
+  if (XYE == "YEH" ){ setYEH (dVal); return true; }
+  if (XYE == "YES" ){ setYES (dVal); return true; }
+  if (XYE == "YESL"){ setYESL(dVal); return true; }
+  if (XYE == "YESH"){ setYESH(dVal); return true; }
+  cout << "FSXYPoint ERROR: problem setting errors" << endl;
+  return false;
+}
 
 bool
 FSXYPoint::hasCategory(TString category){
@@ -132,131 +308,8 @@ FSXYPoint::addCategory(TString category){
   if (!hasCategory(category) && category != "")  m_categories.push_back(category);
 }
 
-
-
-vector< pair<TString,TString> >
-FSXYPoint::processValuesFromString(TString sValues){
-  vector< pair<TString,TString> > vpValues;
-  vector<TString> vPairs = FSString::parseTString(sValues);
-  for (unsigned int i = 0; i < vPairs.size(); i++){
-    vector<TString> vPair = FSString::parseTString(vPairs[i],":");
-    if (vPair.size() != 2){
-      cout << "FSXYPoint ERROR: problem parsing values from: " << sValues << endl;
-      exit(0);
-    }
-    vPair[0].ToUpper();
-    pair<TString,TString> pPair(vPair[0],vPair[1]);
-    if ((vPair[0] == "XV") || (vPair[0] == "YV")){
-      TString sXY = "X"; if (vPair[0] == "YV") sXY = "Y";
-      TString sVal = vPair[1];
-      TString sSign = ""; TString d(sVal[0]); if (d == "-"){ sSign = "-"; sVal.Replace(0,1,""); }
-      while (sVal.Contains("+-")){ sVal.Replace(sVal.Index("+-"),2,"&&"); } 
-      vector<TString> spacers = {"+","-","&&"};
-      vector<TString> sVals = FSString::parseTString(sVal,spacers,true);
-      if (sVals.size() == 1){
-        vpValues.push_back(pPair);
-      }
-      else if ((sVals.size() == 3) && (sVals[1] == "&&")){
-        TString sXYV(sXY); sXYV += "V";  TString sV(sSign); sV += sVals[0];
-        TString sXYE(sXY); sXYE += "E";  TString sE(sVals[2]);
-        vpValues.push_back(pair<TString,TString>(sXYV,sV));
-        vpValues.push_back(pair<TString,TString>(sXYE,sE));
-      }
-      else if ((sVals.size() == 5) && (sVals[1] == "+") && (sVals[3] == "-")){
-        TString sXYV(sXY);  sXYV  += "V";   TString sV(sSign); sV += sVals[0];
-        TString sXYEH(sXY); sXYEH += "EH";  TString sEH(sVals[2]);
-        TString sXYEL(sXY); sXYEL += "EL";  TString sEL(sVals[4]);
-        vpValues.push_back(pair<TString,TString>(sXYV,sV));
-        vpValues.push_back(pair<TString,TString>(sXYEH,sEH));
-        vpValues.push_back(pair<TString,TString>(sXYEL,sEL));
-      }
-      else if ((sVals.size() == 5) && (sVals[1] == "&&") && (sVals[3] == "&&")){
-        TString sXYV(sXY);  sXYV  += "V";   TString sV(sSign); sV += sVals[0];
-        TString sXYE(sXY);  sXYE  += "E";   TString sE(sVals[2]);
-        TString sXYES(sXY); sXYES += "ES";  TString sES(sVals[4]);
-        vpValues.push_back(pair<TString,TString>(sXYV,sV));
-        vpValues.push_back(pair<TString,TString>(sXYE,sE));
-        vpValues.push_back(pair<TString,TString>(sXYES,sES));
-      }
-      else if ((sVals.size() == 7) && (sVals[1] == "&&") && (sVals[3] == "+") && (sVals[5] == "-")){
-        TString sXYV(sXY);   sXYV   += "V";    TString sV(sSign); sV += sVals[0];
-        TString sXYE(sXY);   sXYE   += "E";    TString sE(sVals[2]);
-        TString sXYESH(sXY); sXYESH += "ESH";  TString sESH(sVals[4]);
-        TString sXYESL(sXY); sXYESL += "ESL";  TString sESL(sVals[6]);
-        vpValues.push_back(pair<TString,TString>(sXYV,sV));
-        vpValues.push_back(pair<TString,TString>(sXYE,sE));
-        vpValues.push_back(pair<TString,TString>(sXYESH,sESH));
-        vpValues.push_back(pair<TString,TString>(sXYESL,sESL));
-      }
-      else if ((sVals.size() == 7) && (sVals[1] == "+") && (sVals[3] == "-") && (sVals[5] == "&&")){
-        TString sXYV(sXY);   sXYV  += "V";   TString sV(sSign); sV += sVals[0];
-        TString sXYEH(sXY);  sXYEH += "EH";  TString sEH(sVals[2]);
-        TString sXYEL(sXY);  sXYEL += "EL";  TString sEL(sVals[4]);
-        TString sXYES(sXY);  sXYES += "ES";  TString sES(sVals[6]);
-        vpValues.push_back(pair<TString,TString>(sXYV,sV));
-        vpValues.push_back(pair<TString,TString>(sXYEH,sEH));
-        vpValues.push_back(pair<TString,TString>(sXYEL,sEL));
-        vpValues.push_back(pair<TString,TString>(sXYES,sES));
-      }
-      else if ((sVals.size() == 9) && (sVals[1] == "+") && (sVals[3] == "-") && 
-                                      (sVals[5] == "+") && (sVals[7] == "-")){
-        TString sXYV(sXY);   sXYV   += "V";   TString sV(sSign); sV += sVals[0];
-        TString sXYEH(sXY);  sXYEH  += "EH";  TString sEH(sVals[2]);
-        TString sXYEL(sXY);  sXYEL  += "EL";  TString sEL(sVals[4]);
-        TString sXYESH(sXY); sXYESH += "ESH"; TString sESH(sVals[6]);
-        TString sXYESL(sXY); sXYESL += "ESL"; TString sESL(sVals[8]);
-        vpValues.push_back(pair<TString,TString>(sXYV,sV));
-        vpValues.push_back(pair<TString,TString>(sXYEH,sEH));
-        vpValues.push_back(pair<TString,TString>(sXYEL,sEL));
-        vpValues.push_back(pair<TString,TString>(sXYESH,sESH));
-        vpValues.push_back(pair<TString,TString>(sXYESL,sESL));
-      }
-      else{
-        cout << "FSXYPoint ERROR: problem parsing XV or YV from: " << sValues << endl;
-        exit(0);
-      }
-    }
-    else{
-      vpValues.push_back(pPair);
-    }
-  }
-  return vpValues;
-}
-
-
 void
-FSXYPoint::setValuesFromString(TString sValues){
-  vector< pair<TString,TString> > sExps = FSXYPoint::processValuesFromString(sValues);
-  for (int ipass = 0; ipass < 2; ipass++){
-    for (unsigned int i = 0; i < sExps.size(); i++){
-      TString sVar = sExps[i].first;
-      TString sVal = sExps[i].second;
-       double dVal = FSString::TString2double(sVal);
-      if (sVar.Contains("XE") && (sVal.Contains("r")||sVal.Contains("R"))){ dVal *= xValue(); }
-      if (sVar.Contains("YE") && (sVal.Contains("r")||sVal.Contains("R"))){ dVal *= yValue(); }
-           if (sVar == "XV")  { if (ipass == 0) { setXV  (dVal);     }}
-      else if (sVar == "XVL") { if (ipass == 0) { setXVL (dVal);     }}
-      else if (sVar == "XVH") { if (ipass == 0) { setXVH (dVal);     }}
-      else if (sVar == "XL")  { if (ipass == 0) { setXL  (sVal);     }}
-      else if (sVar == "XE")  { if (ipass == 1) { setXE  (dVal);     }}
-      else if (sVar == "XEL") { if (ipass == 1) { setXEL (dVal);     }}
-      else if (sVar == "XEH") { if (ipass == 1) { setXEH (dVal);     }}
-      else if (sVar == "XES") { if (ipass == 1) { setXES (dVal);     }}
-      else if (sVar == "XESL"){ if (ipass == 1) { setXESL(dVal);     }}
-      else if (sVar == "XESH"){ if (ipass == 1) { setXESH(dVal);     }}
-      else if (sVar == "YV")  { if (ipass == 0) { setYV  (dVal);     }}
-      else if (sVar == "YE")  { if (ipass == 1) { setYE  (dVal);     }}
-      else if (sVar == "YEL") { if (ipass == 1) { setYEL (dVal);     }}
-      else if (sVar == "YEH") { if (ipass == 1) { setYEH (dVal);     }}
-      else if (sVar == "YES") { if (ipass == 1) { setYES (dVal);     }}
-      else if (sVar == "YESL"){ if (ipass == 1) { setYESL(dVal);     }}
-      else if (sVar == "YESH"){ if (ipass == 1) { setYESH(dVal);     }}
-      else if (sVar == "CAT") { if (ipass == 0) { addCategory(sVal); }}
-      else{
-        cout << "FSXYPoint ERROR: problem parsing variable named: " << sVar << endl;
-        exit(0);
-      }
-    }
-    if (ipass == 0) setXV();
-  }
+FSXYPoint::addCategories(vector<TString> categories){
+  for (unsigned int i = 0; i < categories.size(); i++){ addCategory(categories[i]); }
 }
+
