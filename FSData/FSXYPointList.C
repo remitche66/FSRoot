@@ -36,8 +36,8 @@ FSXYPointList::addXYPointsFromFile(TString fileName){
       FSXYPoint* xyp = new FSXYPoint();
       TString sVals = line;  while(sVals.Contains("addXYPoint")){ sVals.Replace(sVals.Index("addXYPoint"),10,""); }
       xyp->setValuesFromString(sVals);
-      xyp->display();
       m_vectorXYPoints.push_back(xyp);
+      xyp->display(m_vectorXYPoints.size());
     }
 // come back to these:  derive newCat = oldCat1 */+- oldCat2
 //    else if (words[0] == "derive"){
@@ -123,7 +123,7 @@ void
 FSXYPointList::display(TString category){
   vector<FSXYPoint*> xypv = getXYPoints(category);
   for (unsigned int i = 0; i < xypv.size(); i++){
-    xypv[i]->display();
+    xypv[i]->display(i+1);
   }
 }
 
