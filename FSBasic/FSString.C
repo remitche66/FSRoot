@@ -509,7 +509,6 @@ FSString::rootSymbols(TString input){
 
 vector<TString>
 FSString::parseTString(TString input, TString spacer, bool recordSpacers, bool display){
-  if (display) cout << "Parsing string: " << input << endl;
   input = FSString::removeTabs(input);
   spacer = FSString::removeTabs(spacer);
   vector<TString> words;
@@ -525,6 +524,9 @@ FSString::parseTString(TString input, TString spacer, bool recordSpacers, bool d
     input = s2;
   }
   if ((words.size() == 0) && (input.Length() > 0)) words.push_back(input);
+  if (display) cout << "FSString::parseTString input:" << endl;
+  if (display) cout << " " << input << endl;
+  if (display) cout << "FSString::parseTString output:" << endl;
   if (display) for (unsigned int i = 0; i < words.size(); i++){ cout << " " << words[i] << endl; }
   return words;
 }    
@@ -533,23 +535,41 @@ vector<TString>
 FSString::parseTString(vector<TString> inputs, TString spacer, bool recordSpacers, bool display){
   vector<TString> words;
   for (unsigned int i = 0; i < inputs.size(); i++){
-    vector<TString> wordsTemp = FSString::parseTString(inputs[i],spacer,recordSpacers,display);
+    vector<TString> wordsTemp = FSString::parseTString(inputs[i],spacer,recordSpacers);
     for (unsigned int j = 0; j < wordsTemp.size(); j++){ words.push_back(wordsTemp[j]); }
   }
-  if (display) cout << "Final parsing result: " << endl;
+  if (display) cout << "FSString::parseTString input:" << endl;
+  if (display) for (unsigned int i = 0; i < inputs.size(); i++){ cout << " " << inputs[i] << endl; }
+  if (display) cout << "FSString::parseTString output:" << endl;
   if (display) for (unsigned int i = 0; i < words.size(); i++){ cout << " " << words[i] << endl; }
   return words;
 }
 
 vector<TString>
 FSString::parseTString(TString input, vector<TString> spacers, bool recordSpacers, bool display){
-  if (display) cout << "Parsing string: " << input << endl;
   input = FSString::removeTabs(input);
   vector<TString> words;
   words.push_back(input);
   for (unsigned int i = 0; i < spacers.size(); i++){
     words = FSString::parseTString(words,spacers[i],recordSpacers);
   }
+  if (display) cout << "FSString::parseTString input:" << endl;
+  if (display) cout << " " << input << endl;
+  if (display) cout << "FSString::parseTString output:" << endl;
+  if (display) for (unsigned int i = 0; i < words.size(); i++){ cout << " " << words[i] << endl; }
+  return words;
+}
+
+vector<TString>
+FSString::parseTString(vector<TString> inputs, vector<TString> spacers, bool recordSpacers, bool display){
+  vector<TString> words;
+  for (unsigned int i = 0; i < inputs.size(); i++){
+    vector<TString> tempWords = FSString::parseTString(inputs[i],spacers,recordSpacers);
+    for (unsigned int j = 0; j < tempWords.size(); j++){ words.push_back(tempWords[j]); }
+  }
+  if (display) cout << "FSString::parseTString input:" << endl;
+  if (display) for (unsigned int i = 0; i < inputs.size(); i++){ cout << " " << inputs[i] << endl; }
+  if (display) cout << "FSString::parseTString output:" << endl;
   if (display) for (unsigned int i = 0; i < words.size(); i++){ cout << " " << words[i] << endl; }
   return words;
 }

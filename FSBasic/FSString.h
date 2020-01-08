@@ -109,6 +109,8 @@ class FSString{
                                         bool recordSpacers = false, bool display = false);
     static vector<TString> parseTString(TString input, vector<TString> spacers,
                                         bool recordSpacers = false, bool display = false);
+    static vector<TString> parseTString(vector<TString> inputs, vector<TString> spacers,
+                                        bool recordSpacers = false, bool display = false);
 
 
       // ********************************************************
