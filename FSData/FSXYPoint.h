@@ -53,6 +53,7 @@ class FSXYPoint{
 
     void clear();
     void setValuesFromString(TString sValues);
+    vector< pair<TString,TString> > processValuesFromString(TString sValues);
     bool hasCategory(TString cat);
     void addCategory(TString cat);
 
