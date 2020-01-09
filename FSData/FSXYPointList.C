@@ -175,7 +175,7 @@ FSXYPointList::getEmptyTH1F(TString category, TString histBounds){
 }
 
 TGraphAsymmErrors*
-FSXYPointList::getTGraph(TString category, bool includeSystErrors){
+FSXYPointList::getTGraph(TString category, bool includeSystErrors, int color){
   static const int MAXPOINTS = 10000;
   int n = 0;
   double vx[MAXPOINTS];  double vxel[MAXPOINTS];  double vxeh[MAXPOINTS];
@@ -191,6 +191,8 @@ FSXYPointList::getTGraph(TString category, bool includeSystErrors){
     n++;
   }
   TGraphAsymmErrors* tgraph = new TGraphAsymmErrors(n,vx,vy,vxel,vxeh,vyel,vyeh);
+  tgraph->SetMarkerColor(color);
+  tgraph->SetLineColor(color);
   return tgraph;
 }
 
