@@ -34,10 +34,22 @@ FSXYPointList::addXYPointsFromFile(TString fileName){
         exit(0);
       }
       FSXYPoint* xyp = new FSXYPoint();
-      TString sVals = line;  while(sVals.Contains("addXYPoint")){ sVals.Replace(sVals.Index("addXYPoint"),10,""); }
+      TString sVals = line;  sVals.Replace(sVals.Index("addXYPoint"),10,"");
       xyp->setValuesFromString(sVals);
       m_vectorXYPoints.push_back(xyp);
       xyp->display(m_vectorXYPoints.size());
+    }
+    else if (words[0] == "addXYPointCategory"){
+      if (words.size() < 3){
+        cout << "FSXYPointList ERROR: problem with addXYPointCategory command" << endl;
+        exit(0);
+      }
+      vector<FSXYPoint*> vxyp = getXYPoints(words[1]);
+      for (unsigned int i = 0; i < vxyp.size(); i++){
+        for (unsigned int j = 2; j < words.size(); j++){
+          vxyp[i]->addCategory(words[j]);
+        }
+      }
     }
 // come back to these:  derive newCat = oldCat1 */+- oldCat2
 //    else if (words[0] == "derive"){
