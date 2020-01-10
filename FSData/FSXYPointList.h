@@ -32,7 +32,8 @@ class FSXYPointList{
 
     static TH1F* getEmptyTH1F(TString category = "", TString histBounds = "(5000,0.0,5.0)");
 
-    static TGraphAsymmErrors* getTGraph(TString category = "", bool includeSystErrors = false, int color = 1);
+    static TGraphAsymmErrors* getTGraph(TString category = "", bool includeSystErrors = false, 
+                     int color = 1, int markerStyle = 20, double lineWidth = 2.0, double markerSize = 1.0);
 
     static void clearXYPoints();
 
