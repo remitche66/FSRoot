@@ -74,6 +74,10 @@ class FSHistogramAnalysis{
     void writeHistograms(string filename);
 
 
+      // helper functions
+
+    int cutFromKey(int cutNumber, TString key);
+
 };
 
 

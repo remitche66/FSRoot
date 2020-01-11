@@ -5,6 +5,7 @@
 #include "TString.h"
 #include "FSAnalysis/FSHistogramAnalysis.h"
 #include "FSBasic/FSHistogram.h"
+#include "FSBasic/FSString.h"
 
 
 void 
@@ -136,5 +137,25 @@ FSHistogramAnalysis::writeHistograms(string filename){
       hist->Write();
     }
   }
+}
+
+
+int
+FSHistogramAnalysis::cutFromKey(int cutNumber, TString key){
+  if ((key.Length() < 9) || (cutNumber < 1) || (cutNumber > 10)){ 
+    cout << "FSHistogramAnalysis ERROR: bad key: " << key << " or cutNumber: " << cutNumber << endl; 
+    return -1;
+  }
+  TString digit("");
+       if (cutNumber == 1){ for (int i = 8; i < key.Length(); i++){ digit += key[i]; } }
+  else if (cutNumber == 2){ digit += key[7]; }
+  else if (cutNumber == 3){ digit += key[6]; }
+  else if (cutNumber == 4){ digit += key[5]; }
+  else if (cutNumber == 5){ digit += key[4]; }
+  else if (cutNumber == 6){ digit += key[3]; }
+  else if (cutNumber == 7){ digit += key[2]; }
+  else if (cutNumber == 8){ digit += key[1]; }
+  else if (cutNumber == 9){ digit += key[0]; }
+  return FSString::TString2int(digit);
 }
 
