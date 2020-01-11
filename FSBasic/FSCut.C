@@ -80,7 +80,7 @@ FSCut::expandCuts(TString cuts, bool showDetails){
       // make a list of the cuts within the parentheses
     TString cutsInParentheses = FSString::captureParentheses(cuts,index);
     size += cutsInParentheses.Length();
-    vector<TString> spacers = {",",";"};
+    vector<TString> spacers; spacers.push_back(","); spacers.push_back(";");
     vector<TString> cutList = FSString::parseTString(cutsInParentheses,spacers);
 
       // sort the cutList vector

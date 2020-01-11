@@ -617,7 +617,13 @@ FSString::evalLogicalTString(TString input, vector<TString> cats){
     cout << "FSString::evalLogicalTString ERROR: parentheses problem in " << input << endl;
     exit(1);
   }
-  vector<TString> spacers = {"(",")",",","&","|","!"};
+  vector<TString> spacers;
+  spacers.push_back("(");
+  spacers.push_back(")");
+  spacers.push_back(",");
+  spacers.push_back("&");
+  spacers.push_back("|");
+  spacers.push_back("!");
   vector<TString> words = FSString::parseTString(input,spacers);
   for (unsigned int i = 0; i < words.size(); i++){
   for (unsigned int j = i+1; j < words.size(); j++){
