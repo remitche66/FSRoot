@@ -23,7 +23,7 @@ class FSHistogramAnalysis{
 
       // Do a Histogram Analysis
 
-    void analyze(TChain* nt, string outputfile);
+    void analyze(TChain* nt, string outputfile, int maxEvents = -1);
 
 
   protected:
@@ -72,11 +72,6 @@ class FSHistogramAnalysis{
       // Standard Function Definitions
 
     void writeHistograms(string filename);
-
-
-      // maximum events
-
-    int MAXEVENTS = -1;
 
 
       // helper functions

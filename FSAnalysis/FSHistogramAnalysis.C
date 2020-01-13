@@ -9,7 +9,7 @@
 
 
 void 
-FSHistogramAnalysis::analyze(TChain* nt, string outputfile){
+FSHistogramAnalysis::analyze(TChain* nt, string outputfile, int maxEvents){
 
 
     // Setup the number of cut combinations
@@ -64,7 +64,7 @@ FSHistogramAnalysis::analyze(TChain* nt, string outputfile){
 
   cout << "FSHistogramAnalysis: Looping Over Tree..." << endl;
 
-  for (long int ientry = 0; ((ientry < nentries) && (MAXEVENTS < 0 || ientry < MAXEVENTS)); ientry++){
+  for (long int ientry = 0; ((ientry < nentries) && (maxEvents < 0 || ientry < maxEvents)); ientry++){
     if ((ientry+1)%100000 == 0){
       cout << "\tEntry Number: " << ientry+1 
            << "\t\t(" << 100*((double)(ientry+1))/nentries << " \%)" << endl;
