@@ -71,12 +71,17 @@ class FSHistogramAnalysis{
 
       // Standard Function Definitions
 
-    void writeHistograms(string filename);
+    void writeHistograms();
 
 
       // helper functions
 
     int cutFromKey(int cutNumber, TString key);
+
+
+  private:
+
+    TFile* m_outFile;
 
 };
 

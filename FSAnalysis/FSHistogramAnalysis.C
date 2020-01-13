@@ -36,6 +36,12 @@ FSHistogramAnalysis::analyze(TChain* nt, string outputfile, int maxEvents){
   setupBranches(nt);
 
 
+    // Open an output file
+
+  m_outFile = new TFile(outputfile.c_str(),"recreate");
+  m_outFile->cd();
+
+
     // Book Histograms
 
   cout << "FSHistogramAnalysis: Booking Histograms..." << endl;
@@ -109,7 +115,7 @@ FSHistogramAnalysis::analyze(TChain* nt, string outputfile, int maxEvents){
 
   cout << "FSHistogramAnalysis: Writing Histograms..." << endl;
 
-  writeHistograms(outputfile);
+  writeHistograms();
 
   cout << "FSHistogramAnalysis: Done." << endl;
 
@@ -117,13 +123,13 @@ FSHistogramAnalysis::analyze(TChain* nt, string outputfile, int maxEvents){
 
 
 void 
-FSHistogramAnalysis::writeHistograms(string filename){
-  TFile* outfile = new TFile(filename.c_str(),"recreate");
+FSHistogramAnalysis::writeHistograms(){
+  //TFile* outFile = new TFile(filename.c_str(),"recreate");
   for (map<TString,TH1F*>::iterator mapItr = h1map.begin();
        mapItr != h1map.end(); mapItr++){
     if (mapItr->second){
       TH1F* hist = FSHistogram::getTH1F(mapItr->second);
-      outfile->cd();
+      m_outFile->cd();
       hist->Write();
     }
   }
@@ -131,10 +137,11 @@ FSHistogramAnalysis::writeHistograms(string filename){
        mapItr != h2map.end(); mapItr++){
     if (mapItr->second){
       TH2F* hist = FSHistogram::getTH2F(mapItr->second);
-      outfile->cd();
+      m_outFile->cd();
       hist->Write();
     }
   }
+  m_outFile->Close();
 }
 
 
