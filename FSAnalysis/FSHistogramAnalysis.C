@@ -64,14 +64,12 @@ FSHistogramAnalysis::analyze(TChain* nt, string outputfile){
 
   cout << "FSHistogramAnalysis: Looping Over Tree..." << endl;
 
-  for (long int ientry = 0; ientry < nentries; ientry++){
+  for (long int ientry = 0; ((ientry < nentries) && (MAXEVENTS < 0 || ientry < MAXEVENTS)); ientry++){
     if ((ientry+1)%100000 == 0){
       cout << "\tEntry Number: " << ientry+1 
            << "\t\t(" << 100*((double)(ientry+1))/nentries << " \%)" << endl;
     }
     nt->GetEntry(ientry);
-
-       //for (int ievent = 1; ievent < 1000; ievent++){
 
 
       // Initialize the Cut Booleans

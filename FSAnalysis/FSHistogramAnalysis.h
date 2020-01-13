@@ -74,6 +74,11 @@ class FSHistogramAnalysis{
     void writeHistograms(string filename);
 
 
+      // maximum events
+
+    int MAXEVENTS = -1;
+
+
       // helper functions
 
     int cutFromKey(int cutNumber, TString key);
