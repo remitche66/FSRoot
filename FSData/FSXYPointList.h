@@ -35,6 +35,8 @@ class FSXYPointList{
     static TGraphAsymmErrors* getTGraph(TString category = "", bool includeSystErrors = false, 
                      int color = 1, int markerStyle = 20, double lineWidth = 2.0, double markerSize = 1.0);
 
+    static TF1* getIdeogram(TString category = "", TString XY = "X", bool includeSystErrors = false);
+
     static void clearXYPoints();
 
 

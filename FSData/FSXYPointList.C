@@ -213,3 +213,35 @@ FSXYPointList::getTGraph(TString category, bool includeSystErrors,
 }
 
 
+TF1*
+FSXYPointList::getIdeogram(TString category, TString XY, bool includeSystErrors){
+  TString sIdeogram("");
+  XY.ToUpper();
+  vector<FSXYPoint*> vxyp = getXYPoints(category);
+  double x1 = 0.0; double x2 = 0.0;
+  for (unsigned int i = 0; i < vxyp.size(); i++){
+    double mean = 0.0;
+    if (XY == "X") mean = vxyp[i]->xValue();
+    if (XY == "Y") mean = vxyp[i]->yValue();
+    double width = 0.0;
+    if ((XY == "X") && (!includeSystErrors)) width = vxyp[i]->xError();
+    if ((XY == "Y") && (!includeSystErrors)) width = vxyp[i]->yError();
+    if ((XY == "X") &&  (includeSystErrors)) width = vxyp[i]->xErrorTot();
+    if ((XY == "Y") &&  (includeSystErrors)) width = vxyp[i]->yErrorTot();
+    if (width == 0.0) continue;
+    TString sMean = FSString::double2TString(mean,8);
+    TString sWidth = FSString::double2TString(width,8);
+    TString sSize = FSString::double2TString(1.0/width,8);
+    double x1temp = mean - width*5.0;  double x2temp = mean + width*5.0;
+    if (sIdeogram == "" || x1temp < x1){ x1 = x1temp; }
+    if (sIdeogram == "" || x2temp > x2){ x2 = x2temp; }
+    if (sIdeogram != "") sIdeogram += "+";
+    sIdeogram += sSize+"*TMath::Gaus(x,"+sMean+","+sWidth+",1)";
+  }
+  if (sIdeogram == "") return NULL;
+  TF1* f1 = new TF1(category,sIdeogram,x1,x2);
+  f1->SetLineColor(kBlack);
+  f1->SetNpx(10000);
+  return f1;
+}
+
