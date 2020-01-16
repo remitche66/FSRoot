@@ -13,9 +13,9 @@ FSXYPoint::FSXYPoint(){
   clear();
 }
 
-FSXYPoint::FSXYPoint(TString category, double scale, FSXYPoint* xyp){
+FSXYPoint::FSXYPoint(TString name, double scale, FSXYPoint* xyp){
   clear();
-  addCategory(category);
+  setNAME(name);
   m_XVL  =         xyp->xValueLow();
   m_XVH  =         xyp->xValueHigh();
   m_XL   =         xyp->xLabel();
@@ -31,7 +31,7 @@ FSXYPoint::FSXYPoint(TString category, double scale, FSXYPoint* xyp){
 }
 
 
-FSXYPoint::FSXYPoint(TString category, TString operation, FSXYPoint* xyp1, FSXYPoint* xyp2){
+FSXYPoint::FSXYPoint(TString name, TString operation, FSXYPoint* xyp1, FSXYPoint* xyp2){
   clear();
   if ((operation != "*") && (operation != "/") && (operation != "+") && (operation != "-")){
     cout << "FSXYPoint ERROR: bad operation: " << operation << endl;
@@ -41,7 +41,7 @@ FSXYPoint::FSXYPoint(TString category, TString operation, FSXYPoint* xyp1, FSXYP
     cout << "FSXYPoint ERROR: divide by zero" << endl;
     exit(0);
   }
-  addCategory(category);
+  setNAME(name);
   m_XVL  = xyp1->xValueLow();
   m_XVH  = xyp1->xValueHigh();
   m_XL   = xyp1->xLabel();
@@ -82,6 +82,7 @@ FSXYPoint::FSXYPoint(TString category, TString operation, FSXYPoint* xyp1, FSXYP
 
 void
 FSXYPoint::clear(){
+  m_NAME = "";
   m_XVL = 0.0;
   m_XVH = 0.0;
   m_XL = "";
@@ -102,6 +103,7 @@ void
 FSXYPoint::display(int counter){
   if (counter >= 0) cout << counter << ". ";
   cout << "FSXYPoint: " << endl;
+  cout << "    name: " << m_NAME << endl;
   cout << "    categories: ";
   vector<TString> n_categories = categories();
   for (unsigned int j = 0; j < n_categories.size(); j++){
@@ -126,11 +128,20 @@ FSXYPoint::setValuesFromString(TString sValues){
   }
 }
 
+void
+FSXYPoint::setNAME(vector<TString> longerName){
+  TString name("");
+  for (unsigned int i = 0; i < longerName.size(); i++){
+    name += longerName[i]; if (i != longerName.size()-1) name += " "; }
+  setNAME(name);
+}
+
 bool
 FSXYPoint::setValuesFromMap(map<TString, vector<TString> > mValues){
   if (!checkMap(mValues)){ return false; }
-  if (mValues.find("XV") != mValues.end()){ if (!setXYV("X",mValues["XV"])) return false; }
-  if (mValues.find("YV") != mValues.end()){ if (!setXYV("Y",mValues["YV"])) return false; }
+  if (mValues.find("NAME") != mValues.end()){ setNAME(mValues["NAME"]); }
+  if (mValues.find("XV")   != mValues.end()){ if (!setXYV("X",mValues["XV"])) return false; }
+  if (mValues.find("YV")   != mValues.end()){ if (!setXYV("Y",mValues["YV"])) return false; }
   if (mValues.find("XE")   != mValues.end()){ if (!setXYE("XE",  mValues["XE"]  )) return false; } 
   if (mValues.find("XEH")  != mValues.end()){ if (!setXYE("XEH", mValues["XEH"] )) return false; } 
   if (mValues.find("XEL")  != mValues.end()){ if (!setXYE("XEL", mValues["XEL"] )) return false; } 
@@ -143,16 +154,17 @@ FSXYPoint::setValuesFromMap(map<TString, vector<TString> > mValues){
   if (mValues.find("YES")  != mValues.end()){ if (!setXYE("YES", mValues["YES"] )) return false; } 
   if (mValues.find("YESH") != mValues.end()){ if (!setXYE("YESH",mValues["YESH"])) return false; } 
   if (mValues.find("YESL") != mValues.end()){ if (!setXYE("YESL",mValues["YESL"])) return false; } 
-  if (mValues.find("XVL") != mValues.end()){ setXVL(FSString::TString2double(mValues["XVL"][0])); }
-  if (mValues.find("XVH") != mValues.end()){ setXVH(FSString::TString2double(mValues["XVH"][0])); }
-  if (mValues.find("XL")  != mValues.end()){ setXL(mValues["XL"][0]); }
-  if (mValues.find("CAT") != mValues.end()){ addCategories(mValues["CAT"]); }
+  if (mValues.find("XVL")  != mValues.end()){ setXVL(FSString::TString2double(mValues["XVL"][0])); }
+  if (mValues.find("XVH")  != mValues.end()){ setXVH(FSString::TString2double(mValues["XVH"][0])); }
+  if (mValues.find("XL")   != mValues.end()){ setXL(mValues["XL"][0]); }
+  if (mValues.find("CAT")  != mValues.end()){ addCategories(mValues["CAT"]); }
   return true;
 }
 
 
 bool
 FSXYPoint::checkKey(TString key){
+  if (key == "NAME") return true;
   if (key == "XV")   return true;
   if (key == "XVL")  return true;
   if (key == "XVH")  return true;
@@ -305,7 +317,10 @@ FSXYPoint::hasCategory(TString category){
 
 void
 FSXYPoint::addCategory(TString category){
-  if (!hasCategory(category) && category != "")  m_categories.push_back(category);
+  if (category == "") return;
+  if (FSString::parseTString(category).size() != 1) return;
+  if (hasCategory(category)) return;
+  m_categories.push_back(category);
 }
 
 void

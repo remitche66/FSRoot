@@ -16,6 +16,7 @@ class FSXYPoint{
 
   public:
 
+    TString     name()           { return m_NAME; }
     double      xValue()         { return (m_XVL + m_XVH)/2.0; }
     double      xValueLow()      { return m_XVL; }
     double      xValueHigh()     { return m_XVH; }
@@ -48,8 +49,8 @@ class FSXYPoint{
   private:
 
     FSXYPoint();
-    FSXYPoint(TString category, double scale, FSXYPoint* xyp); 
-    FSXYPoint(TString category, TString operation, FSXYPoint* xyp1, FSXYPoint* xyp2); 
+    FSXYPoint(TString name, double scale, FSXYPoint* xyp); 
+    FSXYPoint(TString name, TString operation, FSXYPoint* xyp1, FSXYPoint* xyp2); 
 
     void clear();
     void setValuesFromString(TString sValues);
@@ -63,6 +64,8 @@ class FSXYPoint{
     void addCategory(TString cat);
     void addCategories(vector<TString> cat);
 
+    void setNAME(TString val) { m_NAME = val;  addCategory(val); }
+    void setNAME(vector<TString> longerName);
     void setXV  (double  val) { m_XVL = val;  m_XVH = val; }
     void setXVL (double  val) { m_XVL = val; if (m_XVL > m_XVH) m_XVH = m_XVL;}
     void setXVH (double  val) { m_XVH = val; if (m_XVH < m_XVL) m_XVL = m_XVH;}
@@ -86,6 +89,7 @@ class FSXYPoint{
     bool setXYE (TString XYE, TString sVal);
     bool setXYE (TString XYE, vector<TString> sVals);
 
+    TString m_NAME;
     double  m_XVL;
     double  m_XVH;
     TString m_XL; 
