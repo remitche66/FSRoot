@@ -23,6 +23,7 @@ FSXYPointList::addXYPointsFromFile(TString fileName){
     exit(0);
   }
   string sline;
+  vector<TString> fileCategories;
   while(getline(infile,sline)){
     TString line = FSString::string2TString(sline);
     vector<TString> words = FSString::parseTString(line);
@@ -36,6 +37,7 @@ FSXYPointList::addXYPointsFromFile(TString fileName){
       FSXYPoint* xyp = new FSXYPoint();
       TString sVals = line;  sVals.Replace(sVals.Index("addXYPoint"),10,"");
       xyp->setValuesFromString(sVals);
+      xyp->addCategories(fileCategories);
       m_vectorXYPoints.push_back(xyp);
       xyp->display(m_vectorXYPoints.size());
     }
@@ -50,6 +52,14 @@ FSXYPointList::addXYPointsFromFile(TString fileName){
           vxyp[i]->addCategory(words[j]);
         }
       }
+    }
+    else if (words[0] == "addXYPointFileCategories"){
+      TString sVals = line;  sVals.Replace(sVals.Index("addXYPointFileCategories"),24,"");
+      vector<TString> vVals = FSString::parseTString(sVals);
+      for (unsigned int i = 0; i < vVals.size(); i++){ fileCategories.push_back(vVals[i]); }
+    }
+    else if (words[0] == "clearXYPointFileCategories"){
+      fileCategories.clear();
     }
 // come back to these:  derive newCat = oldCat1 */+- oldCat2
 //    else if (words[0] == "derive"){
