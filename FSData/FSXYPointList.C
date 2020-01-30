@@ -188,12 +188,28 @@ FSXYPointList::getTH1F(TString category, TString histBounds, bool includeSystErr
 
 TH1F* 
 FSXYPointList::getEmptyTH1F(TString category, TString histBounds){
-  TH1F* hist = getTH1F(category,histBounds);
-  double max = hist->GetMaximum();
-  hist->Reset();
-  hist = FSHistogram::getTH1F(hist);
-  hist->SetMaximum(max);
+  TH1F* hist = getTH1F("!*",histBounds);
+  hist->SetTitle("FSXYPointList (category = \""+category+"\")");
+  pair<double,double> minmax = getMinMax(category,true);
+  double min = minmax.first; double max = minmax.second;
+  hist->SetMinimum(min - 0.05*abs(min));
+  hist->SetMaximum(max + 0.05*abs(max));
   return hist;
+}
+
+pair<double,double>
+FSXYPointList::getMinMax(TString category, bool includeErrors){
+  vector<FSXYPoint*> vxyp = getXYPoints(category);
+  if (vxyp.size() == 0) return pair<double,double>(0.0,0.0);
+  double min = vxyp[0]->yValue(); if (includeErrors) min -= vxyp[0]->yErrorTotLow();
+  double max = vxyp[0]->yValue(); if (includeErrors) max += vxyp[0]->yErrorTotHigh();
+  for (unsigned int i = 1; i < vxyp.size(); i++){
+    double minTest = vxyp[i]->yValue(); if (includeErrors) minTest -= vxyp[i]->yErrorTotLow();
+    double maxTest = vxyp[i]->yValue(); if (includeErrors) maxTest += vxyp[i]->yErrorTotHigh();
+    if (minTest < min) min = minTest;
+    if (maxTest > max) max = maxTest;
+  }
+  return pair<double,double>(min,max);
 }
 
 TGraphAsymmErrors*

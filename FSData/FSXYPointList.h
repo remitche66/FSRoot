@@ -26,6 +26,8 @@ class FSXYPointList{
 
     static vector<FSXYPoint*> getXYPoints(TString category = "");
 
+    static pair<double,double> getMinMax(TString category = "", bool includeErrors = false);
+
     static void display(TString category = "");
 
     static TH1F* getTH1F(TString category = "", TString histBounds = "(5000,0.0,5.0)", bool includeSystErrors = false);
