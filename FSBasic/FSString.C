@@ -14,8 +14,7 @@
 
 TString
 FSString::string2TString(string input){
-  TString output(input);
-  return output;
+  return TString(input);
 }
 
 string
@@ -62,37 +61,27 @@ FSString::compareChars(const char* cNone, const char* cWith) {
 
 int
 FSString::TString2int(TString input){
-  if (input.IsFloat()){
-    string sinput = TString2string(input);
-    return (int) atof(sinput.c_str());
-  }
-  TString embeddedNumber("");
-  for (int i = 0; i < input.Length(); i++){
-    TString digit(input[i]);
-    if (digit.IsFloat() || digit == ".")
-      embeddedNumber += digit;
-  }
-  if (!embeddedNumber.IsFloat()) return 0;
-  string sinput = TString2string(embeddedNumber);
-  return atoi(sinput.c_str());
+  return (int) FSString::TString2double(input);
 }
 
 double
 FSString::TString2double(TString input){
-  if (input.IsFloat()){
-    string sinput = TString2string(input);
-    return atof(sinput.c_str());
+  input = FSString::removeWhiteSpace(input);
+  while (input.Length() > 0){
+    TString digit1(""); if (input.Length() > 0) digit1 = input[0];
+    TString digit2(""); if (input.Length() > 1) digit2 = input[1];
+    TString digit3(""); if (input.Length() > 2) digit3 = input[2];
+    if (digit1.IsFloat()) break;
+    if ((digit1 == "." || digit1 == "-") && digit2.IsFloat()) break;
+    if (digit1 == "-" && digit2 == "." && digit3.IsFloat()) break;
+    input.Replace(0,1,"");
   }
-  TString embeddedNumber("");
-  for (int i = 0; i < input.Length(); i++){
-    TString digit(input[i]);
-    if (digit.IsFloat() || digit == ".")
-      embeddedNumber += digit;
+  while (input.Length() > 0){
+    if (input.IsFloat()){ return atof(FSString::TString2string(input).c_str()); }
+    input.Replace(input.Length()-1,1,"");
   }
-  if (!embeddedNumber.IsFloat()) return 0.0;
-  string sinput = TString2string(embeddedNumber);
-  return atof(sinput.c_str());
-}  
+  return 0.0;
+}
 
 
   // ********************************************************
@@ -100,10 +89,10 @@ FSString::TString2double(TString input){
   // ********************************************************
 
 TString 
-FSString::int2TString(int number, int ndigits){
+FSString::int2TString(int number, int minimumDigits){
   TString snumber("");  snumber += number;
   TString newsnumber("");
-  for (int i = snumber.Length(); i < ndigits; i++){ newsnumber += "0"; }
+  for (int i = snumber.Length(); i < minimumDigits; i++){ newsnumber += "0"; }
   newsnumber += snumber;
   return newsnumber;
 }
@@ -120,6 +109,185 @@ FSString::int2TString(int number, int ndigits){
       //       the last digit will be in the pow(10,*precision*) place
       //   sign:  can be "+-", "+", or "-"
       // ********************************************************
+
+pair<int, pair<double,int> >
+FSString::double2SignNumberExponent(double x, int nDigits, bool show){
+  if (nDigits > 12){ cout << "FSString::double2SignNumberExponent: max nDigits = 12" << endl; exit(0); }
+  if (nDigits <  1){ cout << "FSString::double2SignNumberExponent: nDigits < 1" << endl; exit(0); }
+  double xe = abs(x);  xe += xe*1.0e-14;  int exp = 0;  int isign = 1; if (x < 0.0) isign = -1;
+  while (xe >= 10.0 && abs(exp) < 100){ xe /= 10.0; exp++; }
+  while (xe  <  1.0 && abs(exp) < 100){ xe *= 10.0; exp--; }
+  if (abs(exp) == 100){ xe = 0.0; exp = 0; }  xe += xe*1.0e-14;
+  xe = round(pow(10,nDigits-1)*xe)/pow(10,nDigits-1);  xe += xe*1.0e-14;
+  if (xe >= 10.0) return FSString::double2SignNumberExponent(isign*xe*pow(10.0,exp),nDigits,show);
+  if (show){ cout.precision(14); cout << isign << " " << std::fixed << xe << " " << exp << endl; }
+  return pair<int, pair<double,int> >(isign,pair<double,int>(xe,exp));
+}
+
+vector<TString> 
+FSString::double2TStringFixedDigits(double x, int nDigits, bool show){
+  pair<int, pair<double,int>> sne = FSString::double2SignNumberExponent(x,nDigits);
+  int isign = sne.first;  double xe = sne.second.first;  int exp = sne.second.second;
+  TString sign("+"); if (isign < 0) sign = "-";
+  if ((int)xe >= 10){ cout << "FSString::double2TStringParts problem" << endl; exit(0); }
+  TString sxeInt = "";  TString sxeFrac = "";
+  for (int i = 0; i < nDigits; i++){
+    if (i == 0) sxeInt  += (int)xe;
+    if (i != 0) sxeFrac += (int)xe;
+    xe -= floor(xe);  xe *= 10.0;  xe += 1.0e-14;
+  }
+  TString expSign("+");  if (exp < 0) expSign = "-";
+  vector<TString> parts;
+  parts.push_back(sign);
+  parts.push_back(sxeInt);
+  parts.push_back(sxeFrac);
+  parts.push_back(expSign);
+  parts.push_back(FSString::int2TString(abs(exp),2));
+  parts.push_back(sxeInt+sxeFrac);
+  if (show){ cout << "parts[0]" << parts[0]
+                  <<      "[1]" << parts[1]
+                  <<      "[2]" << parts[2]
+                  <<      "[3]" << parts[3]
+                  <<      "[4]" << parts[4]
+                  <<      "[5]" << parts[5] << endl;}
+  return parts;
+}
+
+vector<TString>
+FSString::double2TStringFixedDecimal(double x, int decimal, bool show){
+  pair<int, pair<double,int>> sne0 = FSString::double2SignNumberExponent(x);
+  int isign = sne0.first;  double xe0 = sne0.second.first;  int exp0 = sne0.second.second; x = abs(x);
+  int iKeyDigit = -1*decimal + exp0 + 1;
+  if (iKeyDigit < 0 || iKeyDigit >= 12) return vector<TString>();
+  TString sKeyDigit = FSString::double2TStringFixedDigits(x)[5][iKeyDigit];
+  int nKeyDigit = FSString::TString2int(sKeyDigit);
+  if (nKeyDigit >= 5){
+    x += 5.0*pow(10.0,decimal-1);  x += x*1.0e-14;
+  }
+  pair<int, pair<double,int>> sne1 = FSString::double2SignNumberExponent(isign*x);
+  double xe1 = sne1.second.first;  int exp1 = sne1.second.second;
+  int dig1 = -1*decimal + exp1 + 1;
+  return FSString::double2TStringFixedDigits(isign*x,dig1,show);
+}
+
+/*
+  int exp0 = FSString::double2NumberAndExponent(x).second;   
+  int dig1 = -1*decimal + exp0 + 1;
+  if (dig1 < 1) return FSString::double2TStringParts(0.0);
+  int exp1 = FSString::double2NumberAndExponent(x,dig1).second;
+  int dig2 = -1*decimal + exp1 + 1;
+  int exp2 = FSString::double2NumberAndExponent(x,dig2).second;
+  int dig3 = -1*decimal + exp2 + 1;
+*/
+
+/*
+int
+FSString::getExponent2(double x){
+  vector<TString> parts = FSString::double2TStringFixedDigits(x);
+  int expSign = 1; if (parts[3] == "-") expSign = -1;
+  return expSign*FSString::TString2int(parts[4]);
+}
+
+vector<TString>
+FSString::double2TStringFixedDecimal(double x, int decimal){
+  vector<TString> parts = FSString::double2TStringFixedDigits(x);
+  int expSign = 1; if (parts[3] == "-") expSign = -1;
+  int exp = expSign*FSString::TString2int(parts[4]);
+  int nDigits = -1*decimal + exp + 1;
+*/
+
+//TString 
+//FSString::double2TString3(double x, int precision, bool scientific, bool fixdecimal){
+// problem: fixdecimal = false && precision <= 0
+/*
+  int nDigits = 15;
+  TString sxeFF = FSString::double2TStringFixedDigits(x,nDigits);
+  TString sign = FSString::subString(sxeFF,0,1);
+  TString sxe  = FSString::subString(sxeFF,1,nDigits+2);
+  TString sexp = FSString::subString(sxeFF,nDigits+3,nDigits+6);
+  TString snum = FSString::subString(sxeFF,1,2)+FSString::subString(sxeFF,3,nDigits+2);
+  double xe = FSString::TString2double(sxe);
+  int isign = 1;  if (sign == "-") isign = -1;
+  int exp = FSString::TString2int(sexp);
+  int precisionIndex = precision;
+  if (fixdecimal) precisionIndex = -1*precision + exp + 1;
+  if (precisionIndex < 0 && scientific) return TString("0e+00");
+  if (precisionIndex < 0 && !scientific) return TString("0");
+  TString dig(snum[precisionIndex]); int ikeydigit = TString2int(dig);
+  if (ikeydigit >= 5){
+    if (round)  xe += 5.0*pow(10.0,-1*precisionIndex);
+    if (!round) xe += 5.0*pow(10.0,-1*precisionIndex-3);
+    return FSString::double2TString2(isign*xe*pow(10,exp),precision,scientific,fixdecimal,false);
+  }
+  snum = FSString::subString(snum,0,precisionIndex);
+  TString sfinal = "";
+  if (sign == "-") sfinal += sign;
+  if (scientific){
+    sfinal += FSString::subString(snum,0,1);
+    if (precisionIndex > 1) sfinal += ("." + FSString::subString(snum,1,precisionIndex));
+    sfinal += ("e" + sexp);
+  }
+  if (!scientific){
+    int decimal = 1 + exp;  int snumLength = snum.Length();
+    for (int i = snumLength; i < decimal; i++){ snum += "0"; }
+    for (int i = decimal; i < 1; i++){ snum = "0" + snum; }
+    if (decimal <= 0) snum = FSString::subString(snum,0,1)+"."
+                            +FSString::subString(snum,1,snum.Length());
+    if ((decimal > 0) && (decimal < snum.Length())) 
+                      snum = FSString::subString(snum,0,decimal)+"."
+                            +FSString::subString(snum,decimal,snum.Length());
+    sfinal += snum;
+  }  
+*/
+ // return TString("");
+//}
+
+/*
+TString 
+FSString::double2TString2(double x, int precision, bool scientific, bool fixdecimal, bool round){
+// problem: fixdecimal = false && precision <= 0
+  int nDigits = 15;
+  TString sxeFF = FSString::double2TStringFixedDigits(x,nDigits);
+  TString sign = FSString::subString(sxeFF,0,1);
+  TString sxe  = FSString::subString(sxeFF,1,nDigits+2);
+  TString sexp = FSString::subString(sxeFF,nDigits+3,nDigits+6);
+  TString snum = FSString::subString(sxeFF,1,2)+FSString::subString(sxeFF,3,nDigits+2);
+  double xe = FSString::TString2double(sxe);
+  int isign = 1;  if (sign == "-") isign = -1;
+  int exp = FSString::TString2int(sexp);
+  int precisionIndex = precision;
+  if (fixdecimal) precisionIndex = -1*precision + exp + 1;
+  if (precisionIndex < 0 && scientific) return TString("0e+00");
+  if (precisionIndex < 0 && !scientific) return TString("0");
+  TString dig(snum[precisionIndex]); int ikeydigit = TString2int(dig);
+  if (ikeydigit >= 5){
+    if (round)  xe += 5.0*pow(10.0,-1*precisionIndex);
+    if (!round) xe += 5.0*pow(10.0,-1*precisionIndex-3);
+    return FSString::double2TString2(isign*xe*pow(10,exp),precision,scientific,fixdecimal,false);
+  }
+  snum = FSString::subString(snum,0,precisionIndex);
+  TString sfinal = "";
+  if (sign == "-") sfinal += sign;
+  if (scientific){
+    sfinal += FSString::subString(snum,0,1);
+    if (precisionIndex > 1) sfinal += ("." + FSString::subString(snum,1,precisionIndex));
+    sfinal += ("e" + sexp);
+  }
+  if (!scientific){
+    int decimal = 1 + exp;  int snumLength = snum.Length();
+    for (int i = snumLength; i < decimal; i++){ snum += "0"; }
+    for (int i = decimal; i < 1; i++){ snum = "0" + snum; }
+    if (decimal <= 0) snum = FSString::subString(snum,0,1)+"."
+                            +FSString::subString(snum,1,snum.Length());
+    if ((decimal > 0) && (decimal < snum.Length())) 
+                      snum = FSString::subString(snum,0,decimal)+"."
+                            +FSString::subString(snum,decimal,snum.Length());
+    sfinal += snum;
+  }  
+  return sfinal;
+}
+*/
+
 
 
 TString 

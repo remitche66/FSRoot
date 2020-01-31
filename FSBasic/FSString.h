@@ -47,9 +47,10 @@ class FSString{
 
       // ********************************************************
       // CONVERT FROM INT TO TSTRING
+      //   also add leading zeros if the length is less than minimumDigits
       // ********************************************************
 
-    static TString int2TString(int number, int ndigits = 0);
+    static TString int2TString(int number, int minimumDigits = 0);
 
 
       // ********************************************************
@@ -62,6 +63,21 @@ class FSString{
       //       the last digit will be in the pow(10,*precision*) place
       //   sign:  can be "+-", "+", or "-"
       // ********************************************************
+
+  //  static TString double2TString2(double x, int precision = 3, bool scientific = false, 
+  //                                                             bool fixdecimal = false, bool round = true);
+
+ //   static TString double2TString3(double x, int precision = 3, bool scientific = false, 
+  //                                                             bool fixdecimal = false);
+
+
+    static pair<int, pair<double,int> > double2SignNumberExponent(double x, int nDigits = 12, bool show = false);
+
+    static vector<TString> double2TStringFixedDigits(double x, int nDigits = 12, bool show = false);
+    //int getExponent2(double x);
+
+    static vector<TString> double2TStringFixedDecimal(double x, int decimal = -2, bool show = false);
+
 
     static TString double2TString(double x, int precision = 3, bool scientific = false, 
                                                                bool fixdecimal = false);
