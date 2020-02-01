@@ -111,263 +111,78 @@ FSString::int2TString(int number, int minimumDigits){
       // ********************************************************
 
 pair<int, pair<double,int> >
-FSString::double2SignNumberExponent(double x, int nDigits, bool show){
-  if (nDigits > 12){ cout << "FSString::double2SignNumberExponent: max nDigits = 12" << endl; exit(0); }
-  if (nDigits <  1){ cout << "FSString::double2SignNumberExponent: nDigits < 1" << endl; exit(0); }
-  double xe = abs(x);  xe += xe*1.0e-14;  int exp = 0;  int isign = 1; if (x < 0.0) isign = -1;
+FSString::double2SignNumberExponent(double x, int precision, bool fixdecimal, bool show){
+  if (!fixdecimal && precision > 12){ 
+    cout << "FSString::double2SignNumberExponent: max digits = 12" << endl; exit(0); }
+  if (!fixdecimal && precision <  1){ 
+    cout << "FSString::double2SignNumberExponent: digits < 1" << endl; exit(0); }
+  double xe = abs(x);  xe += xe*1.0e-14;  int exp = 0;
+  int isign = 1; if (x < 0.0) isign = -1;
   while (xe >= 10.0 && abs(exp) < 100){ xe /= 10.0; exp++; }
   while (xe  <  1.0 && abs(exp) < 100){ xe *= 10.0; exp--; }
-  if (abs(exp) == 100){ xe = 0.0; exp = 0; }  xe += xe*1.0e-14;
-  xe = round(pow(10,nDigits-1)*xe)/pow(10,nDigits-1);  xe += xe*1.0e-14;
-  if (xe >= 10.0) return FSString::double2SignNumberExponent(isign*xe*pow(10.0,exp),nDigits,show);
-  if (show){ cout.precision(14); cout << isign << " " << std::fixed << xe << " " << exp << endl; }
+  if (abs(exp) == 100) {isign = 1; xe = 0.0; exp = 0; }
+  if (fixdecimal && (exp-precision+1) > 12){ 
+    cout << "FSString::double2SignNumberExponent WARNING: sig digits = " 
+         << exp-precision+1 << endl;}
+  if (!fixdecimal){ xe += xe*1.0e-14; xe = round(pow(10,precision-1)*xe)/pow(10,precision-1);
+                    xe += xe*1.0e-14; }
+  if (fixdecimal){  xe += xe*1.0e-14; xe = round(pow(10,exp-precision)*xe)/pow(10,exp-precision);
+                    xe += xe*1.0e-14; }
+  if (xe < 1.0) {isign = 1; xe = 0.0; exp = 0; }
+  if (xe >= 10.0) 
+    return FSString::double2SignNumberExponent(isign*xe*pow(10.0,exp),precision,fixdecimal,show);
+  if (show){ cout.precision(12); cout << isign << " " << std::fixed << xe << " " << exp << endl; }
   return pair<int, pair<double,int> >(isign,pair<double,int>(xe,exp));
 }
 
-vector<TString> 
-FSString::double2TStringFixedDigits(double x, int nDigits, bool show){
-  pair<int, pair<double,int>> sne = FSString::double2SignNumberExponent(x,nDigits);
+TString
+FSString::double2TString(double x, int precision, bool scientific, bool fixdecimal, bool show){
+  pair<int, pair<double,int>> sne = FSString::double2SignNumberExponent(x,precision,fixdecimal,show);
   int isign = sne.first;  double xe = sne.second.first;  int exp = sne.second.second;
-  TString sign("+"); if (isign < 0) sign = "-";
-  if ((int)xe >= 10){ cout << "FSString::double2TStringParts problem" << endl; exit(0); }
-  TString sxeInt = "";  TString sxeFrac = "";
-  for (int i = 0; i < nDigits; i++){
-    if (i == 0) sxeInt  += (int)xe;
-    if (i != 0) sxeFrac += (int)xe;
+  int totalDigits = precision;
+  if (fixdecimal) totalDigits = exp - precision + 1;
+  TString sxeInt = "0";  TString sxeFrac = "";
+  for (int i = 0; i < totalDigits; i++){
+    if (i == 0) sxeInt   = FSString::int2TString((int)xe);
+    if (i != 0) sxeFrac += FSString::int2TString((int)xe);
     xe -= floor(xe);  xe *= 10.0;  xe += 1.0e-14;
   }
-  TString expSign("+");  if (exp < 0) expSign = "-";
-  vector<TString> parts;
-  parts.push_back(sign);
-  parts.push_back(sxeInt);
-  parts.push_back(sxeFrac);
-  parts.push_back(expSign);
-  parts.push_back(FSString::int2TString(abs(exp),2));
-  parts.push_back(sxeInt+sxeFrac);
-  if (show){ cout << "parts[0]" << parts[0]
-                  <<      "[1]" << parts[1]
-                  <<      "[2]" << parts[2]
-                  <<      "[3]" << parts[3]
-                  <<      "[4]" << parts[4]
-                  <<      "[5]" << parts[5] << endl;}
-  return parts;
-}
-
-vector<TString>
-FSString::double2TStringFixedDecimal(double x, int decimal, bool show){
-  pair<int, pair<double,int>> sne0 = FSString::double2SignNumberExponent(x);
-  int isign = sne0.first;  double xe0 = sne0.second.first;  int exp0 = sne0.second.second; x = abs(x);
-  int iKeyDigit = -1*decimal + exp0 + 1;
-  if (iKeyDigit < 0 || iKeyDigit >= 12) return vector<TString>();
-  TString sKeyDigit = FSString::double2TStringFixedDigits(x)[5][iKeyDigit];
-  int nKeyDigit = FSString::TString2int(sKeyDigit);
-  if (nKeyDigit >= 5){
-    x += 5.0*pow(10.0,decimal-1);  x += x*1.0e-14;
-  }
-  pair<int, pair<double,int>> sne1 = FSString::double2SignNumberExponent(isign*x);
-  double xe1 = sne1.second.first;  int exp1 = sne1.second.second;
-  int dig1 = -1*decimal + exp1 + 1;
-  return FSString::double2TStringFixedDigits(isign*x,dig1,show);
-}
-
-/*
-  int exp0 = FSString::double2NumberAndExponent(x).second;   
-  int dig1 = -1*decimal + exp0 + 1;
-  if (dig1 < 1) return FSString::double2TStringParts(0.0);
-  int exp1 = FSString::double2NumberAndExponent(x,dig1).second;
-  int dig2 = -1*decimal + exp1 + 1;
-  int exp2 = FSString::double2NumberAndExponent(x,dig2).second;
-  int dig3 = -1*decimal + exp2 + 1;
-*/
-
-/*
-int
-FSString::getExponent2(double x){
-  vector<TString> parts = FSString::double2TStringFixedDigits(x);
-  int expSign = 1; if (parts[3] == "-") expSign = -1;
-  return expSign*FSString::TString2int(parts[4]);
-}
-
-vector<TString>
-FSString::double2TStringFixedDecimal(double x, int decimal){
-  vector<TString> parts = FSString::double2TStringFixedDigits(x);
-  int expSign = 1; if (parts[3] == "-") expSign = -1;
-  int exp = expSign*FSString::TString2int(parts[4]);
-  int nDigits = -1*decimal + exp + 1;
-*/
-
-//TString 
-//FSString::double2TString3(double x, int precision, bool scientific, bool fixdecimal){
-// problem: fixdecimal = false && precision <= 0
-/*
-  int nDigits = 15;
-  TString sxeFF = FSString::double2TStringFixedDigits(x,nDigits);
-  TString sign = FSString::subString(sxeFF,0,1);
-  TString sxe  = FSString::subString(sxeFF,1,nDigits+2);
-  TString sexp = FSString::subString(sxeFF,nDigits+3,nDigits+6);
-  TString snum = FSString::subString(sxeFF,1,2)+FSString::subString(sxeFF,3,nDigits+2);
-  double xe = FSString::TString2double(sxe);
-  int isign = 1;  if (sign == "-") isign = -1;
-  int exp = FSString::TString2int(sexp);
-  int precisionIndex = precision;
-  if (fixdecimal) precisionIndex = -1*precision + exp + 1;
-  if (precisionIndex < 0 && scientific) return TString("0e+00");
-  if (precisionIndex < 0 && !scientific) return TString("0");
-  TString dig(snum[precisionIndex]); int ikeydigit = TString2int(dig);
-  if (ikeydigit >= 5){
-    if (round)  xe += 5.0*pow(10.0,-1*precisionIndex);
-    if (!round) xe += 5.0*pow(10.0,-1*precisionIndex-3);
-    return FSString::double2TString2(isign*xe*pow(10,exp),precision,scientific,fixdecimal,false);
-  }
-  snum = FSString::subString(snum,0,precisionIndex);
-  TString sfinal = "";
-  if (sign == "-") sfinal += sign;
+  TString sxeNum = sxeInt + sxeFrac;
+  TString sDouble(""); if (isign < 0) sDouble = "-";
   if (scientific){
-    sfinal += FSString::subString(snum,0,1);
-    if (precisionIndex > 1) sfinal += ("." + FSString::subString(snum,1,precisionIndex));
-    sfinal += ("e" + sexp);
+    sDouble += sxeInt; if (totalDigits > 1){ sDouble += "."; sDouble += sxeFrac; }
+    if (exp < 0) sDouble += "e-"; if (exp >= 0) sDouble += "e+";
+    sDouble += FSString::int2TString(abs(exp),2);
   }
   if (!scientific){
-    int decimal = 1 + exp;  int snumLength = snum.Length();
-    for (int i = snumLength; i < decimal; i++){ snum += "0"; }
-    for (int i = decimal; i < 1; i++){ snum = "0" + snum; }
-    if (decimal <= 0) snum = FSString::subString(snum,0,1)+"."
-                            +FSString::subString(snum,1,snum.Length());
-    if ((decimal > 0) && (decimal < snum.Length())) 
-                      snum = FSString::subString(snum,0,decimal)+"."
-                            +FSString::subString(snum,decimal,snum.Length());
-    sfinal += snum;
-  }  
-*/
- // return TString("");
-//}
-
-/*
-TString 
-FSString::double2TString2(double x, int precision, bool scientific, bool fixdecimal, bool round){
-// problem: fixdecimal = false && precision <= 0
-  int nDigits = 15;
-  TString sxeFF = FSString::double2TStringFixedDigits(x,nDigits);
-  TString sign = FSString::subString(sxeFF,0,1);
-  TString sxe  = FSString::subString(sxeFF,1,nDigits+2);
-  TString sexp = FSString::subString(sxeFF,nDigits+3,nDigits+6);
-  TString snum = FSString::subString(sxeFF,1,2)+FSString::subString(sxeFF,3,nDigits+2);
-  double xe = FSString::TString2double(sxe);
-  int isign = 1;  if (sign == "-") isign = -1;
-  int exp = FSString::TString2int(sexp);
-  int precisionIndex = precision;
-  if (fixdecimal) precisionIndex = -1*precision + exp + 1;
-  if (precisionIndex < 0 && scientific) return TString("0e+00");
-  if (precisionIndex < 0 && !scientific) return TString("0");
-  TString dig(snum[precisionIndex]); int ikeydigit = TString2int(dig);
-  if (ikeydigit >= 5){
-    if (round)  xe += 5.0*pow(10.0,-1*precisionIndex);
-    if (!round) xe += 5.0*pow(10.0,-1*precisionIndex-3);
-    return FSString::double2TString2(isign*xe*pow(10,exp),precision,scientific,fixdecimal,false);
+    int firstDigitPlace = precision + totalDigits - 1; 
+    if (!fixdecimal) firstDigitPlace = exp;
+    int lastDigitPlace = firstDigitPlace - totalDigits + 1;
+    int firstPlace = firstDigitPlace; if (firstPlace < 0) firstPlace = 0;
+    int lastPlace = lastDigitPlace; if (lastPlace > 0) lastPlace = 0;
+    int iDigitPlace = 0;
+    for (int iPlace = -1*firstPlace; iPlace <= -1*lastPlace; iPlace++){
+      if (iPlace == 1) sDouble += ".";
+      if (iPlace >= -1*firstDigitPlace && iPlace <= -1*lastDigitPlace){ 
+            sDouble += sxeNum[iDigitPlace++]; }
+      else{ sDouble += "0"; }
+    }
   }
-  snum = FSString::subString(snum,0,precisionIndex);
-  TString sfinal = "";
-  if (sign == "-") sfinal += sign;
-  if (scientific){
-    sfinal += FSString::subString(snum,0,1);
-    if (precisionIndex > 1) sfinal += ("." + FSString::subString(snum,1,precisionIndex));
-    sfinal += ("e" + sexp);
-  }
-  if (!scientific){
-    int decimal = 1 + exp;  int snumLength = snum.Length();
-    for (int i = snumLength; i < decimal; i++){ snum += "0"; }
-    for (int i = decimal; i < 1; i++){ snum = "0" + snum; }
-    if (decimal <= 0) snum = FSString::subString(snum,0,1)+"."
-                            +FSString::subString(snum,1,snum.Length());
-    if ((decimal > 0) && (decimal < snum.Length())) 
-                      snum = FSString::subString(snum,0,decimal)+"."
-                            +FSString::subString(snum,decimal,snum.Length());
-    sfinal += snum;
-  }  
-  return sfinal;
+  return sDouble;
 }
-*/
-
-
-
-TString 
-FSString::double2TString(double x, int precision, bool scientific, bool fixdecimal){
-
-  if (fixdecimal) return matchPrecision(x,pow(10.0,precision),1,scientific);
-
-  if (precision == 0){
-    if (x >=  5*pow(10.0,getExponent(x,1))) x += 5*pow(10.0,getExponent(x,1));
-    if (x <= -5*pow(10.0,getExponent(x,1))) x -= 5*pow(10.0,getExponent(x,1));
-    precision = 1;
-  }
-
-  stringstream xstream;
-  xstream.precision(precision-1);
-  xstream.setf(ios::scientific);
-  xstream << x;
-
-  TString snumber = FSString::string2TString(xstream.str());
-
-  if (scientific) return snumber;
-
-  int iexponent = getExponent(snumber);
-
-  snumber.Replace(snumber.Index("e"),4,"");
-
-  TString sign("");
-  if (snumber.Contains("-")){
-    sign = "-";
-    snumber.Replace(snumber.Index("-"),1,"");
-  }
-
-  while (iexponent > 0){
-    if (snumber.Contains(".")){
-      int decimal = snumber.Index(".");
-      snumber.Replace(decimal,1,"");
-      if (decimal < snumber.Length()){
-        snumber.Replace(decimal+1,0,".");
-      }
-      else{
-        snumber.Append("0");
-      }
-    }
-    else{
-      snumber.Append("0");
-    }
-    iexponent--;
-  }
-
-  while (iexponent < 0){
-    if (snumber.Contains(".")){
-      snumber.Replace(snumber.Index("."),1,"");
-    }
-    snumber = ("0."+snumber);
-    iexponent++;
-  }
-
-
-  if (snumber.Contains(".") && snumber.Index(".") == snumber.Length()-1)
-    snumber.Replace(snumber.Index("."),1,"");
-
-  return (sign+snumber);
-
-}
-
 
 
 TString 
 FSString::latexMeasurement(double x, double ex1, 
                                   int precision, bool fixdecimal){
-
-  double ex = 0.0;
-  if (!fixdecimal) ex = ex1;
-  if (fixdecimal) {ex = pow(10.0,precision); precision = 1;}
-
-  TString sx  = matchPrecision(  x,ex,precision,false);
-  TString sex = matchPrecision(ex1,ex,precision,false);
-
+  if (!fixdecimal){
+    int ex1precision = -1*precision + 1
+          + double2SignNumberExponent(ex1,precision,false).second.second;
+    precision = ex1precision;
+  }
+  TString  sx = double2TString(  x,precision,false,true);
+  TString sex = double2TString(ex1,precision,false,true);
   return (sx+"\\pm"+sex);
-
 }
 
 
@@ -375,24 +190,24 @@ TString
 FSString::latexMeasurement(double x, TString sign1, double ex1, 
                                    TString sign2, double ex2, 
                                   int precision, bool fixdecimal){
-
-  double ex = 0.0;
-  if (!fixdecimal) ex = getLeastPrecise(ex1,ex2,precision);
-  if (fixdecimal) {ex = pow(10.0,precision); precision = 1;}
-
-  TString sx    = matchPrecision( x, ex,precision,false);
-  TString sex1  = matchPrecision(ex1,ex,precision,false);
-  TString sex2  = matchPrecision(ex2,ex,precision,false);
-
+  if (!fixdecimal){
+    int ex1precision = -1*precision + 1
+          + double2SignNumberExponent(ex1,precision,false).second.second;
+    int ex2precision = -1*precision + 1
+          + double2SignNumberExponent(ex2,precision,false).second.second;
+                                  precision = ex1precision;
+    if (precision < ex2precision) precision = ex2precision;
+  }
+  TString  sx  = double2TString(  x,precision,false,true);
+  TString sex1 = double2TString(ex1,precision,false,true);
+  TString sex2 = double2TString(ex2,precision,false,true);
   TString a1(""); TString b1("");  if (sign1 == "+-"){ a1 = "\\pm"; b1 = "";}
                                    if (sign1 == "+") { a1 = "^{+";  b1 = "}";}
                                    if (sign1 == "-") { a1 = "_{-";  b1 = "}";}
   TString a2(""); TString b2("");  if (sign2 == "+-"){ a2 = "\\pm"; b2 = "";}
                                    if (sign2 == "+") { a2 = "^{+";  b2 = "}";}
                                    if (sign2 == "-") { a2 = "_{-";  b2 = "}";}
-
   return (sx+a1+sex1+b1+a2+sex2+b2);
-
 }
 
 
@@ -401,16 +216,21 @@ FSString::latexMeasurement(double x, TString sign1, double ex1,
                                    TString sign2, double ex2,
                                    TString sign3, double ex3, 
                                   int precision, bool fixdecimal){
-
-  double ex = 0.0;
-  if (!fixdecimal) ex = getLeastPrecise(ex1,ex2,ex3,precision);
-  if (fixdecimal) {ex = pow(10.0,precision); precision = 1;}
-
-  TString sx    = matchPrecision( x, ex,precision,false);
-  TString sex1  = matchPrecision(ex1,ex,precision,false);
-  TString sex2  = matchPrecision(ex2,ex,precision,false);
-  TString sex3  = matchPrecision(ex3,ex,precision,false);
-
+  if (!fixdecimal){
+    int ex1precision = -1*precision + 1
+          + double2SignNumberExponent(ex1,precision,false).second.second;
+    int ex2precision = -1*precision + 1
+          + double2SignNumberExponent(ex2,precision,false).second.second;
+    int ex3precision = -1*precision + 1
+          + double2SignNumberExponent(ex3,precision,false).second.second;
+                                  precision = ex1precision;
+    if (precision < ex2precision) precision = ex2precision;
+    if (precision < ex3precision) precision = ex3precision;
+  }
+  TString sx    = double2TString( x, precision,false,true);
+  TString sex1  = double2TString(ex1,precision,false,true);
+  TString sex2  = double2TString(ex2,precision,false,true);
+  TString sex3  = double2TString(ex3,precision,false,true);
   TString a1(""); TString b1("");  if (sign1 == "+-"){ a1 = "\\pm"; b1 = "";}
                                    if (sign1 == "+") { a1 = "^{+";  b1 = "}";}
                                    if (sign1 == "-") { a1 = "_{-";  b1 = "}";}
@@ -420,9 +240,7 @@ FSString::latexMeasurement(double x, TString sign1, double ex1,
   TString a3(""); TString b3("");  if (sign3 == "+-"){ a3 = "\\pm"; b3 = "";}
                                    if (sign3 == "+") { a3 = "^{+";  b3 = "}";}
                                    if (sign3 == "-") { a3 = "_{-";  b3 = "}";}
-
   return (sx+a1+sex1+b1+a2+sex2+b2+a3+sex3+b3);
-
 }
 
 
@@ -432,17 +250,25 @@ FSString::latexMeasurement(double x, TString sign1, double ex1,
                                    TString sign3, double ex3,
                                    TString sign4, double ex4,
                                   int precision, bool fixdecimal){
-
-  double ex = 0.0;
-  if (!fixdecimal) ex = getLeastPrecise(ex1,ex2,ex3,ex4,precision);
-  if (fixdecimal) {ex = pow(10.0,precision); precision = 1;}
-
-  TString sx    = matchPrecision( x, ex,precision,false);
-  TString sex1  = matchPrecision(ex1,ex,precision,false);
-  TString sex2  = matchPrecision(ex2,ex,precision,false);
-  TString sex3  = matchPrecision(ex3,ex,precision,false);
-  TString sex4  = matchPrecision(ex4,ex,precision,false);
-
+  if (!fixdecimal){
+    int ex1precision = -1*precision + 1
+          + double2SignNumberExponent(ex1,precision,false).second.second;
+    int ex2precision = -1*precision + 1
+          + double2SignNumberExponent(ex2,precision,false).second.second;
+    int ex3precision = -1*precision + 1
+          + double2SignNumberExponent(ex3,precision,false).second.second;
+    int ex4precision = -1*precision + 1
+          + double2SignNumberExponent(ex4,precision,false).second.second;
+                                  precision = ex1precision;
+    if (precision < ex2precision) precision = ex2precision;
+    if (precision < ex3precision) precision = ex3precision;
+    if (precision < ex4precision) precision = ex4precision;
+  }
+  TString sx    = double2TString( x, precision,false,true);
+  TString sex1  = double2TString(ex1,precision,false,true);
+  TString sex2  = double2TString(ex2,precision,false,true);
+  TString sex3  = double2TString(ex3,precision,false,true);
+  TString sex4  = double2TString(ex4,precision,false,true);
   TString a1(""); TString b1("");  if (sign1 == "+-"){ a1 = "\\pm"; b1 = "";}
                                    if (sign1 == "+") { a1 = "^{+";  b1 = "}";}
                                    if (sign1 == "-") { a1 = "_{-";  b1 = "}";}
@@ -455,102 +281,7 @@ FSString::latexMeasurement(double x, TString sign1, double ex1,
   TString a4(""); TString b4("");  if (sign4 == "+-"){ a4 = "\\pm"; b4 = "";}
                                    if (sign4 == "+") { a4 = "^{+";  b4 = "}";}
                                    if (sign4 == "-") { a4 = "_{-";  b4 = "}";}
-
   return (sx+a1+sex1+b1+a2+sex2+b2+a3+sex3+b3+a4+sex4+b4);
-
-}
-
-
-
-int 
-FSString::getExponent(TString input){
-
-  if (!input.Contains("e") || input.Length() < 4){
-    cout << "problem in FSString::getExponent" << endl;
-    return 0;
-  }
-
-  TString sexponent(""); 
-  if (input[input.Length()-3] == '-')
-    sexponent += input[input.Length()-3];
-  if (input[input.Length()-2] != '0')
-    sexponent += input[input.Length()-2];
-  sexponent += input[input.Length()-1];
-
-  return FSString::TString2int(sexponent);
-
-}
-
-
-
-int 
-FSString::getExponent(double x, int precision){
-
-  stringstream xstream;
-  xstream.precision(precision-1);
-  xstream.setf(ios::scientific);
-  xstream << x;
-
-  TString snumber = FSString::string2TString(xstream.str());
-
-  return getExponent(snumber);  
-
-}
-
-
-
-TString 
-FSString::matchPrecision(double x, double reference, int precision, bool scientific){
-
-  TString sx   = double2TString(x,15,true);
-  TString sref = double2TString(reference,precision,true);
-
-  int xprecision = getExponent(sx)-getExponent(sref)+precision;
-
-  if (xprecision >= 0){
-    if (getExponent(double2TString(x,xprecision,true)) > getExponent(sx)){
-      x = FSString::TString2double(double2TString(x,xprecision,true));
-      xprecision++;
-    }
-  }
-
-  if (xprecision > 0){
-    return double2TString(x,xprecision,scientific);
-  }
-
-  return double2TString(0.0,1,scientific);
-
-}
-
-
-double 
-FSString::getLeastPrecise(double x1, double x2, int precision){
-  double x = x1;
-  if (getExponent(double2TString(x, precision,true)) < 
-      getExponent(double2TString(x2,precision,true))) x = x2;
-  return x;
-}
-
-double 
-FSString::getLeastPrecise(double x1, double x2, double x3, int precision){
-  double x = x1;
-  if (getExponent(double2TString(x, precision,true)) < 
-      getExponent(double2TString(x2,precision,true))) x = x2;
-  if (getExponent(double2TString(x, precision,true)) < 
-      getExponent(double2TString(x3,precision,true))) x = x3;
-  return x;
-}
-
-double 
-FSString::getLeastPrecise(double x1, double x2, double x3, double x4, int precision){
-  double x = x1;
-  if (getExponent(double2TString(x, precision,true)) < 
-      getExponent(double2TString(x2,precision,true))) x = x2;
-  if (getExponent(double2TString(x, precision,true)) < 
-      getExponent(double2TString(x3,precision,true))) x = x3;
-  if (getExponent(double2TString(x, precision,true)) < 
-      getExponent(double2TString(x4,precision,true))) x = x4;
-  return x;
 }
 
 
