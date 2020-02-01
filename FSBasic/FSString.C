@@ -116,47 +116,45 @@ FSString::double2SignNumberExponent(double x, int precision, bool fixdecimal, bo
     cout << "FSString::double2SignNumberExponent: max digits = 12" << endl; exit(0); }
   if (!fixdecimal && precision <  1){ 
     cout << "FSString::double2SignNumberExponent: digits < 1" << endl; exit(0); }
-  double xe = abs(x);  xe += xe*1.0e-14;  int exp = 0;
+  double ax = abs(x);  ax += ax*1.0e-14;  int exp = 0;
   int isign = 1; if (x < 0.0) isign = -1;
-  while (xe >= 10.0 && abs(exp) < 100){ xe /= 10.0; exp++; }
-  while (xe  <  1.0 && abs(exp) < 100){ xe *= 10.0; exp--; }
-  if (abs(exp) == 100) {isign = 1; xe = 0.0; exp = 0; }
+  while (ax >= 10.0 && abs(exp) < 100){ ax /= 10.0; exp++; }
+  while (ax  <  1.0 && abs(exp) < 100){ ax *= 10.0; exp--; }
+  if (abs(exp) == 100) {isign = 1; ax = 0.0; exp = 0; }
   if (fixdecimal && (exp-precision+1) > 12){ 
     cout << "FSString::double2SignNumberExponent WARNING: sig digits = " 
          << exp-precision+1 << endl;}
-  if (!fixdecimal){ xe += xe*1.0e-14; xe = round(pow(10,precision-1)*xe)/pow(10,precision-1);
-                    xe += xe*1.0e-14; }
-  if (fixdecimal){  xe += xe*1.0e-14; xe = round(pow(10,exp-precision)*xe)/pow(10,exp-precision);
-                    xe += xe*1.0e-14; }
-  if (xe < 1.0) {isign = 1; xe = 0.0; exp = 0; }
-  if (xe >= 10.0) 
-    return FSString::double2SignNumberExponent(isign*xe*pow(10.0,exp),precision,fixdecimal,show);
-  if (show){ cout.precision(12); cout << isign << " " << std::fixed << xe << " " << exp << endl; }
-  return pair<int, pair<double,int> >(isign,pair<double,int>(xe,exp));
+  if (!fixdecimal){ ax += ax*1.0e-14; ax = round(pow(10,precision-1)*ax)/pow(10,precision-1);
+                    ax += ax*1.0e-14; }
+  if (fixdecimal){  ax += ax*1.0e-14; ax = round(pow(10,exp-precision)*ax)/pow(10,exp-precision);
+                    ax += ax*1.0e-14; }
+  if (ax < 1.0) {isign = 1; ax = 0.0; exp = 0; }
+  if (ax >= 10.0) 
+    return FSString::double2SignNumberExponent(isign*ax*pow(10.0,exp),precision,fixdecimal,show);
+  if (show){ cout.precision(12); cout << isign << " " << std::fixed << ax << " " << exp << endl; }
+  return pair<int, pair<double,int> >(isign,pair<double,int>(ax,exp));
 }
 
 TString
 FSString::double2TString(double x, int precision, bool scientific, bool fixdecimal, bool show){
   pair<int, pair<double,int>> sne = FSString::double2SignNumberExponent(x,precision,fixdecimal,show);
-  int isign = sne.first;  double xe = sne.second.first;  int exp = sne.second.second;
-  int totalDigits = precision;
-  if (fixdecimal) totalDigits = exp - precision + 1;
-  TString sxeInt = "0";  TString sxeFrac = "";
+  int isign = sne.first;  double ax = sne.second.first;  int exp = sne.second.second;
+  int totalDigits = precision;  if (fixdecimal) totalDigits = exp - precision + 1;
+  TString saxInt = "0";  TString saxFrac = "";
   for (int i = 0; i < totalDigits; i++){
-    if (i == 0) sxeInt   = FSString::int2TString((int)xe);
-    if (i != 0) sxeFrac += FSString::int2TString((int)xe);
-    xe -= floor(xe);  xe *= 10.0;  xe += 1.0e-14;
+    if (i == 0) saxInt   = FSString::int2TString((int)ax);
+    if (i != 0) saxFrac += FSString::int2TString((int)ax);
+    ax -= floor(ax);  ax *= 10.0;  ax += 1.0e-14;
   }
-  TString sxeNum = sxeInt + sxeFrac;
+  TString saxNum = saxInt + saxFrac;
   TString sDouble(""); if (isign < 0) sDouble = "-";
   if (scientific){
-    sDouble += sxeInt; if (totalDigits > 1){ sDouble += "."; sDouble += sxeFrac; }
+    sDouble += saxInt; if (totalDigits > 1){ sDouble += "."; sDouble += saxFrac; }
     if (exp < 0) sDouble += "e-"; if (exp >= 0) sDouble += "e+";
     sDouble += FSString::int2TString(abs(exp),2);
   }
   if (!scientific){
-    int firstDigitPlace = precision + totalDigits - 1; 
-    if (!fixdecimal) firstDigitPlace = exp;
+    int firstDigitPlace = precision + totalDigits - 1;  if (!fixdecimal) firstDigitPlace = exp;
     int lastDigitPlace = firstDigitPlace - totalDigits + 1;
     int firstPlace = firstDigitPlace; if (firstPlace < 0) firstPlace = 0;
     int lastPlace = lastDigitPlace; if (lastPlace > 0) lastPlace = 0;
@@ -164,7 +162,7 @@ FSString::double2TString(double x, int precision, bool scientific, bool fixdecim
     for (int iPlace = -1*firstPlace; iPlace <= -1*lastPlace; iPlace++){
       if (iPlace == 1) sDouble += ".";
       if (iPlace >= -1*firstDigitPlace && iPlace <= -1*lastDigitPlace){ 
-            sDouble += sxeNum[iDigitPlace++]; }
+            sDouble += saxNum[iDigitPlace++]; }
       else{ sDouble += "0"; }
     }
   }
