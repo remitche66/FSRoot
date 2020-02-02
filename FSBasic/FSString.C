@@ -669,31 +669,22 @@ FSString::latexTable(int nrows, int ncols, TString* tableContents,
 
 
   // ********************************************************
-  // READ A TSTRING FROM A FILE
+  // READ LINES FROM A FILE
   // ********************************************************
 
-TString
-FSString::readTStringFromFile(TString filename, int line, int word){
+vector<TString>
+FSString::readLinesFromFile(TString filename){
+  vector<TString> lines;  string instring;
   ifstream infile(filename.Data());
-  if (!infile) cout << "can't find " << filename << endl;
-  string instring;
-  for (int i = 0; i < line; i++){ getline(infile,instring); }
+  if (!infile){
+    cout << "FSString::readLinesFromFile: can't find " << filename << endl;
+    return lines;
+  }
+  while (getline(infile,instring)){ 
+    lines.push_back(FSString::string2TString(instring)); 
+  }
   infile.close();
-  vector<TString> words = parseTString(string2TString(instring));
-  if (word >= (int)words.size()) return TString("");
-  if (word < -1*(int)words.size()) return TString("");
-  if (word < 0) word += (int)words.size();
-  return words[(unsigned int)word];
-}
-
-TString
-FSString::readTStringLineFromFile(TString filename, int line){
-  ifstream infile(filename.Data());
-  if (!infile) cout << "can't find " << filename << endl;
-  string instring;
-  for (int i = 0; i < line; i++){ getline(infile,instring); }
-  infile.close();
-  return instring;
+  return lines;
 }
 
 

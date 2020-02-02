@@ -165,11 +165,10 @@ class FSString{
 
 
       // ********************************************************
-      // READ A TSTRING FROM A FILE
+      // READ LINES FROM A FILE
       // ********************************************************
 
-    static TString readTStringFromFile(TString filename, int line, int word);
-    static TString readTStringLineFromFile(TString filename, int line);
+    static vector<TString> readLinesFromFile(TString filename);
 
 
       // ********************************************************
