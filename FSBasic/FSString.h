@@ -47,9 +47,10 @@ class FSString{
 
       // ********************************************************
       // CONVERT FROM INT TO TSTRING
+      //   also add leading zeros if the length is less than minimumDigits
       // ********************************************************
 
-    static TString int2TString(int number, int ndigits = 0);
+    static TString int2TString(int number, int minimumDigits = 0);
 
 
       // ********************************************************
@@ -63,8 +64,9 @@ class FSString{
       //   sign:  can be "+-", "+", or "-"
       // ********************************************************
 
+
     static TString double2TString(double x, int precision = 3, bool scientific = false, 
-                                                               bool fixdecimal = false);
+                                          bool fixdecimal = false, bool show = false);
 
     static TString latexMeasurement(double x, double ex1, 
                                     int precision = 2, bool fixdecimal = false);
@@ -163,11 +165,10 @@ class FSString{
 
 
       // ********************************************************
-      // READ A TSTRING FROM A FILE
+      // READ LINES FROM A FILE
       // ********************************************************
 
-    static TString readTStringFromFile(TString filename, int line, int word);
-    static TString readTStringLineFromFile(TString filename, int line);
+    static vector<TString> readLinesFromFile(TString filename);
 
 
       // ********************************************************
@@ -240,19 +241,11 @@ class FSString{
 
     static bool evalBooleanTString(TString input);
 
-      // helper functions for double2TString
+      // helper function for double2TString
 
-    static int getExponent(TString input);
-
-    static int getExponent(double x, int precision);
-
-    static TString matchPrecision(double x, double reference, int precision, bool scientific);
-
-    static double getLeastPrecise(double x1, double x2, int precision);
-
-    static double getLeastPrecise(double x1, double x2, double x3, int precision);
-
-    static double getLeastPrecise(double x1, double x2, double x3, double x4, int precision);
+    static pair<int, pair<double,int> > 
+       double2SignNumberExponent(double x, int precision = 12, 
+                                 bool fixdecimal = false, bool show = false);
 
 
 };
