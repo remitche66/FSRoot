@@ -81,6 +81,7 @@ class FSModeInfo{
       //      "MODECODE"
       //      "MODECODE1"
       //      "MODECODE2"
+      //      "MODEGLUEX"
       //    if "counter" is also given and non-negative:
       //      "MODECOUNTER"
       //        or "MODECOUNTERXXXX" to pad with zeros
@@ -91,6 +92,7 @@ class FSModeInfo{
     int            modeCode2();
     TString        modeString(TString original = "", int counter = -1);
     TString        modeDescription();
+    TString        modeGlueXFormat();
 
     vector<TString> particles();
 

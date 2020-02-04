@@ -190,6 +190,7 @@ FSModeInfo::FSModeInfo(TString mString){
       //      "MODECODE"
       //      "MODECODE1"
       //      "MODECODE2"
+      //      "MODEGLUEX"
       //    if "counter" is also given and non-negative:
       //      "MODECOUNTER"
       //        or "MODECOUNTERXXXX" to pad with zeros
@@ -241,6 +242,11 @@ FSModeInfo::modeString(TString original, int counter){
   while (original.Contains("MODECODE")){
     original.Replace(original.Index("MODECODE"),8,mString);
   }
+  while (original.Contains("MODEGLUEX")){
+    TString stmp("");  
+    stmp += modeGlueXFormat();
+    original.Replace(original.Index("MODEGLUEX"),9,stmp);
+  }
   while (original.Contains("MODECOUNTER") && counter >= 0){
     int digits = 0;
     while (original.Index("MODECOUNTER")+11+digits < original.Length() &&
@@ -277,6 +283,28 @@ FSModeInfo::modeDescription(){
   return description;
 }
 
+TString
+FSModeInfo::modeGlueXFormat(){
+  TString gluexFormat("");
+  int np;
+  np = modeNGamma     ();  for (int i = 0; i < np; i++){ gluexFormat += "_1"; }
+  np = modeNEp        ();  for (int i = 0; i < np; i++){ gluexFormat += "_2"; }
+  np = modeNEm        ();  for (int i = 0; i < np; i++){ gluexFormat += "_3"; }
+  np = modeNMp        ();  if (np != 0){ cout << "No muons in modeGlueXFormat yet" << endl; }
+  np = modeNMm        ();  if (np != 0){ cout << "No muons in modeGlueXFormat yet" << endl; }
+  np = modeNPi0       ();  for (int i = 0; i < np; i++){ gluexFormat += "_7"; }
+  np = modeNPip       ();  for (int i = 0; i < np; i++){ gluexFormat += "_8"; }
+  np = modeNPim       ();  for (int i = 0; i < np; i++){ gluexFormat += "_9"; }
+  np = modeNKp        ();  for (int i = 0; i < np; i++){ gluexFormat += "_11"; }
+  np = modeNKm        ();  for (int i = 0; i < np; i++){ gluexFormat += "_12"; }
+  np = modeNKs        ();  for (int i = 0; i < np; i++){ gluexFormat += "_16"; }
+  np = modeNEta       ();  for (int i = 0; i < np; i++){ gluexFormat += "_17"; }
+  np = modeNPp        ();  for (int i = 0; i < np; i++){ gluexFormat += "_14"; }
+  np = modeNPm        ();  for (int i = 0; i < np; i++){ gluexFormat += "_15"; }
+  np = modeNLambda    ();  for (int i = 0; i < np; i++){ gluexFormat += "_18"; }
+  np = modeNALambda   ();  for (int i = 0; i < np; i++){ gluexFormat += "_26"; }
+  return gluexFormat;
+}
 
 
 vector<TString> 
