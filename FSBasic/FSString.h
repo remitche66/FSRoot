@@ -114,6 +114,16 @@ class FSString{
     static vector<TString> parseTString(vector<TString> inputs, vector<TString> spacers,
                                         bool recordSpacers = false, bool display = false);
 
+      // ********************************************************
+      // PARSE STRING INTO A MAP ACCORDING TO KEYS
+      // ********************************************************
+
+    static map<TString, TString> 
+       parseTStringToMap1(TString input, vector<TString> keys, bool display = false);
+
+    static map<TString, vector<TString> > 
+       parseTStringToMap2(TString input, vector<TString> keys, bool display = false);
+
 
       // ********************************************************
       // CAPTURE SUBSTRINGS

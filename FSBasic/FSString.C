@@ -472,6 +472,60 @@ FSString::parseTString(vector<TString> inputs, vector<TString> spacers, bool rec
 }
 
 
+   // ********************************************************
+   // PARSE STRING INTO A MAP ACCORDING TO KEYS
+   // ********************************************************
+
+map<TString,vector<TString> >
+FSString::parseTStringToMap2(TString input, vector<TString> keys, bool display){
+  map<TString,vector<TString> > wordMap;
+  vector<TString> words = parseTString(input,keys,true);
+  TString key = ""; TString value = "";
+  for (unsigned int i = 0; i < words.size(); i++){
+    bool isKey = false; 
+    for (unsigned int j = 0; j < keys.size(); j++){ if (words[i] == keys[j]){ isKey = true; break; } }
+    if (isKey){
+      if (key != "") wordMap[key].push_back(value);
+      key = words[i]; value = "";
+    }
+    else{
+      value = words[i];
+    }
+    if ((i == words.size()-1) && (key != "")) wordMap[key].push_back(value);
+  }
+  if (display) cout << "FSString::parseTStringToMap2 input:" << endl;
+  if (display) cout << " " << input << endl;
+  if (display) cout << "FSString::parseTStringToMap2 output:" << endl;
+  if (display){for (map<TString, vector<TString>>::iterator it = wordMap.begin();
+                    it != wordMap.end(); it++){
+                 for (unsigned int i = 0; i < it->second.size(); i++){
+                   cout << it->first << " = " << it->second[i] << endl;
+                 }}}
+  return wordMap;
+}
+
+map<TString,TString>
+FSString::parseTStringToMap1(TString input, vector<TString> keys, bool display){
+  map<TString,vector<TString> > wordMap2 = parseTStringToMap2(input,keys);
+  map<TString,TString> wordMap1;
+  for (map<TString,vector<TString> >::iterator it = wordMap2.begin(); it != wordMap2.end(); it++){
+    wordMap1[it->first] = it->second[0];
+  }
+  if (display) cout << "FSString::parseTStringToMap1 input:" << endl;
+  if (display) cout << " " << input << endl;
+  if (display) cout << "FSString::parseTStringToMap1 output:" << endl;
+  if (display){for (map<TString,TString>::iterator it = wordMap1.begin();
+                    it != wordMap1.end(); it++){
+                   cout << it->first << " = " << it->second << endl;
+                 }}
+  return wordMap1;
+}
+
+
+  // ********************************************************
+  // CAPTURE SUBSTRINGS
+  // ********************************************************
+
 TString
 FSString::subString(TString input, int startIndex, int endIndex){
   TString output("");
