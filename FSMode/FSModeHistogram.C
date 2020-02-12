@@ -27,29 +27,6 @@ map<TString, float> FSModeHistogram::m_mcComponentsMap;
 map<TString, map<TString, float> > FSModeHistogram::m_cacheComponentsMap;
 
 
-      // ********************************************************
-      // CREATE A TREE IN THE SAME WAY AS A HISTOGRAM
-      // ********************************************************
-
-
-TTree*
-FSModeHistogram::getTH1FContents(TString fileName, TString ntName, TString category, 
-       TString variable, TString bounds, TString cuts, TString options, float scale,
-       vector< pair<TString,TString> > extraTreeContents){
-  TTree* histTree = FSHistogram::setTHNFContents(1,extraTreeContents);
-  getTHNF(1,fileName,ntName,category,variable,bounds,cuts,options,scale,histTree,extraTreeContents);
-  return histTree;
-}
-
-TTree*
-FSModeHistogram::getTH2FContents(TString fileName, TString ntName, TString category, 
-       TString variable, TString bounds, TString cuts, TString options, float scale,
-       vector< pair<TString,TString> > extraTreeContents){
-  TTree* histTree = FSHistogram::setTHNFContents(2,extraTreeContents);
-  getTHNF(2,fileName,ntName,category,variable,bounds,cuts,options,scale,histTree,extraTreeContents);
-  return histTree;
-}
-
 
   // ********************************************************
   // CREATE A HISTOGRAM FROM A TREE
@@ -203,6 +180,29 @@ FSModeHistogram::getTHNF(int dimension,
 
 }
 
+
+      // ********************************************************
+      // CREATE A TREE IN THE SAME WAY AS A HISTOGRAM
+      // ********************************************************
+
+
+TTree*
+FSModeHistogram::getTH1FContents(TString fileName, TString ntName, TString category, 
+       TString variable, TString bounds, TString cuts, TString options, float scale,
+       vector< pair<TString,TString> > extraTreeContents){
+  TTree* histTree = FSHistogram::setTHNFContents(1,extraTreeContents);
+  getTHNF(1,fileName,ntName,category,variable,bounds,cuts,options,scale,histTree,extraTreeContents);
+  return histTree;
+}
+
+TTree*
+FSModeHistogram::getTH2FContents(TString fileName, TString ntName, TString category, 
+       TString variable, TString bounds, TString cuts, TString options, float scale,
+       vector< pair<TString,TString> > extraTreeContents){
+  TTree* histTree = FSHistogram::setTHNFContents(2,extraTreeContents);
+  getTHNF(2,fileName,ntName,category,variable,bounds,cuts,options,scale,histTree,extraTreeContents);
+  return histTree;
+}
 
 
 
