@@ -30,259 +30,8 @@ TString FSOR("||");
 TString FSNOT("!");
 
 
-
-      // ********************************************************
-      // CREATE A TREE IN THE SAME WAY AS A HISTOGRAM
-      // ********************************************************
-
-
-TTree*
-FSHistogram::getTH1FContents(TString fileName, TString ntName, TString variable, TString bounds, 
-                             TString cuts, TString options, float scale,
-                             vector< pair<TString,TString> > extraTreeContents){
-  TTree* histTree = setTHNFContents(1,extraTreeContents);
-  getTHNF(1,fileName,ntName,variable,bounds,cuts,options,scale,histTree,extraTreeContents);
-  return histTree;
-}
-
-TTree*
-FSHistogram::getTH2FContents(TString fileName, TString ntName, TString variable, TString bounds, 
-                             TString cuts, TString options, float scale,
-                             vector< pair<TString,TString> > extraTreeContents){
-  TTree* histTree = setTHNFContents(2,extraTreeContents);
-  getTHNF(2,fileName,ntName,variable,bounds,cuts,options,scale,histTree,extraTreeContents);
-  return histTree;
-}
-
-TTree*
-FSHistogram::setTHNFContents(int dimension,
-                             vector< pair<TString,TString> > extraTreeContents){
-  TTree* histTree = new TTree("HistContents", "HistContents");
-  Double_t x;  if (dimension >= 1) histTree->Branch("x",  &x,  "x/D");
-  Double_t y;  if (dimension == 2) histTree->Branch("y",  &y,  "y/D");
-  Double_t wt; if (dimension >= 1) histTree->Branch("wt", &wt, "wt/D");
-  vector<Double_t> tempDoubles;
-  for (unsigned int i = 0; i < extraTreeContents.size(); i++){
-    tempDoubles.push_back(0.0);
-    TString contentName = extraTreeContents[i].first;
-    histTree->Branch(contentName,&tempDoubles[i],contentName+"/D");
-  }
-  return histTree;
-}
-
-TTree*
-FSHistogram::addTHNFContents(TTree* histTree, int dimension, 
-                             TString fileName, TString ntName, TString variable, TString bounds, 
-                             TString cuts, float scale,
-                             vector< pair<TString,TString> > extraTreeContents){
-
-    // get the x and y variable names
-
-  vector<TString> vars = FSString::parseTString(variable,":");
-  if ((int)vars.size() != dimension){
-    cout << "FSHistogram contents ERROR:  bad variable format" << endl;
-    exit(0);
-  }
-  TString varX("");  if (dimension >= 1)  varX = vars[0];
-  TString varY("");  if (dimension == 2){ varX = vars[1]; varY = vars[0]; }
-
-    // set the addresses of the values to add to histTree
-
-  Double_t x = 0.0;  if (dimension >= 1) histTree->SetBranchAddress("x",  &x);
-  Double_t y = 0.0;  if (dimension == 2) histTree->SetBranchAddress("y",  &y);
-  Double_t wt = 0.0; if (dimension >= 1) histTree->SetBranchAddress("wt", &wt);
-  Double_t extraValues[200];
-  if (extraTreeContents.size() > 200){
-    cout << "FSHistogram::addTHNFContents ERROR: too many extra branches" << endl;
-    exit(0);
-  }
-  for (unsigned int i = 0; i < extraTreeContents.size(); i++){
-    TString contentName = extraTreeContents[i].first;
-    histTree->SetBranchAddress(contentName,&extraValues[i]);
-  }
-
-    // get the old tree
-
-  TTree* nt = FSTree::getTChain(fileName,ntName);
-
-    // set up the TTreeFormula objects
-
-  if (cuts == "") cuts = "(1==1)";
-  TTreeFormula* cutsF = NULL; if (dimension >= 1) cutsF = new TTreeFormula("cutsF", cuts, nt);
-  TTreeFormula* varXF = NULL; if (dimension >= 1) varXF = new TTreeFormula("varXF", varX, nt);
-  TTreeFormula* varYF = NULL; if (dimension == 2) varYF = new TTreeFormula("varYF", varY, nt);
-  vector<TTreeFormula*> varEF;
-  for (unsigned int i = 0; i < extraTreeContents.size(); i++){
-    TString varName("varEF"); varName += i;
-    varEF.push_back(new TTreeFormula(varName,extraTreeContents[i].second,nt));
-  }
-
-    // get cut values according to the histogram bounds
-
-  double xLow  = 0.0;  if (dimension >= 1)  xLow = FSString::parseBoundsLowerX(bounds);
-  double xHigh = 0.0;  if (dimension >= 1) xHigh = FSString::parseBoundsUpperX(bounds);
-  double yLow  = 0.0;  if (dimension == 2)  yLow = FSString::parseBoundsLowerY(bounds);
-  double yHigh = 0.0;  if (dimension == 2) yHigh = FSString::parseBoundsUpperY(bounds);
-
-    // loop over events
-
-  unsigned int nEvents = nt->GetEntries();
-  for (unsigned int i = 0; i < nEvents; i++){
-    nt->GetEntry(i);
-    if (!cutsF->EvalInstance()) continue;
-    if (dimension >= 1) x = varXF->EvalInstance();
-    if (dimension == 2) y = varYF->EvalInstance();
-    if (dimension >= 1) wt = scale * cutsF->EvalInstance();
-    for (unsigned int j = 0; j < varEF.size(); j++){
-      extraValues[j] = varEF[j]->EvalInstance();
-    }
-    if ((dimension >= 1) && ((x < xLow) || (x > xHigh))) continue;      
-    if ((dimension == 2) && ((y < yLow) || (y > yHigh))) continue;      
-    histTree->Fill();  
-  }
-
-    // delete the TTreeFormula objects
-
-  if (cutsF) delete cutsF;
-  if (varXF) delete varXF;
-  if (varYF) delete varYF;
-  for (unsigned int i = 0; i < varEF.size(); i++){
-    if (varEF[i]) delete varEF[i];
-  }
-
-  return histTree;
-}
-
-
-
   // ********************************************************
-  // GET A HISTOGRAM FROM THE CACHE OR RETURN NULL (private)
-  // ********************************************************
-
-pair<TH1F*,TH2F*>
-FSHistogram::getHistogramFromCache(TString index){
-
-    // clear the histogram cache if there is no histogram caching
-
-  if (!FSControl::HISTOGRAMCACHING) clearHistogramCache();
-
-    // search for the histogram
-
-  if (FSControl::DEBUG) 
-    cout << "FSHistogram: looking for histogram " << index << endl;
-  map<TString, pair<TH1F*,TH2F*> >::const_iterator mapItr = m_histogramCache.find(index);
-  if (mapItr != m_histogramCache.end()){
-    pair<TH1F*,TH2F*> histPair = m_histogramCache[index];
-    if ((FSControl::DEBUG || !FSControl::QUIET) && histPair.first) 
-      cout << "FSHistogram:  FOUND 1D HIST... " << histPair.first->GetName() 
-           << " \twith entries... " << histPair.first->GetEntries() << endl;
-    if ((FSControl::DEBUG || !FSControl::QUIET) && histPair.second) 
-      cout << "FSHistogram:  FOUND 2D HIST... " << histPair.second->GetName() 
-           << " \twith entries... " << histPair.second->GetEntries() << endl;
-    return histPair;
-  }
-
-    // return NULL if not found
-
-  if (FSControl::DEBUG) 
-    cout << "FSHistogram: could not find histogram " << index << endl;
-  return pair<TH1F*,TH2F*>(NULL,NULL);
-
-}
-
-
-  // ********************************************************
-  // GIVE HISTOGRAMS IN THE CACHE A UNIQUE NAME (private)
-  // ********************************************************
-
-TString
-FSHistogram::makeHistogramName(){
-  TString hname("HISTCACHE");
-  hname += (m_histogramCache.size() + 1);
-  return hname;
-}
-
-TString
-FSHistogram::makeTempHistName(){
-  TString hname("TEMPHISTCACHE");
-  hname += (m_tempCache.size() + 1);
-  return hname;
-}
-
-TString
-FSHistogram::makeAddName(){
-  TString hname("ADDCACHE");
-  hname += ++m_addCacheTotalSize; //(m_addCache.size() + 1);
-  if (FSControl::DEBUG) { cout << "FSHistogram::makeAddName: new name = " << hname << endl; }
-  return hname;
-}
-
-
-
-  // ********************************************************
-  // ADD A HISTOGRAM TO THE CACHE (private)
-  // ********************************************************
-
-void
-FSHistogram::addHistogramToCache(TString index, TH1F* hist1d, TH2F* hist2d){
-
-    // give the histogram a name
-
-  TString hname = makeHistogramName();
-  if (hist1d) hist1d->SetName(hname);
-  if (hist2d) hist2d->SetName(hname);
-
-    // set common properties
-
-  if (hist1d) hist1d = getTH1F(hist1d);
-  if (hist2d) hist2d = getTH2F(hist2d);
-
-    // add the histogram to the cache (if it isn't already there)
-
-  map<TString, pair<TH1F*,TH2F*> >::const_iterator mapItr = m_histogramCache.find(index);
-  if (mapItr == m_histogramCache.end()){
-    if ((FSControl::DEBUG || !FSControl::QUIET) && hist1d) 
-      cout << "FSHistogram:  CREATED 1D HIST... " << hist1d->GetName() 
-           << " \twith entries... " << hist1d->GetEntries() << endl;
-    if ((FSControl::DEBUG || !FSControl::QUIET) && hist2d) 
-      cout << "FSHistogram:  CREATED 2D HIST... " << hist2d->GetName() 
-           << " \twith entries... " << hist2d->GetEntries() << endl;
-    m_histogramCache[index] = pair<TH1F*,TH2F*>(hist1d,hist2d);
-  }
-
-}
-
-pair<TH1F*,TH2F*>
-FSHistogram::addTempHistToCache(TH1F* hist1d, TH2F* hist2d){
-  if (FSControl::DEBUG){
-    cout << "FSHistogram: adding a histogram to the temporary cache" << endl;
-    if (hist1d){ cout << "  hist1d exists with "; 
-                 cout << hist1d->GetEntries() << " entries" << endl; }
-    if (hist2d){ cout << "  hist2d exists with " << endl; 
-                 cout << hist2d->GetEntries() << " entries" << endl; }
-  }
-  TH1F* hist1dcopy = NULL;
-  TH2F* hist2dcopy = NULL;
-  TString histName = makeTempHistName();
-  if (FSControl::DEBUG){ cout << "  new name = " << histName << endl; }
-  if (hist1d){
-    hist1dcopy = new TH1F(*hist1d);
-    hist1dcopy->SetName(histName);
-    hist1dcopy = FSHistogram::getTH1F(hist1dcopy);
-  }
-  if (hist2d){
-    hist2dcopy = new TH2F(*hist2d);
-    hist2dcopy->SetName(histName);
-    hist2dcopy = FSHistogram::getTH2F(hist2dcopy);
-  }
-  m_tempCache[histName] = pair<TH1F*,TH2F*>(hist1dcopy,hist2dcopy);
-  if (FSControl::DEBUG){ cout << "   added it to the cache" << endl; }
-  return pair<TH1F*,TH2F*>(hist1dcopy,hist2dcopy);
-}
-
-
-  // ********************************************************
-  // SET COMMON PROPERTIES OF HISTOGRAMS
+  // SET HISTOGRAM ATTRIBUTES
   // ********************************************************
 
 
@@ -325,9 +74,8 @@ FSHistogram::getTH2F(TH2F* hist){
 }
 
 
-
   // ********************************************************
-  // RETRIEVE HISTOGRAMS FROM FILES
+  // RETRIEVE A HISTOGRAM FROM A FILE AND CACHE IT
   // ********************************************************
 
 
@@ -388,8 +136,9 @@ FSHistogram::getTHNF(int dimension, TString fileName,
 }
 
 
+
   // ********************************************************
-  // CREATE HISTOGRAMS FROM TREES
+  // CREATE A HISTOGRAM FROM A TREE AND CACHE IT
   // ********************************************************
 
 
@@ -574,9 +323,132 @@ FSHistogram::getTHNF(int dimension,
 } 
 
 
-    // ********************************************
-    //  CREATE HISTOGRAMS FROM FUNCTIONS
-    // ********************************************
+  // ********************************************************
+  // CREATE A TREE IN THE SAME WAY AS A HISTOGRAM
+  // ********************************************************
+
+
+TTree*
+FSHistogram::getTH1FContents(TString fileName, TString ntName, TString variable, TString bounds, 
+                             TString cuts, TString options, float scale,
+                             vector< pair<TString,TString> > extraTreeContents){
+  TTree* histTree = setTHNFContents(1,extraTreeContents);
+  getTHNF(1,fileName,ntName,variable,bounds,cuts,options,scale,histTree,extraTreeContents);
+  return histTree;
+}
+
+TTree*
+FSHistogram::getTH2FContents(TString fileName, TString ntName, TString variable, TString bounds, 
+                             TString cuts, TString options, float scale,
+                             vector< pair<TString,TString> > extraTreeContents){
+  TTree* histTree = setTHNFContents(2,extraTreeContents);
+  getTHNF(2,fileName,ntName,variable,bounds,cuts,options,scale,histTree,extraTreeContents);
+  return histTree;
+}
+
+TTree*
+FSHistogram::setTHNFContents(int dimension,
+                             vector< pair<TString,TString> > extraTreeContents){
+  TTree* histTree = new TTree("HistContents", "HistContents");
+  Double_t x;  if (dimension >= 1) histTree->Branch("x",  &x,  "x/D");
+  Double_t y;  if (dimension == 2) histTree->Branch("y",  &y,  "y/D");
+  Double_t wt; if (dimension >= 1) histTree->Branch("wt", &wt, "wt/D");
+  vector<Double_t> tempDoubles;
+  for (unsigned int i = 0; i < extraTreeContents.size(); i++){
+    tempDoubles.push_back(0.0);
+    TString contentName = extraTreeContents[i].first;
+    histTree->Branch(contentName,&tempDoubles[i],contentName+"/D");
+  }
+  return histTree;
+}
+
+TTree*
+FSHistogram::addTHNFContents(TTree* histTree, int dimension, 
+                             TString fileName, TString ntName, TString variable, TString bounds, 
+                             TString cuts, float scale,
+                             vector< pair<TString,TString> > extraTreeContents){
+
+    // get the x and y variable names
+
+  vector<TString> vars = FSString::parseTString(variable,":");
+  if ((int)vars.size() != dimension){
+    cout << "FSHistogram contents ERROR:  bad variable format" << endl;
+    exit(0);
+  }
+  TString varX("");  if (dimension >= 1)  varX = vars[0];
+  TString varY("");  if (dimension == 2){ varX = vars[1]; varY = vars[0]; }
+
+    // set the addresses of the values to add to histTree
+
+  Double_t x = 0.0;  if (dimension >= 1) histTree->SetBranchAddress("x",  &x);
+  Double_t y = 0.0;  if (dimension == 2) histTree->SetBranchAddress("y",  &y);
+  Double_t wt = 0.0; if (dimension >= 1) histTree->SetBranchAddress("wt", &wt);
+  Double_t extraValues[200];
+  if (extraTreeContents.size() > 200){
+    cout << "FSHistogram::addTHNFContents ERROR: too many extra branches" << endl;
+    exit(0);
+  }
+  for (unsigned int i = 0; i < extraTreeContents.size(); i++){
+    TString contentName = extraTreeContents[i].first;
+    histTree->SetBranchAddress(contentName,&extraValues[i]);
+  }
+
+    // get the old tree
+
+  TTree* nt = FSTree::getTChain(fileName,ntName);
+
+    // set up the TTreeFormula objects
+
+  if (cuts == "") cuts = "(1==1)";
+  TTreeFormula* cutsF = NULL; if (dimension >= 1) cutsF = new TTreeFormula("cutsF", cuts, nt);
+  TTreeFormula* varXF = NULL; if (dimension >= 1) varXF = new TTreeFormula("varXF", varX, nt);
+  TTreeFormula* varYF = NULL; if (dimension == 2) varYF = new TTreeFormula("varYF", varY, nt);
+  vector<TTreeFormula*> varEF;
+  for (unsigned int i = 0; i < extraTreeContents.size(); i++){
+    TString varName("varEF"); varName += i;
+    varEF.push_back(new TTreeFormula(varName,extraTreeContents[i].second,nt));
+  }
+
+    // get cut values according to the histogram bounds
+
+  double xLow  = 0.0;  if (dimension >= 1)  xLow = FSString::parseBoundsLowerX(bounds);
+  double xHigh = 0.0;  if (dimension >= 1) xHigh = FSString::parseBoundsUpperX(bounds);
+  double yLow  = 0.0;  if (dimension == 2)  yLow = FSString::parseBoundsLowerY(bounds);
+  double yHigh = 0.0;  if (dimension == 2) yHigh = FSString::parseBoundsUpperY(bounds);
+
+    // loop over events
+
+  unsigned int nEvents = nt->GetEntries();
+  for (unsigned int i = 0; i < nEvents; i++){
+    nt->GetEntry(i);
+    if (!cutsF->EvalInstance()) continue;
+    if (dimension >= 1) x = varXF->EvalInstance();
+    if (dimension == 2) y = varYF->EvalInstance();
+    if (dimension >= 1) wt = scale * cutsF->EvalInstance();
+    for (unsigned int j = 0; j < varEF.size(); j++){
+      extraValues[j] = varEF[j]->EvalInstance();
+    }
+    if ((dimension >= 1) && ((x < xLow) || (x > xHigh))) continue;      
+    if ((dimension == 2) && ((y < yLow) || (y > yHigh))) continue;      
+    histTree->Fill();  
+  }
+
+    // delete the TTreeFormula objects
+
+  if (cutsF) delete cutsF;
+  if (varXF) delete varXF;
+  if (varYF) delete varYF;
+  for (unsigned int i = 0; i < varEF.size(); i++){
+    if (varEF[i]) delete varEF[i];
+  }
+
+  return histTree;
+}
+
+
+  // ********************************************
+  //  CREATE HISTOGRAMS FROM FUNCTIONS
+  // ********************************************
 
 TH1F*
 FSHistogram::getTH1FFormula(TString formula, TString bounds, int numRandomTrials){
@@ -706,7 +578,7 @@ FSHistogram::getTHNFFormula(int dimension, TString formula, TString bounds, int 
 
 
   // ********************************************
-  //  MAKE PROJECTIONS
+  //  MAKE PROJECTIONS AND DO INTEGRALS
   // ********************************************
 
 TH1F*
@@ -779,7 +651,7 @@ FSHistogram::integral(TH2F* hist, bool function){
 
 
   // ********************************************************
-  // GIVE A SET OF HISTOGRAMS A COMMON MAXIMUM
+  // SET MAXIMA/MINIMA SO HISTOGRAMS CAN BE SHOWN TOGETHER
   // ********************************************************
 
 void 
@@ -813,9 +685,6 @@ FSHistogram::setHistogramMaxima(TH1F* h1, TH1F* h2, TH1F* h3, TH1F* h4,
   }
 }
 
-  // ********************************************************
-  // GIVE A SET OF HISTOGRAMS A COMMON MINIMUM
-  // ********************************************************
 
 void 
 FSHistogram::setHistogramMinima(TH1F* h1, TH1F* h2, TH1F* h3, TH1F* h4, 
@@ -848,9 +717,9 @@ FSHistogram::setHistogramMinima(TH1F* h1, TH1F* h2, TH1F* h3, TH1F* h4,
 }
 
 
-      // ********************************************************
-      // GET USEFUL INFORMATION ABOUT A HISTOGRAM
-      // ********************************************************
+  // ********************************************************
+  // GET USEFUL INFORMATION ABOUT A HISTOGRAM
+  // ********************************************************
 
 int
 FSHistogram::getNBins(TH1F* hist){
@@ -994,6 +863,251 @@ FSHistogram::readHistogramCache(string cacheName){
 }
 
 
+  // ********************************************************
+  // KEEP RUNNING TOTALS FOR HISTOGRAMS
+  // ********************************************************
+
+TH1F*
+FSHistogram::addTH1F(TString addName, TH1F* hist, float scale){
+  TH2F* hist2d = NULL;
+  return addTHNF(addName,hist,hist2d,scale).first;
+}
+
+TH2F*
+FSHistogram::addTH2F(TString addName, TH2F* hist, float scale){
+  TH1F* hist1d = NULL;
+  return addTHNF(addName,hist1d,hist,scale).second;
+}
+
+pair<TH1F*,TH2F*>
+FSHistogram::addTHNF(TString addName, TH1F* hist1d, TH2F* hist2d, float scale){
+
+    // the original histogram
+
+  TH1F* hist1d0 = NULL;
+  TH2F* hist2d0 = NULL;
+
+    // first search for the original histogram in the cache
+
+  map<TString, pair<TH1F*,TH2F*> >::const_iterator mapItr = m_addCache.find(addName);
+  if (mapItr != m_addCache.end()){
+    pair<TH1F*,TH2F*> histPair = m_addCache[addName];
+    hist1d0 = histPair.first;
+    hist2d0 = histPair.second;
+  }
+
+    // if found in cache, add hist to original and return
+
+  if (hist1d0 || hist2d0){
+    if (hist1d0) hist1d0->Add(hist1d,scale);
+    if (hist2d0) hist2d0->Add(hist2d,scale);
+    return pair<TH1F*,TH2F*>(hist1d0,hist2d0);
+  }
+
+    // if not found in cache, add hist to cache and return
+
+  if (hist1d){ 
+    hist1d0 = getTH1F(new TH1F(*hist1d));
+    hist1d0->SetName(makeAddName());  
+    hist1d0->Scale(scale); 
+  }
+  if (hist2d){
+    hist2d0 = getTH2F(new TH2F(*hist2d));
+    hist2d0->SetName(makeAddName());  
+    hist2d0->Scale(scale); 
+  }
+
+  m_addCache[addName] = pair<TH1F*,TH2F*>(hist1d0,hist2d0);
+  return m_addCache[addName];
+
+}
+
+void
+FSHistogram::clearAddCache(TString addName){
+  if (FSControl::DEBUG) 
+    cout << "FSHistogram: clearing add cache " << addName << endl;
+  if (addName != ""){
+    map<TString,pair<TH1F*,TH2F*> >::iterator rmItr = m_addCache.find(addName);
+    if (rmItr != m_addCache.end()){
+      if (rmItr->second.first) delete rmItr->second.first;
+      if (rmItr->second.second) delete rmItr->second.second;
+      m_addCache.erase(rmItr);
+    }
+  }
+  else{
+    for (map<TString,pair<TH1F*,TH2F*> >::iterator rmItr = m_addCache.begin();
+         rmItr != m_addCache.end(); rmItr++){
+      if (rmItr->second.first) delete rmItr->second.first;
+      if (rmItr->second.second) delete rmItr->second.second;
+    }
+    m_addCache.clear();
+  }
+  if (FSControl::DEBUG) 
+    cout << "FSHistogram: done clearing add cache" << endl;
+}
+
+
+  // ********************************************************
+  // CLEAR GLOBAL CACHES
+  // ********************************************************
+
+void
+FSHistogram::clearHistogramCache(){
+  if (FSControl::DEBUG) 
+    cout << "FSHistogram: clearing histogram cache" << endl;
+  for (map<TString,pair<TH1F*,TH2F*> >::iterator rmItr = m_histogramCache.begin();
+       rmItr != m_histogramCache.end(); rmItr++){
+    if (rmItr->second.first) delete rmItr->second.first;
+    if (rmItr->second.second) delete rmItr->second.second;
+  }
+  m_histogramCache.clear();
+  if (FSControl::DEBUG) 
+    cout << "FSHistogram: done clearing histogram cache" << endl;
+}
+
+void
+FSHistogram::clearTempHistCache(){
+  if (FSControl::DEBUG) 
+    cout << "FSHistogram: clearing temp histogram cache" << endl;
+  for (map<TString,pair<TH1F*,TH2F*> >::iterator rmItr = m_tempCache.begin();
+       rmItr != m_tempCache.end(); rmItr++){
+    if (rmItr->second.first) delete rmItr->second.first;
+    if (rmItr->second.second) delete rmItr->second.second;
+  }
+  m_tempCache.clear();
+  if (FSControl::DEBUG) 
+    cout << "FSHistogram: done clearing temp histogram cache" << endl;
+}
+
+
+
+
+  // ********************************************************
+  // GET A HISTOGRAM FROM THE CACHE OR RETURN NULL (private)
+  // ********************************************************
+
+pair<TH1F*,TH2F*>
+FSHistogram::getHistogramFromCache(TString index){
+
+    // clear the histogram cache if there is no histogram caching
+
+  if (!FSControl::HISTOGRAMCACHING) clearHistogramCache();
+
+    // search for the histogram
+
+  if (FSControl::DEBUG) 
+    cout << "FSHistogram: looking for histogram " << index << endl;
+  map<TString, pair<TH1F*,TH2F*> >::const_iterator mapItr = m_histogramCache.find(index);
+  if (mapItr != m_histogramCache.end()){
+    pair<TH1F*,TH2F*> histPair = m_histogramCache[index];
+    if ((FSControl::DEBUG || !FSControl::QUIET) && histPair.first) 
+      cout << "FSHistogram:  FOUND 1D HIST... " << histPair.first->GetName() 
+           << " \twith entries... " << histPair.first->GetEntries() << endl;
+    if ((FSControl::DEBUG || !FSControl::QUIET) && histPair.second) 
+      cout << "FSHistogram:  FOUND 2D HIST... " << histPair.second->GetName() 
+           << " \twith entries... " << histPair.second->GetEntries() << endl;
+    return histPair;
+  }
+
+    // return NULL if not found
+
+  if (FSControl::DEBUG) 
+    cout << "FSHistogram: could not find histogram " << index << endl;
+  return pair<TH1F*,TH2F*>(NULL,NULL);
+
+}
+
+
+  // ********************************************************
+  // GIVE HISTOGRAMS IN THE CACHE A UNIQUE NAME (private)
+  // ********************************************************
+
+TString
+FSHistogram::makeHistogramName(){
+  TString hname("HISTCACHE");
+  hname += (m_histogramCache.size() + 1);
+  return hname;
+}
+
+TString
+FSHistogram::makeTempHistName(){
+  TString hname("TEMPHISTCACHE");
+  hname += (m_tempCache.size() + 1);
+  return hname;
+}
+
+TString
+FSHistogram::makeAddName(){
+  TString hname("ADDCACHE");
+  hname += ++m_addCacheTotalSize; //(m_addCache.size() + 1);
+  if (FSControl::DEBUG) { cout << "FSHistogram::makeAddName: new name = " << hname << endl; }
+  return hname;
+}
+
+
+
+  // ********************************************************
+  // ADD A HISTOGRAM TO THE CACHE (private)
+  // ********************************************************
+
+void
+FSHistogram::addHistogramToCache(TString index, TH1F* hist1d, TH2F* hist2d){
+
+    // give the histogram a name
+
+  TString hname = makeHistogramName();
+  if (hist1d) hist1d->SetName(hname);
+  if (hist2d) hist2d->SetName(hname);
+
+    // set common properties
+
+  if (hist1d) hist1d = getTH1F(hist1d);
+  if (hist2d) hist2d = getTH2F(hist2d);
+
+    // add the histogram to the cache (if it isn't already there)
+
+  map<TString, pair<TH1F*,TH2F*> >::const_iterator mapItr = m_histogramCache.find(index);
+  if (mapItr == m_histogramCache.end()){
+    if ((FSControl::DEBUG || !FSControl::QUIET) && hist1d) 
+      cout << "FSHistogram:  CREATED 1D HIST... " << hist1d->GetName() 
+           << " \twith entries... " << hist1d->GetEntries() << endl;
+    if ((FSControl::DEBUG || !FSControl::QUIET) && hist2d) 
+      cout << "FSHistogram:  CREATED 2D HIST... " << hist2d->GetName() 
+           << " \twith entries... " << hist2d->GetEntries() << endl;
+    m_histogramCache[index] = pair<TH1F*,TH2F*>(hist1d,hist2d);
+  }
+
+}
+
+pair<TH1F*,TH2F*>
+FSHistogram::addTempHistToCache(TH1F* hist1d, TH2F* hist2d){
+  if (FSControl::DEBUG){
+    cout << "FSHistogram: adding a histogram to the temporary cache" << endl;
+    if (hist1d){ cout << "  hist1d exists with "; 
+                 cout << hist1d->GetEntries() << " entries" << endl; }
+    if (hist2d){ cout << "  hist2d exists with " << endl; 
+                 cout << hist2d->GetEntries() << " entries" << endl; }
+  }
+  TH1F* hist1dcopy = NULL;
+  TH2F* hist2dcopy = NULL;
+  TString histName = makeTempHistName();
+  if (FSControl::DEBUG){ cout << "  new name = " << histName << endl; }
+  if (hist1d){
+    hist1dcopy = new TH1F(*hist1d);
+    hist1dcopy->SetName(histName);
+    hist1dcopy = FSHistogram::getTH1F(hist1dcopy);
+  }
+  if (hist2d){
+    hist2dcopy = new TH2F(*hist2d);
+    hist2dcopy->SetName(histName);
+    hist2dcopy = FSHistogram::getTH2F(hist2dcopy);
+  }
+  m_tempCache[histName] = pair<TH1F*,TH2F*>(hist1dcopy,hist2dcopy);
+  if (FSControl::DEBUG){ cout << "   added it to the cache" << endl; }
+  return pair<TH1F*,TH2F*>(hist1dcopy,hist2dcopy);
+}
+
+
 
   // ********************************************************
   // GET (OR CREATE) THE CACHING INDEX ASSOCIATED WITH A HISTOGRAM
@@ -1063,122 +1177,7 @@ FSHistogram::getTHNFIndex(pair<TH1F*,TH2F*> hist){
 
 
 
-  // ********************************************************
-  // KEEP RUNNING HISTOGRAMS
-  // ********************************************************
-
-TH1F*
-FSHistogram::addTH1F(TString addName, TH1F* hist, float scale){
-  TH2F* hist2d = NULL;
-  return addTHNF(addName,hist,hist2d,scale).first;
-}
-
-TH2F*
-FSHistogram::addTH2F(TString addName, TH2F* hist, float scale){
-  TH1F* hist1d = NULL;
-  return addTHNF(addName,hist1d,hist,scale).second;
-}
-
-pair<TH1F*,TH2F*>
-FSHistogram::addTHNF(TString addName, TH1F* hist1d, TH2F* hist2d, float scale){
-
-    // the original histogram
-
-  TH1F* hist1d0 = NULL;
-  TH2F* hist2d0 = NULL;
-
-    // first search for the original histogram in the cache
-
-  map<TString, pair<TH1F*,TH2F*> >::const_iterator mapItr = m_addCache.find(addName);
-  if (mapItr != m_addCache.end()){
-    pair<TH1F*,TH2F*> histPair = m_addCache[addName];
-    hist1d0 = histPair.first;
-    hist2d0 = histPair.second;
-  }
-
-    // if found in cache, add hist to original and return
-
-  if (hist1d0 || hist2d0){
-    if (hist1d0) hist1d0->Add(hist1d,scale);
-    if (hist2d0) hist2d0->Add(hist2d,scale);
-    return pair<TH1F*,TH2F*>(hist1d0,hist2d0);
-  }
-
-    // if not found in cache, add hist to cache and return
-
-  if (hist1d){ 
-    hist1d0 = getTH1F(new TH1F(*hist1d));
-    hist1d0->SetName(makeAddName());  
-    hist1d0->Scale(scale); 
-  }
-  if (hist2d){
-    hist2d0 = getTH2F(new TH2F(*hist2d));
-    hist2d0->SetName(makeAddName());  
-    hist2d0->Scale(scale); 
-  }
-
-  m_addCache[addName] = pair<TH1F*,TH2F*>(hist1d0,hist2d0);
-  return m_addCache[addName];
-
-}
   
 
 
-  // ********************************************************
-  // CLEAR GLOBAL CACHES
-  // ********************************************************
-
-
-void
-FSHistogram::clearHistogramCache(){
-  if (FSControl::DEBUG) 
-    cout << "FSHistogram: clearing histogram cache" << endl;
-  for (map<TString,pair<TH1F*,TH2F*> >::iterator rmItr = m_histogramCache.begin();
-       rmItr != m_histogramCache.end(); rmItr++){
-    if (rmItr->second.first) delete rmItr->second.first;
-    if (rmItr->second.second) delete rmItr->second.second;
-  }
-  m_histogramCache.clear();
-  if (FSControl::DEBUG) 
-    cout << "FSHistogram: done clearing histogram cache" << endl;
-}
-
-void
-FSHistogram::clearTempHistCache(){
-  if (FSControl::DEBUG) 
-    cout << "FSHistogram: clearing temp histogram cache" << endl;
-  for (map<TString,pair<TH1F*,TH2F*> >::iterator rmItr = m_tempCache.begin();
-       rmItr != m_tempCache.end(); rmItr++){
-    if (rmItr->second.first) delete rmItr->second.first;
-    if (rmItr->second.second) delete rmItr->second.second;
-  }
-  m_tempCache.clear();
-  if (FSControl::DEBUG) 
-    cout << "FSHistogram: done clearing temp histogram cache" << endl;
-}
-
-
-void
-FSHistogram::clearAddCache(TString addName){
-  if (FSControl::DEBUG) 
-    cout << "FSHistogram: clearing add cache " << addName << endl;
-  if (addName != ""){
-    map<TString,pair<TH1F*,TH2F*> >::iterator rmItr = m_addCache.find(addName);
-    if (rmItr != m_addCache.end()){
-      if (rmItr->second.first) delete rmItr->second.first;
-      if (rmItr->second.second) delete rmItr->second.second;
-      m_addCache.erase(rmItr);
-    }
-  }
-  else{
-    for (map<TString,pair<TH1F*,TH2F*> >::iterator rmItr = m_addCache.begin();
-         rmItr != m_addCache.end(); rmItr++){
-      if (rmItr->second.first) delete rmItr->second.first;
-      if (rmItr->second.second) delete rmItr->second.second;
-    }
-    m_addCache.clear();
-  }
-  if (FSControl::DEBUG) 
-    cout << "FSHistogram: done clearing add cache" << endl;
-}
 

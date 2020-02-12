@@ -16,13 +16,15 @@
 #include "TFormula.h"
 
 using namespace std;
+class FSHistogramInfo;
 
-
+// ***********************
 // useful global strings
+// ***********************
 
-extern TString FSAND;
-extern TString FSOR;
-extern TString FSNOT;
+extern TString FSAND;   // = "&&'
+extern TString FSOR;    // = "||"
+extern TString FSNOT;   // = "!"
 
 
 class FSHistogram{
@@ -96,7 +98,7 @@ class FSHistogram{
 
 
       // ********************************************
-      //  MAKE PROJECTIONS
+      //  MAKE PROJECTIONS AND DO INTEGRALS
       // ********************************************
 
     static TH1F* getTH1F(TH2F* hist2d, TString projectionAxis = "X", bool function = false);
