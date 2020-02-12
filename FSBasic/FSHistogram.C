@@ -1465,6 +1465,7 @@ FSHistogram::getTHNFIndex(pair<TH1F*,TH2F*> hist){
 TString
 FSHistogram::getHistogramIndex(map<TString,TString> indexMap){
   TString index;
+  if (indexMap.find("{-TP-}") != indexMap.end()){ index += "{-TP-}"; index += indexMap["{-TP-}"]; }
   if (indexMap.find("{-ND-}") != indexMap.end()){ index += "{-ND-}"; index += indexMap["{-ND-}"]; }
   if (indexMap.find("{-FN-}") != indexMap.end()){ index += "{-FN-}"; index += indexMap["{-FN-}"]; }
   if (indexMap.find("{-HN-}") != indexMap.end()){ index += "{-HN-}"; index += indexMap["{-HN-}"]; }
@@ -1483,6 +1484,7 @@ FSHistogram::getHistogramIndexFile(int dimension, TString fileName, TString hist
   TString index;
   fileName = FSString::removeWhiteSpace(fileName);
   histName = FSString::removeWhiteSpace(histName);
+  index += "{-TP-}FILE";
   if (dimension == 1) index += "{-ND-}1D";
   if (dimension == 2) index += "{-ND-}2D";
   index += "{-FN-}";  index += fileName;
@@ -1496,6 +1498,7 @@ FSHistogram::getHistogramIndexFormula(int dimension, TString formula, TString bo
   formula  = FSString::removeWhiteSpace(formula);
   bounds   = FSString::removeWhiteSpace(bounds);
   histName = FSString::removeWhiteSpace(histName);
+  index += "{-TP-}FORMULA";
   if (dimension == 1) index += "{-ND-}1D";
   if (dimension == 2) index += "{-ND-}2D";
   index += "{-FO-}";  index += formula;
@@ -1517,6 +1520,7 @@ FSHistogram::getHistogramIndexTree(int dimension,
   bounds   = FSString::removeWhiteSpace(bounds);
   cuts     = FSString::removeWhiteSpace(cuts);
   cat      = FSString::removeWhiteSpace(cat);
+  index += "{-TP-}TREE";
   if (dimension == 1) index += "{-ND-}1D";
   if (dimension == 2) index += "{-ND-}2D";
   index += "{-FN-}";  index += fileName;
@@ -1534,6 +1538,7 @@ map<TString,TString>
 FSHistogram::parseHistogramIndex(TString index){
   index = FSString::removeWhiteSpace(index);
   vector<TString> spacers; 
+  spacers.push_back("{-TP-}");
   spacers.push_back("{-ND-}");
   spacers.push_back("{-FN-}");
   spacers.push_back("{-HN-}");
@@ -1557,6 +1562,7 @@ FSHistogram::printIndexInfo(TString index){
 void
 FSHistogram::printIndexInfo(map<TString,TString> iMap){
   cout << "---- HISTOGRAM INDEX INFORMATION ----" << endl;
+  if (iMap.find("{-TP-}") != iMap.end()){ cout << "\tTYPE      = " << iMap["{-TP-}"] << endl; }
   if (iMap.find("{-ND-}") != iMap.end()){ cout << "\tDIMENSION = " << iMap["{-ND-}"] << endl; }
   if (iMap.find("{-FN-}") != iMap.end()){ cout << "\tFILE NAME = " << iMap["{-FN-}"] << endl; }
   if (iMap.find("{-HN-}") != iMap.end()){ cout << "\tHIST NAME = " << iMap["{-HN-}"] << endl; }
