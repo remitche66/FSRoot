@@ -195,7 +195,7 @@ class FSHistogram{
                                      TString fileName, TString histName,
                                      TString index = "");
 
-    static pair<TH1F*,TH2F*> getTHNFBasic(int dimension, 
+    static pair<TH1F*,TH2F*> getTHNFBasicFile(int dimension, 
                                      TString fileName, TString histName);
 
         // XXXXX REMOVE XXXXX
@@ -207,10 +207,13 @@ class FSHistogram{
                                 vector< pair<TString,TString> > extraTreeContents = 
                                   vector< pair<TString,TString> >());
 
-    static pair<TH1F*,TH2F*> getTHNFBasic(int dimension,
+    static pair<TH1F*,TH2F*> getTHNFBasicTree(int dimension,
                                 TString fileName, TString ntName,
                                 TString variable, TString bounds,
                                 TString cuts,     double scale);
+
+    static pair<TH1F*,TH2F*> getTHNFBasicEmpty(int dimension, TString bounds, 
+                                               TString hname = "");
 
     static TString getTHNFIndex(int dimension,
                                 TString fileName, TString ntName,
@@ -236,6 +239,8 @@ class FSHistogram{
 
     static pair<TH1F*,TH2F*> getTHNFFormula(int dimension, TString formula, TString bounds, int numRandomTrials = -1);
     static pair<TH1F*,TH2F*> getTHNFFormulaRandom(int dimension, TString formula, TString bounds, int numRandomTrials = -1);
+
+    static pair<TH1F*,TH2F*> getTHNFBasicFormula(int dimension, TString formula, TString bounds);
 
 
       // helper functions for getTHNFContents

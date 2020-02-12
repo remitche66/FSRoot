@@ -139,7 +139,7 @@ FSHistogram::getTHNF(int dimension, TString fileName,
 
 
 pair<TH1F*,TH2F*> 
-FSHistogram::getTHNFBasic(int dimension, TString fileName, TString histName){
+FSHistogram::getTHNFBasicFile(int dimension, TString fileName, TString histName){
   if (FSControl::DEBUG){
     cout << "FSHistogram DEBUG: looking for histogram in file" << endl;
     printIndexInfo(getHistogramIndex(dimension,fileName,histName));
@@ -352,7 +352,7 @@ FSHistogram::getTHNF(int dimension,
 
 
 pair<TH1F*,TH2F*> 
-FSHistogram::getTHNFBasic(int dimension,
+FSHistogram::getTHNFBasicTree(int dimension,
                        TString fileName, TString ntName,
                        TString variable, TString bounds,
                        TString cuts,     double scale){
@@ -384,14 +384,8 @@ FSHistogram::getTHNFBasic(int dimension,
 
     // otherwise create an empty histogram
   else{
-    int nbins = FSString::parseBoundsNBinsX(bounds);
-    double low = FSString::parseBoundsLowerX(bounds);
-    double high = FSString::parseBoundsUpperX(bounds);
-    int nbinsy = FSString::parseBoundsNBinsY(bounds);
-    double lowy = FSString::parseBoundsLowerY(bounds);
-    double highy = FSString::parseBoundsUpperY(bounds);
-    if (dimension == 1) hist1d = new TH1F(hname,"",nbins,low,high);
-    if (dimension == 2) hist2d = new TH2F(hname,"",nbins,low,high,nbinsy,lowy,highy); 
+    if (dimension == 1) hist1d = getTHNFBasicEmpty(1,bounds,hname).first;
+    if (dimension == 2) hist2d = getTHNFBasicEmpty(2,bounds,hname).second;
   }
 
     // return the created histogram
@@ -403,6 +397,27 @@ FSHistogram::getTHNFBasic(int dimension,
   }
   return pair<TH1F*,TH2F*>(hist1d,hist2d);
 } 
+
+
+
+pair<TH1F*,TH2F*> 
+FSHistogram::getTHNFBasicEmpty(int dimension, TString bounds, TString hname){
+  TH1F* hist1d = NULL; TH2F* hist2d = NULL;
+  if (hname == "") hname = makeFSRootHistName();
+  bounds   = FSString::removeWhiteSpace(bounds);
+  int nbins = FSString::parseBoundsNBinsX(bounds);
+  double low = FSString::parseBoundsLowerX(bounds);
+  double high = FSString::parseBoundsUpperX(bounds);
+  int nbinsy = FSString::parseBoundsNBinsY(bounds);
+  double lowy = FSString::parseBoundsLowerY(bounds);
+  double highy = FSString::parseBoundsUpperY(bounds);
+  if (dimension == 1) hist1d = new TH1F(hname,"",nbins,low,high);
+  if (dimension == 2) hist2d = new TH2F(hname,"",nbins,low,high,nbinsy,lowy,highy); 
+  if (hist1d){ hist1d = getTH1F(hist1d); hist1d->SetName(hname); }
+  if (hist2d){ hist2d = getTH2F(hist2d); hist2d->SetName(hname); }
+  return pair<TH1F*,TH2F*>(hist1d,hist2d);
+} 
+
 
 
 
@@ -656,6 +671,42 @@ FSHistogram::getTHNFFormula(int dimension, TString formula, TString bounds, int 
   if (hist1d){ hist1d->SetTitle("f(x) = "+formula); hist1d->SetXTitle("x"); }
   if (hist2d){ hist2d->SetTitle("f(x,y) = "+formula); hist2d->SetXTitle("x"); hist2d->SetYTitle("y"); }
   addHistogramToCache(index, hist1d, hist2d);
+  return pair<TH1F*,TH2F*>(hist1d,hist2d);
+}
+
+
+pair<TH1F*,TH2F*>
+FSHistogram::getTHNFBasicFormula(int dimension, TString formula, TString bounds){
+  formula = FSString::removeWhiteSpace(formula);
+  formula = FSString::expandSUM(formula);
+  bounds  = FSString::removeWhiteSpace(bounds);
+  TFormula rootFormula("FSRootTempFormula",formula);
+  int nbinsx = 1; int nbinsy = 1;
+  double lowx = 0.0; double lowy = 0.0;
+  double highx = 10.0; double highy = 10.0;
+  if (dimension >= 1) nbinsx = FSString::parseBoundsNBinsX(bounds);
+  if (dimension == 2) nbinsy = FSString::parseBoundsNBinsY(bounds);
+  if (dimension >= 1)   lowx = FSString::parseBoundsLowerX(bounds);
+  if (dimension == 2)   lowy = FSString::parseBoundsLowerY(bounds);
+  if (dimension >= 1)  highx = FSString::parseBoundsUpperX(bounds);
+  if (dimension == 2)  highy = FSString::parseBoundsUpperY(bounds);
+  pair<TH1F*,TH2F*> histPair = getTHNFBasicEmpty(dimension,bounds,makeFSRootHistName());
+  TH1F* hist1d = histPair.first;  TH2F* hist2d = histPair.second;
+  double x = 0.0; double y = 0.0;  double f = 0.0;
+  for (int ix = 1; ix <= nbinsx; ix++){
+    for (int iy = 1; iy <= nbinsy; iy++){
+      if (dimension >= 1) x = lowx + (highx-lowx)*(ix-0.5)/nbinsx;
+      if (dimension == 2) y = lowy + (highy-lowy)*(iy-0.5)/nbinsy;
+      if (dimension == 1) f = rootFormula.Eval(x);
+      if (dimension == 2) f = rootFormula.Eval(x,y);
+      if (dimension == 1){ hist1d->SetBinContent(ix,   f); hist1d->SetBinError(ix,   0.0); }
+      if (dimension == 2){ hist2d->SetBinContent(ix,iy,f); hist2d->SetBinError(ix,iy,0.0); }
+    }
+  }
+  if (hist1d){ hist1d = getTH1F(hist1d); hist1d->SetName(hname); }
+  if (hist2d){ hist2d = getTH2F(hist2d); hist2d->SetName(hname); }
+  if (hist1d){ hist1d->SetTitle("f(x) = "+formula); hist1d->SetXTitle("x"); }
+  if (hist2d){ hist2d->SetTitle("f(x,y) = "+formula); hist2d->SetXTitle("x"); hist2d->SetYTitle("y"); }
   return pair<TH1F*,TH2F*>(hist1d,hist2d);
 }
 
