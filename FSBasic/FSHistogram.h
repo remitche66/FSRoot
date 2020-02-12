@@ -240,7 +240,8 @@ class FSHistogram{
     static pair<TH1F*,TH2F*> getTHNFFormula(int dimension, TString formula, TString bounds, int numRandomTrials = -1);
     static pair<TH1F*,TH2F*> getTHNFFormulaRandom(int dimension, TString formula, TString bounds, int numRandomTrials = -1);
 
-    static pair<TH1F*,TH2F*> getTHNFBasicFormula(int dimension, TString formula, TString bounds);
+    static pair<TH1F*,TH2F*> getTHNFBasicFormula(int dimension, TString formula, TString bounds, 
+                                                 TString histName = "");
 
 
       // helper functions for getTHNFContents
@@ -257,11 +258,20 @@ class FSHistogram{
                                 vector< pair<TString,TString> > extraTreeContents = 
                                  vector< pair<TString,TString> >());
 
+    static TTree* getTHNFBasicContents(TTree* histTree, int dimension,
+                                TString fileName, TString ntName,
+                                TString variable, TString bounds,
+                                TString cuts, double scale,
+                                vector< pair<TString,TString> > extraTreeContents = 
+                                  vector< pair<TString,TString> >());
+
       // helper functions for histogram indices
 
     static TString getHistogramIndex(map<TString,TString> indexMap);
-    static TString getHistogramIndex(int dimension, TString fileName, TString histName);
-    static TString getHistogramIndex(int dimension,
+    static TString getHistogramIndexFile(int dimension, TString fileName, TString histName);
+    static TString getHistogramIndexFormula(int dimension, TString formula, TString bounds, 
+                                            TString histName);
+    static TString getHistogramIndexTree(int dimension,
                             TString fileName, TString ntName,
                             TString variable, TString bounds,
                             TString cuts, double scale = 1.0,
