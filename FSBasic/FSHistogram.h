@@ -265,6 +265,9 @@ class FSHistogram{
                                 vector< pair<TString,TString> > extraTreeContents = 
                                   vector< pair<TString,TString> >());
 
+    static pair<TH1F*,TH2F*> getTHNFBasicIndex(TString index);
+
+
       // helper functions for histogram indices
 
     static TString getHistogramIndex(map<TString,TString> indexMap);

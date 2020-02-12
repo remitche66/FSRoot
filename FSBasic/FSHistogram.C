@@ -1456,6 +1456,37 @@ FSHistogram::getTHNFIndex(pair<TH1F*,TH2F*> hist){
 }
 
 
+pair<TH1F*,TH2F*>
+FSHistogram::getTHNFBasicIndex(TString index){
+  index = FSString::removeWhiteSpace(index);
+  map<TString,TString> mapIndex = parseHistogramIndex(index);
+  if (mapIndex["{-TP-}"] == "FILE"){
+    int     dimension = FSString::TString2int(mapIndex["{-ND-}"]);
+    TString fileName  = mapIndex["{-FN-}"];
+    TString histName  = mapIndex["{-HN-}"];
+    return getTHNFBasicFile(dimension,fileName,histName);
+  }
+  if (mapIndex["{-TP-}"] == "TREE"){
+    int     dimension = FSString::TString2int(mapIndex["{-ND-}"]);
+    TString fileName  = mapIndex["{-FN-}"];
+    TString ntName    = mapIndex["{-NT-}"];
+    TString variable  = mapIndex["{-VA-}"];
+    TString bounds    = mapIndex["{-BO-}"];
+    TString cuts      = mapIndex["{-CU-}"];
+    double  scale     = FSString::TString2double(mapIndex["{-SC-}"]);
+    return getTHNFBasicTree(dimension,fileName,ntName,variable,bounds,cuts,scale);
+  }
+  if (mapIndex["{-TP-}"] == "FORMULA"){
+    int     dimension = FSString::TString2int(mapIndex["{-ND-}"]);
+    TString formula   = mapIndex["{-FO-}"];
+    TString bounds    = mapIndex["{-BO-}"];
+    TString histName  = mapIndex["{-HN-}"];
+    return getTHNFBasicFormula(dimension,formula,bounds,histName);
+  }
+  return pair<TH1F*,TH2F*>(NULL,NULL);
+}
+
+
 
   // ***********************************************
   // helper functions for histogram indices
