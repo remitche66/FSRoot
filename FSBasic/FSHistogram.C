@@ -136,6 +136,27 @@ FSHistogram::getTHNF(int dimension, TString fileName,
 }
 
 
+pair<TH1F*,TH2F*> 
+FSHistogram::getTHNFSimple(int dimension, TString fileName, TString histName){
+  TFile* tf = FSTree::getTFile(fileName); tf->cd();
+  TH1F* hist1d0 = NULL;  TH2F* hist2d0 = NULL;  // histograms from the file
+  TH1F* hist1d  = NULL;  TH2F* hist2d  = NULL;  // copied histograms to return
+  if (dimension == 1) hist1d0 = (TH1F*) gDirectory->FindObjectAny(histName);
+  if (dimension == 2) hist2d0 = (TH2F*) gDirectory->FindObjectAny(histName);
+  if (hist1d0){ hist1d = new TH1F(*hist1d0); hist1d = getTH1F(hist1d); }
+  if (hist2d0){ hist2d = new TH2F(*hist2d0); hist2d = getTH2F(hist2d); }  
+  if (!hist1d && !hist2d){
+    cout << "FSHistogram WARNING: could not find histogram" << endl;
+    printIndexInfo(dimension,fileName,histName);
+  }
+  if (FSControl::DEBUG && (hist1d || hist2d)){
+    cout << "FSHistogram: found histogram in file" << endl;
+    printIndexInfo(dimension,fileName,histName);
+  }
+  return pair<TH1F*,TH2F*>(hist1d,hist2d);
+}
+
+
 
   // ********************************************************
   // CREATE A HISTOGRAM FROM A TREE AND CACHE IT
@@ -1177,7 +1198,103 @@ FSHistogram::getTHNFIndex(pair<TH1F*,TH2F*> hist){
 
 
 
-  
+  // ***********************************************
+  // helper functions for histogram indices
+  // ***********************************************
 
 
+TString
+FSHistogram::getHistogramIndex(map<TString,TString> indexMap){
+  TString index;
+  if (indexMap.find("{-ND-}") != indexMap.end()){ index += "{-ND-}"; index += indexMap["{-ND-}"]; }
+  if (indexMap.find("{-FN-}") != indexMap.end()){ index += "{-FN-}"; index += indexMap["{-FN-}"]; }
+  if (indexMap.find("{-HN-}") != indexMap.end()){ index += "{-HN-}"; index += indexMap["{-HN-}"]; }
+  if (indexMap.find("{-NT-}") != indexMap.end()){ index += "{-NT-}"; index += indexMap["{-NT-}"]; }
+  if (indexMap.find("{-CA-}") != indexMap.end()){ index += "{-CA-}"; index += indexMap["{-CA-}"]; }
+  if (indexMap.find("{-VA-}") != indexMap.end()){ index += "{-VA-}"; index += indexMap["{-VA-}"]; }
+  if (indexMap.find("{-BO-}") != indexMap.end()){ index += "{-BO-}"; index += indexMap["{-BO-}"]; }
+  if (indexMap.find("{-CU-}") != indexMap.end()){ index += "{-CU-}"; index += indexMap["{-CU-}"]; }
+  if (indexMap.find("{-SC-}") != indexMap.end()){ index += "{-SC-}"; index += indexMap["{-SC-}"]; }
+  return index;
+}
 
+TString
+FSHistogram::getHistogramIndex(int dimension, TString fileName, TString histName){
+  TString index;
+  fileName = FSString::removeWhiteSpace(fileName);
+  histName = FSString::removeWhiteSpace(histName);
+  if (dimension == 1) index += "{-ND-}1D";
+  if (dimension == 2) index += "{-ND-}2D";
+  index += "{-FN-}";  index += fileName;
+  index += "{-HN-}";  index += histName;
+  return index;
+}
+
+TString
+FSHistogram::getHistogramIndex(int dimension,
+                      TString fileName, TString ntName,
+                      TString variable, TString bounds,
+                      TString cuts, double scale, 
+                      bool useCat, TString cat){
+  TString index;
+  fileName = FSString::removeWhiteSpace(fileName);
+  ntName   = FSString::removeWhiteSpace(ntName);
+  variable = FSString::removeWhiteSpace(variable);
+  bounds   = FSString::removeWhiteSpace(bounds);
+  cuts     = FSString::removeWhiteSpace(cuts);
+  cat      = FSString::removeWhiteSpace(cat);
+  if (dimension == 1) index += "{-ND-}1D";
+  if (dimension == 2) index += "{-ND-}2D";
+  index += "{-FN-}";  index += fileName;
+  index += "{-NT-}";  index += ntName;
+  if (useCat)
+  index += "{-CA-}";  index += cat;
+  index += "{-VA-}";  index += FSTree::expandVariable(variable);
+  index += "{-BO-}";  index += bounds;
+  index += "{-CU-}";  index += FSTree::expandVariable(cuts);
+  index += "{-SC-}";  index += FSString::double2TString(scale,8,true);
+  return index;
+}
+
+map<TString,TString>
+FSHistogram::parseHistogramIndex(TString index){
+  index = FSString::removeWhiteSpace(index);
+  vector<TString> spacers; 
+  spacers.push_back("{-ND-}");
+  spacers.push_back("{-FN-}");
+  spacers.push_back("{-HN-}");
+  spacers.push_back("{-NT-}");
+  spacers.push_back("{-CA-}");
+  spacers.push_back("{-VA-}");
+  spacers.push_back("{-BO-}");
+  spacers.push_back("{-CU-}");
+  spacers.push_back("{-SC-}");
+  map<TString,TString> mapWords = FSString::parseTStringToMap1(index,spacers);
+  return mapWords;
+}  
+
+void 
+FSHistogram::printIndexInfo(int dimension, TString fileName, TString histName){
+  TString index = getHistogramIndex(dimension,fileName,histName);
+  printIndexInfo(index);
+}
+
+void
+FSHistogram::printIndexInfo(TString index){
+  printIndexInfo(parseHistogramIndex(index));
+}
+
+void
+FSHistogram::printIndexInfo(map<TString,TString> iMap){
+  cout << "---- HISTOGRAM INDEX INFORMATION ----" << endl;
+  if (iMap.find("{-ND-}") != iMap.end()){ cout << "\tDIMENSION = " << iMap["{-ND-}"] << endl; }
+  if (iMap.find("{-FN-}") != iMap.end()){ cout << "\tFILE NAME = " << iMap["{-FN-}"] << endl; }
+  if (iMap.find("{-HN-}") != iMap.end()){ cout << "\tHIST NAME = " << iMap["{-HN-}"] << endl; }
+  if (iMap.find("{-NT-}") != iMap.end()){ cout << "\tTREE NAME = " << iMap["{-NT-}"] << endl; }
+  if (iMap.find("{-CA-}") != iMap.end()){ cout << "\tCATEGORY  = " << iMap["{-CA-}"] << endl; }
+  if (iMap.find("{-VA-}") != iMap.end()){ cout << "\tVARIABLE  = " << iMap["{-VA-}"] << endl; }
+  if (iMap.find("{-BO-}") != iMap.end()){ cout << "\tBOUNDS    = " << iMap["{-BO-}"] << endl; }
+  if (iMap.find("{-CU-}") != iMap.end()){ cout << "\tCUTS      = " << iMap["{-CU-}"] << endl; }
+  if (iMap.find("{-SC-}") != iMap.end()){ cout << "\tSCALE     = " << iMap["{-SC-}"] << endl; }
+  cout << "-------------------------------------" << endl;
+}

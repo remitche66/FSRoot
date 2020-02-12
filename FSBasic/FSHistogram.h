@@ -194,6 +194,9 @@ class FSHistogram{
                                      TString fileName, TString histName,
                                      TString index = "");
 
+    static pair<TH1F*,TH2F*> getTHNFSimple(int dimension, 
+                                     TString fileName, TString histName);
+
     static pair<TH1F*,TH2F*> getTHNF(int dimension,
                                 TString fileName, TString ntName,
                                 TString variable, TString bounds,
@@ -241,6 +244,22 @@ class FSHistogram{
     static TTree* setTHNFContents(int dimension,
                                 vector< pair<TString,TString> > extraTreeContents = 
                                  vector< pair<TString,TString> >());
+
+      // helper functions for histogram indices
+
+    static TString getHistogramIndex(map<TString,TString> indexMap);
+    static TString getHistogramIndex(int dimension, TString fileName, TString histName);
+    static TString getHistogramIndex(int dimension,
+                            TString fileName, TString ntName,
+                            TString variable, TString bounds,
+                            TString cuts, double scale = 1.0,
+                            bool useCat = false, TString cat = "");
+
+    static map<TString,TString> parseHistogramIndex(TString index);
+
+    static void printIndexInfo(int dimension, TString fileName, TString histName);
+    static void printIndexInfo(TString index);
+    static void printIndexInfo(map<TString,TString> indexMap);
 
       // global caches
 
