@@ -24,6 +24,7 @@ map< TString, pair<TH1F*,TH2F*> > FSHistogram::m_histogramCache;
 map< TString, pair<TH1F*,TH2F*> > FSHistogram::m_tempCache;
 map< TString, pair<TH1F*,TH2F*> > FSHistogram::m_addCache;
 unsigned int FSHistogram::m_addCacheTotalSize = 0;
+unsigned int FSHistogram::m_indexFSRootHistName = 0;
 
 TString FSAND("&&");
 TString FSOR("||");
@@ -89,6 +90,7 @@ FSHistogram::getTH2F(TString fileName, TString histName){
   return getTH2F(getTHNF(2,fileName,histName).second);
 }
 
+        // XXXXX REMOVE XXXXX
 pair<TH1F*,TH2F*> 
 FSHistogram::getTHNF(int dimension, TString fileName, 
                                         TString histName, TString index){
@@ -137,21 +139,25 @@ FSHistogram::getTHNF(int dimension, TString fileName,
 
 
 pair<TH1F*,TH2F*> 
-FSHistogram::getTHNFSimple(int dimension, TString fileName, TString histName){
+FSHistogram::getTHNFBasic(int dimension, TString fileName, TString histName){
+  if (FSControl::DEBUG){
+    cout << "FSHistogram DEBUG: looking for histogram in file" << endl;
+    printIndexInfo(getHistogramIndex(dimension,fileName,histName));
+  }
   TFile* tf = FSTree::getTFile(fileName); tf->cd();
   TH1F* hist1d0 = NULL;  TH2F* hist2d0 = NULL;  // histograms from the file
   TH1F* hist1d  = NULL;  TH2F* hist2d  = NULL;  // copied histograms to return
+  TString newName = makeFSRootHistName();
   if (dimension == 1) hist1d0 = (TH1F*) gDirectory->FindObjectAny(histName);
   if (dimension == 2) hist2d0 = (TH2F*) gDirectory->FindObjectAny(histName);
-  if (hist1d0){ hist1d = new TH1F(*hist1d0); hist1d = getTH1F(hist1d); }
-  if (hist2d0){ hist2d = new TH2F(*hist2d0); hist2d = getTH2F(hist2d); }  
+  if (hist1d0){ hist1d = new TH1F(*hist1d0); hist1d = getTH1F(hist1d); hist1d->SetName(newName); }
+  if (hist2d0){ hist2d = new TH2F(*hist2d0); hist2d = getTH2F(hist2d); hist2d->SetName(newName); }  
   if (!hist1d && !hist2d){
     cout << "FSHistogram WARNING: could not find histogram" << endl;
-    printIndexInfo(dimension,fileName,histName);
+    printIndexInfo(getHistogramIndex(dimension,fileName,histName));
   }
   if (FSControl::DEBUG && (hist1d || hist2d)){
-    cout << "FSHistogram: found histogram in file" << endl;
-    printIndexInfo(dimension,fileName,histName);
+    cout << "FSHistogram DEBUG: found histogram in file" << endl;
   }
   return pair<TH1F*,TH2F*>(hist1d,hist2d);
 }
@@ -342,6 +348,62 @@ FSHistogram::getTHNF(int dimension,
   return pair<TH1F*,TH2F*>(hist1d,hist2d);
 
 } 
+
+
+
+pair<TH1F*,TH2F*> 
+FSHistogram::getTHNFBasic(int dimension,
+                       TString fileName, TString ntName,
+                       TString variable, TString bounds,
+                       TString cuts,     double scale){
+
+    // set up to make the histogram
+  if (FSControl::DEBUG){
+    cout << "FSHistogram DEBUG: making histogram" << endl;
+    printIndexInfo(getHistogramIndex(dimension,fileName,ntName,variable,bounds,cuts,scale));
+  }
+  fileName = FSString::removeWhiteSpace(fileName);
+  ntName   = FSString::removeWhiteSpace(ntName);
+  variable = FSString::removeWhiteSpace(variable);
+  bounds   = FSString::removeWhiteSpace(bounds);
+  cuts     = FSString::removeWhiteSpace(cuts);
+  TH1F* hist1d = NULL; TH2F* hist2d = NULL;
+  TString hname = makeFSRootHistName();
+  TString hbounds(hname); hbounds += bounds;
+
+    // use project to create a histogram if the chain is okay
+  TChain* chain = FSTree::getTChain(fileName,ntName);
+  if ((chain) && (chain->GetEntries() > 0) && (chain->GetNbranches() > 0)){
+    TString sScale(FSString::double2TString(scale,8,true));
+    TString scaleTimesCuts(sScale);
+    if (cuts != "") scaleTimesCuts += ("*("+cuts+")");
+    chain->Project(hbounds, variable, scaleTimesCuts);
+    if (dimension == 1) hist1d = (TH1F*) gDirectory->FindObject(hname); 
+    if (dimension == 2) hist2d = (TH2F*) gDirectory->FindObject(hname); 
+  }
+
+    // otherwise create an empty histogram
+  else{
+    int nbins = FSString::parseBoundsNBinsX(bounds);
+    double low = FSString::parseBoundsLowerX(bounds);
+    double high = FSString::parseBoundsUpperX(bounds);
+    int nbinsy = FSString::parseBoundsNBinsY(bounds);
+    double lowy = FSString::parseBoundsLowerY(bounds);
+    double highy = FSString::parseBoundsUpperY(bounds);
+    if (dimension == 1) hist1d = new TH1F(hname,"",nbins,low,high);
+    if (dimension == 2) hist2d = new TH2F(hname,"",nbins,low,high,nbinsy,lowy,highy); 
+  }
+
+    // return the created histogram
+  if (hist1d){ hist1d = getTH1F(hist1d); hist1d->SetName(hname); }
+  if (hist2d){ hist2d = getTH2F(hist2d); hist2d->SetName(hname); }
+  if (FSControl::DEBUG){
+    cout << "FSHistogram DEBUG: finished making histogram" << endl;
+    printIndexInfo(getHistogramIndex(dimension,fileName,ntName,variable,bounds,cuts,scale));
+  }
+  return pair<TH1F*,TH2F*>(hist1d,hist2d);
+} 
+
 
 
   // ********************************************************
@@ -1273,11 +1335,6 @@ FSHistogram::parseHistogramIndex(TString index){
   return mapWords;
 }  
 
-void 
-FSHistogram::printIndexInfo(int dimension, TString fileName, TString histName){
-  TString index = getHistogramIndex(dimension,fileName,histName);
-  printIndexInfo(index);
-}
 
 void
 FSHistogram::printIndexInfo(TString index){
@@ -1298,3 +1355,11 @@ FSHistogram::printIndexInfo(map<TString,TString> iMap){
   if (iMap.find("{-SC-}") != iMap.end()){ cout << "\tSCALE     = " << iMap["{-SC-}"] << endl; }
   cout << "-------------------------------------" << endl;
 }
+
+TString
+FSHistogram::makeFSRootHistName(){
+  TString hname("FSRootHist");
+  hname += FSString::int2TString(++m_indexFSRootHistName,9);
+  return hname;
+}
+

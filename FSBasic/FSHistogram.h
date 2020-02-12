@@ -190,13 +190,15 @@ class FSHistogram{
 
     static pair<TH1F*,TH2F*> getHistogramFromCache(TString index);
 
+        // XXXXX REMOVE XXXXX
     static pair<TH1F*,TH2F*> getTHNF(int dimension, 
                                      TString fileName, TString histName,
                                      TString index = "");
 
-    static pair<TH1F*,TH2F*> getTHNFSimple(int dimension, 
+    static pair<TH1F*,TH2F*> getTHNFBasic(int dimension, 
                                      TString fileName, TString histName);
 
+        // XXXXX REMOVE XXXXX
     static pair<TH1F*,TH2F*> getTHNF(int dimension,
                                 TString fileName, TString ntName,
                                 TString variable, TString bounds,
@@ -204,6 +206,11 @@ class FSHistogram{
                                 float scale, TTree* histTree,
                                 vector< pair<TString,TString> > extraTreeContents = 
                                   vector< pair<TString,TString> >());
+
+    static pair<TH1F*,TH2F*> getTHNFBasic(int dimension,
+                                TString fileName, TString ntName,
+                                TString variable, TString bounds,
+                                TString cuts,     double scale);
 
     static TString getTHNFIndex(int dimension,
                                 TString fileName, TString ntName,
@@ -257,9 +264,12 @@ class FSHistogram{
 
     static map<TString,TString> parseHistogramIndex(TString index);
 
-    static void printIndexInfo(int dimension, TString fileName, TString histName);
     static void printIndexInfo(TString index);
     static void printIndexInfo(map<TString,TString> indexMap);
+
+      // make histogram names
+
+    static TString makeFSRootHistName();
 
       // global caches
 
@@ -267,6 +277,7 @@ class FSHistogram{
     static map< TString, pair<TH1F*,TH2F*> > m_tempCache;
     static map< TString, pair<TH1F*,TH2F*> > m_addCache;
     static unsigned int m_addCacheTotalSize;
+    static unsigned int m_indexFSRootHistName;
 
 };
 
