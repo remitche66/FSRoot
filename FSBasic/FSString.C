@@ -447,6 +447,18 @@ FSString::parseTString(TString input, vector<TString> spacers, bool recordSpacer
   input = FSString::removeTabs(input);
   vector<TString> words;
   words.push_back(input);
+        // try to account for tricky special cases by sorting, or throw a warning
+      if (spacers.size() > 1){
+        for (unsigned int i = 0; i < spacers.size()-1; i++){
+          for (unsigned int j = i+1; j < spacers.size(); j++){
+            if (recordSpacers && (spacers[i].Contains(spacers[j]) ||
+                                  spacers[j].Contains(spacers[i])))
+              cout << "FSString::parseTString WARNING: spacers within spacers" << endl;
+            if (spacers[i].Length() < spacers[j].Length()){
+              TString temp = spacers[i];
+              spacers[i] = spacers[j];
+              spacers[j] = temp;
+      } } } }
   for (unsigned int i = 0; i < spacers.size(); i++){
     words = FSString::parseTString(words,spacers[i],recordSpacers);
   }
