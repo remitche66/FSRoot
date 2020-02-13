@@ -17,6 +17,7 @@
 
   // static member data
 
+
 map< TString, TChain*> FSTree::m_chainCache;
 map< TString, TFile*> FSTree::m_fileCache;
 
@@ -24,6 +25,10 @@ map< TString, TString > FSTree::m_mapDefinedPx;
 map< TString, TString > FSTree::m_mapDefinedPy;
 map< TString, TString > FSTree::m_mapDefinedPz;
 map< TString, TString > FSTree::m_mapDefinedEn;
+map< TString, TString > FSTree::m_mapDefined1VMacros;
+map< TString, TString > FSTree::m_mapDefined2VMacros;
+vector< TString > FSTree::m_vectorDefinedMacroKeywords;
+bool FSTree::m_madeStandardDefinitions = false;
 
 
   // ********************************************************
@@ -33,6 +38,8 @@ map< TString, TString > FSTree::m_mapDefinedEn;
 TChain*
 FSTree::getTChain(TString fileName, TString ntName, 
                               bool addFilesIndividually){
+  fileName = FSString::removeWhiteSpace(fileName);
+  ntName   = FSString::removeWhiteSpace(ntName);
   TChain* nt = NULL;
 
     // clear the chain cache if there is no chain caching
@@ -122,6 +129,7 @@ FSTree::getTChain(TString fileName, TString ntName,
 
 TFile*
 FSTree::getTFile(TString fileName){
+  fileName = FSString::removeWhiteSpace(fileName);
   TFile* tf;
 
     // clear the file cache if there is no file caching
@@ -161,7 +169,12 @@ void
 FSTree::skimTree(TString fileNameInput, TString chainName, 
                  TString fileNameOutput, TString cuts, 
                  TString newChainName, TString printCommandFile){
+  fileNameInput = FSString::removeWhiteSpace(fileNameInput);
+  chainName = FSString::removeWhiteSpace(chainName);
+  fileNameOutput = FSString::removeWhiteSpace(fileNameOutput);
   cuts = FSString::removeWhiteSpace(cuts);
+  newChainName = FSString::removeWhiteSpace(newChainName);
+  printCommandFile = FSString::removeWhiteSpace(printCommandFile);
 
   // just write the command to a file and return
 
@@ -266,28 +279,407 @@ FSTree::skimTree(TString fileNameInput, TString chainName,
 
 
 
+    // ********************************************************
+    // DEFINE SPECIAL FOUR-VECTORS AND MACROS
+    // ********************************************************
+
+void
+FSTree::makeStandardDefinitions(){
+  if (!m_madeStandardDefinitions){
+    m_madeStandardDefinitions = true;
+
+    defineFourVector("B3BEAM","(2.0*BeamEnergy)",
+                              "1.0*sin(0.011)*(2.0*BeamEnergy)","0.0","0.0",true);
+    defineFourVector("CCBEAM","(2.0*BeamEnergy)",
+                              "1.0*sin(-0.003)*(2.0*BeamEnergy)","0.0","0.0",true);
+    defineFourVector("GBEAM","(EnPB+0.938272)","PxPB","PyPB","PzPB",true);
+
+    defineMacro("MOMENTUMX",   1,    "(PxP[I])", true);
+
+    defineMacro("MOMENTUMY",   1,    "(PyP[I])", true);
+
+    defineMacro("MOMENTUMZ",   1,    "(PzP[I])", true);
+
+    defineMacro("ENERGY",      1,    "(EnP[I])", true);
+
+    defineMacro("MOMENTUMR",   1,    "(sqrt(pow((PxP[I]),2)+"
+                                           "pow((PyP[I]),2)))", true);
+
+    defineMacro("MOMENTUM",    1,    "(sqrt(pow((PxP[I]),2)+"
+                                           "pow((PyP[I]),2)+"
+                                           "pow((PzP[I]),2)))", true);
+
+    defineMacro("MASS",        1, "(sqrt(pow((EnP[I]),2)-"
+                                        "pow((PxP[I]),2)-"
+                                        "pow((PyP[I]),2)-"
+                                        "pow((PzP[I]),2)))", true);
+
+    defineMacro("MASS",        2, "(sqrt(pow((EnP[I]-EnP[J]),2)-"
+                                        "pow((PxP[I]-PxP[J]),2)-"
+                                        "pow((PyP[I]-PyP[J]),2)-"
+                                        "pow((PzP[I]-PzP[J]),2)))", true);
+
+    defineMacro("MASS2",       1,      "(pow((EnP[I]),2)-"
+                                        "pow((PxP[I]),2)-"
+                                        "pow((PyP[I]),2)-"
+                                        "pow((PzP[I]),2))", true);
+
+    defineMacro("MASS2",       2,      "(pow((EnP[I]-EnP[J]),2)-"
+                                        "pow((PxP[I]-PxP[J]),2)-"
+                                        "pow((PyP[I]-PyP[J]),2)-"
+                                        "pow((PzP[I]-PzP[J]),2))", true);
+
+    defineMacro("RECOILMASS",  2, "(sqrt(pow((EnP[I]-EnP[J]),2)-"
+                                        "pow((PxP[I]-PxP[J]),2)-"
+                                        "pow((PyP[I]-PyP[J]),2)-"
+                                        "pow((PzP[I]-PzP[J]),2)))", true);
+
+    defineMacro("RECOILMASS2", 2,      "(pow((EnP[I]-EnP[J]),2)-"
+                                        "pow((PxP[I]-PxP[J]),2)-"
+                                        "pow((PyP[I]-PyP[J]),2)-"
+                                        "pow((PzP[I]-PzP[J]),2))", true);
+
+    defineMacro("DOTPRODUCT",  2,      "((PxP[I])*(PxP[J])+"
+                                        "(PyP[I])*(PyP[J])+"
+                                        "(PzP[I])*(PzP[J]))", true);
+
+    defineMacro("COSINE",      1,            "((PzP[I])/" 
+                                    "(sqrt(pow((PxP[I]),2)+" 
+                                          "pow((PyP[I]),2)+" 
+                                          "pow((PzP[I]),2))))", true);
+
+    defineMacro("COSINE",      2,      "(((PxP[I])*(PxP[J])+" 
+                                         "(PyP[I])*(PyP[J])+" 
+                                         "(PzP[I])*(PzP[J]))/" 
+                                    "(sqrt(pow((PxP[I]),2)+" 
+                                          "pow((PyP[I]),2)+" 
+                                          "pow((PzP[I]),2)))/"  
+                                    "(sqrt(pow((PxP[J]),2)+" 
+                                          "pow((PyP[J]),2)+" 
+                                          "pow((PzP[J]),2))))", true);
+
+        {TString pmag = "(sqrt((pow(PxP[J]),2)+"
+                              "(pow(PyP[J]),2)+"
+                              "(pow(PzP[J]),2)))";
+         TString bmag = "(sqrt((pow(PxP[I]),2)+"
+                              "(pow(PyP[I]),2)+"
+                              "(pow(PzP[I]),2)))";
+         TString Ep   = "(EnP[J])";
+         TString Eb   = "(EnP[I])";
+         TString costheta = "(((PxP[I])*(PxP[J])+"
+                              "(PyP[I])*(PyP[J])+"
+                              "(PzP[I])*(PzP[J]))/"
+                                 "(" + pmag + "*" + bmag + "))";
+         TString sintheta = "(sqrt(1.0-pow(" + costheta + ",2)))";
+         TString ppar  = "("+pmag+"*"+costheta+")";
+         TString pperp = "("+pmag+"*"+sintheta+")";
+         TString beta = "(("+bmag+")/("+Eb+"))";
+         TString gamma = "(1.0/sqrt(1.0-pow("+beta+",2)))";
+         TString pparp = "("+gamma+"*"+ppar+ "-" +gamma+"*"+beta+"*"+Ep+")";
+         TString pmagp = "(sqrt(pow("+pparp+",2)+pow("+pperp+",2)))";
+         TString helcosine = "("+pparp+"/"+pmagp+")";
+
+    defineMacro("HELCOSINE", 2,  helcosine, true);}
+
+  }
+}
+
+
+void
+FSTree::defineFourVector(TString indexName, TString En, TString Px, TString Py, TString Pz, bool force){
+  indexName = FSString::removeWhiteSpace(indexName);
+  En = FSString::removeWhiteSpace(En);
+  Px = FSString::removeWhiteSpace(Px);
+  Py = FSString::removeWhiteSpace(Py);
+  Pz = FSString::removeWhiteSpace(Pz);
+  makeStandardDefinitions();
+  map<TString,TString>::const_iterator mapItr = m_mapDefinedEn.find(indexName);
+  if (mapItr != m_mapDefinedEn.end()){
+    cout << "FSTree WARNING:  four-vector named " << indexName << " already exists" << endl;
+    if (force)   cout << "   overwriting it with the new definition" << endl;
+    if (!force){ cout << "   ignoring the new definition" << endl; return; }
+  }
+  m_mapDefinedEn[indexName] = En;
+  m_mapDefinedPx[indexName] = Px;
+  m_mapDefinedPy[indexName] = Py;
+  m_mapDefinedPz[indexName] = Pz;
+}
+
+void
+FSTree::showDefinedFourVectors(){
+  makeStandardDefinitions();
+  cout << "----------------------------" << endl;
+  cout << "    DEFINED FOUR-VECTORS " << endl;
+  cout << "----------------------------" << endl;
+  for (map<TString,TString>::iterator mapItr = m_mapDefinedEn.begin(); 
+       mapItr != m_mapDefinedEn.end(); mapItr++){
+    TString name = mapItr->first;
+    cout << name << ":" << endl;
+    cout << "  En = " << m_mapDefinedEn[name] << endl;
+    cout << "  Px = " << m_mapDefinedPx[name] << endl;
+    cout << "  Py = " << m_mapDefinedPy[name] << endl;
+    cout << "  Pz = " << m_mapDefinedPz[name] << endl;
+  }
+  cout << "----------------------------" << endl;
+}
+
+
+void
+FSTree::defineMacro(TString macroName, int numFourVectors, TString macro, bool force){
+  macroName = FSString::removeWhiteSpace(macroName);
+  macro     = FSString::removeWhiteSpace(macro);
+  makeStandardDefinitions();
+  if ((macroName == "") || (macro == "")) return;
+  if ((numFourVectors < 1) || (numFourVectors > 2)){
+    cout << "FSTree::defineMacro WARNING: numFourVectors should be 1 or 2, nothing defined" << endl;
+    return;
+  }
+  if (((numFourVectors == 1) && (m_mapDefined1VMacros.find(macroName) != m_mapDefined1VMacros.end())) ||
+      ((numFourVectors == 2) && (m_mapDefined2VMacros.find(macroName) != m_mapDefined2VMacros.end()))){
+    cout << "FSTree::defineMacro WARNING: macro named " << macroName << " already defined" << endl;
+    if (force)   cout << "   overwriting it with the new definition" << endl;
+    if (!force){ cout << "   ignoring the new definition" << endl; return; }
+  }
+  if ((numFourVectors == 1) && (!macro.Contains("[I]"))){
+    cout << "FSTree::defineMacro WARNING: for numFourVectors = 1, macro should contain [I]" << endl;
+    return;
+  }
+  if ((numFourVectors == 2) && (!macro.Contains("[I]") || !macro.Contains("[J]"))){
+    cout << "FSTree::defineMacro WARNING: for numFourVectors = 2, macro should contain [I] and [J]" << endl;
+    return;
+  }
+  if (numFourVectors == 1) m_mapDefined1VMacros[macroName] = macro;
+  if (numFourVectors == 2) m_mapDefined2VMacros[macroName] = macro;
+  bool inVector = false;
+  for (unsigned int i = 0; i < m_vectorDefinedMacroKeywords.size(); i++){
+    if (m_vectorDefinedMacroKeywords[i] == macroName){ inVector = true; break; }
+  }
+  if (!inVector){
+    m_vectorDefinedMacroKeywords.push_back(macroName);
+    for (unsigned int i = 0; i < m_vectorDefinedMacroKeywords.size()-1; i++){
+    for (unsigned int j = i+1; j < m_vectorDefinedMacroKeywords.size(); j++){
+      if (m_vectorDefinedMacroKeywords[i].Length() < m_vectorDefinedMacroKeywords[j].Length()){
+        TString temp = m_vectorDefinedMacroKeywords[i];
+        m_vectorDefinedMacroKeywords[i] = m_vectorDefinedMacroKeywords[j];
+        m_vectorDefinedMacroKeywords[j] = temp;
+      }
+    }}
+  }
+}
+
+
+void
+FSTree::showDefinedMacros(){
+  makeStandardDefinitions();
+  cout << "----------------------------" << endl;
+  cout << "       DEFINED MACROS " << endl;
+  cout << "----------------------------" << endl << endl;
+  for (unsigned int i = 0; i < m_vectorDefinedMacroKeywords.size(); i++){
+    TString name = m_vectorDefinedMacroKeywords[i];
+    if (m_mapDefined1VMacros.find(name) != m_mapDefined1VMacros.end()){
+      cout << name << "([I])" << endl << endl; 
+      cout << "          " << m_mapDefined1VMacros[name] << endl << endl;
+    }
+    if (m_mapDefined2VMacros.find(name) != m_mapDefined2VMacros.end()){
+      cout << name << "([I];[J])" << endl << endl; 
+      cout << "          " << m_mapDefined2VMacros[name] << endl << endl;
+    }
+  }
+  cout << "----------------------------" << endl;
+}
+
+
+
   // ********************************************************
   // EXPAND VARIABLE MACROS
   // ********************************************************
 
+
+TString
+FSTree::reorderVariable(TString variable, bool show){
+  variable = FSString::removeWhiteSpace(variable);
+  makeStandardDefinitions();
+  vector< vector<TString> > expressions = parseVariable(variable,show);
+  for (unsigned int i = 0; i < expressions.size(); i++){
+    TString expression = expressions[i][0];
+    TString parentheses = expressions[i][3];
+    TString newExp = expressions[i][expressions[i].size()-1];
+    variable.Replace(variable.Index(expression),expression.Length(),newExp);
+  }
+  return variable;
+}
+
+
+vector< vector<TString> >
+FSTree::parseVariable(TString variable, bool show){
+  variable = FSString::removeWhiteSpace(variable);
+  TString tempVar = variable;
+  vector <vector<TString> > parsedVariable;
+  vector<TString> keywords = m_vectorDefinedMacroKeywords;
+  for (unsigned int i = 0; i < keywords.size(); i++){
+    while (tempVar.Contains(keywords[i]+"(")){
+      vector<TString> parsedExpression;  parsedExpression.resize(4);
+      TString pars = 
+        FSString::captureParentheses(tempVar,tempVar.Index(keywords[i]+"("));
+      TString expression = keywords[i]+"("+pars+")";
+      TString prefix("");
+      int index = tempVar.Index(expression);
+      if (index >= 1 && TString(tempVar[index-1]).IsAlpha()){
+        prefix = TString(tempVar[index-1]) + prefix;
+        if (index >= 2 && TString(tempVar[index-2]).IsAlpha())
+          prefix = TString(tempVar[index-2]) + prefix;}
+      expression = prefix + expression;
+      if (!tempVar.Contains(expression)){
+        cout << "FSTree::parseVariable ERROR: problem parsing variable = " 
+             << variable << endl;
+        exit(0);
+      }
+      tempVar.Replace(tempVar.Index(expression),expression.Length(),"");
+      parsedExpression[0] = expression;
+      parsedExpression[1] = prefix;
+      parsedExpression[2] = keywords[i];
+      parsedExpression[3] = pars;
+      vector<TString> semiParts = FSString::parseTString(pars,";");
+      for (unsigned int j = 0; j < semiParts.size(); j++){
+        vector<TString> commaParts = FSString::parseTString(semiParts[j],",");
+        if (commaParts.size() == 0) continue;
+        for (unsigned int ic = 0; ic < commaParts.size()-1; ic++){
+        for (unsigned int jc = ic+1; jc < commaParts.size(); jc++){
+          if (FSString::TString2string(commaParts[jc]) < 
+              FSString::TString2string(commaParts[ic])){
+            TString tempComma = commaParts[ic];
+            commaParts[ic] = commaParts[jc];
+            commaParts[jc] = tempComma;
+          }
+        }}
+        TString newSemiPart("");
+        for (unsigned int ic = 0; ic < commaParts.size(); ic++){
+          if (commaParts[ic] == "") continue;
+          newSemiPart += commaParts[ic];
+          if (ic != commaParts.size()-1) newSemiPart += ",";
+        }
+        if (newSemiPart != "") parsedExpression.push_back(newSemiPart);
+      }
+      TString newPars("");
+      for (unsigned int j = 4; j < parsedExpression.size(); j++){
+        newPars += parsedExpression[j];
+        if (j != parsedExpression.size()-1) newPars += ";";
+      }
+      parsedExpression.push_back(newPars);
+      TString newExpression = expression;
+      newExpression.Replace(expression.Index(pars),pars.Length(),newPars);
+      parsedExpression.push_back(newExpression);
+      parsedVariable.push_back(parsedExpression);
+    }
+  }
+  if (show){
+    cout << "------ PARSING VARIABLE -----" << endl;
+    cout << variable << endl;
+    cout << "-----------------------------" << endl;
+    for (unsigned int i = 0; i < parsedVariable.size(); i++){
+      cout << "expression  = " << parsedVariable[i][0] << endl;
+      cout << "prefix      = " << parsedVariable[i][1] << endl;
+      cout << "keyword     = " << parsedVariable[i][2] << endl;
+      cout << "parentheses = " << parsedVariable[i][3] << endl;
+      for (unsigned int j = 4; j < parsedVariable[i].size()-2; j++){
+      cout << "    part " << j-3 << "  = " << parsedVariable[i][j] << endl;}
+      cout << "new parentheses = " << parsedVariable[i][parsedVariable[i].size()-2] << endl;
+      cout << "new expression  = " << parsedVariable[i][parsedVariable[i].size()-1] << endl;
+      cout << "-----------------------------" << endl;
+    }
+  }
+  return parsedVariable;
+}
+
+
+TString
+FSTree::expandVariable2(TString variable, bool show){
+  variable = FSString::removeWhiteSpace(variable);
+  makeStandardDefinitions();
+  vector< vector<TString> > expressions = parseVariable(variable,show);
+  for (unsigned int i = 0; i < expressions.size(); i++){
+    vector<TString> expInfo = expressions[i];
+    int numParts = expInfo.size()-6;
+    if ((numParts != 1) && (numParts != 2)){
+      cout << "FSTree::expandVariable2 ERROR: problem parsing variable..." << endl;
+      parseVariable(variable,true);
+      return TString("");
+    }
+    TString expression = expInfo[0];
+    TString prefix = expInfo[1];
+    TString keyword = expInfo[2];
+    TString macro = "";
+    if (numParts == 1 && m_mapDefined1VMacros.find(keyword) != m_mapDefined1VMacros.end())
+      macro = m_mapDefined1VMacros[keyword];
+    if (numParts == 2 && m_mapDefined2VMacros.find(keyword) != m_mapDefined2VMacros.end())
+      macro = m_mapDefined2VMacros[keyword];
+    if (macro == ""){
+      cout << "FSTree::expandVariable ERROR: no macro named " << keyword 
+           << " with number of parts = " << numParts << endl;
+      parseVariable(variable,true);
+      return TString("");
+    }
+    TString newMacro = macro;
+    for (int np = 0; np < numParts; np++){
+      TString IJ = "[I]"; if (np == 1) IJ = "[J]";
+      TString macroEn = "EnP"+IJ;  TString newEn = "(";
+      TString macroPx = "PxP"+IJ;  TString newPx = "(";
+      TString macroPy = "PyP"+IJ;  TString newPy = "(";
+      TString macroPz = "PzP"+IJ;  TString newPz = "(";
+      TString commaList = expInfo[4+np];
+      vector<TString> commaParts = FSString::parseTString(commaList,",");
+      for (unsigned int ic = 0; ic < commaParts.size(); ic++){
+        if (m_mapDefinedEn.find(commaParts[ic]) != m_mapDefinedEn.end()){
+          newEn += m_mapDefinedEn[commaParts[ic]];
+          newPx += m_mapDefinedPx[commaParts[ic]];
+          newPy += m_mapDefinedPy[commaParts[ic]];
+          newPz += m_mapDefinedPz[commaParts[ic]];
+        }
+        else{
+          newEn += (prefix+"EnP"+commaParts[ic]);
+          newPx += (prefix+"PxP"+commaParts[ic]);
+          newPy += (prefix+"PyP"+commaParts[ic]);
+          newPz += (prefix+"PzP"+commaParts[ic]);
+        }
+        if (ic != commaParts.size()-1){ 
+          newEn += "+"; newPx += "+"; newPy += "+"; newPz += "+"; }
+      }
+      newEn += ")"; newPx += ")"; newPy += ")"; newPz += ")";
+      while (newMacro.Contains(macroEn)){ 
+        newMacro.Replace(newMacro.Index(macroEn),macroEn.Length(),newEn); }
+      while (newMacro.Contains(macroPx)){ 
+        newMacro.Replace(newMacro.Index(macroPx),macroPx.Length(),newPx); }
+      while (newMacro.Contains(macroPy)){ 
+        newMacro.Replace(newMacro.Index(macroPy),macroPy.Length(),newPy); }
+      while (newMacro.Contains(macroPz)){ 
+        newMacro.Replace(newMacro.Index(macroPz),macroPz.Length(),newPz); }
+    }
+    variable.Replace(variable.Index(expression),expression.Length(),newMacro);
+  }
+  return variable;
+}
+
+
+
 TString 
 FSTree::expandVariable(TString variable){
+  makeStandardDefinitions();
 
   TString PREFIXMARK("");
 
-  TString RECOILMASSMARK  ("RECOILMASS(");
+  TString RECOILMASSMARK  ("RECOILMASS(" );
   TString RECOILMASS2MARK ("RECOILMASS2(");
-  TString MASSMARK        ("MASS(");
-  TString MASS2MARK       ("MASS2(");
-  TString MOMXMARK        ("MOMENTUMX(");
-  TString MOMYMARK        ("MOMENTUMY(");
-  TString MOMZMARK        ("MOMENTUMZ(");
-  TString MOMRMARK        ("MOMENTUMR(");
-  TString MOMMARK         ("MOMENTUM(");
-  TString ENMARK          ("ENERGY(");
-  TString DOTPRODUCT      ("DOTPRODUCT(");
-  TString HELCOSINE       ("HELCOSINE(");
-  TString COSINE          ("COSINE(");
+  TString MASSMARK        ("MASS("       );
+  TString MASS2MARK       ("MASS2("      );
+  TString MOMXMARK        ("MOMENTUMX("  );
+  TString MOMYMARK        ("MOMENTUMY("  );
+  TString MOMZMARK        ("MOMENTUMZ("  );
+  TString MOMRMARK        ("MOMENTUMR("  );
+  TString MOMMARK         ("MOMENTUM("   );
+  TString ENMARK          ("ENERGY("     );
+  TString DOTPRODUCT      ("DOTPRODUCT(" );
+  TString HELCOSINE       ("HELCOSINE("  );
+  TString COSINE          ("COSINE("     );
 
   while (variable.Contains(RECOILMASSMARK) ||
          variable.Contains(RECOILMASS2MARK) ||
@@ -585,22 +977,6 @@ FSTree::expandVariable(TString variable){
 
 }
 
-
-    // ********************************************************
-    // DEFINE SPECIAL FOUR-VECTORS
-    // ********************************************************
-
-void
-FSTree::defineFourVector(TString indexName, TString En, TString Px, TString Py, TString Pz){
-  map<TString,TString>::const_iterator mapItr = m_mapDefinedEn.find(indexName);
-  if (mapItr != m_mapDefinedEn.end()){
-    cout << "FSTree WARNING:  overwriting defined four-vector named " << indexName << endl;
-  }
-  m_mapDefinedEn[indexName] = En;
-  m_mapDefinedPx[indexName] = Px;
-  m_mapDefinedPy[indexName] = Py;
-  m_mapDefinedPz[indexName] = Pz;
-}
 
 
   // ********************************************************

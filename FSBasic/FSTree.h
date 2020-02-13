@@ -54,7 +54,10 @@ class FSTree{
       //               -(XXPzP2+XXPzP3)**2))"
       // ********************************************************
 
+    static TString reorderVariable(TString variable, bool show = false);
+    static TString expandVariable2(TString variable, bool show = false);
     static TString expandVariable(TString variable);
+
 
       // ********************************************************
       // DEFINE SPECIAL FOUR-VECTORS
@@ -69,7 +72,11 @@ class FSTree{
       //               -(spz+XXPzP2+XXPzP3)**2))"
       // ********************************************************
 
-    static void defineFourVector(TString indexName, TString En, TString Px, TString Py, TString Pz);
+    static void defineFourVector(TString indexName, TString En, TString Px, TString Py, TString Pz, bool force = false);
+    static void showDefinedFourVectors();
+
+    static void defineMacro(TString macroName, int numFourVectors, TString macro, bool force = false);
+    static void showDefinedMacros();
   
 
       // ********************************************************
@@ -81,6 +88,10 @@ class FSTree{
 
 
   private:
+
+    static vector< vector<TString> > parseVariable(TString variable, bool show = false);
+    static void makeStandardDefinitions();
+    static bool m_madeStandardDefinitions;
 
       // global caches
 
@@ -94,6 +105,11 @@ class FSTree{
     static map< TString, TString > m_mapDefinedPz;
     static map< TString, TString > m_mapDefinedEn;
 
+      // defined macros
+
+    static map< TString, TString > m_mapDefined1VMacros;
+    static map< TString, TString > m_mapDefined2VMacros;
+    static vector< TString > m_vectorDefinedMacroKeywords;
 
 };
 
