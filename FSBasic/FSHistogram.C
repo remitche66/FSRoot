@@ -816,7 +816,6 @@ FSHistogram::getTHNFBasicFormula(int dimension, TString formula, TString bounds,
 
     // adjust the input parameters
   formula  = FSString::removeWhiteSpace(formula);
-  formula  = FSString::expandSUM(formula);
   bounds   = FSString::removeWhiteSpace(bounds);
   histName = FSString::removeWhiteSpace(histName);
   if (histName == "") histName = makeFSRootHistName();
@@ -824,6 +823,7 @@ FSHistogram::getTHNFBasicFormula(int dimension, TString formula, TString bounds,
     cout << "FSHistogram::getTHNFBasicFormula DEBUG: making histogram from formula" << endl;
     printIndexInfo(getHistogramIndexFormula(dimension,formula,bounds,histName));
   }
+  formula  = FSString::expandSUM(formula);
 
     // set up to make the histogram
   TFormula rootFormula("FSRootTempFormula",formula);

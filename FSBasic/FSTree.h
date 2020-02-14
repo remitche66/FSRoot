@@ -60,6 +60,13 @@ class FSTree{
 
 
       // ********************************************************
+      // DEFINE AND SHOW VARIABLE MACROS
+      // ********************************************************
+
+    static void defineMacro(TString macroName, int numFourVectors, TString macro, bool force = false);
+    static void showDefinedMacros();
+
+      // ********************************************************
       // DEFINE SPECIAL FOUR-VECTORS
       //   These are used by expandVariable.
       //   For example:
@@ -74,9 +81,6 @@ class FSTree{
 
     static void defineFourVector(TString indexName, TString En, TString Px, TString Py, TString Pz, bool force = false);
     static void showDefinedFourVectors();
-
-    static void defineMacro(TString macroName, int numFourVectors, TString macro, bool force = false);
-    static void showDefinedMacros();
   
 
       // ********************************************************
