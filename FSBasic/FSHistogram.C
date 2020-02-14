@@ -378,6 +378,8 @@ FSHistogram::getTHNFBasicTree(int dimension,
     cout << "FSHistogram::getTHNFBasicTree DEBUG: making histogram from tree" << endl;
     printIndexInfo(getHistogramIndexTree(dimension,fileName,ntName,variable,bounds,cuts,scale));
   }
+  variable = FSTree::expandVariable(variable);
+  cuts     = FSTree::expandVariable(cuts);
 
     // set up to make the histogram
   TH1F* hist1d = NULL; TH2F* hist2d = NULL;
@@ -590,6 +592,8 @@ FSHistogram::getTHNFBasicContents(TTree* histTree, int dimension,
     cout << "FSHistogram::getTHNFBasicContents DEBUG: making tree of histogram contents" << endl;
     printIndexInfo(getHistogramIndexTree(dimension,fileName,ntName,variable,bounds,cuts,scale));
   }
+  variable = FSTree::expandVariable(variable);
+  cuts = FSTree::expandVariable(cuts);
 
     // create a new tree if one hasn't been passed in
   if (!histTree){
@@ -1558,9 +1562,9 @@ FSHistogram::getHistogramIndexTree(int dimension,
   index += "{-NT-}";  index += ntName;
   if (useCat)
   index += "{-CA-}";  index += cat;
-  index += "{-VA-}";  index += variable;
+  index += "{-VA-}";  index += FSTree::reorderVariable(variable);
   index += "{-BO-}";  index += bounds;
-  index += "{-CU-}";  index += cuts;
+  index += "{-CU-}";  index += FSTree::reorderVariable(cuts);
   index += "{-SC-}";  index += FSString::double2TString(scale,8,true);
   return index;
 }
