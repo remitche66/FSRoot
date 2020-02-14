@@ -90,18 +90,16 @@ FSHistogram::getTH2F(TString fileName, TString histName){
   return getTH2F(getTHNF(2,fileName,histName).second);
 }
 
-        // XXXXX REMOVE XXXXX
 pair<TH1F*,TH2F*> 
 FSHistogram::getTHNF(int dimension, TString fileName, 
                                         TString histName, TString index){
 
     // create an index (or use the original index for readHistogramCache)
 
+  fileName = FSString::removeWhiteSpace(fileName);
+  histName = FSString::removeWhiteSpace(histName);
   if (index == ""){
-    if (dimension == 1) index += "1D";
-    if (dimension == 2) index += "2D";
-    index += "(fn)"; index += fileName;
-    index += "(hn)"; index += histName;
+    index = getHistogramIndexFile(dimension,fileName,histName);
   }
 
     // first search the cache and return if the histogram is found
@@ -111,16 +109,9 @@ FSHistogram::getTHNF(int dimension, TString fileName,
 
     // if not found in cache, search the file
 
-  TFile* tf = FSTree::getTFile(fileName);
-  tf->cd();
-  TH1F* hist1d0 = NULL;
-  TH2F* hist2d0 = NULL;
-  TH1F* hist1d = NULL;
-  TH2F* hist2d = NULL;
-  if (dimension == 1) hist1d0 = (TH1F*) gDirectory->FindObjectAny(histName);
-  if (dimension == 2) hist2d0 = (TH2F*) gDirectory->FindObjectAny(histName);
-  if (hist1d0) hist1d = new TH1F(*hist1d0);
-  if (hist2d0) hist2d = new TH2F(*hist2d0);  
+  histPair = getTHNFBasicFile(dimension,fileName,histName);
+  TH1F* hist1d = histPair.first;
+  TH2F* hist2d = histPair.second;
 
     // if found in file, add the histogram to the cache and return
 
@@ -266,9 +257,8 @@ FSHistogram::getTHNF(int dimension,
 
     // create an index
 
-  TString index = getTHNFIndex(dimension, fileName, ntName, 
-                                           fullVariable, bounds, fullCuts, 
-                                           options, scale);
+  TString index = getHistogramIndexTree(dimension, fileName, ntName, 
+                                           variable, bounds, cuts, scale);
 
 
     // print information to screen if DEBUG is set
@@ -303,54 +293,17 @@ FSHistogram::getTHNF(int dimension,
   }
 
 
-    // set up the chain
-
-  TChain* chain = FSTree::getTChain(fileName,ntName);
-
-
     // if not found in cache, set up to make a new histogram
 
-  TH1F* hist1d = NULL;
-  TH2F* hist2d = NULL;
-  TString hname = makeHistogramName();
-  TString hbounds(hname); hbounds += bounds;
-
-
-
-    // use project to create a histogram if the chain is okay
-
-  if ((chain) && (chain->GetEntries() > 0) && (chain->GetNbranches() > 0)){
-
-    TString extraScale(FSString::double2TString(scale,8,true));
-    TString scaleTimesCuts(fullCuts);
-    if (scaleTimesCuts != "") scaleTimesCuts = "*("+scaleTimesCuts+")";
-    scaleTimesCuts = extraScale+scaleTimesCuts;
-
-    chain->Project(hbounds, fullVariable, scaleTimesCuts, options);
-
-    if (dimension == 1) hist1d = (TH1F*) gDirectory->FindObject(hname); 
-    if (dimension == 2) hist2d = (TH2F*) gDirectory->FindObject(hname); 
-
-    if (histTree) histTree = addTHNFContents(histTree, dimension, fileName,
-                      ntName,fullVariable,bounds,fullCuts,scale,extraTreeContents);
-
+  if (histTree){
+    histTree = getTHNFBasicContents(histTree,dimension,fileName,ntName,
+                 variable,bounds,cuts,scale,extraTreeContents);
   }
 
-    // otherwise create an empty histogram
-
-  else{
-
-    int nbins = FSString::parseBoundsNBinsX(bounds);
-    double low = FSString::parseBoundsLowerX(bounds);
-    double high = FSString::parseBoundsUpperX(bounds);
-    int nbinsy = FSString::parseBoundsNBinsY(bounds);
-    double lowy = FSString::parseBoundsLowerY(bounds);
-    double highy = FSString::parseBoundsUpperY(bounds);
-
-    if (dimension == 1) hist1d = new TH1F(hname,"",nbins,low,high);
-    if (dimension == 2) hist2d = new TH2F(hname,"",nbins,low,high,nbinsy,lowy,highy); 
-
-  }
+  pair<TH1F*,TH2F*> histPair = getTHNFBasicTree(dimension,fileName,ntName,
+                                    variable,bounds,cuts,scale);
+  TH1F* hist1d = histPair.first;
+  TH2F* hist2d = histPair.second;
 
 
     // add to the histogram cache and return
@@ -487,88 +440,6 @@ FSHistogram::setTHNFContents(int dimension,
   return histTree;
 }
 
-TTree*
-FSHistogram::addTHNFContents(TTree* histTree, int dimension, 
-                             TString fileName, TString ntName, TString variable, TString bounds, 
-                             TString cuts, float scale,
-                             vector< pair<TString,TString> > extraTreeContents){
-
-    // get the x and y variable names
-
-  vector<TString> vars = FSString::parseTString(variable,":");
-  if ((int)vars.size() != dimension){
-    cout << "FSHistogram contents ERROR:  bad variable format" << endl;
-    exit(0);
-  }
-  TString varX("");  if (dimension >= 1)  varX = vars[0];
-  TString varY("");  if (dimension == 2){ varX = vars[1]; varY = vars[0]; }
-
-    // set the addresses of the values to add to histTree
-
-  Double_t x = 0.0;  if (dimension >= 1) histTree->SetBranchAddress("x",  &x);
-  Double_t y = 0.0;  if (dimension == 2) histTree->SetBranchAddress("y",  &y);
-  Double_t wt = 0.0; if (dimension >= 1) histTree->SetBranchAddress("wt", &wt);
-  Double_t extraValues[200];
-  if (extraTreeContents.size() > 200){
-    cout << "FSHistogram::addTHNFContents ERROR: too many extra branches" << endl;
-    exit(0);
-  }
-  for (unsigned int i = 0; i < extraTreeContents.size(); i++){
-    TString contentName = extraTreeContents[i].first;
-    histTree->SetBranchAddress(contentName,&extraValues[i]);
-  }
-
-    // get the old tree
-
-  TTree* nt = FSTree::getTChain(fileName,ntName);
-
-    // set up the TTreeFormula objects
-
-  if (cuts == "") cuts = "(1==1)";
-  TTreeFormula* cutsF = NULL; if (dimension >= 1) cutsF = new TTreeFormula("cutsF", cuts, nt);
-  TTreeFormula* varXF = NULL; if (dimension >= 1) varXF = new TTreeFormula("varXF", varX, nt);
-  TTreeFormula* varYF = NULL; if (dimension == 2) varYF = new TTreeFormula("varYF", varY, nt);
-  vector<TTreeFormula*> varEF;
-  for (unsigned int i = 0; i < extraTreeContents.size(); i++){
-    TString varName("varEF"); varName += i;
-    varEF.push_back(new TTreeFormula(varName,extraTreeContents[i].second,nt));
-  }
-
-    // get cut values according to the histogram bounds
-
-  double xLow  = 0.0;  if (dimension >= 1)  xLow = FSString::parseBoundsLowerX(bounds);
-  double xHigh = 0.0;  if (dimension >= 1) xHigh = FSString::parseBoundsUpperX(bounds);
-  double yLow  = 0.0;  if (dimension == 2)  yLow = FSString::parseBoundsLowerY(bounds);
-  double yHigh = 0.0;  if (dimension == 2) yHigh = FSString::parseBoundsUpperY(bounds);
-
-    // loop over events
-
-  unsigned int nEvents = nt->GetEntries();
-  for (unsigned int i = 0; i < nEvents; i++){
-    nt->GetEntry(i);
-    if (!cutsF->EvalInstance()) continue;
-    if (dimension >= 1) x = varXF->EvalInstance();
-    if (dimension == 2) y = varYF->EvalInstance();
-    if (dimension >= 1) wt = scale * cutsF->EvalInstance();
-    for (unsigned int j = 0; j < varEF.size(); j++){
-      extraValues[j] = varEF[j]->EvalInstance();
-    }
-    if ((dimension >= 1) && ((x < xLow) || (x > xHigh))) continue;      
-    if ((dimension == 2) && ((y < yLow) || (y > yHigh))) continue;      
-    histTree->Fill();  
-  }
-
-    // delete the TTreeFormula objects
-
-  if (cutsF) delete cutsF;
-  if (varXF) delete varXF;
-  if (varYF) delete varYF;
-  for (unsigned int i = 0; i < varEF.size(); i++){
-    if (varEF[i]) delete varEF[i];
-  }
-
-  return histTree;
-}
 
 TTree* 
 FSHistogram::getTHNFBasicContents(TTree* histTree, int dimension,
@@ -1459,6 +1330,25 @@ FSHistogram::getTHNFIndex(pair<TH1F*,TH2F*> hist){
   return TString("");
 }
 
+
+TTree* 
+FSHistogram::getTHNFBasicContents(TTree* histTree, TString index,
+                                vector< pair<TString,TString> > extraTreeContents){
+  index = FSString::removeWhiteSpace(index);
+  map<TString,TString> mapIndex = parseHistogramIndex(index);
+  if (mapIndex["{-TP-}"] == "TREE"){
+    int     dimension = FSString::TString2int(mapIndex["{-ND-}"]);
+    TString fileName  = mapIndex["{-FN-}"];
+    TString ntName    = mapIndex["{-NT-}"];
+    TString variable  = mapIndex["{-VA-}"];
+    TString bounds    = mapIndex["{-BO-}"];
+    TString cuts      = mapIndex["{-CU-}"];
+    double  scale     = FSString::TString2double(mapIndex["{-SC-}"]);
+    return getTHNFBasicContents(histTree,dimension,fileName,ntName,
+              variable,bounds,cuts,scale,extraTreeContents);
+  }
+  return histTree;
+}
 
 pair<TH1F*,TH2F*>
 FSHistogram::getTHNFBasicIndex(TString index){
