@@ -311,18 +311,43 @@ class FSHistogramInfo{
   private:
     FSHistogramInfo(TString index, vector<TString> expandedIndices){
       if (expandedIndices.size() == 1){ index = expandedIndices[0];  expandedIndices.clear(); }
-      m_index = index;  m_hist1d = NULL;  m_hist2d = NULL;
+      m_index = index;  m_histPair.first = NULL;  m_histPair.second = NULL;
       for (unsigned int i = 0; i < expandedIndices.size(); i++){
-        m_basicFSHistograms.push_back(FSHistogram::getFSHistogramInfo(expandedIndices[i]));
+        m_basicHistograms.push_back(FSHistogram::getFSHistogramInfo(expandedIndices[i]));
       }
     }
-    //pair<TH1F*,TH2F*> getTHNF();
-    //TTree* getTHNFContents(TTree* histTree = NULL,
-    //  vector< pair<TString,TString> > extraTreeContents = vector< pair<TString,TString> >());
+    pair<TH1F*,TH2F*> getTHNF(){
+      if (m_histPair.first || m_histPair.second) return m_histPair;
+      if (m_basicHistograms.size() == 0) {
+        m_histPair = FSHistogram::getTHNFBasicIndex(m_index);
+        return m_histPair;
+      }
+      pair<TH1F*,TH2F*> histPairTmp = m_basicHistograms[0]->getTHNF();
+      if (histPairTmp.first) m_histPair.first = 
+        FSHistogram::getTH1F((TH1F*)histPairTmp.first->Clone(FSHistogram::makeFSRootHistName()));
+      if (histPairTmp.second) m_histPair.second = 
+        FSHistogram::getTH2F((TH2F*)histPairTmp.second->Clone(FSHistogram::makeFSRootHistName()));
+      for (unsigned int i = 1; i < m_basicHistograms.size(); i++){
+        pair<TH1F*,TH2F*> hNew = m_basicHistograms[i]->getTHNF();
+        if (m_histPair.first  && hNew.first)  m_histPair.first->Add(hNew.first);
+        if (m_histPair.second && hNew.second) m_histPair.second->Add(hNew.second);
+      }
+      return m_histPair;
+    }
+    TTree* getTHNFContents(vector< pair<TString,TString> > extraTreeContents 
+                              = vector< pair<TString,TString> >()){
+      if (m_basicHistograms.size() == 0)
+        return FSHistogram::getTHNFBasicContents(NULL,m_index,extraTreeContents);
+      TTree* histTree = NULL;
+      for (unsigned int i = 0; i < m_basicHistograms.size(); i++){
+        histTree = FSHistogram::getTHNFBasicContents(histTree,
+                                       m_basicHistograms[i]->m_index,extraTreeContents);
+      }
+      return histTree;
+    }
     TString m_index;
-    vector<FSHistogramInfo*> m_basicFSHistograms;
-    TH1F* m_hist1d;
-    TH2F* m_hist2d;
+    vector<FSHistogramInfo*> m_basicHistograms;
+    pair<TH1F*,TH2F*> m_histPair;
 };
 
 
