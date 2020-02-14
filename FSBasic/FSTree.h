@@ -56,7 +56,7 @@ class FSTree{
 
     static TString reorderVariable(TString variable, bool show = false);
     static TString expandVariable2(TString variable, bool show = false);
-    static TString expandVariable(TString variable);
+    static TString expandVariable(TString variable, bool show = false);
 
 
       // ********************************************************

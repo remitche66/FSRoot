@@ -593,7 +593,7 @@ FSTree::parseVariable(TString variable, bool show){
 
 
 TString
-FSTree::expandVariable2(TString variable, bool show){
+FSTree::expandVariable(TString variable, bool show){
   variable = FSString::removeWhiteSpace(variable);
   makeStandardDefinitions();
   vector< vector<TString> > expressions = parseVariable(variable,show);
@@ -601,7 +601,7 @@ FSTree::expandVariable2(TString variable, bool show){
     vector<TString> expInfo = expressions[i];
     int numParts = expInfo.size()-6;
     if ((numParts != 1) && (numParts != 2)){
-      cout << "FSTree::expandVariable2 ERROR: problem parsing variable..." << endl;
+      cout << "FSTree::expandVariable ERROR: problem parsing variable..." << endl;
       parseVariable(variable,true);
       return TString("");
     }
@@ -662,8 +662,9 @@ FSTree::expandVariable2(TString variable, bool show){
 
 
 TString 
-FSTree::expandVariable(TString variable){
+FSTree::expandVariable2(TString variable, bool show){
   makeStandardDefinitions();
+  show = false;
 
   TString PREFIXMARK("");
 
