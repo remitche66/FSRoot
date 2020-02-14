@@ -310,28 +310,38 @@ class FSHistogramInfo{
   friend class FSModeHistogram;
   private:
     FSHistogramInfo(TString index, vector<TString> expandedIndices){
-      if (expandedIndices.size() == 1){ index = expandedIndices[0];  expandedIndices.clear(); }
+      //cout << "Creating FSHistogramInfo: index = " << index << endl;
       m_index = index;  m_histPair.first = NULL;  m_histPair.second = NULL;
       for (unsigned int i = 0; i < expandedIndices.size(); i++){
         m_basicHistograms.push_back(FSHistogram::getFSHistogramInfo(expandedIndices[i]));
       }
     }
     pair<TH1F*,TH2F*> getTHNF(){
-      if (m_histPair.first || m_histPair.second) return m_histPair;
-      if (m_basicHistograms.size() == 0) {
+      if (m_histPair.first || m_histPair.second){
+        cout << "FSHistogramInfo:  FOUND HISTOGRAM...     ";
+      }
+      else if (m_basicHistograms.size() == 0) {
+        cout << "FSHistogramInfo:  CREATING HISTOGRAM...  ";
         m_histPair = FSHistogram::getTHNFBasicIndex(m_index);
-        return m_histPair;
       }
-      pair<TH1F*,TH2F*> histPairTmp = m_basicHistograms[0]->getTHNF();
-      if (histPairTmp.first) m_histPair.first = 
-        FSHistogram::getTH1F((TH1F*)histPairTmp.first->Clone(FSHistogram::makeFSRootHistName()));
-      if (histPairTmp.second) m_histPair.second = 
-        FSHistogram::getTH2F((TH2F*)histPairTmp.second->Clone(FSHistogram::makeFSRootHistName()));
-      for (unsigned int i = 1; i < m_basicHistograms.size(); i++){
-        pair<TH1F*,TH2F*> hNew = m_basicHistograms[i]->getTHNF();
-        if (m_histPair.first  && hNew.first)  m_histPair.first->Add(hNew.first);
-        if (m_histPair.second && hNew.second) m_histPair.second->Add(hNew.second);
+      else{
+        cout << "FSHistogramInfo:  CREATING COMPOSITE...  " << endl;
+        pair<TH1F*,TH2F*> histPairTmp = m_basicHistograms[0]->getTHNF();
+        if (histPairTmp.first) m_histPair.first = 
+          FSHistogram::getTH1F((TH1F*)histPairTmp.first->Clone(FSHistogram::makeFSRootHistName()));
+        if (histPairTmp.second) m_histPair.second = 
+          FSHistogram::getTH2F((TH2F*)histPairTmp.second->Clone(FSHistogram::makeFSRootHistName()));
+        for (unsigned int i = 1; i < m_basicHistograms.size(); i++){
+          pair<TH1F*,TH2F*> hNew = m_basicHistograms[i]->getTHNF();
+          if (m_histPair.first  && hNew.first)  m_histPair.first->Add(hNew.first);
+          if (m_histPair.second && hNew.second) m_histPair.second->Add(hNew.second);
+        }
+        cout << "FSHistogramInfo:  FINISHED COMPOSITE...  ";
       }
+      if (m_histPair.first) 
+        cout << "with entries... " << m_histPair.first->GetEntries() << endl;
+      if (m_histPair.second) 
+        cout << "with entries... " << m_histPair.second->GetEntries() << endl;
       return m_histPair;
     }
     TTree* getTHNFContents(vector< pair<TString,TString> > extraTreeContents 

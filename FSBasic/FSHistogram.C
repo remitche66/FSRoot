@@ -83,12 +83,16 @@ FSHistogram::getTH2F(TH2F* hist){
 
 TH1F* 
 FSHistogram::getTH1F(TString fileName, TString histName){
-  return getTH1F(getTHNF(1,fileName,histName).first);
+  //return getTH1F(getTHNF(1,fileName,histName).first);
+  TString index = getHistogramIndexFile(1,fileName,histName);
+  return getFSHistogramInfo(index)->getTHNF().first;
 }
 
 TH2F* 
 FSHistogram::getTH2F(TString fileName, TString histName){
-  return getTH2F(getTHNF(2,fileName,histName).second);
+  //return getTH2F(getTHNF(2,fileName,histName).second);
+  TString index = getHistogramIndexFile(2,fileName,histName);
+  return getFSHistogramInfo(index)->getTHNF().second;
 }
 
 pair<TH1F*,TH2F*> 
@@ -177,8 +181,10 @@ FSHistogram::getTH1F(TString fileName, TString ntName,
                                    TString variable, TString bounds,
                                    TString cuts,     TString options,
                                    float scale){
-  TH1F* hist = getTHNF(1,fileName,ntName,variable,bounds,cuts,options,scale,NULL).first;
-  return getTH1F(hist);
+  //TH1F* hist = getTHNF(1,fileName,ntName,variable,bounds,cuts,options,scale,NULL).first;
+  //return getTH1F(hist);
+  TString index = getHistogramIndexTree(1,fileName,ntName,variable,bounds,cuts,scale);
+  return getFSHistogramInfo(index)->getTHNF().first;
 } 
 
 TH2F* 
@@ -186,8 +192,10 @@ FSHistogram::getTH2F(TString fileName, TString ntName,
                                    TString variable, TString bounds,
                                    TString cuts,     TString options,
                                    float scale){
-  TH2F* hist = getTHNF(2,fileName,ntName,variable,bounds,cuts,options,scale,NULL).second;
-  return getTH2F(hist);
+  //TH2F* hist = getTHNF(2,fileName,ntName,variable,bounds,cuts,options,scale,NULL).second;
+  //return getTH2F(hist);
+  TString index = getHistogramIndexTree(2,fileName,ntName,variable,bounds,cuts,scale);
+  return getFSHistogramInfo(index)->getTHNF().second;
 } 
 
 
@@ -958,6 +966,26 @@ FSHistogram::dumpHistogramCache(string cacheName){
 
     // write to files
 
+  for (map<TString,FSHistogramInfo*>::iterator mapItr = m_FSHistogramInfoCache.begin();
+       mapItr != m_FSHistogramInfoCache.end(); mapItr++){
+    rootCache->cd();
+    TString histIndex = mapItr->first;
+    FSHistogramInfo* histInfo = mapItr->second;
+    if (histInfo->m_basicHistograms.size() > 0) continue;
+    pair<TH1F*,TH2F*> histPair = histInfo->getTHNF();
+    if (histPair.first || histPair.second) 
+      textCache << histIndex << endl;
+    if (histPair.first) { 
+      textCache << histPair.first->GetName() << endl;
+      histPair.first->Write();
+    }
+    if (histPair.second) { 
+      textCache << histPair.second->GetName() << endl;
+      histPair.second->Write();
+    }
+  }
+
+/*
   for (map<TString,pair<TH1F*,TH2F*> >::const_iterator mapItr = m_histogramCache.begin();
        mapItr != m_histogramCache.end(); mapItr++){
     rootCache->cd();
@@ -971,6 +999,7 @@ FSHistogram::dumpHistogramCache(string cacheName){
       mapItr->second.second->Write();
     }
   }
+*/
 
     // close files
 
@@ -998,16 +1027,27 @@ FSHistogram::readHistogramCache(string cacheName){
 
     // read histograms
 
-  TString name;
+  TString histName;
+  TString fileName(FSString::string2TString(rootCacheName));
   TString index;
   while (textCache >> index){
-    textCache >> name;
+    textCache >> histName;
     if (FSControl::DEBUG) cout << "FSHistogram: reading cache" << endl;
-    if (FSControl::DEBUG) cout << "\tname  = " << name << endl;
+    if (FSControl::DEBUG) cout << "\tname  = " << histName << endl;
     if (FSControl::DEBUG) cout << "\tindex = " << index << endl;
     int dim = 1;
-    if (index.Index("2") == 0) dim = 2;
-    getTHNF(dim,FSString::string2TString(rootCacheName),name,index);
+    if (index.Contains("{-ND-}1D")) dim = 1;
+    if (index.Contains("{-ND-}2D")) dim = 2;
+    pair<TH1F*,TH2F*> histPair = getTHNFBasicFile(dim,fileName,histName);
+    pair<TH1F*,TH2F*> oldPair = getFSHistogramInfo(index)->m_histPair;
+    if (!oldPair.first && !oldPair.second){
+      getFSHistogramInfo(index)->m_histPair = histPair;
+      cout << "FSHistogram:  READ HISTOGRAM...          ";
+      if (histPair.first) 
+        cout << "with entries... " << histPair.first->GetEntries() << endl;
+      if (histPair.second) 
+        cout << "with entries... " << histPair.second->GetEntries() << endl;
+    }
   }
 
     // close files
@@ -1554,9 +1594,9 @@ FSHistogramInfo*
 FSHistogram::getFSHistogramInfo(TString index){
   if (m_FSHistogramInfoCache.find(index) != m_FSHistogramInfoCache.end())
     return m_FSHistogramInfoCache[index];
-  FSHistogramInfo* histInfo = new FSHistogramInfo(index,expandHistogramIndex(index));
+  vector<TString> indices = expandHistogramIndex(index);
+  if ((indices.size() == 1) && (indices[0] == index)) indices.clear();
+  FSHistogramInfo* histInfo = new FSHistogramInfo(index,indices);
   m_FSHistogramInfoCache[index] = histInfo;
   return histInfo;
 }
-
-
