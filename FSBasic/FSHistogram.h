@@ -169,6 +169,7 @@ class FSHistogram{
     static void clearTempHistCache();
 
     friend class FSModeHistogram;
+    friend class FSHistogramInfo;
 
   private:
 
@@ -266,10 +267,13 @@ class FSHistogram{
 
       // helper functions for histogram indices
 
+    static vector<TString> expandHistogramIndex(TString index);
+
     static TString getHistogramIndex(map<TString,TString> indexMap);
     static TString getHistogramIndexFile(int dimension, TString fileName, TString histName);
     static TString getHistogramIndexFormula(int dimension, TString formula, TString bounds, 
                                             TString histName);
+    static TString getHistogramIndexEmpty(int dimension, TString bounds, TString histName);
     static TString getHistogramIndexTree(int dimension,
                             TString fileName, TString ntName,
                             TString variable, TString bounds,
@@ -293,8 +297,33 @@ class FSHistogram{
     static unsigned int m_addCacheTotalSize;
     static unsigned int m_indexFSRootHistName;
 
+    static FSHistogramInfo* getFSHistogramInfo(TString index);
+    static map< TString, FSHistogramInfo* >  m_FSHistogramInfoCache;
+
 };
 
+
+
+
+class FSHistogramInfo{
+  friend class FSHistogram;
+  friend class FSModeHistogram;
+  private:
+    FSHistogramInfo(TString index, vector<TString> expandedIndices){
+      if (expandedIndices.size() == 1){ index = expandedIndices[0];  expandedIndices.clear(); }
+      m_index = index;  m_hist1d = NULL;  m_hist2d = NULL;
+      for (unsigned int i = 0; i < expandedIndices.size(); i++){
+        m_basicFSHistograms.push_back(FSHistogram::getFSHistogramInfo(expandedIndices[i]));
+      }
+    }
+    //pair<TH1F*,TH2F*> getTHNF();
+    //TTree* getTHNFContents(TTree* histTree = NULL,
+    //  vector< pair<TString,TString> > extraTreeContents = vector< pair<TString,TString> >());
+    TString m_index;
+    vector<FSHistogramInfo*> m_basicFSHistograms;
+    TH1F* m_hist1d;
+    TH2F* m_hist2d;
+};
 
 
 #endif

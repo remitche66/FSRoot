@@ -20,6 +20,7 @@
 
   // static member data
 
+map< TString, FSHistogramInfo* >  FSHistogram::m_FSHistogramInfoCache;
 map< TString, pair<TH1F*,TH2F*> > FSHistogram::m_histogramCache;
 map< TString, pair<TH1F*,TH2F*> > FSHistogram::m_tempCache;
 map< TString, pair<TH1F*,TH2F*> > FSHistogram::m_addCache;
@@ -376,7 +377,7 @@ FSHistogram::getTHNFBasicEmpty(int dimension, TString bounds, TString hname){
   if (hname == "") hname = makeFSRootHistName();
   if (FSControl::DEBUG){
     cout << "FSHistogram::getTHNFBasicEmpty DEBUG: making empty histogram" << endl;
-    printIndexInfo(getHistogramIndexFormula(dimension,"",bounds,hname));
+    printIndexInfo(getHistogramIndexEmpty(dimension,bounds,hname));
   }
 
     // set up to make the histogram
@@ -1377,6 +1378,12 @@ FSHistogram::getTHNFBasicIndex(TString index){
     TString histName  = mapIndex["{-HN-}"];
     return getTHNFBasicFormula(dimension,formula,bounds,histName);
   }
+  if (mapIndex["{-TP-}"] == "EMPTY"){
+    int     dimension = FSString::TString2int(mapIndex["{-ND-}"]);
+    TString bounds    = mapIndex["{-BO-}"];
+    TString histName  = mapIndex["{-HN-}"];
+    return getTHNFBasicEmpty(dimension,bounds,histName);
+  }
   return pair<TH1F*,TH2F*>(NULL,NULL);
 }
 
@@ -1385,6 +1392,27 @@ FSHistogram::getTHNFBasicIndex(TString index){
   // ***********************************************
   // helper functions for histogram indices
   // ***********************************************
+
+
+vector<TString>
+FSHistogram::expandHistogramIndex(TString index){
+  vector<TString> expandedIndices;
+    // expand "cuts" using FSCut and check for multidimensional sidebands
+  map<TString,TString> indexMap = FSHistogram::parseHistogramIndex(index);
+  if (indexMap.find("{-CU-}") != indexMap.end()){
+    TString cuts = indexMap["{-CU-}"];  double scale = 1.0;
+    if (indexMap.find("{-SC-}") != indexMap.end()) 
+      scale = FSString::TString2double(indexMap["{-SC-}"]);
+    vector< pair<TString,double> > fsCuts = FSCut::expandCuts(cuts);
+    for (unsigned int i = 0; i < fsCuts.size(); i++){
+      indexMap["{-CU-}"] = fsCuts[i].first;
+      indexMap["{-SC-}"] = FSString::double2TString(fsCuts[i].second*scale,8,true);
+      expandedIndices.push_back(FSHistogram::getHistogramIndex(indexMap));
+    }
+  }
+  if (expandedIndices.size() == 0) expandedIndices.push_back(index);
+  return expandedIndices;
+}
 
 
 TString
@@ -1427,6 +1455,19 @@ FSHistogram::getHistogramIndexFormula(int dimension, TString formula, TString bo
   if (dimension == 1) index += "{-ND-}1D";
   if (dimension == 2) index += "{-ND-}2D";
   index += "{-FO-}";  index += formula;
+  index += "{-BO-}";  index += bounds;
+  index += "{-HN-}";  index += histName;
+  return index;
+}
+
+TString
+FSHistogram::getHistogramIndexEmpty(int dimension, TString bounds, TString histName){
+  TString index;
+  bounds   = FSString::removeWhiteSpace(bounds);
+  histName = FSString::removeWhiteSpace(histName);
+  index += "{-TP-}EMPTY";
+  if (dimension == 1) index += "{-ND-}1D";
+  if (dimension == 2) index += "{-ND-}2D";
   index += "{-BO-}";  index += bounds;
   index += "{-HN-}";  index += histName;
   return index;
@@ -1507,4 +1548,15 @@ FSHistogram::makeFSRootHistName(){
   hname += FSString::int2TString(++m_indexFSRootHistName,9);
   return hname;
 }
+
+
+FSHistogramInfo*
+FSHistogram::getFSHistogramInfo(TString index){
+  if (m_FSHistogramInfoCache.find(index) != m_FSHistogramInfoCache.end())
+    return m_FSHistogramInfoCache[index];
+  FSHistogramInfo* histInfo = new FSHistogramInfo(index,expandHistogramIndex(index));
+  m_FSHistogramInfoCache[index] = histInfo;
+  return histInfo;
+}
+
 
