@@ -239,13 +239,8 @@ class FSHistogram{
                                      TH1F* hist1d, TH2F* hist2d, 
                                      float scale);
 
-      // helper function for making histograms from functions
 
-    static pair<TH1F*,TH2F*> getTHNFFormula(int dimension, TString formula, TString bounds, int numRandomTrials = -1);
-    static pair<TH1F*,TH2F*> getTHNFFormulaRandom(int dimension, TString formula, TString bounds, int numRandomTrials = -1);
-
-    static pair<TH1F*,TH2F*> getTHNFBasicFormula(int dimension, TString formula, TString bounds, 
-                                                 TString histName = "");
+    static pair<TH1F*,TH2F*> getTHNFBasicFormula(int dimension, TString formula, TString bounds);
 
 
       // helper functions for getTHNFContents
@@ -274,8 +269,7 @@ class FSHistogram{
 
     static TString getHistogramIndex(map<TString,TString> indexMap);
     static TString getHistogramIndexFile(int dimension, TString fileName, TString histName);
-    static TString getHistogramIndexFormula(int dimension, TString formula, TString bounds, 
-                                            TString histName);
+    static TString getHistogramIndexFormula(int dimension, TString formula, TString bounds);
     static TString getHistogramIndexEmpty(int dimension, TString bounds, TString histName);
     static TString getHistogramIndexTree(int dimension,
                             TString fileName, TString ntName,
