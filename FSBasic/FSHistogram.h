@@ -53,13 +53,11 @@ class FSHistogram{
 
     static TH1F* getTH1F(TString fileName, TString ntName,
                                 TString variable, TString bounds,
-                                TString cuts,     TString options = "",
-                                float scale = 1.0);
+                                TString cuts, double scale = 1.0);
 
     static TH2F* getTH2F(TString fileName, TString ntName,
                                 TString variable, TString bounds,
-                                TString cuts,     TString options = "",
-                                float scale = 1.0);
+                                TString cuts, double scale = 1.0);
 
     static void testTH1F(TString fileName, TString ntName,
                                 TString variable, TString bounds,
@@ -83,15 +81,13 @@ class FSHistogram{
 
     static TTree*  getTH1FContents(TString fileName, TString ntName,
                                    TString variable, TString bounds, 
-                                   TString cuts, TString options = "",
-                                   float scale = 1.0,
+                                   TString cuts, double scale = 1.0,
                                    vector< pair<TString,TString> > extraTreeContents = 
                                      vector< pair<TString,TString> >());
 
     static TTree*  getTH2FContents(TString fileName, TString ntName,
                                    TString variable, TString bounds, 
-                                   TString cuts, TString options = "",
-                                   float scale = 1.0,
+                                   TString cuts, double scale = 1.0,
                                    vector< pair<TString,TString> > extraTreeContents = 
                                      vector< pair<TString,TString> >());
 
@@ -134,24 +130,6 @@ class FSHistogram{
                                    TH1F* h5=NULL, TH1F* h6=NULL,
                                    TH1F* h7=NULL, TH1F* h8=NULL,
                                    TH1F* h9=NULL, TH1F* h10=NULL);
-
-
-      // ********************************************************
-      // GET USEFUL INFORMATION ABOUT A HISTOGRAM
-      // ********************************************************
-
-    static int    getNBins (TH1F* hist);
-    static int    getNBinsX(TH1F* hist);
-    static int    getNBinsX(TH2F* hist);
-    static int    getNBinsY(TH2F* hist);
-    static double getLow   (TH1F* hist);
-    static double getLowX  (TH1F* hist);
-    static double getLowX  (TH2F* hist);
-    static double getLowY  (TH2F* hist);
-    static double getHigh  (TH1F* hist);
-    static double getHighX (TH1F* hist);
-    static double getHighX (TH2F* hist);
-    static double getHighY (TH2F* hist);
     
 
       // ********************************************************
@@ -163,62 +141,25 @@ class FSHistogram{
 
 
       // ********************************************************
-      // KEEP RUNNING TOTALS FOR HISTOGRAMS
-      //   reset using clearAddCache
-      // ********************************************************
-
-    static TH1F* addTH1F(TString addName, TH1F* hist, float scale = 1.0);
-    static TH2F* addTH2F(TString addName, TH2F* hist, float scale = 1.0);
-
-    static void clearAddCache( TString addName = "" );
-
-
-      // ********************************************************
       // CLEAR GLOBAL CACHES
       // ********************************************************
 
     static void clearHistogramCache();
-    static void clearTempHistCache();
 
     friend class FSModeHistogram;
     friend class FSHistogramInfo;
 
+
+
+
   private:
 
-      // helper functions for histogram caching
-
-    static TString getTH1FIndex(TString fileName, TString ntName,
-                                TString variable, TString bounds,
-                                TString cuts,     TString options = "",
-                                float scale = 1.0);
-
-    static TString getTH2FIndex(TString fileName, TString ntName,
-                                TString variable, TString bounds,
-                                TString cuts,     TString options = "",
-                                float scale = 1.0);
-
-    static TString getTH1FIndex(TH1F* hist1d);
-
-    static TString getTH2FIndex(TH2F* hist2d);
-
-    static pair<TH1F*,TH2F*> getHistogramFromCache(TString index);
-
-        // XXXXX REMOVE XXXXX
-    static pair<TH1F*,TH2F*> getTHNF(int dimension, 
-                                     TString fileName, TString histName,
-                                     TString index = "");
+      // ********************************************************
+      // BASIC FUNCTIONS: HISTOGRAMS ALWAYS GO THROUGH THESE
+      // ********************************************************
 
     static pair<TH1F*,TH2F*> getTHNFBasicFile(int dimension, 
                                      TString fileName, TString histName);
-
-        // XXXXX REMOVE XXXXX
-    static pair<TH1F*,TH2F*> getTHNF(int dimension,
-                                TString fileName, TString ntName,
-                                TString variable, TString bounds,
-                                TString cuts,     TString options,
-                                float scale, TTree* histTree,
-                                vector< pair<TString,TString> > extraTreeContents = 
-                                  vector< pair<TString,TString> >());
 
     static pair<TH1F*,TH2F*> getTHNFBasicTree(int dimension,
                                 TString fileName, TString ntName,
@@ -228,35 +169,8 @@ class FSHistogram{
     static pair<TH1F*,TH2F*> getTHNFBasicEmpty(int dimension, TString bounds, 
                                                TString hname = "");
 
-    static TString getTHNFIndex(int dimension,
-                                TString fileName, TString ntName,
-                                TString variable, TString bounds,
-                                TString cuts,     TString options,
-                                float scale);
-
-    static TString getTHNFIndex(pair<TH1F*,TH2F*> hist);
-
-    static TString makeHistogramName();
-    static TString makeAddName();
-    static TString makeTempHistName();
-
-    static void addHistogramToCache(TString index, TH1F* hist1d, TH2F* hist2d);
-
-    static pair<TH1F*,TH2F*> addTempHistToCache(TH1F* hist1d, TH2F* hist2d);
-
-    static pair<TH1F*,TH2F*> addTHNF(TString addName, 
-                                     TH1F* hist1d, TH2F* hist2d, 
-                                     float scale);
-
-
     static pair<TH1F*,TH2F*> getTHNFBasicFormula(int dimension, TString formula, TString bounds);
 
-
-      // helper functions for getTHNFContents
-
-    static TTree* setTHNFContents(int dimension,
-                                vector< pair<TString,TString> > extraTreeContents = 
-                                 vector< pair<TString,TString> >());
 
     static TTree* getTHNFBasicContents(TTree* histTree, int dimension,
                                 TString fileName, TString ntName,
@@ -265,6 +179,11 @@ class FSHistogram{
                                 vector< pair<TString,TString> > extraTreeContents = 
                                   vector< pair<TString,TString> >());
 
+
+      // ********************************************************
+      // GENERALIZED BASIC FUNCTIONS CREATED FROM INDICES
+      // ********************************************************
+
     static TTree* getTHNFBasicContents(TTree* histTree, TString index,
                                 vector< pair<TString,TString> > extraTreeContents = 
                                   vector< pair<TString,TString> >());
@@ -272,9 +191,17 @@ class FSHistogram{
     static pair<TH1F*,TH2F*> getTHNFBasicIndex(TString index);
 
 
-      // helper functions for histogram indices
+      // *******************************************
+      // INTERFACE TO THE FSHISTOGRAMINFO CLASS
+      // *******************************************
 
     static vector<TString> expandHistogramIndex(TString index);
+    static FSHistogramInfo* getFSHistogramInfo(TString index);
+
+
+      // ***********************************************
+      // helper functions for histogram indices
+      // ***********************************************
 
     static TString getHistogramIndex(map<TString,TString> indexMap);
     static TString getHistogramIndexFile(int dimension, TString fileName, TString histName);
@@ -297,14 +224,8 @@ class FSHistogram{
 
       // global caches
 
-    static map< TString, pair<TH1F*,TH2F*> > m_histogramCache;
-    static map< TString, pair<TH1F*,TH2F*> > m_tempCache;
-    static map< TString, pair<TH1F*,TH2F*> > m_addCache;
-    static unsigned int m_addCacheTotalSize;
-    static unsigned int m_indexFSRootHistName;
-
-    static FSHistogramInfo* getFSHistogramInfo(TString index);
     static map< TString, FSHistogramInfo* >  m_FSHistogramInfoCache;
+    static unsigned int m_indexFSRootHistName;
 
 };
 
