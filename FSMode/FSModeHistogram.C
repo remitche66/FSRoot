@@ -35,8 +35,7 @@ map<TString, map<TString, float> > FSModeHistogram::m_cacheComponentsMap;
 TH1F* 
 FSModeHistogram::getTH1F(TString fileName, TString ntName, TString category,
                        TString variable, TString bounds,
-                       TString cuts,     TString options,
-                       float scale){
+                       TString cuts, double scale){
   TString index = FSHistogram::getHistogramIndexTree(1,fileName,ntName,variable,
                                                  bounds,cuts,scale,true,category);
   return getFSHistogramInfo(index)->getTHNF().first;
@@ -46,8 +45,7 @@ FSModeHistogram::getTH1F(TString fileName, TString ntName, TString category,
 TH2F* 
 FSModeHistogram::getTH2F(TString fileName, TString ntName, TString category,
                        TString variable, TString bounds,
-                       TString cuts,     TString options,
-                       float scale){
+                       TString cuts, double scale){
   TString index = FSHistogram::getHistogramIndexTree(2,fileName,ntName,variable,
                                                  bounds,cuts,scale,true,category);
   return getFSHistogramInfo(index)->getTHNF().second;
@@ -61,7 +59,7 @@ FSModeHistogram::getTH2F(TString fileName, TString ntName, TString category,
 
 TTree*
 FSModeHistogram::getTH1FContents(TString fileName, TString ntName, TString category, 
-       TString variable, TString bounds, TString cuts, TString options, float scale,
+       TString variable, TString bounds, TString cuts, double scale,
        vector< pair<TString,TString> > extraTreeContents){
   TString index = FSHistogram::getHistogramIndexTree(1,fileName,ntName,variable,
                                                  bounds,cuts,scale,true,category);
@@ -70,7 +68,7 @@ FSModeHistogram::getTH1FContents(TString fileName, TString ntName, TString categ
 
 TTree*
 FSModeHistogram::getTH2FContents(TString fileName, TString ntName, TString category, 
-       TString variable, TString bounds, TString cuts, TString options, float scale,
+       TString variable, TString bounds, TString cuts, double scale,
        vector< pair<TString,TString> > extraTreeContents){
   TString index = FSHistogram::getHistogramIndexTree(2,fileName,ntName,variable,
                                                  bounds,cuts,scale,true,category);
@@ -88,7 +86,7 @@ void
 FSModeHistogram::drawTH1F(TString fileName, TString ntName, TString category,
                         TString variable, TString bounds,
                         TString cuts,     TString options,
-                        float scale, TCanvas* c1){
+                        double scale, TCanvas* c1){
   drawTHNF(1,fileName,ntName,category,variable,bounds,cuts,options,scale,c1);
 }
 
@@ -96,7 +94,7 @@ void
 FSModeHistogram::drawTH2F(TString fileName, TString ntName, TString category,
                         TString variable, TString bounds,
                         TString cuts,     TString options,
-                        float scale, TCanvas* c1){
+                        double scale, TCanvas* c1){
   drawTHNF(2,fileName,ntName,category,variable,bounds,cuts,options,scale,c1);
 }
 
@@ -106,7 +104,7 @@ FSModeHistogram::drawTHNF(int dimension,
                        TString fileName, TString ntName, TString category,
                        TString variable, TString bounds,
                        TString cuts,     TString options,
-                       float scale, TCanvas* c1){
+                       double scale, TCanvas* c1){
 
   vector<FSModeInfo*> modeVector = FSModeCollection::modeVector(category);
 
@@ -130,13 +128,13 @@ FSModeHistogram::drawTHNF(int dimension,
 
     if (dimension == 1){
       hist1d = getTH1F(fileName,ntName,category_i,
-                       variable,bounds,cuts,options,scale);
+                       variable,bounds,cuts,scale);
       hist1d->SetTitle(title_i);
       hist1d->Draw(options);
     }
     if (dimension == 2){
       hist2d = getTH2F(fileName,ntName,category_i,
-                       variable,bounds,cuts,options,scale);
+                       variable,bounds,cuts,scale);
       hist2d->SetTitle(title_i);
       hist2d->Draw(options);
     }
@@ -159,7 +157,7 @@ vector<TString>
 FSModeHistogram::getMCComponents(TString fileName, TString ntName, 
                                 TString category, TString variable, 
                                 TString bounds, TString cuts,
-                                TString options, float scale, bool moreInfo){
+                                double scale, bool moreInfo){
     // initial setup
 
   vector<TString> components;
@@ -167,15 +165,9 @@ FSModeHistogram::getMCComponents(TString fileName, TString ntName,
 
     // create an index for caching
 
-  TString index;
-  index += "(fn)";  index += fileName;
-  index += "(nt)";  index += ntName;
-  index += "(ca)";  index += category;
-  index += "(va)";  index += variable;
-  index += "(bo)";  index += bounds;
-  index += "(cu)";  index += cuts;
-  index += "(op)";  index += options;  index += (int) moreInfo;
-  index += "(sc)";  index += FSString::double2TString(scale,8,true);
+  TString index = FSHistogram::getHistogramIndexTree(1,fileName,ntName,variable,
+                                                bounds,cuts,scale,true,category);
+  if (moreInfo) index += "{-MI-}";
 
     // search the cache for this mode
 
@@ -199,7 +191,7 @@ FSModeHistogram::getMCComponents(TString fileName, TString ntName,
       extraTreeContents.push_back(pair<TString,TString>("MCDecayParticle5","MCDecayParticle5"));
       extraTreeContents.push_back(pair<TString,TString>("MCDecayParticle6","MCDecayParticle6"));
     }
-    TTree* histTree = getTH1FContents(fileName,ntName,category,"1.234","(10,1.0,2.0)",cuts,options,scale,extraTreeContents);
+    TTree* histTree = getTH1FContents(fileName,ntName,category,"1.234","(10,1.0,2.0)",cuts,scale,extraTreeContents);
 
       // set the branch addresses for the new tree
 
@@ -308,8 +300,8 @@ FSModeHistogram::getMCComponentSize(TString modeString){
 TH1F*
 FSModeHistogram::drawMCComponents(TString fileName, TString ntName, 
                                 TString category, TString variable, 
-                                TString bounds, TString cuts, TString options,
-                                float scale, TCanvas* c1){
+                                TString bounds, TString cuts,
+                                double scale, TCanvas* c1){
 
 
     // create the original histogram
@@ -319,7 +311,7 @@ FSModeHistogram::drawMCComponents(TString fileName, TString ntName,
     cout << "FSModeHistogram::drawMCComponents ERROR: no modes for category = " << category << endl;
     exit(0);
   }
-  TH1F* htot = getTH1F(fileName,ntName,category,variable,bounds,cuts,options,scale);
+  TH1F* htot = getTH1F(fileName,ntName,category,variable,bounds,cuts,scale);
   FSModeInfo* modeInfo = modeVector[0];
   htot->SetTitle(FSModeString::rootSymbols(modeInfo->modeDescription()));
   if (modeVector.size() > 1) htot->SetTitle("category = "+category);
@@ -332,7 +324,7 @@ FSModeHistogram::drawMCComponents(TString fileName, TString ntName,
     // get a vector of the MC components
 
   vector<TString> components = getMCComponents(fileName,ntName,category,
-                                               variable,bounds,cuts,options,scale);
+                                               variable,bounds,cuts,scale);
 
     // make a stack of MC components
 
@@ -352,7 +344,7 @@ FSModeHistogram::drawMCComponents(TString fileName, TString ntName,
     mcCut += FSModeInfo(components[i]).modeCode2();
     mcCut += "))";
 
-    TH1F* hcomp = getTH1F(fileName,ntName,category,variable,bounds,mcCut,options,scale);
+    TH1F* hcomp = getTH1F(fileName,ntName,category,variable,bounds,mcCut,scale);
     if (i != 0) hcomp->SetFillColor(i+1);
     hcomp->SetLineColor(i+1);
     stack->Add(hcomp,"hist");
