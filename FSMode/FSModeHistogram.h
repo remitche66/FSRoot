@@ -120,9 +120,11 @@ class FSModeHistogram{
 
   private:
 
-      // helper functions for histogram indices
+
+      // helper functions to interact with the FSHistogramInfo class
 
     static vector<TString> expandHistogramIndex(TString index);
+    static FSHistogramInfo* getFSHistogramInfo(TString index);
 
 
       // MC components

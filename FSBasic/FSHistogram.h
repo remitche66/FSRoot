@@ -353,11 +353,11 @@ class FSHistogramInfo{
                               = vector< pair<TString,TString> >()){
       TTree* histTree = NULL;
       if (m_basicHistograms.size() == 0){
-        cout << "FSHistogramInfo:  CREATING TREE FROM HISTOGRAM... " << endl;
+        cout << "FSHistogramInfo:  CREATING TREE FROM HISTOGRAM... ";
         histTree = FSHistogram::getTHNFBasicContents(histTree,m_index,extraTreeContents);
       }
       else{
-        cout << "FSHistogramInfo:  CREATING COMPOSITE TREE FROM HISTOGRAM...  ";
+        cout << "FSHistogramInfo:  CREATING COMPOSITE TREE FROM HISTOGRAM...  " << endl;
         for (unsigned int i = 0; i < m_basicHistograms.size(); i++){
           histTree = FSHistogram::getTHNFBasicContents(histTree,
                                          m_basicHistograms[i]->m_index,extraTreeContents);

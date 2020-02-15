@@ -37,8 +37,11 @@ FSModeHistogram::getTH1F(TString fileName, TString ntName, TString category,
                        TString variable, TString bounds,
                        TString cuts,     TString options,
                        float scale){
-  return getTHNF(1,fileName,ntName,category,
-                             variable,bounds,cuts,options,scale,NULL).first;
+//  return getTHNF(1,fileName,ntName,category,
+//                             variable,bounds,cuts,options,scale,NULL).first;
+  TString index = FSHistogram::getHistogramIndexTree(1,fileName,ntName,variable,
+                                                 bounds,cuts,scale,true,category);
+  return getFSHistogramInfo(index)->getTHNF().first;
 }
 
 
@@ -47,8 +50,11 @@ FSModeHistogram::getTH2F(TString fileName, TString ntName, TString category,
                        TString variable, TString bounds,
                        TString cuts,     TString options,
                        float scale){
-  return getTHNF(2,fileName,ntName,category,
-                             variable,bounds,cuts,options,scale,NULL).second;
+//  return getTHNF(2,fileName,ntName,category,
+//                             variable,bounds,cuts,options,scale,NULL).second;
+  TString index = FSHistogram::getHistogramIndexTree(2,fileName,ntName,variable,
+                                                 bounds,cuts,scale,true,category);
+  return getFSHistogramInfo(index)->getTHNF().second;
 }
 
 
@@ -190,18 +196,24 @@ TTree*
 FSModeHistogram::getTH1FContents(TString fileName, TString ntName, TString category, 
        TString variable, TString bounds, TString cuts, TString options, float scale,
        vector< pair<TString,TString> > extraTreeContents){
-  TTree* histTree = FSHistogram::setTHNFContents(1,extraTreeContents);
-  getTHNF(1,fileName,ntName,category,variable,bounds,cuts,options,scale,histTree,extraTreeContents);
-  return histTree;
+  //TTree* histTree = FSHistogram::setTHNFContents(1,extraTreeContents);
+  //getTHNF(1,fileName,ntName,category,variable,bounds,cuts,options,scale,histTree,extraTreeContents);
+  //return histTree;
+  TString index = FSHistogram::getHistogramIndexTree(1,fileName,ntName,variable,
+                                                 bounds,cuts,scale,true,category);
+  return getFSHistogramInfo(index)->getTHNFContents(extraTreeContents);
 }
 
 TTree*
 FSModeHistogram::getTH2FContents(TString fileName, TString ntName, TString category, 
        TString variable, TString bounds, TString cuts, TString options, float scale,
        vector< pair<TString,TString> > extraTreeContents){
-  TTree* histTree = FSHistogram::setTHNFContents(2,extraTreeContents);
-  getTHNF(2,fileName,ntName,category,variable,bounds,cuts,options,scale,histTree,extraTreeContents);
-  return histTree;
+//  TTree* histTree = FSHistogram::setTHNFContents(2,extraTreeContents);
+//  getTHNF(2,fileName,ntName,category,variable,bounds,cuts,options,scale,histTree,extraTreeContents);
+//  return histTree;
+  TString index = FSHistogram::getHistogramIndexTree(2,fileName,ntName,variable,
+                                                 bounds,cuts,scale,true,category);
+  return getFSHistogramInfo(index)->getTHNFContents(extraTreeContents);
 }
 
 
@@ -599,7 +611,7 @@ FSModeHistogram::readHistogramCache(string cacheName){
 
 
   // ***********************************************
-  // helper functions for histogram indices
+  // helper functions to interact with the FSHistogramInfo class
   // ***********************************************
 
 vector<TString>
@@ -636,6 +648,17 @@ FSModeHistogram::expandHistogramIndex(TString index){
   return expandedIndices;
 }
 
+FSHistogramInfo*
+FSModeHistogram::getFSHistogramInfo(TString index){
+  if (FSHistogram::m_FSHistogramInfoCache.find(index) != 
+      FSHistogram::m_FSHistogramInfoCache.end())
+    return FSHistogram::m_FSHistogramInfoCache[index];
+  vector<TString> indices = expandHistogramIndex(index);
+  if ((indices.size() == 1) && (indices[0] == index)) indices.clear();
+  FSHistogramInfo* histInfo = new FSHistogramInfo(index,indices);
+  FSHistogram::m_FSHistogramInfoCache[index] = histInfo;
+  return histInfo;
+}
 
 
 void 
