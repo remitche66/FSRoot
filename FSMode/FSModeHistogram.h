@@ -137,15 +137,6 @@ class FSModeHistogram{
 
       // helper functions for histograms
 
-    static pair<TH1F*,TH2F*> getTHNF(int dimension,
-                                   TString fileName, TString ntName, TString category,
-                                   TString variable, TString bounds,
-                                   TString cuts,     TString options,
-                                   float scale,      TTree* histTree,
-                                   vector< pair<TString,TString> > extraTreeContents = 
-                                     vector< pair<TString,TString> >());
-
-
     static void drawTHNF(int dimension,
                          TString fileName, TString ntName, TString category,
                          TString variable, TString bounds,
