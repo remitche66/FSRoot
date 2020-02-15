@@ -307,7 +307,6 @@ class FSHistogramInfo{
   friend class FSModeHistogram;
   private:
     FSHistogramInfo(TString index, vector<TString> expandedIndices){
-      //cout << "Creating FSHistogramInfo: index = " << index << endl;
       m_index = index;  m_histPair.first = NULL;  m_histPair.second = NULL;
       for (unsigned int i = 0; i < expandedIndices.size(); i++){
         m_basicHistograms.push_back(FSHistogram::getFSHistogramInfo(expandedIndices[i]));
@@ -343,13 +342,20 @@ class FSHistogramInfo{
     }
     TTree* getTHNFContents(vector< pair<TString,TString> > extraTreeContents 
                               = vector< pair<TString,TString> >()){
-      if (m_basicHistograms.size() == 0)
-        return FSHistogram::getTHNFBasicContents(NULL,m_index,extraTreeContents);
       TTree* histTree = NULL;
-      for (unsigned int i = 0; i < m_basicHistograms.size(); i++){
-        histTree = FSHistogram::getTHNFBasicContents(histTree,
-                                       m_basicHistograms[i]->m_index,extraTreeContents);
+      if (m_basicHistograms.size() == 0){
+        cout << "FSHistogramInfo:  CREATING TREE FROM HISTOGRAM... " << endl;
+        histTree = FSHistogram::getTHNFBasicContents(histTree,m_index,extraTreeContents);
       }
+      else{
+        cout << "FSHistogramInfo:  CREATING COMPOSITE TREE FROM HISTOGRAM...  ";
+        for (unsigned int i = 0; i < m_basicHistograms.size(); i++){
+          histTree = FSHistogram::getTHNFBasicContents(histTree,
+                                         m_basicHistograms[i]->m_index,extraTreeContents);
+        }
+        cout << "FSHistogramInfo:  FINISHED COMPOSITE TREE FROM HISTOGRAM...  ";
+      }
+      cout << "with entries... " << histTree->GetEntries() << endl;
       return histTree;
     }
     TString m_index;
