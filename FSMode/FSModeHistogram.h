@@ -38,6 +38,15 @@ class FSModeHistogram{
                                 TString cuts,     TString options = "",
                                 float scale = 1.0);
 
+    static void testTH1F(TString fileName, TString ntName, TString category,
+                                TString variable, TString bounds,
+                                TString cuts, double scale = 1.0);
+
+    static void testTH2F(TString fileName, TString ntName, TString category,
+                                TString variable, TString bounds,
+                                TString cuts, double scale = 1.0);
+
+
       // ********************************************************
       // CREATE A TREE IN THE SAME WAY A HISTOGRAM IS CREATED ABOVE
       //   the tree is called "HistContents" and includes variables:
@@ -110,6 +119,10 @@ class FSModeHistogram{
 
 
   private:
+
+      // helper functions for histogram indices
+
+    static vector<TString> expandHistogramIndex(TString index);
 
 
       // MC components

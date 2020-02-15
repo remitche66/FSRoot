@@ -701,7 +701,7 @@ FSModeInfo::setSubmode (TString particleName,
 
 vector<TString>
 FSModeInfo::modeCombinatorics(TString varString, bool printCombinatorics, bool removeDuplicates){
-
+  TString varStringOriginal = varString;
   vector<TString> allCombinatorics;
 
 
@@ -919,22 +919,28 @@ FSModeInfo::modeCombinatorics(TString varString, bool printCombinatorics, bool r
 
   }
 
+    // order the macro variables (e.g. MASS(3,2) --> MASS(2,3))
+
+  for (unsigned int i = 0; i < allCombinatorics.size(); i++){
+    allCombinatorics[i] = FSTree::reorderVariable(allCombinatorics[i]);
+  }
+
     // remove duplicate combinations
 
   if (removeDuplicates && allCombinatorics.size() > 1){
     vector<TString> copyOriginal = allCombinatorics;
-    vector<TString> copyExpanded = allCombinatorics;
     allCombinatorics.clear();
-    for (unsigned int i = 0; i < copyExpanded.size(); i++){
-      copyExpanded[i] = FSTree::expandVariable(copyOriginal[i]);
-    }
-    for (unsigned int i = 0; i < copyExpanded.size(); i++){
-      if (copyExpanded[i] != ""){
-        for (unsigned int j = i+1; j < copyExpanded.size(); j++){
-          if (copyExpanded[j] != ""){
-            if (copyExpanded[i] == copyExpanded[j]) copyExpanded[j] = "";
+    for (unsigned int i = 0; i < copyOriginal.size()-1; i++){
+      if (copyOriginal[i] != ""){
+        for (unsigned int j = i+1; j < copyOriginal.size(); j++){
+          if (copyOriginal[j] != ""){
+            if (copyOriginal[i] == copyOriginal[j]) copyOriginal[j] = "";
           }
         }
+      }
+    }
+    for (unsigned int i = 0; i < copyOriginal.size(); i++){
+      if (copyOriginal[i] != ""){
         allCombinatorics.push_back(copyOriginal[i]);
       }
     }
@@ -943,9 +949,14 @@ FSModeInfo::modeCombinatorics(TString varString, bool printCombinatorics, bool r
     // print the combinatorics to the screen for debugging
 
   if (printCombinatorics){
+    cout << "*******************************" << endl;
     cout << "*** MODE COMBINATORICS TEST ***" << endl;
+    cout << "*******************************" << endl;
+    cout << "  modeCode = " << modeString("MODECODE") << endl;
+    cout << "     input = " << varStringOriginal << endl;
+    cout << "  combinations:" << endl;
     for (unsigned int i = 0; i < allCombinatorics.size(); i++){
-      cout << allCombinatorics[i] << endl;
+      cout << "         (" << i+1 << ") "  << allCombinatorics[i] << endl;
     }
     cout << "*******************************" << endl;
   }

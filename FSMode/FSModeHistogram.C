@@ -596,3 +596,66 @@ FSModeHistogram::readHistogramCache(string cacheName){
   readComponentsCache(cacheName);
 }
 
+
+
+  // ***********************************************
+  // helper functions for histogram indices
+  // ***********************************************
+
+vector<TString>
+FSModeHistogram::expandHistogramIndex(TString index){
+    // expand FSCuts using the same method as FSHistogram
+  vector<TString> expandedIndices = FSHistogram::expandHistogramIndex(index);
+    // expand modes
+  vector<TString> expandedIndicesTemp = expandedIndices;
+  expandedIndices.clear();
+  for (unsigned int i = 0; i < expandedIndicesTemp.size(); i++){
+    TString index = expandedIndicesTemp[i];
+    map<TString,TString> indexMap = FSHistogram::parseHistogramIndex(index);
+    if (indexMap.find("{-CA-}") == indexMap.end())
+      { expandedIndices.push_back(index); continue; }
+    TString category = indexMap["{-CA-}"];
+    vector<FSModeInfo*> modeVector = FSModeCollection::modeVector(category);
+    for (unsigned int iM = 0; iM < modeVector.size(); iM++){
+      TString indexM = modeVector[iM]->modeString(index);
+              indexM = modeVector[iM]->modeCuts(indexM);
+      vector<TString> combos = modeVector[iM]->modeCombinatorics(indexM);
+      for (unsigned int iC = 0; iC < combos.size(); iC++){
+         // checking for duplicates (but this should also be in modeCombinatorics)
+        bool usedIndex = false;
+        for (unsigned int iE = 0; iE < expandedIndices.size(); iE++){
+          if (expandedIndices[iE] == combos[iC]){ usedIndex = true; break; }
+        }
+        if (usedIndex) continue;
+        map<TString,TString> comboMap = FSHistogram::parseHistogramIndex(combos[iC]);
+        comboMap.erase("{-CA-}");
+        expandedIndices.push_back(FSHistogram::getHistogramIndex(comboMap));
+      }
+    }
+  }
+  return expandedIndices;
+}
+
+
+
+void 
+FSModeHistogram::testTH1F(TString fileName, TString ntName, TString category,
+                                TString variable, TString bounds,
+                                TString cuts, double scale){
+  TString index = FSHistogram::getHistogramIndexTree(1,fileName,ntName,variable,
+                                                 bounds,cuts,scale,true,category);
+  vector<TString> indices = expandHistogramIndex(index);
+  for (unsigned int i = 0; i < indices.size(); i++){ FSHistogram::printIndexInfo(indices[i]); }
+}
+
+void 
+FSModeHistogram::testTH2F(TString fileName, TString ntName, TString category,
+                                TString variable, TString bounds,
+                                TString cuts, double scale){
+  TString index = FSHistogram::getHistogramIndexTree(2,fileName,ntName,variable,
+                                                 bounds,cuts,scale,true,category);
+  vector<TString> indices = expandHistogramIndex(index);
+  for (unsigned int i = 0; i < indices.size(); i++){ FSHistogram::printIndexInfo(indices[i]); }
+}
+
+
