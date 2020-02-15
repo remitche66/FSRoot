@@ -946,13 +946,27 @@ FSModeInfo::modeCombinatorics(TString varString, bool printCombinatorics, bool r
     }
   }
 
+    // do a final sort (for aesthetics)
+
+  if (allCombinatorics.size() > 1){
+    for (unsigned int i = 0; i < allCombinatorics.size()-1; i++){
+    for (unsigned int j = i+1; j < allCombinatorics.size(); j++){
+      if (FSString::TString2string(allCombinatorics[j]) < 
+          FSString::TString2string(allCombinatorics[i])){
+        TString temp = allCombinatorics[i];
+        allCombinatorics[i] = allCombinatorics[j];
+        allCombinatorics[j] = temp;
+      }
+    }}
+  }
+
     // print the combinatorics to the screen for debugging
 
   if (printCombinatorics){
     cout << "*******************************" << endl;
     cout << "*** MODE COMBINATORICS TEST ***" << endl;
     cout << "*******************************" << endl;
-    cout << "  modeCode = " << modeString("MODECODE") << endl;
+    cout << "      mode = " << modeString("MODEDESCRIPTION") << endl;
     cout << "     input = " << varStringOriginal << endl;
     cout << "  combinations:" << endl;
     for (unsigned int i = 0; i < allCombinatorics.size(); i++){
