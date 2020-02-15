@@ -55,7 +55,6 @@ class FSTree{
       // ********************************************************
 
     static TString reorderVariable(TString variable, bool show = false);
-    static TString expandVariable2(TString variable, bool show = false);
     static TString expandVariable(TString variable, bool show = false);
 
 
@@ -65,6 +64,8 @@ class FSTree{
 
     static void defineMacro(TString macroName, int numFourVectors, TString macro, bool force = false);
     static void showDefinedMacros();
+    static void testMacro(TString variable){ expandVariable(variable,true); }
+
 
       // ********************************************************
       // DEFINE SPECIAL FOUR-VECTORS
