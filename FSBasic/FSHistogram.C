@@ -691,6 +691,58 @@ FSHistogram::getTHNFFormula(int dimension, TString formula, TString bounds, int 
 }
 
 
+
+TH1F*
+FSHistogram::getTH1FRandom(TH1F* hist, int numRandomTrials){
+  if (!hist) return NULL;
+  TH1F* rhist = getTH1F((TH1F*)hist->Clone(makeFSRootHistName()));  rhist->Reset();
+  TAxis* axisX = rhist->GetXaxis(); 
+  int nbinsX = axisX->GetNbins(); 
+  double fMax; double fMin;  hist->GetMinimumAndMaximum(fMin,fMax);
+  int numAccepted = 0;  int numAttempts = 0;
+  while ((numAccepted < numRandomTrials) && (numAttempts < numRandomTrials*100000)){
+    numAttempts++;
+    int iX = 1+(int)gRandom->Uniform(0.0,nbinsX);
+    double f0 = gRandom->Uniform(0.0,fMax);
+    double f = hist->GetBinContent(iX);
+    if (f0 <= f){
+      numAccepted++;
+      rhist->Fill(axisX->GetBinCenter(iX));
+    }
+  }
+  rhist = FSHistogram::getTH1F(rhist);
+  TString title(hist->GetTitle());  rhist->SetTitle("Random from "+title);
+  addTempHistToCache(rhist,NULL);
+  return rhist;
+}
+
+TH2F*
+FSHistogram::getTH2FRandom(TH2F* hist, int numRandomTrials){
+  if (!hist) return NULL;
+  TH2F* rhist = getTH2F((TH2F*)hist->Clone(makeFSRootHistName()));  rhist->Reset();
+  TAxis* axisX = rhist->GetXaxis(); TAxis* axisY = rhist->GetYaxis();
+  int nbinsX = axisX->GetNbins();   int nbinsY = axisX->GetNbins();
+  double fMax; double fMin;  hist->GetMinimumAndMaximum(fMin,fMax);
+  int numAccepted = 0;  int numAttempts = 0;
+  while ((numAccepted < numRandomTrials) && (numAttempts < numRandomTrials*100000)){
+    numAttempts++;
+    int iX = 1+(int)gRandom->Uniform(0.0,nbinsX); int iY = 1+(int)gRandom->Uniform(0.0,nbinsY);
+    double f0 = gRandom->Uniform(0.0,fMax);
+    double f = hist->GetBinContent(iX,iY);
+    if (f0 <= f){
+      numAccepted++;
+      rhist->Fill(axisX->GetBinCenter(iX),axisY->GetBinCenter(iY));
+    }
+  }
+  rhist = FSHistogram::getTH2F(rhist);
+  TString title(hist->GetTitle());  rhist->SetTitle("Random from "+title);
+  addTempHistToCache(NULL,rhist);
+  return rhist;
+}
+
+
+
+
 pair<TH1F*,TH2F*>
 FSHistogram::getTHNFBasicFormula(int dimension, TString formula, TString bounds, TString histName){
 

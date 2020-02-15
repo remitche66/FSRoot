@@ -98,8 +98,11 @@ class FSHistogram{
 
 
       // ********************************************
-      //  MAKE PROJECTIONS AND DO INTEGRALS
+      //  MAKE PROJECTIONS, DO INTEGRALS, ETC.
       // ********************************************
+
+    static TH1F* getTH1FRandom(TH1F* hist, int numRandomTrials);
+    static TH2F* getTH2FRandom(TH2F* hist, int numRandomTrials);
 
     static TH1F* getTH1F(TH2F* hist2d, TString projectionAxis = "X", bool function = false);
 
