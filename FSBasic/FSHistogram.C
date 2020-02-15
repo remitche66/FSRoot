@@ -1409,6 +1409,25 @@ FSHistogram::expandHistogramIndex(TString index){
 }
 
 
+void 
+FSHistogram::testTH1F(TString fileName, TString ntName,
+                                TString variable, TString bounds,
+                                TString cuts, double scale){
+  TString index = getHistogramIndexTree(1,fileName,ntName,variable,bounds,cuts,scale);
+  vector<TString> indices = expandHistogramIndex(index);
+  for (unsigned int i = 0; i < indices.size(); i++){ printIndexInfo(indices[i]); }
+}
+
+void 
+FSHistogram::testTH2F(TString fileName, TString ntName,
+                                TString variable, TString bounds,
+                                TString cuts, double scale){
+  TString index = getHistogramIndexTree(2,fileName,ntName,variable,bounds,cuts,scale);
+  vector<TString> indices = expandHistogramIndex(index);
+  for (unsigned int i = 0; i < indices.size(); i++){ printIndexInfo(indices[i]); }
+}
+
+
 TString
 FSHistogram::getHistogramIndex(map<TString,TString> indexMap){
   TString index;
@@ -1520,17 +1539,19 @@ FSHistogram::printIndexInfo(TString index){
 void
 FSHistogram::printIndexInfo(map<TString,TString> iMap){
   cout << "---- HISTOGRAM INDEX INFORMATION ----" << endl;
-  if (iMap.find("{-TP-}") != iMap.end()){ cout << "\tTYPE      = " << iMap["{-TP-}"] << endl; }
-  if (iMap.find("{-ND-}") != iMap.end()){ cout << "\tDIMENSION = " << iMap["{-ND-}"] << endl; }
-  if (iMap.find("{-FN-}") != iMap.end()){ cout << "\tFILE NAME = " << iMap["{-FN-}"] << endl; }
-  if (iMap.find("{-HN-}") != iMap.end()){ cout << "\tHIST NAME = " << iMap["{-HN-}"] << endl; }
-  if (iMap.find("{-NT-}") != iMap.end()){ cout << "\tTREE NAME = " << iMap["{-NT-}"] << endl; }
-  if (iMap.find("{-CA-}") != iMap.end()){ cout << "\tCATEGORY  = " << iMap["{-CA-}"] << endl; }
-  if (iMap.find("{-VA-}") != iMap.end()){ cout << "\tVARIABLE  = " << iMap["{-VA-}"] << endl; }
-  if (iMap.find("{-BO-}") != iMap.end()){ cout << "\tBOUNDS    = " << iMap["{-BO-}"] << endl; }
-  if (iMap.find("{-CU-}") != iMap.end()){ cout << "\tCUTS      = " << iMap["{-CU-}"] << endl; }
-  if (iMap.find("{-SC-}") != iMap.end()){ cout << "\tSCALE     = " << iMap["{-SC-}"] << endl; }
-  if (iMap.find("{-FO-}") != iMap.end()){ cout << "\tFORMULA   = " << iMap["{-FO-}"] << endl; }
+  if (iMap.find("{-TP-}") != iMap.end()){ cout << "\tTYPE        = " << iMap["{-TP-}"] << endl; }
+  if (iMap.find("{-ND-}") != iMap.end()){ cout << "\tDIMENSION   = " << iMap["{-ND-}"] << endl; }
+  if (iMap.find("{-FN-}") != iMap.end()){ cout << "\tFILE NAME   = " << iMap["{-FN-}"] << endl; }
+  if (iMap.find("{-HN-}") != iMap.end()){ cout << "\tHIST NAME   = " << iMap["{-HN-}"] << endl; }
+  if (iMap.find("{-NT-}") != iMap.end()){ cout << "\tTREE NAME   = " << iMap["{-NT-}"] << endl; }
+  if (iMap.find("{-CA-}") != iMap.end()){ cout << "\tCATEGORY    = " << iMap["{-CA-}"] << endl; }
+  if (iMap.find("{-VA-}") != iMap.end()){ cout << "\tVARIABLE    = " << iMap["{-VA-}"] << endl; 
+                   cout << "\t  EXPANDED  = " << FSTree::expandVariable(iMap["{-VA-}"]) << endl;}
+  if (iMap.find("{-BO-}") != iMap.end()){ cout << "\tBOUNDS      = " << iMap["{-BO-}"] << endl; }
+  if (iMap.find("{-CU-}") != iMap.end()){ cout << "\tCUTS        = " << iMap["{-CU-}"] << endl;
+                   cout << "\t  EXPANDED  = " << FSTree::expandVariable(iMap["{-CU-}"]) << endl;}
+  if (iMap.find("{-SC-}") != iMap.end()){ cout << "\tSCALE       = " << iMap["{-SC-}"] << endl; }
+  if (iMap.find("{-FO-}") != iMap.end()){ cout << "\tFORMULA     = " << iMap["{-FO-}"] << endl; }
   cout << "-------------------------------------" << endl;
 }
 
