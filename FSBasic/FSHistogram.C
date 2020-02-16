@@ -1035,6 +1035,7 @@ FSHistogram::disableRDataFrame(){
 
 FSHistogramInfo::FSHistogramInfo(TString index, vector<TString> expandedIndices){
   m_index = index;  m_histPair.first = NULL;  m_histPair.second = NULL;
+  m_waitingForEventLoop = false;
   for (unsigned int i = 0; i < expandedIndices.size(); i++){
     m_basicHistograms.push_back(FSHistogram::getFSHistogramInfo(expandedIndices[i]));
   }
@@ -1045,9 +1046,18 @@ FSHistogramInfo::getTHNF(){
   if (m_histPair.first || m_histPair.second){
     cout << "FSHistogramInfo:  FOUND HISTOGRAM...     ";
   }
-  else if (m_basicHistograms.size() == 0) {
+  else if ((m_basicHistograms.size() == 0) && 
+            !(FSHistogram::m_USEDATAFRAME && m_index.Contains("{-TP-}TREE"))) {
     cout << "FSHistogramInfo:  CREATING HISTOGRAM...  ";
     m_histPair = FSHistogram::getTHNFBasicIndex(m_index);
+  }
+  else if ((m_basicHistograms.size() == 0) && 
+             (FSHistogram::m_USEDATAFRAME && m_index.Contains("{-TP-}TREE"))) {
+    cout << "FSHistogramInfo:  SETTING HISTOGRAM...   " << endl;
+    TString eIndex(m_index); eIndex.Replace(eIndex.Index("{-TP-}TREE"),10,"{-TP-}EMPTY");
+    m_histPair = FSHistogram::getTHNFBasicIndex(eIndex);
+    m_waitingForEventLoop = true;
+    //m_histPairDF = ......
   }
   else{
     cout << "FSHistogramInfo:  CREATING COMPOSITE...  " << endl;

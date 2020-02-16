@@ -267,6 +267,8 @@ class FSHistogramInfo{
     TString m_index;
     vector<FSHistogramInfo*> m_basicHistograms;
     pair<TH1F*,TH2F*> m_histPair;
+    pair< ROOT::RDF::RResultPtr<TH1D>, ROOT::RDF::RResultPtr<TH2D> > m_histPairDF;
+    bool m_waitingForEventLoop;
 };
 
 
