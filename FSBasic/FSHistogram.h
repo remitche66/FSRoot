@@ -146,7 +146,7 @@ class FSHistogram{
       // ********************************************************
 
     static void enableRDataFrame(int numThreads = 0);
-    static void executeRDataFrame() {return;}
+    static void executeRDataFrame();
     static void disableRDataFrame();
 
 
@@ -188,6 +188,9 @@ class FSHistogram{
                                 TString cuts, double scale,
                                 vector< pair<TString,TString> > extraTreeContents = 
                                   vector< pair<TString,TString> >());
+
+    static pair< ROOT::RDF::RResultPtr<TH1D>, 
+                 ROOT::RDF::RResultPtr<TH2D> >  getTHNFBasicTreeRDF(TString index);
 
 
       // ********************************************************
@@ -237,11 +240,15 @@ class FSHistogram{
     static map< TString, FSHistogramInfo* >  m_FSHistogramInfoCache;
     static unsigned int m_indexFSRootHistName;
 
+
       // *******************************************
       // INTERFACE TO RDATAFRAME
       // *******************************************
 
     static bool m_USEDATAFRAME;
+    static map< TString, ROOT::RDataFrame* > m_RDataFrameCache;
+    static map< TString, TString > m_RDFVariableDefinitions;
+    static unsigned int m_RDFVariableCounter;
 
 };
 
@@ -252,7 +259,7 @@ class FSHistogram{
   // FSHistogramInfo class (private):
   //    (1) holds histograms
   //    (2) manages loops over histograms
-  //    (3) interfaces to RDataFrame
+  //    (3) holds RDataFrame RResultPtr objects
   // *****************************************************
   // *****************************************************
 
@@ -267,7 +274,7 @@ class FSHistogramInfo{
     TString m_index;
     vector<FSHistogramInfo*> m_basicHistograms;
     pair<TH1F*,TH2F*> m_histPair;
-    pair< ROOT::RDF::RResultPtr<TH1D>, ROOT::RDF::RResultPtr<TH2D> > m_histPairDF;
+    pair< ROOT::RDF::RResultPtr<TH1D>, ROOT::RDF::RResultPtr<TH2D> > m_histPairRDF;
     bool m_waitingForEventLoop;
 };
 

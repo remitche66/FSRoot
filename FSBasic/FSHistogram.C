@@ -23,6 +23,9 @@
 map< TString, FSHistogramInfo* >  FSHistogram::m_FSHistogramInfoCache;
 unsigned int FSHistogram::m_indexFSRootHistName = 0;
 bool FSHistogram::m_USEDATAFRAME = false;
+map< TString, ROOT::RDataFrame* > FSHistogram::m_RDataFrameCache;
+map< TString, TString > FSHistogram::m_RDFVariableDefinitions;
+unsigned int FSHistogram::m_RDFVariableCounter = 0;
 
 
 TString FSAND("&&");
@@ -218,6 +221,75 @@ FSHistogram::getTHNFBasicTree(int dimension,
   }
   return pair<TH1F*,TH2F*>(hist1d,hist2d);
 } 
+
+
+pair< ROOT::RDF::RResultPtr<TH1D>, ROOT::RDF::RResultPtr<TH2D> >
+FSHistogram::getTHNFBasicTreeRDF(TString index){
+  pair< ROOT::RDF::RResultPtr<TH1D>, ROOT::RDF::RResultPtr<TH2D> > histPairRDF;
+
+    // adjust the input parameters
+  index = FSString::removeWhiteSpace(index);
+  if (FSControl::DEBUG){
+    cout << "FSHistogram::getTHNFBasicTreeRDF DEBUG: setting up histogram" << endl;
+    printIndexInfo(index);
+  }
+  map<TString,TString> mapIndex = parseHistogramIndex(index);
+  int     dimension = FSString::TString2int(mapIndex["{-ND-}"]);
+  TString fileName  = mapIndex["{-FN-}"];
+  TString ntName    = mapIndex["{-NT-}"];
+  TString variable  = mapIndex["{-VA-}"];  variable = FSTree::expandVariable(variable);
+  TString bounds    = mapIndex["{-BO-}"];
+  TString cuts      = mapIndex["{-CU-}"];  cuts = FSTree::expandVariable(cuts);
+  double  scale     = FSString::TString2double(mapIndex["{-SC-}"]);
+  string sFN   = FSString::TString2string(fileName);
+  string sNT   = FSString::TString2string(ntName);
+  string sVAR  = FSString::TString2string(variable);
+  string sCUTS = FSString::TString2string(cuts);
+  int nbinsx = FSString::parseBoundsNBinsX(bounds);
+  double xlow = FSString::parseBoundsLowerX(bounds);
+  double xhigh = FSString::parseBoundsUpperX(bounds);
+  int nbinsy = FSString::parseBoundsNBinsY(bounds);
+  double ylow = FSString::parseBoundsLowerY(bounds);
+  double yhigh = FSString::parseBoundsUpperY(bounds);
+  TString rdfIndex = "{-FN-}"+fileName + "{-NT-}"+ntName;
+  TString hname = makeFSRootHistName();
+
+    // find the right RDataFrame object
+  ROOT::RDataFrame* RDF;
+  if (m_RDataFrameCache.find(rdfIndex) != m_RDataFrameCache.end()){
+    RDF = m_RDataFrameCache[rdfIndex]; 
+  }
+  else {
+    RDF = new ROOT::RDataFrame(sNT, sFN);
+    m_RDataFrameCache[rdfIndex] = RDF;
+  }
+
+    // find the name of the variable
+  TString varName(""); string sVarName("");
+  if (m_RDFVariableDefinitions.find(variable) != m_RDFVariableDefinitions.end()){
+    varName = m_RDFVariableDefinitions[variable];
+  }
+  else{
+    varName = "VAR" + FSString::int2TString(m_RDFVariableCounter++);
+    m_RDFVariableDefinitions[variable] = varName;
+  }
+  sVarName = FSString::TString2string(varName);
+
+    // set up the histogram
+  if (dimension == 1){
+    histPairRDF.first = RDF->Filter(sCUTS)
+                            .Define(sVarName,sVAR)
+                            .Histo1D({hname,hname,nbinsx,xlow,xhigh},sVarName);
+  }
+  if (dimension == 2){
+    histPairRDF.second = RDF->Filter(sCUTS)
+                            .Define(sVarName,sVAR)
+                            .Histo2D({hname,hname,nbinsx,xlow,xhigh,nbinsy,ylow,yhigh},sVarName);
+  }
+
+  return histPairRDF;
+
+}
 
 
 
@@ -1021,6 +1093,26 @@ FSHistogram::enableRDataFrame(int numThreads){
 }
 
 void
+FSHistogram::executeRDataFrame(){
+  for (map< TString, FSHistogramInfo* >::iterator mapItr = m_FSHistogramInfoCache.begin();
+       mapItr != m_FSHistogramInfoCache.end(); mapItr++){
+    FSHistogramInfo* histInfo = mapItr->second;
+    if (histInfo->m_waitingForEventLoop){
+      if (histInfo->m_histPair.first){
+        TH1F* hist = histInfo->m_histPair.first;  TString hName = hist->GetName();
+        ROOT::RDF::RResultPtr<TH1D> histRDF = histInfo->m_histPairRDF.first; 
+        histRDF->Copy(*hist);  hist->SetName(hName);  hist = getTH1F(hist);
+      }
+      if (histInfo->m_histPair.second){
+        TH2F* hist = histInfo->m_histPair.second;  TString hName = hist->GetName();
+        ROOT::RDF::RResultPtr<TH2D> histRDF = histInfo->m_histPairRDF.second; 
+        histRDF->Copy(*hist);  hist->SetName(hName);  hist = getTH2F(hist);
+      }
+    }
+  }
+}
+
+void
 FSHistogram::disableRDataFrame(){
   ROOT::DisableImplicitMT();
   m_USEDATAFRAME = false;
@@ -1056,8 +1148,8 @@ FSHistogramInfo::getTHNF(){
     cout << "FSHistogramInfo:  SETTING HISTOGRAM...   " << endl;
     TString eIndex(m_index); eIndex.Replace(eIndex.Index("{-TP-}TREE"),10,"{-TP-}EMPTY");
     m_histPair = FSHistogram::getTHNFBasicIndex(eIndex);
+    m_histPairRDF = FSHistogram::getTHNFBasicTreeRDF(m_index);
     m_waitingForEventLoop = true;
-    //m_histPairDF = ......
   }
   else{
     cout << "FSHistogramInfo:  CREATING COMPOSITE...  " << endl;
