@@ -22,6 +22,8 @@
 
 map< TString, FSHistogramInfo* >  FSHistogram::m_FSHistogramInfoCache;
 unsigned int FSHistogram::m_indexFSRootHistName = 0;
+bool FSHistogram::m_USEDATAFRAME = false;
+
 
 TString FSAND("&&");
 TString FSOR("||");
@@ -1006,3 +1008,84 @@ FSHistogram::makeFSRootHistName(){
 }
 
 
+  // ********************************************************
+  // ********************************************************
+  // INTERACT WITH RDATAFRAME
+  // ********************************************************
+  // ********************************************************
+
+void
+FSHistogram::enableRDataFrame(int numThreads){
+  ROOT::EnableImplicitMT(numThreads);
+  m_USEDATAFRAME = true;
+}
+
+void
+FSHistogram::disableRDataFrame(){
+  ROOT::DisableImplicitMT();
+  m_USEDATAFRAME = false;
+}
+
+
+  // *****************************************************
+  // *****************************************************
+  //          FSHISTOGRAMINFO CLASS (private)
+  // *****************************************************
+  // *****************************************************
+
+FSHistogramInfo::FSHistogramInfo(TString index, vector<TString> expandedIndices){
+  m_index = index;  m_histPair.first = NULL;  m_histPair.second = NULL;
+  for (unsigned int i = 0; i < expandedIndices.size(); i++){
+    m_basicHistograms.push_back(FSHistogram::getFSHistogramInfo(expandedIndices[i]));
+  }
+}
+
+pair<TH1F*,TH2F*>
+FSHistogramInfo::getTHNF(){
+  if (m_histPair.first || m_histPair.second){
+    cout << "FSHistogramInfo:  FOUND HISTOGRAM...     ";
+  }
+  else if (m_basicHistograms.size() == 0) {
+    cout << "FSHistogramInfo:  CREATING HISTOGRAM...  ";
+    m_histPair = FSHistogram::getTHNFBasicIndex(m_index);
+  }
+  else{
+    cout << "FSHistogramInfo:  CREATING COMPOSITE...  " << endl;
+    pair<TH1F*,TH2F*> histPairTmp = m_basicHistograms[0]->getTHNF();
+    if (histPairTmp.first) m_histPair.first = 
+      FSHistogram::getTH1F((TH1F*)histPairTmp.first->Clone(FSHistogram::makeFSRootHistName()));
+    if (histPairTmp.second) m_histPair.second = 
+      FSHistogram::getTH2F((TH2F*)histPairTmp.second->Clone(FSHistogram::makeFSRootHistName()));
+    for (unsigned int i = 1; i < m_basicHistograms.size(); i++){
+      pair<TH1F*,TH2F*> hNew = m_basicHistograms[i]->getTHNF();
+      if (m_histPair.first  && hNew.first)  m_histPair.first->Add(hNew.first);
+      if (m_histPair.second && hNew.second) m_histPair.second->Add(hNew.second);
+    }
+    cout << "FSHistogramInfo:  FINISHED COMPOSITE...  ";
+  }
+  if (m_histPair.first) 
+    cout << "with entries... " << m_histPair.first->GetEntries() << endl;
+  if (m_histPair.second) 
+    cout << "with entries... " << m_histPair.second->GetEntries() << endl;
+  return m_histPair;
+}
+
+
+TTree* 
+FSHistogramInfo::getTHNFContents(vector< pair<TString,TString> > extraTreeContents){
+  TTree* histTree = NULL;
+  if (m_basicHistograms.size() == 0){
+    cout << "FSHistogramInfo:  CREATING TREE FROM HISTOGRAM... ";
+    histTree = FSHistogram::getTHNFBasicContents(histTree,m_index,extraTreeContents);
+  }
+  else{
+    cout << "FSHistogramInfo:  CREATING COMPOSITE TREE FROM HISTOGRAM...  " << endl;
+    for (unsigned int i = 0; i < m_basicHistograms.size(); i++){
+      histTree = FSHistogram::getTHNFBasicContents(histTree,
+                                     m_basicHistograms[i]->m_index,extraTreeContents);
+    }
+    cout << "FSHistogramInfo:  FINISHED COMPOSITE TREE FROM HISTOGRAM...  ";
+  }
+  cout << "with entries... " << histTree->GetEntries() << endl;
+  return histTree;
+}
