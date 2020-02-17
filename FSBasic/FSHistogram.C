@@ -806,9 +806,11 @@ FSHistogram::readHistogramCache(string cacheName){
       getFSHistogramInfo(index)->m_histPair = histPair;
       cout << "FSHistogram:  READ HISTOGRAM...          ";
       if (histPair.first) 
-        cout << "with entries... " << histPair.first->GetEntries() << endl;
+        cout << histPair.first->GetName() << "  with entries... " 
+             << histPair.first->GetEntries() << endl;
       if (histPair.second) 
-        cout << "with entries... " << histPair.second->GetEntries() << endl;
+        cout << histPair.second->GetName() << "  with entries... " 
+             << histPair.second->GetEntries() << endl;
     }
   }
 
@@ -826,19 +828,33 @@ FSHistogram::readHistogramCache(string cacheName){
   // ********************************************************
 
 void
-FSHistogram::clearHistogramCache(){
+FSHistogram::clearHistogramCache(int histNumber){
   if (FSControl::DEBUG) 
-    cout << "FSHistogram: clearing histogram cache" << endl;
+    cout << "FSHistogram: clearing histogram cache " << histNumber << endl;
   for (map<TString,FSHistogramInfo*>::iterator rmItr = m_FSHistogramInfoCache.begin();
-       rmItr != m_FSHistogramInfoCache.end(); rmItr++){
-    if (rmItr->second){
-      rmItr->second->m_basicHistograms.clear();
-      if (rmItr->second->m_histPair.first)  delete rmItr->second->m_histPair.first;
-      if (rmItr->second->m_histPair.second) delete rmItr->second->m_histPair.second;
-      delete rmItr->second;
+       rmItr != m_FSHistogramInfoCache.end(); ){
+    bool eraseIt = false;
+    FSHistogramInfo* hInfo = rmItr->second;
+    if (!hInfo) eraseIt = true;  // shouldn't happen 
+    if (hInfo){
+      TString hName("");
+      if (hInfo->m_histPair.first)  hName = hInfo->m_histPair.first->GetName();
+      if (hInfo->m_histPair.second) hName = hInfo->m_histPair.second->GetName();
+      if (hName == "") eraseIt = true;  // shouldn't happen
+      if (histNumber < 0) eraseIt = true;
+      if (histNumber > 0 && getFSRootHistNumber(hName) == histNumber) eraseIt = true;
     }
+    if (eraseIt){
+      if (hInfo){
+        hInfo->m_basicHistograms.clear();
+        if (hInfo->m_histPair.first)  delete hInfo->m_histPair.first;
+        if (hInfo->m_histPair.second) delete hInfo->m_histPair.second;
+        delete hInfo;
+      }
+      rmItr = m_FSHistogramInfoCache.erase(rmItr);
+    }
+    else{ rmItr++; }
   }
-  m_FSHistogramInfoCache.clear();
   if (FSControl::DEBUG) 
     cout << "FSHistogram: done clearing histogram cache" << endl;
 }
@@ -1075,9 +1091,19 @@ FSHistogram::printIndexInfo(map<TString,TString> iMap){
 
 TString
 FSHistogram::makeFSRootHistName(){
-  TString hname("FSRootHist");
-  hname += FSString::int2TString(++m_indexFSRootHistName,9);
+  return getFSRootHistName(++m_indexFSRootHistName);
+}
+
+TString
+FSHistogram::getFSRootHistName(int histNumber){
+  TString hname("FSRootHist.");
+  hname += FSString::int2TString(histNumber,6);
   return hname;
+}
+
+int
+FSHistogram::getFSRootHistNumber(TString hName){
+  return FSString::TString2int(hName);
 }
 
 
@@ -1120,9 +1146,11 @@ FSHistogram::executeRDataFrame(){
         histRDF->Copy(*hist);  hist->SetName(hName);  hist->Scale(scale);  hist = getTH2F(hist);
       }
       if (histPair.first) 
-        cout << "with entries... " << histPair.first->GetEntries() << endl;
+        cout << histPair.first->GetName() << "  with entries... " 
+             << histPair.first->GetEntries() << endl;
       if (histPair.second) 
-        cout << "with entries... " << histPair.second->GetEntries() << endl;
+        cout << histPair.second->GetName() << "  with entries... " 
+             << histPair.second->GetEntries() << endl;
     }
   }
     // then loop over the composite histograms
@@ -1139,9 +1167,11 @@ FSHistogram::executeRDataFrame(){
         if (hComp.second && hBasic.second) hComp.second->Add(hBasic.second);
       }
       if (hComp.first) 
-        cout << "with entries... " << hComp.first->GetEntries() << endl;
+        cout << hComp.first->GetName() << "  with entries... " 
+             << hComp.first->GetEntries() << endl;
       if (hComp.second) 
-        cout << "with entries... " << hComp.second->GetEntries() << endl;
+        cout << hComp.second->GetName() << "  with entries... " 
+             << hComp.second->GetEntries() << endl;
     }
   }
 }
@@ -1223,9 +1253,11 @@ FSHistogramInfo::getTHNF(){
     cout << "FSHistogramInfo:  FINISHED COMPOSITE...  ";
   }
   if (m_histPair.first) 
-    cout << "with entries... " << m_histPair.first->GetEntries() << endl;
+    cout << m_histPair.first->GetName() << "  with entries... " 
+         << m_histPair.first->GetEntries() << endl;
   if (m_histPair.second) 
-    cout << "with entries... " << m_histPair.second->GetEntries() << endl;
+    cout << m_histPair.second->GetName() << "  with entries... " 
+         << m_histPair.second->GetEntries() << endl;
   return m_histPair;
 }
 

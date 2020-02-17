@@ -142,6 +142,13 @@ class FSHistogram{
 
 
       // ********************************************************
+      // INTERACT WITH THE HISTOGRAM CACHE
+      // ********************************************************
+
+    static void clearHistogramCache(int histNumber = -1);
+
+
+      // ********************************************************
       // INTERACT WITH RDATAFRAME
       // ********************************************************
 
@@ -149,12 +156,6 @@ class FSHistogram{
     static void executeRDataFrame();
     static void disableRDataFrame();
 
-
-      // ********************************************************
-      // CLEAR GLOBAL CACHES
-      // ********************************************************
-
-    static void clearHistogramCache();
 
     friend class FSModeHistogram;
     friend class FSHistogramInfo;
@@ -234,6 +235,9 @@ class FSHistogram{
       // make histogram names
 
     static TString makeFSRootHistName();
+    static TString getFSRootHistName(int histNumber);
+    static int getFSRootHistNumber(TString hName);
+
 
       // global caches
 
