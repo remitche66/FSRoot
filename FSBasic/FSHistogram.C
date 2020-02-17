@@ -1188,13 +1188,18 @@ FSHistogram::disableRDataFrame(){
   m_RDataFrameCache.clear();
   m_RDFVariableDefinitions.clear();
   m_RDFVariableCounter = 0;
+  vector<int> rmHistNumber;
   for (map<TString, FSHistogramInfo*>::iterator mapItr = m_FSHistogramInfoCache.begin();
            mapItr != m_FSHistogramInfoCache.end(); mapItr++){
-    if (mapItr->second && mapItr->second->m_waitingForEventLoop){
-      if (mapItr->second->m_histPair.first) delete mapItr->second->m_histPair.first;
-      if (mapItr->second->m_histPair.second) delete mapItr->second->m_histPair.second;
+    FSHistogramInfo* histInfo = mapItr->second;
+    if (histInfo && histInfo->m_waitingForEventLoop){
+      if (histInfo->m_histPair.first) 
+        rmHistNumber.push_back(getFSRootHistNumber(histInfo->m_histPair.first->GetName()));
+      if (histInfo->m_histPair.second) 
+        rmHistNumber.push_back(getFSRootHistNumber(histInfo->m_histPair.second->GetName()));
     }
   }
+  for (unsigned int i = 0; i < rmHistNumber.size(); i++){ clearHistogramCache(rmHistNumber[i]); }
 }
 
 
