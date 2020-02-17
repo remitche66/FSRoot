@@ -23,6 +23,7 @@
 map< TString, FSHistogramInfo* >  FSHistogram::m_FSHistogramInfoCache;
 unsigned int FSHistogram::m_indexFSRootHistName = 0;
 bool FSHistogram::m_USEDATAFRAME = false;
+bool FSHistogram::m_USEDATAFRAMENOW = false;
 map< TString, ROOT::RDataFrame* > FSHistogram::m_RDataFrameCache;
 map< TString, TString > FSHistogram::m_RDFVariableDefinitions;
 unsigned int FSHistogram::m_RDFVariableCounter = 0;
@@ -1148,9 +1149,10 @@ FSHistogram::getFSRootHistNumber(TString hName){
 
 
 void
-FSHistogram::enableRDataFrame(int numThreads){
+FSHistogram::enableRDataFrame(bool executeImmediately, int numThreads){
   ROOT::EnableImplicitMT(numThreads);
   m_USEDATAFRAME = true;
+  m_USEDATAFRAMENOW = executeImmediately;
 }
 
 
@@ -1214,6 +1216,7 @@ void
 FSHistogram::disableRDataFrame(){
   ROOT::DisableImplicitMT();
   m_USEDATAFRAME = false;
+  m_USEDATAFRAMENOW = false;
   for (map<TString, ROOT::RDataFrame*>::iterator mapItr = m_RDataFrameCache.begin();
            mapItr != m_RDataFrameCache.end(); mapItr++){
     if (mapItr->second) delete mapItr->second;
@@ -1295,6 +1298,8 @@ FSHistogramInfo::getTHNF(){
   if (m_histPair.second) 
     cout << m_histPair.second->GetName() << "  with entries... " 
          << m_histPair.second->GetEntries() << endl;
+  if (FSHistogram::m_USEDATAFRAME && m_index.Contains("{-TP-}TREE") && FSHistogram::m_USEDATAFRAMENOW)
+    FSHistogram::executeRDataFrame();
   return m_histPair;
 }
 

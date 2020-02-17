@@ -153,7 +153,7 @@ class FSHistogram{
       // INTERACT WITH RDATAFRAME
       // ********************************************************
 
-    static void enableRDataFrame(int numThreads = 0);
+    static void enableRDataFrame(bool executeImmediately = true, int numThreads = 0);
     static void executeRDataFrame();
     static void disableRDataFrame();
 
@@ -250,6 +250,7 @@ class FSHistogram{
       // *******************************************
 
     static bool m_USEDATAFRAME;
+    static bool m_USEDATAFRAMENOW;
     static map< TString, ROOT::RDataFrame* > m_RDataFrameCache;
     static map< TString, TString > m_RDFVariableDefinitions;
     static unsigned int m_RDFVariableCounter;
