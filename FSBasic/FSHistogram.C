@@ -887,8 +887,7 @@ FSHistogram::showHistogramCache(int histNumber){
     }
   }}
   for (unsigned int i = 0; i < vecHistInfo.size(); i++){
-    cout << "  NAME = " << vecHistInfo[i]->getName() << endl;
-    cout << "  INDEX = " << vecHistInfo[i]->m_index << endl;
+    vecHistInfo[i]->show();
     cout << "-------------------------------------" << endl;
   }
 }
@@ -1229,9 +1228,10 @@ FSHistogram::disableRDataFrame(){
            mapItr != m_FSHistogramInfoCache.end(); mapItr++){
     FSHistogramInfo* histInfo = mapItr->second;
     if (histInfo && histInfo->m_waitingForEventLoop){
-      int dim = histInfo->getND();
-      if (dim == 1) rmHist.push_back(getFSRootHistNumber(histInfo->m_histPair.first->GetName()));
-      if (dim == 2) rmHist.push_back(getFSRootHistNumber(histInfo->m_histPair.second->GetName()));
+      if (histInfo->m_histPair.first) 
+        rmHist.push_back(getFSRootHistNumber(histInfo->m_histPair.first->GetName()));
+      if (histInfo->m_histPair.second) 
+        rmHist.push_back(getFSRootHistNumber(histInfo->m_histPair.second->GetName()));
     }
   }
   for (unsigned int i = 0; i < rmHist.size(); i++){ clearHistogramCache(rmHist[i]); }
@@ -1267,7 +1267,8 @@ FSHistogramInfo::getTHNF(){
       m_histPairRDF = FSHistogram::getTHNFBasicTreeRDF(m_index);
     }
     else{
-      cout << "FSHistogramInfo:  SETTING COMPOSITE... " << endl;
+      cout << "FSHistogramInfo:  SETTING COMPOSITE (from " 
+           << m_basicHistograms.size() << " elements)" << endl;
       for (unsigned int i = 0; i < m_basicHistograms.size(); i++){
         m_basicHistograms[i]->getTHNF();
       }
@@ -1279,7 +1280,8 @@ FSHistogramInfo::getTHNF(){
     m_histPair = FSHistogram::getTHNFBasicIndex(m_index);
   }
   else{
-    cout << "FSHistogramInfo:  CREATING COMPOSITE...  " << endl;
+    cout << "FSHistogramInfo:  CREATING COMPOSITE (from " 
+         << m_basicHistograms.size() << " elements)" << endl;
     pair<TH1F*,TH2F*> histPairTmp = m_basicHistograms[0]->getTHNF();
     if (histPairTmp.first) m_histPair.first = 
       FSHistogram::getTH1F((TH1F*)histPairTmp.first->Clone(FSHistogram::makeFSRootHistName()));

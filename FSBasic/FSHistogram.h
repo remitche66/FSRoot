@@ -276,17 +276,18 @@ class FSHistogramInfo{
     pair<TH1F*,TH2F*> getTHNF();
     TTree* getTHNFContents(vector< pair<TString,TString> > extraTreeContents 
                               = vector< pair<TString,TString> >());
+    TString getName(){ if (m_histPair.first)  return m_histPair.first->GetName();
+                       if (m_histPair.second) return m_histPair.second->GetName(); 
+                       return TString(""); };
+    void show(){ cout << "  NAME = " << getName() << endl; 
+                 cout << "  INDEX = " << m_index << endl; };
+
     TString m_index;
+    bool m_waitingForEventLoop;
     vector<FSHistogramInfo*> m_basicHistograms;
     pair<TH1F*,TH2F*> m_histPair;
     pair< ROOT::RDF::RResultPtr<TH1D>, ROOT::RDF::RResultPtr<TH2D> > m_histPairRDF;
-    bool m_waitingForEventLoop;
-    int getND(){ if (m_histPair.first) return 1; if (m_histPair.second) return 2;
-                 cout << "FSHistogramInfo ERROR: no histogram defined" << endl;
-                 exit(0); return 0; }
-    TString getName(){ if (m_histPair.first)  return m_histPair.first->GetName();
-                       if (m_histPair.second) return m_histPair.second->GetName(); 
-                       getND(); return TString(""); };
+
 };
 
 
