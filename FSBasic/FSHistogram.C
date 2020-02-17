@@ -749,6 +749,7 @@ FSHistogram::dumpHistogramCache(string cacheName){
     TString histIndex = mapItr->first;
     FSHistogramInfo* histInfo = mapItr->second;
     if (histInfo->m_basicHistograms.size() > 0) continue;
+    if (histInfo->m_waitingForEventLoop) continue;
     pair<TH1F*,TH2F*> histPair = histInfo->getTHNF();
     if (histPair.first || histPair.second) 
       textCache << histIndex << endl;
@@ -1103,16 +1104,20 @@ FSHistogram::executeRDataFrame(){
     if ((histInfo->m_waitingForEventLoop) && (histInfo->m_basicHistograms.size() == 0)){
       cout << "FSHistogramInfo:  FILLING HISTOGRAM...     ";
       histInfo->m_waitingForEventLoop = false;
+      map<TString,TString> indexMap = parseHistogramIndex(histInfo->m_index);
+      double scale = 1.0;  
+      if (indexMap.find("{-SC-}") != indexMap.end()) 
+        scale = FSString::TString2double(indexMap["{-SC-}"]); 
       pair<TH1F*, TH2F*> histPair = histInfo->m_histPair;
       if (histPair.first){
         TH1F* hist = histPair.first;  TString hName = hist->GetName();
         ROOT::RDF::RResultPtr<TH1D> histRDF = histInfo->m_histPairRDF.first; 
-        histRDF->Copy(*hist);  hist->SetName(hName);  hist = getTH1F(hist);
+        histRDF->Copy(*hist);  hist->SetName(hName);  hist->Scale(scale);  hist = getTH1F(hist);
       }
       if (histPair.second){
         TH2F* hist = histPair.second;  TString hName = hist->GetName();
         ROOT::RDF::RResultPtr<TH2D> histRDF = histInfo->m_histPairRDF.second; 
-        histRDF->Copy(*hist);  hist->SetName(hName);  hist = getTH2F(hist);
+        histRDF->Copy(*hist);  hist->SetName(hName);  hist->Scale(scale);  hist = getTH2F(hist);
       }
       if (histPair.first) 
         cout << "with entries... " << histPair.first->GetEntries() << endl;
@@ -1146,6 +1151,20 @@ void
 FSHistogram::disableRDataFrame(){
   ROOT::DisableImplicitMT();
   m_USEDATAFRAME = false;
+  for (map<TString, ROOT::RDataFrame*>::iterator mapItr = m_RDataFrameCache.begin();
+           mapItr != m_RDataFrameCache.end(); mapItr++){
+    if (mapItr->second) delete mapItr->second;
+  }
+  m_RDataFrameCache.clear();
+  m_RDFVariableDefinitions.clear();
+  m_RDFVariableCounter = 0;
+  for (map<TString, FSHistogramInfo*>::iterator mapItr = m_FSHistogramInfoCache.begin();
+           mapItr != m_FSHistogramInfoCache.end(); mapItr++){
+    if (mapItr->second && mapItr->second->m_waitingForEventLoop){
+      if (mapItr->second->m_histPair.first) delete mapItr->second->m_histPair.first;
+      if (mapItr->second->m_histPair.second) delete mapItr->second->m_histPair.second;
+    }
+  }
 }
 
 
