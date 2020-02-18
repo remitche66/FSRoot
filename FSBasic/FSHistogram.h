@@ -237,12 +237,14 @@ class FSHistogram{
     static TString makeFSRootHistName();
     static TString getFSRootHistName(int histNumber);
     static int getFSRootHistNumber(TString hName);
+    static TString makeFSRootTempName();
 
 
       // global caches
 
     static map< TString, FSHistogramInfo* >  m_FSHistogramInfoCache;
     static unsigned int m_indexFSRootHistName;
+    static unsigned int m_indexFSRootTempName;
 
 
       // *******************************************

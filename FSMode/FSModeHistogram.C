@@ -503,11 +503,11 @@ FSModeHistogram::expandHistogramIndex(TString index){
 
 FSHistogramInfo*
 FSModeHistogram::getFSHistogramInfo(TString index){
+  vector<TString> indices = expandHistogramIndex(index);
+  if (indices.size() == 1){ index = indices[0]; indices.clear(); }
   if (FSHistogram::m_FSHistogramInfoCache.find(index) != 
       FSHistogram::m_FSHistogramInfoCache.end())
     return FSHistogram::m_FSHistogramInfoCache[index];
-  vector<TString> indices = expandHistogramIndex(index);
-  if ((indices.size() == 1) && (indices[0] == index)) indices.clear();
   FSHistogramInfo* histInfo = new FSHistogramInfo(index,indices);
   FSHistogram::m_FSHistogramInfoCache[index] = histInfo;
   return histInfo;
