@@ -38,7 +38,10 @@ FSModeHistogram::getTH1F(TString fileName, TString ntName, TString category,
                        TString cuts, double scale){
   TString index = FSHistogram::getHistogramIndexTree(1,fileName,ntName,variable,
                                                  bounds,cuts,scale,true,category);
-  return getFSHistogramInfo(index)->getTHNF().first;
+  TH1F* hist = getFSHistogramInfo(index)->getTHNF().first;
+  if (FSHistogram::m_USEDATAFRAME && FSHistogram::m_USEDATAFRAMENOW)
+    FSHistogram::executeRDataFrame();
+  return FSHistogram::getTH1F(hist);
 }
 
 
@@ -48,7 +51,10 @@ FSModeHistogram::getTH2F(TString fileName, TString ntName, TString category,
                        TString cuts, double scale){
   TString index = FSHistogram::getHistogramIndexTree(2,fileName,ntName,variable,
                                                  bounds,cuts,scale,true,category);
-  return getFSHistogramInfo(index)->getTHNF().second;
+  TH2F* hist = getFSHistogramInfo(index)->getTHNF().second;
+  if (FSHistogram::m_USEDATAFRAME && FSHistogram::m_USEDATAFRAMENOW)
+    FSHistogram::executeRDataFrame();
+  return FSHistogram::getTH2F(hist);
 }
 
 

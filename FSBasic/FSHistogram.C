@@ -87,13 +87,13 @@ FSHistogram::getTH2F(TH2F* hist){
 TH1F* 
 FSHistogram::getTH1F(TString fileName, TString histName){
   TString index = getHistogramIndexFile(1,fileName,histName);
-  return getFSHistogramInfo(index)->getTHNF().first;
+  return getTH1F(getFSHistogramInfo(index)->getTHNF().first);
 }
 
 TH2F* 
 FSHistogram::getTH2F(TString fileName, TString histName){
   TString index = getHistogramIndexFile(2,fileName,histName);
-  return getFSHistogramInfo(index)->getTHNF().second;
+  return getTH2F(getFSHistogramInfo(index)->getTHNF().second);
 }
 
 
@@ -148,7 +148,7 @@ FSHistogram::getTH1F(TString fileName, TString ntName,
   TString index = getHistogramIndexTree(1,fileName,ntName,variable,bounds,cuts,scale);
   TH1F* hist = getFSHistogramInfo(index)->getTHNF().first;
   if (m_USEDATAFRAME && m_USEDATAFRAMENOW) executeRDataFrame();
-  return hist;
+  return getTH1F(hist);
 } 
 
 TH2F* 
@@ -158,7 +158,7 @@ FSHistogram::getTH2F(TString fileName, TString ntName,
   TString index = getHistogramIndexTree(2,fileName,ntName,variable,bounds,cuts,scale);
   TH2F* hist = getFSHistogramInfo(index)->getTHNF().second;
   if (m_USEDATAFRAME && m_USEDATAFRAMENOW) executeRDataFrame();
-  return hist;
+  return getTH2F(hist);
 } 
 
 void 
@@ -479,7 +479,7 @@ FSHistogram::getTH1FFormula(TString formula, TString bounds, int numRandomTrials
   TString index = getHistogramIndexFormula(1,formula,bounds);
   TH1F* hist = getFSHistogramInfo(index)->getTHNF().first;
   if (numRandomTrials > 0) hist = getTH1FRandom(hist,numRandomTrials);
-  return hist;
+  return getTH1F(hist);
 }
 
 TH2F*
@@ -487,7 +487,7 @@ FSHistogram::getTH2FFormula(TString formula, TString bounds, int numRandomTrials
   TString index = getHistogramIndexFormula(2,formula,bounds);
   TH2F* hist = getFSHistogramInfo(index)->getTHNF().second;
   if (numRandomTrials > 0) hist = getTH2FRandom(hist,numRandomTrials);
-  return hist;
+  return getTH2F(hist);
 }
 
 TH1F*
@@ -1210,12 +1210,12 @@ FSHistogram::executeRDataFrame(){
       if (histPair.first){
         TH1F* hist = histPair.first;  TString hName = hist->GetName();
         ROOT::RDF::RResultPtr<TH1D> histRDF = histInfo->m_histPairRDF.first; 
-        histRDF->Copy(*hist);  hist->SetName(hName);  hist->Scale(scale);  hist = getTH1F(hist);
+        histRDF->Copy(*hist);  hist = getTH1F(hist);  hist->SetName(hName);  hist->Scale(scale);
       }
       if (histPair.second){
         TH2F* hist = histPair.second;  TString hName = hist->GetName();
         ROOT::RDF::RResultPtr<TH2D> histRDF = histInfo->m_histPairRDF.second; 
-        histRDF->Copy(*hist);  hist->SetName(hName);  hist->Scale(scale);  hist = getTH2F(hist);
+        histRDF->Copy(*hist);  hist = getTH2F(hist);  hist->SetName(hName);  hist->Scale(scale);
       }
       if (histPair.first) 
         cout << histPair.first->GetName() << "  with entries... " 
