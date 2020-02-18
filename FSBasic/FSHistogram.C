@@ -238,10 +238,13 @@ FSHistogram::getTHNFBasicTreeRDF(TString index){
   int     dimension = FSString::TString2int(mapIndex["{-ND-}"]);
   TString fileName  = mapIndex["{-FN-}"];
   TString ntName    = mapIndex["{-NT-}"];
-  TString variable  = mapIndex["{-VA-}"];  variable = FSTree::expandVariable(variable);
+  TString variable  = mapIndex["{-VA-}"];
   TString bounds    = mapIndex["{-BO-}"];
-  TString cuts      = mapIndex["{-CU-}"];  cuts = FSTree::expandVariable(cuts);
+  TString cuts      = mapIndex["{-CU-}"]; 
   double  scale     = FSString::TString2double(mapIndex["{-SC-}"]);
+  variable = FSTree::expandVariable(variable);
+  cuts = FSTree::expandVariable(cuts);
+  if (cuts == "") cuts = "(1==1)";
   string sFN   = FSString::TString2string(fileName);
   string sNT   = FSString::TString2string(ntName);
   string sVAR  = FSString::TString2string(variable);
