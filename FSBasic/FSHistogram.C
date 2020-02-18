@@ -113,10 +113,12 @@ FSHistogram::getTHNFBasicFile(int dimension, TString fileName, TString histName)
   TH1F* hist1d  = NULL;  TH2F* hist2d  = NULL;  // copied histograms to return
   TString newName = makeFSRootHistName();
 
-    // find the histogram in a file
+    // find the histogram in a file (and change its name to get it out of the way)
   TFile* tf = FSTree::getTFile(fileName); tf->cd();
   if (dimension == 1) hist1d0 = (TH1F*) gDirectory->FindObjectAny(histName);
   if (dimension == 2) hist2d0 = (TH2F*) gDirectory->FindObjectAny(histName);
+  if (hist1d0) hist1d0->SetName(makeFSRootTempName());
+  if (hist2d0) hist2d0->SetName(makeFSRootTempName());
 
     // copy the histogram and return it
   if (hist1d0){ hist1d = new TH1F(*hist1d0); hist1d = getTH1F(hist1d); hist1d->SetName(newName); }
@@ -144,7 +146,9 @@ FSHistogram::getTH1F(TString fileName, TString ntName,
                                    TString variable, TString bounds,
                                    TString cuts, double scale){
   TString index = getHistogramIndexTree(1,fileName,ntName,variable,bounds,cuts,scale);
-  return getFSHistogramInfo(index)->getTHNF().first;
+  TH1F* hist = getFSHistogramInfo(index)->getTHNF().first;
+  if (m_USEDATAFRAME && m_USEDATAFRAMENOW) executeRDataFrame();
+  return hist;
 } 
 
 TH2F* 
@@ -152,7 +156,9 @@ FSHistogram::getTH2F(TString fileName, TString ntName,
                                    TString variable, TString bounds,
                                    TString cuts, double scale){
   TString index = getHistogramIndexTree(2,fileName,ntName,variable,bounds,cuts,scale);
-  return getFSHistogramInfo(index)->getTHNF().second;
+  TH2F* hist = getFSHistogramInfo(index)->getTHNF().second;
+  if (m_USEDATAFRAME && m_USEDATAFRAMENOW) executeRDataFrame();
+  return hist;
 } 
 
 void 
@@ -1287,38 +1293,60 @@ FSHistogramInfo::FSHistogramInfo(TString index, vector<TString> expandedIndices)
 
 pair<TH1F*,TH2F*>
 FSHistogramInfo::getTHNF(){
+
+    // case 1:  return a previously created histogram
   if (m_histPair.first || m_histPair.second){
     cout << "FSHistogramInfo:  FOUND HISTOGRAM...     " << std::flush;
   }
+
+    // case 2:  set up histograms but don't fill them yet
   else if (FSHistogram::m_USEDATAFRAME && m_index.Contains("{-TP-}TREE")){
     TString eIndex(m_index); eIndex.Replace(eIndex.Index("{-TP-}TREE"),10,"{-TP-}EMPTY");
     m_histPair = FSHistogram::getTHNFBasicIndex(eIndex);
     m_waitingForEventLoop = true;
+
+      // case 2a: set up a single histogram
     if (m_basicHistograms.size() == 0){
       cout << "FSHistogramInfo:  SETTING HISTOGRAM...   " << std::flush;
       m_histPairRDF = FSHistogram::getTHNFBasicTreeRDF(m_index);
     }
+
+      // case 2b: set up a composite histogram
     else{
-      cout << "FSHistogramInfo:  SETTING COMPOSITE (from " 
-           << m_basicHistograms.size() << " elements)" << endl;
+      cout << "FSHistogramInfo:  SETTING COMPOSITE...   " << getName() 
+           << "   (from " << m_basicHistograms.size() << " elements)" << endl;
+      m_waitingForEventLoop = false;
+      vector< pair<TH1F*,TH2F*> > vBasic;
       for (unsigned int i = 0; i < m_basicHistograms.size(); i++){
-        m_basicHistograms[i]->getTHNF();
+        vBasic.push_back(m_basicHistograms[i]->getTHNF());
+        if (m_basicHistograms[i]->m_waitingForEventLoop) m_waitingForEventLoop = true;
+      }
+        // case 2c: if the basic histograms all exist, fill the composite
+      if (!m_waitingForEventLoop){
+        for (unsigned int i = 0; i < vBasic.size(); i++){
+          pair<TH1F*,TH2F*> hNew = vBasic[i];
+          if (m_histPair.first  && hNew.first)  m_histPair.first->Add(hNew.first);
+          if (m_histPair.second && hNew.second) m_histPair.second->Add(hNew.second);
+        }
       }
       cout << "FSHistogramInfo:  FINISHED COMPOSITE...  " << std::flush;
     }
   }
+
+    // case 3: create a single histogram
   else if (m_basicHistograms.size() == 0){
     cout << "FSHistogramInfo:  CREATING HISTOGRAM...  " << std::flush;
     m_histPair = FSHistogram::getTHNFBasicIndex(m_index);
   }
+
+    // case 4: create a composite histogram
   else{
-    cout << "FSHistogramInfo:  CREATING COMPOSITE (from " 
-         << m_basicHistograms.size() << " elements)" << endl;
-    pair<TH1F*,TH2F*> histPairTmp = m_basicHistograms[0]->getTHNF();
-    if (histPairTmp.first) m_histPair.first = 
-      FSHistogram::getTH1F((TH1F*)histPairTmp.first->Clone(FSHistogram::makeFSRootHistName()));
-    if (histPairTmp.second) m_histPair.second = 
-      FSHistogram::getTH2F((TH2F*)histPairTmp.second->Clone(FSHistogram::makeFSRootHistName()));
+    TString compName = FSHistogram::makeFSRootHistName();
+    cout << "FSHistogramInfo:  CREATING COMPOSITE...  " << compName 
+         << "   (from " << m_basicHistograms.size() << " elements)" << endl;
+    pair<TH1F*,TH2F*> hP0 = m_basicHistograms[0]->getTHNF();
+    if (hP0.first)  m_histPair.first  = FSHistogram::getTH1F((TH1F*)hP0.first->Clone(compName));
+    if (hP0.second) m_histPair.second = FSHistogram::getTH2F((TH2F*)hP0.second->Clone(compName));
     for (unsigned int i = 1; i < m_basicHistograms.size(); i++){
       pair<TH1F*,TH2F*> hNew = m_basicHistograms[i]->getTHNF();
       if (m_histPair.first  && hNew.first)  m_histPair.first->Add(hNew.first);
@@ -1326,14 +1354,13 @@ FSHistogramInfo::getTHNF(){
     }
     cout << "FSHistogramInfo:  FINISHED COMPOSITE...  " << std::flush;
   }
+
   if (m_histPair.first) 
     cout << m_histPair.first->GetName() << "  with entries... " 
          << m_histPair.first->GetEntries() << endl;
   if (m_histPair.second) 
     cout << m_histPair.second->GetName() << "  with entries... " 
          << m_histPair.second->GetEntries() << endl;
-  if (FSHistogram::m_USEDATAFRAME && m_index.Contains("{-TP-}TREE") && FSHistogram::m_USEDATAFRAMENOW)
-    FSHistogram::executeRDataFrame();
   return m_histPair;
 }
 
