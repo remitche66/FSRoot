@@ -146,7 +146,7 @@ class FSHistogram{
       // ********************************************************
 
     static void clearHistogramCache(int histNumber = -1);
-    static void showHistogramCache(int histNumber = -1);
+    static void showHistogramCache(int histNumber = -1, bool showDetails = false);
 
 
       // ********************************************************
@@ -278,14 +278,10 @@ class FSHistogramInfo{
     pair<TH1F*,TH2F*> getTHNF();
     TTree* getTHNFContents(vector< pair<TString,TString> > extraTreeContents 
                               = vector< pair<TString,TString> >());
-    TString getName(){ if (m_histPair.first)  return m_histPair.first->GetName();
-                       if (m_histPair.second) return m_histPair.second->GetName(); 
-                       return TString(""); };
-    void show(){ cout << "  NAME = " << getName();
-                 if (m_basicHistograms.size() > 0) 
-                   cout << "  *** COMPOSITE (" << m_basicHistograms.size() << ") ***"; 
-                 cout << endl;
-                 cout << "  INDEX = " << m_index << endl; };
+    TString getHistName(){ if (m_histPair.first)  return m_histPair.first->GetName();
+                           if (m_histPair.second) return m_histPair.second->GetName(); 
+                           return TString(""); };
+    void show(bool showDetails = false);
 
     TString m_index;
     bool m_waitingForEventLoop;

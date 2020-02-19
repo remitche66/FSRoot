@@ -750,14 +750,14 @@ FSHistogram::dumpHistogramCache(string cacheName){
   vector<FSHistogramInfo*> vecHistInfo;
   for (map<TString,FSHistogramInfo*>::iterator mpItr = m_FSHistogramInfoCache.begin();
        mpItr != m_FSHistogramInfoCache.end(); mpItr++){
-    if ((mpItr->second) && (mpItr->second->getName() != ""))
+    if ((mpItr->second) && (mpItr->second->getHistName() != ""))
       vecHistInfo.push_back(mpItr->second);
   }
   if (vecHistInfo.size() == 0) return;
   for (unsigned int i = 0; i < vecHistInfo.size()-1; i++){
   for (unsigned int j = i+1; j < vecHistInfo.size(); j++){
-    if (FSString::TString2string(vecHistInfo[j]->getName()) <
-        FSString::TString2string(vecHistInfo[i]->getName())){
+    if (FSString::TString2string(vecHistInfo[j]->getHistName()) <
+        FSString::TString2string(vecHistInfo[i]->getHistName())){
       FSHistogramInfo* temp = vecHistInfo[i];
       vecHistInfo[i] = vecHistInfo[j];
       vecHistInfo[j] = temp;
@@ -830,8 +830,8 @@ FSHistogram::readHistogramCache(string cacheName){
     if (index.Contains("{-ND-}1D")) dim = 1;
     if (index.Contains("{-ND-}2D")) dim = 2;
     cout << "FSHistogram:  READ HISTOGRAM...          " << std::flush;
-    if (getFSHistogramInfo(index)->getName() != ""){
-      cout << "histogram already exists: " << getFSHistogramInfo(index)->getName() << endl;
+    if (getFSHistogramInfo(index)->getHistName() != ""){
+      cout << "histogram already exists: " << getFSHistogramInfo(index)->getHistName() << endl;
       continue;
     }
     FSTree::clearFileCache();  // (subtle: reusing the same cache name)
@@ -868,7 +868,7 @@ FSHistogram::clearHistogramCache(int histNumber){
     FSHistogramInfo* hInfo = rmItr->second;
     if (!hInfo) eraseIt = true;  // shouldn't happen 
     if (hInfo){
-      TString hName = hInfo->getName();
+      TString hName = hInfo->getHistName();
       if (histNumber < 0) eraseIt = true;
       if (histNumber > 0 && getFSRootHistNumber(hName) == histNumber) eraseIt = true;
     }
@@ -888,7 +888,7 @@ FSHistogram::clearHistogramCache(int histNumber){
 }
 
 void
-FSHistogram::showHistogramCache(int histNumber){
+FSHistogram::showHistogramCache(int histNumber, bool showDetails){
   cout << "-------------------------------------" << endl;
   cout << "-- CONTENTS OF THE HISTOGRAM CACHE --" << endl;
   cout << "-------------------------------------" << endl;
@@ -896,7 +896,7 @@ FSHistogram::showHistogramCache(int histNumber){
   for (map<TString,FSHistogramInfo*>::iterator mpItr = m_FSHistogramInfoCache.begin();
        mpItr != m_FSHistogramInfoCache.end(); mpItr++){
     if (histNumber < 0){ vecHistInfo.push_back(mpItr->second); continue; }
-    TString hName(""); if (mpItr->second) hName = mpItr->second->getName();
+    TString hName(""); if (mpItr->second) hName = mpItr->second->getHistName();
     if (histNumber > 0 && getFSRootHistNumber(hName) == histNumber)
       vecHistInfo.push_back(mpItr->second);
   }
@@ -909,15 +909,15 @@ FSHistogram::showHistogramCache(int histNumber){
   if (vecHistInfo.size() == 0) return;
   for (unsigned int i = 0; i < vecHistInfo.size()-1; i++){
   for (unsigned int j = i+1; j < vecHistInfo.size(); j++){
-    if (FSString::TString2string(vecHistInfo[j]->getName()) <
-        FSString::TString2string(vecHistInfo[i]->getName())){
+    if (FSString::TString2string(vecHistInfo[j]->getHistName()) <
+        FSString::TString2string(vecHistInfo[i]->getHistName())){
       FSHistogramInfo* temp = vecHistInfo[i];
       vecHistInfo[i] = vecHistInfo[j];
       vecHistInfo[j] = temp;
     }
   }}
   for (unsigned int i = 0; i < vecHistInfo.size(); i++){
-    vecHistInfo[i]->show();
+    vecHistInfo[i]->show(showDetails);
     cout << "-------------------------------------" << endl;
   }
 }
@@ -1313,7 +1313,7 @@ FSHistogramInfo::getTHNF(){
 
       // case 2b: set up a composite histogram
     else{
-      cout << "FSHistogramInfo:  SETTING COMPOSITE...   " << getName() 
+      cout << "FSHistogramInfo:  SETTING COMPOSITE...   " << getHistName() 
            << "   (from " << m_basicHistograms.size() << " elements)" << endl;
       m_waitingForEventLoop = false;
       vector< pair<TH1F*,TH2F*> > vBasic;
@@ -1382,4 +1382,19 @@ FSHistogramInfo::getTHNFContents(vector< pair<TString,TString> > extraTreeConten
   }
   cout << "with entries... " << histTree->GetEntries() << endl;
   return histTree;
+}
+
+void
+FSHistogramInfo::show(bool showDetails){
+  cout << "  NAME = " << getHistName();
+  if (m_basicHistograms.size() > 0) 
+    cout << "  *** COMPOSITE (" << m_basicHistograms.size() << ") ***"; 
+  cout << endl;
+  cout << "  INDEX = " << m_index << endl; 
+  if (showDetails) FSHistogram::printIndexInfo(m_index);
+  if (showDetails){
+    for (unsigned int i = 0; i < m_basicHistograms.size(); i++){
+      m_basicHistograms[i]->show(showDetails);
+    }
+  }
 }
