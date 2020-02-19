@@ -60,14 +60,6 @@ class FSHistogram{
                                 TString variable, TString bounds,
                                 TString cuts, double scale = 1.0);
 
-    static void testTH1F(TString fileName, TString ntName,
-                                TString variable, TString bounds,
-                                TString cuts,  double scale = 1.0);
-
-    static void testTH2F(TString fileName, TString ntName,
-                                TString variable, TString bounds,
-                                TString cuts,  double scale = 1.0);
-
 
       // ********************************************************
       // CREATE A TREE IN THE SAME WAY A HISTOGRAM IS CREATED ABOVE
@@ -209,8 +201,8 @@ class FSHistogram{
       // INTERFACE TO THE FSHISTOGRAMINFO CLASS
       // *******************************************
 
-    static vector<TString> expandHistogramIndex(TString index);
-    static FSHistogramInfo* getFSHistogramInfo(TString index);
+    static FSHistogramInfo* getFSHistogramInfo(TString index, 
+                          vector<TString> subIndices = vector<TString>());
 
 
       // ***********************************************
@@ -221,11 +213,12 @@ class FSHistogram{
     static TString getHistogramIndexFile(int dimension, TString fileName, TString histName);
     static TString getHistogramIndexFormula(int dimension, TString formula, TString bounds);
     static TString getHistogramIndexEmpty(int dimension, TString bounds, TString histName);
-    static TString getHistogramIndexTree(int dimension,
-                            TString fileName, TString ntName,
-                            TString variable, TString bounds,
-                            TString cuts, double scale = 1.0,
-                            bool useCat = false, TString cat = "");
+
+    static vector<TString> expandHistogramIndexTree(TString index);
+    static pair<TString, vector<TString> >  getHistogramIndexTree(int dimension,
+                                                   TString fileName, TString ntName,
+                                                   TString variable, TString bounds,
+                                                   TString cuts, double scale = 1.0);
 
     static map<TString,TString> parseHistogramIndex(TString index);
 

@@ -36,14 +36,6 @@ class FSModeHistogram{
                                 TString variable, TString bounds,
                                 TString cuts, double scale = 1.0);
 
-    static void testTH1F(TString fileName, TString ntName, TString category,
-                                TString variable, TString bounds,
-                                TString cuts, double scale = 1.0);
-
-    static void testTH2F(TString fileName, TString ntName, TString category,
-                                TString variable, TString bounds,
-                                TString cuts, double scale = 1.0);
-
 
       // ********************************************************
       // CREATE A TREE IN THE SAME WAY A HISTOGRAM IS CREATED ABOVE
@@ -119,8 +111,12 @@ class FSModeHistogram{
 
       // helper functions to interact with the FSHistogramInfo class
 
-    static vector<TString> expandHistogramIndex(TString index);
-    static FSHistogramInfo* getFSHistogramInfo(TString index);
+    static vector<TString> expandHistogramIndexTree(TString index);
+    static pair<TString, vector<TString> >  getHistogramIndexTree(int dimension,
+                                              TString fileName, TString ntName, TString category,
+                                              TString variable, TString bounds,
+                                              TString cuts, double scale = 1.0);
+
 
 
       // MC components
