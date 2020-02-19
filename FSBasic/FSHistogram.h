@@ -223,7 +223,7 @@ class FSHistogram{
     static map<TString,TString> parseHistogramIndex(TString index);
 
     static void printIndexInfo(TString index);
-    static void printIndexInfo(map<TString,TString> indexMap);
+
 
       // make histogram names
 
