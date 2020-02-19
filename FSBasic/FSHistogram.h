@@ -281,7 +281,10 @@ class FSHistogramInfo{
     TString getName(){ if (m_histPair.first)  return m_histPair.first->GetName();
                        if (m_histPair.second) return m_histPair.second->GetName(); 
                        return TString(""); };
-    void show(){ cout << "  NAME = " << getName() << endl; 
+    void show(){ cout << "  NAME = " << getName();
+                 if (m_basicHistograms.size() > 0) 
+                   cout << "  *** COMPOSITE (" << m_basicHistograms.size() << ") ***"; 
+                 cout << endl;
                  cout << "  INDEX = " << m_index << endl; };
 
     TString m_index;
