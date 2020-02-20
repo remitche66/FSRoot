@@ -111,27 +111,15 @@ FSHistogram::getTHNFBasicFile(TString index){
     printIndexInfo(index);
   }
 
-    // set up to make the histogram
-  TH1F* hist1d0 = NULL;  TH2F* hist2d0 = NULL;  // histograms from the file
-  TH1F* hist1d  = NULL;  TH2F* hist2d  = NULL;  // copied histograms to return
-  TString newName = makeFSRootHistName();
-
-    // find the histogram in a file (and change its name to get it out of the way)
+    // find the histogram in a file 
+  TH1F* hist1d  = NULL;  TH2F* hist2d  = NULL; 
   TFile* tf = FSTree::getTFile(fileName); tf->cd();
-  if (dimension == 1) hist1d0 = (TH1F*) gDirectory->FindObjectAny(histName);
-  if (dimension == 2) hist2d0 = (TH2F*) gDirectory->FindObjectAny(histName);
-  if (hist1d0) hist1d0->SetName(makeFSRootTempName());
-  if (hist2d0) hist2d0->SetName(makeFSRootTempName());
-
-    // copy the histogram and return it
-  if (hist1d0){ hist1d = new TH1F(*hist1d0); hist1d = getTH1F(hist1d); hist1d->SetName(newName); }
-  if (hist2d0){ hist2d = new TH2F(*hist2d0); hist2d = getTH2F(hist2d); hist2d->SetName(newName); }  
+  if (dimension == 1) hist1d = (TH1F*) gDirectory->FindObjectAny(histName);
+  if (dimension == 2) hist2d = (TH2F*) gDirectory->FindObjectAny(histName);
+  if (hist1d) getTH1F(hist1d)->SetName(makeFSRootTempName());
+  if (hist2d) getTH2F(hist2d)->SetName(makeFSRootTempName());
   if (!hist1d && !hist2d){
     cout << "FSHistogram::getTHNFBasicFile WARNING: could not find histogram" << endl;
-    printIndexInfo(index);
-  }
-  if (FSControl::DEBUG && (hist1d || hist2d)){
-    cout << "FSHistogram::getTHNFBasicFile DEBUG: found histogram in file and renamed it" << endl;
     printIndexInfo(index);
   }
   return pair<TH1F*,TH2F*>(hist1d,hist2d);
@@ -829,6 +817,8 @@ FSHistogram::readHistogramCache(string cacheName){
     }
     FSTree::clearFileCache();  // (subtle: reusing the same cache name)
     pair<TH1F*,TH2F*> histPair = getTHNFBasicFile(getHistogramIndexFile(dim,fileName,histName));
+    if (histPair.first)  histPair.first->SetName(makeFSRootHistName());
+    if (histPair.second) histPair.second->SetName(makeFSRootHistName());
     getFSHistogramInfo(index)->m_histPair = histPair;
     if (histPair.first) 
       cout << histPair.first->GetName() << "  with entries... " 
