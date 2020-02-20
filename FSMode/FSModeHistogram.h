@@ -30,11 +30,11 @@ class FSModeHistogram{
 
     static TH1F* getTH1F(TString fileName, TString ntName, TString category,
                                 TString variable, TString bounds,
-                                TString cuts, double scale = 1.0);
+                                TString cuts, double scale = 1.0, bool TESTONLY = false);
 
     static TH2F* getTH2F(TString fileName, TString ntName, TString category,
                                 TString variable, TString bounds,
-                                TString cuts, double scale = 1.0);
+                                TString cuts, double scale = 1.0, bool TESTONLY = false);
 
 
       // ********************************************************

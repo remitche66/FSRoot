@@ -35,9 +35,10 @@ map<TString, map<TString, float> > FSModeHistogram::m_cacheComponentsMap;
 TH1F* 
 FSModeHistogram::getTH1F(TString fileName, TString ntName, TString category,
                        TString variable, TString bounds,
-                       TString cuts, double scale){
+                       TString cuts, double scale, bool TESTONLY){
   pair<TString, vector<TString> > 
     indices = getHistogramIndexTree(1,fileName,ntName,category,variable,bounds,cuts,scale);
+  if (TESTONLY){ FSHistogram::printIndexInfo(indices.first,indices.second); return NULL; }
   TH1F* hist = FSHistogram::getFSHistogramInfo(indices.first,indices.second)->getTHNF().first;
   if (FSHistogram::m_USEDATAFRAME && FSHistogram::m_USEDATAFRAMENOW)
     FSHistogram::executeRDataFrame();
@@ -49,9 +50,10 @@ FSModeHistogram::getTH1F(TString fileName, TString ntName, TString category,
 TH2F* 
 FSModeHistogram::getTH2F(TString fileName, TString ntName, TString category,
                        TString variable, TString bounds,
-                       TString cuts, double scale){
+                       TString cuts, double scale, bool TESTONLY){
   pair<TString, vector<TString> > 
     indices = getHistogramIndexTree(2,fileName,ntName,category,variable,bounds,cuts,scale);
+  if (TESTONLY){ FSHistogram::printIndexInfo(indices.first,indices.second); return NULL; }
   TH2F* hist = FSHistogram::getFSHistogramInfo(indices.first,indices.second)->getTHNF().second;
   if (FSHistogram::m_USEDATAFRAME && FSHistogram::m_USEDATAFRAMENOW)
     FSHistogram::executeRDataFrame();

@@ -52,13 +52,11 @@ class FSHistogram{
       // CREATE A HISTOGRAM FROM A TREE AND CACHE IT
       // ********************************************************
 
-    static TH1F* getTH1F(TString fileName, TString ntName,
-                                TString variable, TString bounds,
-                                TString cuts, double scale = 1.0);
+    static TH1F* getTH1F(TString fileName, TString ntName, TString variable, TString bounds,
+                                TString cuts, double scale = 1.0, bool TESTONLY = false);
 
-    static TH2F* getTH2F(TString fileName, TString ntName,
-                                TString variable, TString bounds,
-                                TString cuts, double scale = 1.0);
+    static TH2F* getTH2F(TString fileName, TString ntName, TString variable, TString bounds,
+                                TString cuts, double scale = 1.0, bool TESTONLY = false);
 
 
       // ********************************************************
@@ -196,7 +194,7 @@ class FSHistogram{
     static TString getHistogramIndex(map<TString,TString> indexMap);
     static TString getHistogramIndexFile(int dimension, TString fileName, TString histName);
     static TString getHistogramIndexFormula(int dimension, TString formula, TString bounds);
-    static TString getHistogramIndexEmpty(int dimension, TString bounds, TString histName);
+    static TString getHistogramIndexEmpty(int dimension, TString bounds);
 
     static vector<TString> expandHistogramIndexTree(TString index);
     static pair<TString, vector<TString> >  getHistogramIndexTree(int dimension,
@@ -207,12 +205,12 @@ class FSHistogram{
     static map<TString,TString> parseHistogramIndex(TString index);
 
     static void printIndexInfo(TString index);
+    static void printIndexInfo(TString index, vector<TString> subIndices);
 
 
       // make histogram names
 
     static TString makeFSRootHistName();
-    static TString getFSRootHistName(int histNumber);
     static int getFSRootHistNumber(TString hName);
     static TString makeFSRootTempName();
 
@@ -258,6 +256,7 @@ class FSHistogramInfo{
     TString getHistName(){ if (m_histPair.first)  return m_histPair.first->GetName();
                            if (m_histPair.second) return m_histPair.second->GetName(); 
                            return TString(""); };
+    TString infoString();
     void show(bool showDetails = false);
 
     TString m_index;

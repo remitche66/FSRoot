@@ -135,9 +135,10 @@ FSHistogram::getTHNFBasicFile(TString index){
 TH1F* 
 FSHistogram::getTH1F(TString fileName, TString ntName,
                                    TString variable, TString bounds,
-                                   TString cuts, double scale){
+                                   TString cuts, double scale, bool TESTONLY){
   pair<TString, vector<TString> > 
     indices = getHistogramIndexTree(1,fileName,ntName,variable,bounds,cuts,scale);
+  if (TESTONLY){ printIndexInfo(indices.first,indices.second); return NULL; }
   TH1F* hist = getFSHistogramInfo(indices.first,indices.second)->getTHNF().first;
   if (m_USEDATAFRAME && m_USEDATAFRAMENOW) executeRDataFrame();
   return getTH1F(hist);
@@ -146,9 +147,10 @@ FSHistogram::getTH1F(TString fileName, TString ntName,
 TH2F* 
 FSHistogram::getTH2F(TString fileName, TString ntName,
                                    TString variable, TString bounds,
-                                   TString cuts, double scale){
+                                   TString cuts, double scale, bool TESTONLY){
   pair<TString, vector<TString> > 
     indices = getHistogramIndexTree(2,fileName,ntName,variable,bounds,cuts,scale);
+  if (TESTONLY){ printIndexInfo(indices.first,indices.second); return NULL; }
   TH2F* hist = getFSHistogramInfo(indices.first,indices.second)->getTHNF().second;
   if (m_USEDATAFRAME && m_USEDATAFRAMENOW) executeRDataFrame();
   return getTH2F(hist);
@@ -219,12 +221,10 @@ FSHistogram::getTHNFBasicTreeRDF(TString index){
   int     dimension = FSString::TString2int(mapIndex["{-ND-}"]);
   TString fileName  = mapIndex["{-FN-}"];
   TString ntName    = mapIndex["{-NT-}"];
-  TString variable  = mapIndex["{-VA-}"];
+  TString variable  = mapIndex["{-VA-}"];  variable = FSTree::expandVariable(variable);
   TString bounds    = mapIndex["{-BO-}"];
-  TString cuts      = mapIndex["{-CU-}"]; 
+  TString cuts      = mapIndex["{-CU-}"];  cuts = FSTree::expandVariable(cuts);
   double  scale     = FSString::TString2double(mapIndex["{-SC-}"]);
-  variable = FSTree::expandVariable(variable);
-  cuts = FSTree::expandVariable(cuts);
   if (cuts == "") cuts = "(1==1)";
   string sFN   = FSString::TString2string(fileName);
   string sNT   = FSString::TString2string(ntName);
@@ -543,9 +543,9 @@ FSHistogram::getTH1FRandom(TH1F* hist, int numRandomTrials){
   TAxis* axisX = rhist->GetXaxis(); 
   int nbinsX = axisX->GetNbins(); 
   double fMax; double fMin;  hist->GetMinimumAndMaximum(fMin,fMax);
-  int numAccepted = 0;  int numAttempts = 0;
-  while ((numAccepted < numRandomTrials) && (numAttempts < numRandomTrials*100000)){
-    numAttempts++;
+  int numAccepted = 0;  //int numAttempts = 0;
+  while (numAccepted < numRandomTrials){
+    //numAttempts++;
     int iX = 1+(int)gRandom->Uniform(0.0,nbinsX);
     double f0 = gRandom->Uniform(0.0,fMax);
     double f = hist->GetBinContent(iX);
@@ -566,9 +566,9 @@ FSHistogram::getTH2FRandom(TH2F* hist, int numRandomTrials){
   TAxis* axisX = rhist->GetXaxis(); TAxis* axisY = rhist->GetYaxis();
   int nbinsX = axisX->GetNbins();   int nbinsY = axisX->GetNbins();
   double fMax; double fMin;  hist->GetMinimumAndMaximum(fMin,fMax);
-  int numAccepted = 0;  int numAttempts = 0;
-  while ((numAccepted < numRandomTrials) && (numAttempts < numRandomTrials*100000)){
-    numAttempts++;
+  int numAccepted = 0;  //int numAttempts = 0;
+  while (numAccepted < numRandomTrials){
+    //numAttempts++;
     int iX = 1+(int)gRandom->Uniform(0.0,nbinsX); int iY = 1+(int)gRandom->Uniform(0.0,nbinsY);
     double f0 = gRandom->Uniform(0.0,fMax);
     double f = hist->GetBinContent(iX,iY);
@@ -901,7 +901,7 @@ FSHistogram::showHistogramCache(int histNumber, bool showDetails){
   }}
   for (unsigned int i = 0; i < vecHistInfo.size(); i++){
     vecHistInfo[i]->show(showDetails);
-    cout << "-------------------------------------" << endl;
+    if (!showDetails) cout << "-------------------------------------" << endl;
   }
 }
 
@@ -1007,15 +1007,13 @@ FSHistogram::getHistogramIndexFormula(int dimension, TString formula, TString bo
 }
 
 TString
-FSHistogram::getHistogramIndexEmpty(int dimension, TString bounds, TString histName){
+FSHistogram::getHistogramIndexEmpty(int dimension, TString bounds){
   TString index;
   bounds   = FSString::removeWhiteSpace(bounds);
-  histName = FSString::removeWhiteSpace(histName);
   index += "{-TP-}EMPTY";
   if (dimension == 1) index += "{-ND-}1D";
   if (dimension == 2) index += "{-ND-}2D";
   index += "{-BO-}";  index += bounds;
-  index += "{-HN-}";  index += histName;
   return index;
 }
 
@@ -1065,12 +1063,31 @@ FSHistogram::parseHistogramIndex(TString index){
 
 
 void
+FSHistogram::printIndexInfo(TString index, vector<TString> subIndices){
+  cout << "---------------------------------------------------------" << endl;
+  cout << "----                PRIMARY HISTOGRAM                ----" << endl;
+  cout << "----        (with number of components = "
+       << FSString::int2TString(subIndices.size(),3) << ")        ----" << endl;
+  cout << "---------------------------------------------------------" << endl;
+  printIndexInfo(index);
+  for (unsigned int i = 0; i < subIndices.size(); i++){
+    cout << "---------------------------------------------------------" << endl;
+    cout << "----             COMPONENT HISTOGRAM "
+         << FSString::int2TString(i+1,3) << "             ----" << endl;
+    cout << "---------------------------------------------------------" << endl;
+    printIndexInfo(subIndices[i]);
+  }
+}
+
+void
 FSHistogram::printIndexInfo(TString index){
   map<TString,TString> iMap = parseHistogramIndex(index);
-  cout << "---- HISTOGRAM INDEX INFORMATION ----" << endl;
-  cout << "  Looking in cache: " << std::flush;
-  if (m_FSHistogramInfoCache.find(index) != m_FSHistogramInfoCache.end()){ cout << "FOUND" << endl; }
-  else{ cout << "NOT FOUND" << endl; }
+  cout << "-------------- HISTOGRAM INDEX INFORMATION --------------" << endl;
+  cout << "\tCACHE NAME  = ";
+  if (m_FSHistogramInfoCache.find(index) != m_FSHistogramInfoCache.end()){
+    cout << m_FSHistogramInfoCache[index]->infoString() << endl;
+  }
+  else{ cout << "NOT IN CACHE" << endl; }
   if (iMap.find("{-TP-}") != iMap.end()){ cout << "\tTYPE        = " << iMap["{-TP-}"] << endl; }
   if (iMap.find("{-ND-}") != iMap.end()){ cout << "\tDIMENSION   = " << iMap["{-ND-}"] << endl; }
   if (iMap.find("{-FN-}") != iMap.end()){ cout << "\tFILE NAME   = " << iMap["{-FN-}"] << endl; }
@@ -1083,19 +1100,16 @@ FSHistogram::printIndexInfo(TString index){
   if (iMap.find("{-CU-}") != iMap.end()){ cout << "\tCUTS        = " << iMap["{-CU-}"] << endl;
                    cout << "\t  EXPANDED  = " << FSTree::expandVariable(iMap["{-CU-}"]) << endl;}
   if (iMap.find("{-SC-}") != iMap.end()){ cout << "\tSCALE       = " << iMap["{-SC-}"] << endl; }
-  if (iMap.find("{-FO-}") != iMap.end()){ cout << "\tFORMULA     = " << iMap["{-FO-}"] << endl; }
-  cout << "-------------------------------------" << endl;
+  if (iMap.find("{-FO-}") != iMap.end()){ cout << "\tFORMULA     = " << iMap["{-FO-}"] << endl;
+                      cout << "\t  EXPANDED  = " << FSString::expandSUM(iMap["{-FO-}"]) << endl;}
+  cout << "---------------------------------------------------------" << endl;
 }
+
 
 TString
 FSHistogram::makeFSRootHistName(){
-  return getFSRootHistName(++m_indexFSRootHistName);
-}
-
-TString
-FSHistogram::getFSRootHistName(int histNumber){
   TString hname("FSRootHist:");
-  hname += FSString::int2TString(histNumber,6);
+  hname += FSString::int2TString(++m_indexFSRootHistName,6);
   return hname;
 }
 
@@ -1326,15 +1340,25 @@ FSHistogramInfo::getTHNFContents(vector< pair<TString,TString> > extraTreeConten
 
 void
 FSHistogramInfo::show(bool showDetails){
-  cout << "  NAME = " << getHistName();
-  if (m_basicHistograms.size() > 0) 
-    cout << "  *** COMPOSITE (" << m_basicHistograms.size() << ") ***"; 
-  cout << endl;
+  cout << "   NAME = " << infoString() << endl;
   cout << "  INDEX = " << m_index << endl; 
-  if (showDetails) FSHistogram::printIndexInfo(m_index);
-  if (showDetails){
-    for (unsigned int i = 0; i < m_basicHistograms.size(); i++){
-      m_basicHistograms[i]->show(showDetails);
-    }
+  if (m_basicHistograms.size() > 0) cout << "    COMPONENTS: " << endl;
+  for (unsigned int i = 0; i < m_basicHistograms.size(); i++){
+    cout << "    (" << i+1 << ")  " << m_basicHistograms[i]->infoString() << endl;
   }
+  if (showDetails) FSHistogram::printIndexInfo(m_index);
 }
+
+
+TString
+FSHistogramInfo::infoString(){
+  TString name = getHistName();
+  if (name == "") name = "NO NAME";
+  if (m_histPair.first)  name += "   (entries = " +
+    FSString::double2TString(m_histPair.first->GetEntries(),0,false,true) + ")";
+  if (m_histPair.second)  name += "   (entries = " +
+    FSString::double2TString(m_histPair.second->GetEntries(),0,false,true) + ")";
+  if (m_waitingForEventLoop) name += "  (WAITING) ";
+  return name;
+}
+
