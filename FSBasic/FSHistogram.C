@@ -175,7 +175,7 @@ FSHistogram::getTHNFBasicTree(TString index){
 
     // set up to make the histogram
   TH1F* hist1d = NULL; TH2F* hist2d = NULL;
-  TString hname = makeFSRootHistName();
+  TString hname = makeFSRootTempName();
   TString hbounds(hname); hbounds += bounds;
 
     // use project to create a histogram if the chain is okay,
@@ -195,8 +195,8 @@ FSHistogram::getTHNFBasicTree(TString index){
   }
 
     // return the created histogram
-  if (hist1d){ hist1d = getTH1F(hist1d); hist1d->SetName(hname); }
-  if (hist2d){ hist2d = getTH2F(hist2d); hist2d->SetName(hname); }
+  if (hist1d){ getTH1F(hist1d)->SetName(hname); }
+  if (hist2d){ getTH2F(hist2d)->SetName(hname); }
   if (FSControl::DEBUG){
     cout << "FSHistogram::getTHNFBasicTree DEBUG: finished making histogram from tree" << endl;
     printIndexInfo(index);
@@ -306,8 +306,8 @@ FSHistogram::getTHNFBasicEmpty(TString index){
   if (dimension == 2) hist2d = new TH2F(hname,"",nbins,low,high,nbinsy,lowy,highy);
 
     // return the histogram 
-  if (hist1d){ hist1d = getTH1F(hist1d); hist1d->SetName(hname); }
-  if (hist2d){ hist2d = getTH2F(hist2d); hist2d->SetName(hname); }
+  if (hist1d){ getTH1F(hist1d)->SetName(hname); }
+  if (hist2d){ getTH2F(hist2d)->SetName(hname); }
   return pair<TH1F*,TH2F*>(hist1d,hist2d);
 } 
 
@@ -487,7 +487,7 @@ FSHistogram::getTHNFBasicFormula(TString index){
   int     dimension = FSString::TString2int(mapIndex["{-ND-}"]);
   TString formula   = mapIndex["{-FO-}"];  formula  = FSString::expandSUM(formula);
   TString bounds    = mapIndex["{-BO-}"];
-  TString histName = makeFSRootHistName();
+  TString histName = makeFSRootTempName();
   if (FSControl::DEBUG){
     cout << "FSHistogram::getTHNFBasicFormula DEBUG: making histogram from formula" << endl;
     printIndexInfo(index);
@@ -523,8 +523,8 @@ FSHistogram::getTHNFBasicFormula(TString index){
   }
 
     // return the histogram
-  if (hist1d){ hist1d = getTH1F(hist1d); hist1d->SetName(histName); }
-  if (hist2d){ hist2d = getTH2F(hist2d); hist2d->SetName(histName); }
+  if (hist1d){ getTH1F(hist1d)->SetName(histName); }
+  if (hist2d){ getTH2F(hist2d)->SetName(histName); }
   if (hist1d){ hist1d->SetTitle("f(x) = "+formula); hist1d->SetXTitle("x"); }
   if (hist2d){ hist2d->SetTitle("f(x,y) = "+formula); hist2d->SetXTitle("x"); hist2d->SetYTitle("y"); }
   return pair<TH1F*,TH2F*>(hist1d,hist2d);
@@ -1172,6 +1172,8 @@ FSHistogram::executeRDataFrame(){
         if (hComp.first  && hBasic.first)  hComp.first->Add(hBasic.first);
         if (hComp.second && hBasic.second) hComp.second->Add(hBasic.second);
       }
+      if (hComp.first)  getTH1F(hComp.first);
+      if (hComp.second) getTH2F(hComp.second);
       if (hComp.first) 
         cout << hComp.first->GetName() << "  with entries... " 
              << hComp.first->GetEntries() << endl;
@@ -1237,6 +1239,8 @@ FSHistogramInfo::getTHNF(){
   else if (FSHistogram::m_USEDATAFRAME && m_index.Contains("{-TP-}TREE")){
     TString eIndex(m_index); eIndex.Replace(eIndex.Index("{-TP-}TREE"),10,"{-TP-}EMPTY");
     m_histPair = FSHistogram::getTHNFBasicIndex(eIndex);
+    if (m_histPair.first)  FSHistogram::getTH1F(m_histPair.first)->SetName(FSHistogram::makeFSRootHistName());
+    if (m_histPair.second) FSHistogram::getTH2F(m_histPair.second)->SetName(FSHistogram::makeFSRootHistName());
     m_waitingForEventLoop = true;
 
       // case 2a: set up a single histogram
@@ -1271,6 +1275,8 @@ FSHistogramInfo::getTHNF(){
   else if (m_basicHistograms.size() == 0){
     cout << "FSHistogramInfo:  CREATING HISTOGRAM...  " << std::flush;
     m_histPair = FSHistogram::getTHNFBasicIndex(m_index);
+    if (m_histPair.first)  FSHistogram::getTH1F(m_histPair.first)->SetName(FSHistogram::makeFSRootHistName());
+    if (m_histPair.second) FSHistogram::getTH2F(m_histPair.second)->SetName(FSHistogram::makeFSRootHistName());
   }
 
     // case 4: create a composite histogram
