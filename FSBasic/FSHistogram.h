@@ -161,24 +161,12 @@ class FSHistogram{
       // BASIC FUNCTIONS: HISTOGRAMS ALWAYS GO THROUGH THESE
       // ********************************************************
 
-    static pair<TH1F*,TH2F*> getTHNFBasicFile(int dimension, 
-                                     TString fileName, TString histName);
+    static pair<TH1F*,TH2F*> getTHNFBasicFile(TString index);
+    static pair<TH1F*,TH2F*> getTHNFBasicTree(TString index);
+    static pair<TH1F*,TH2F*> getTHNFBasicEmpty(TString index);
+    static pair<TH1F*,TH2F*> getTHNFBasicFormula(TString index);
 
-    static pair<TH1F*,TH2F*> getTHNFBasicTree(int dimension,
-                                TString fileName, TString ntName,
-                                TString variable, TString bounds,
-                                TString cuts,     double scale);
-
-    static pair<TH1F*,TH2F*> getTHNFBasicEmpty(int dimension, TString bounds, 
-                                               TString hname = "");
-
-    static pair<TH1F*,TH2F*> getTHNFBasicFormula(int dimension, TString formula, TString bounds);
-
-
-    static TTree* getTHNFBasicContents(TTree* histTree, int dimension,
-                                TString fileName, TString ntName,
-                                TString variable, TString bounds,
-                                TString cuts, double scale,
+    static TTree* getTHNFBasicContents(TTree* histTree, TString index,
                                 vector< pair<TString,TString> > extraTreeContents = 
                                   vector< pair<TString,TString> >());
 
@@ -189,10 +177,6 @@ class FSHistogram{
       // ********************************************************
       // GENERALIZED BASIC FUNCTIONS CREATED FROM INDICES
       // ********************************************************
-
-    static TTree* getTHNFBasicContents(TTree* histTree, TString index,
-                                vector< pair<TString,TString> > extraTreeContents = 
-                                  vector< pair<TString,TString> >());
 
     static pair<TH1F*,TH2F*> getTHNFBasicIndex(TString index);
 
