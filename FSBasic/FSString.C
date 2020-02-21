@@ -496,7 +496,7 @@ FSString::parseTStringToMap2(TString input, vector<TString> keys, bool display){
   if (display) cout << "FSString::parseTStringToMap2 input:" << endl;
   if (display) cout << " " << input << endl;
   if (display) cout << "FSString::parseTStringToMap2 output:" << endl;
-  if (display){for (map<TString, vector<TString>>::iterator it = wordMap.begin();
+  if (display){for (map<TString, vector<TString> >::iterator it = wordMap.begin();
                     it != wordMap.end(); it++){
                  for (unsigned int i = 0; i < it->second.size(); i++){
                    cout << it->first << " = " << it->second[i] << endl;
