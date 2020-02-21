@@ -62,7 +62,7 @@ class FSTree{
       // DEFINE AND SHOW VARIABLE MACROS
       // ********************************************************
 
-    static void defineMacro(TString macroName, int numFourVectors, TString macro, bool force = false);
+    static void defineMacro(TString macroName, int numFourVectors, TString macro);
     static void showDefinedMacros();
     static void testMacro(TString variable){ cout << expandVariable(variable,true) << endl; }
 
@@ -80,7 +80,7 @@ class FSTree{
       //               -(spz+XXPzP2+XXPzP3)**2))"
       // ********************************************************
 
-    static void defineFourVector(TString indexName, TString En, TString Px, TString Py, TString Pz, bool force = false);
+    static void defineFourVector(TString indexName, TString En, TString Px, TString Py, TString Pz);
     static void showDefinedFourVectors();
   
 

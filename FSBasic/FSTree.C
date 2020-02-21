@@ -288,65 +288,69 @@ FSTree::makeStandardDefinitions(){
   if (!m_madeStandardDefinitions){
     m_madeStandardDefinitions = true;
 
-    defineFourVector("B3BEAM","(2.0*BeamEnergy)",
-                              "1.0*sin(0.011)*(2.0*BeamEnergy)","0.0","0.0",true);
-    defineFourVector("CCBEAM","(2.0*BeamEnergy)",
-                              "1.0*sin(-0.003)*(2.0*BeamEnergy)","0.0","0.0",true);
-    defineFourVector("GBEAM","(EnPB+0.938272)","PxPB","PyPB","PzPB",true);
+    defineFourVector("BES3BEAM","BeamEnergy","BeamEnergy*sin(0.011)","0.0","BeamEnergy*cos(0.011)");
+    defineFourVector("BES3CMS","2.0*BeamEnergy","2.0*BeamEnergy*sin(0.011)","0.0","0.0");
 
-    defineMacro("MOMENTUMX",   1,    "(PxP[I])", true);
+    defineFourVector("CLEOBEAM","BeamEnergy","BeamEnergy*sin(-0.003)","0.0","BeamEnergy*cos(-0.003)");
+    defineFourVector("CLEOCMS","2.0*BeamEnergy","2.0*BeamEnergy*sin(-0.003)","0.0","0.0");
 
-    defineMacro("MOMENTUMY",   1,    "(PyP[I])", true);
+    defineFourVector("GLUEXBEAM","EnPB","PxPB","PyPB","PzPB");
+    defineFourVector("GLUEXTARGET","0.938272","0.0","0.0","0.0");
+    defineFourVector("GLUEXCMS","(EnPB+0.938272)","PxPB","PyPB","PzPB");
 
-    defineMacro("MOMENTUMZ",   1,    "(PzP[I])", true);
+    defineMacro("MOMENTUMX",   1,    "(PxP[I])" );
 
-    defineMacro("ENERGY",      1,    "(EnP[I])", true);
+    defineMacro("MOMENTUMY",   1,    "(PyP[I])" );
+
+    defineMacro("MOMENTUMZ",   1,    "(PzP[I])" );
+
+    defineMacro("ENERGY",      1,    "(EnP[I])" );
 
     defineMacro("MOMENTUMR",   1,    "(sqrt(pow((PxP[I]),2)+"
-                                           "pow((PyP[I]),2)))", true);
+                                           "pow((PyP[I]),2)))" );
 
     defineMacro("MOMENTUM",    1,    "(sqrt(pow((PxP[I]),2)+"
                                            "pow((PyP[I]),2)+"
-                                           "pow((PzP[I]),2)))", true);
+                                           "pow((PzP[I]),2)))" );
 
     defineMacro("MASS",        1, "(sqrt(pow((EnP[I]),2)-"
                                         "pow((PxP[I]),2)-"
                                         "pow((PyP[I]),2)-"
-                                        "pow((PzP[I]),2)))", true);
+                                        "pow((PzP[I]),2)))" );
 
     defineMacro("MASS",        2, "(sqrt(pow((EnP[I]-EnP[J]),2)-"
                                         "pow((PxP[I]-PxP[J]),2)-"
                                         "pow((PyP[I]-PyP[J]),2)-"
-                                        "pow((PzP[I]-PzP[J]),2)))", true);
+                                        "pow((PzP[I]-PzP[J]),2)))" );
 
     defineMacro("MASS2",       1,      "(pow((EnP[I]),2)-"
                                         "pow((PxP[I]),2)-"
                                         "pow((PyP[I]),2)-"
-                                        "pow((PzP[I]),2))", true);
+                                        "pow((PzP[I]),2))" );
 
     defineMacro("MASS2",       2,      "(pow((EnP[I]-EnP[J]),2)-"
                                         "pow((PxP[I]-PxP[J]),2)-"
                                         "pow((PyP[I]-PyP[J]),2)-"
-                                        "pow((PzP[I]-PzP[J]),2))", true);
+                                        "pow((PzP[I]-PzP[J]),2))" );
 
     defineMacro("RECOILMASS",  2, "(sqrt(pow((EnP[I]-EnP[J]),2)-"
                                         "pow((PxP[I]-PxP[J]),2)-"
                                         "pow((PyP[I]-PyP[J]),2)-"
-                                        "pow((PzP[I]-PzP[J]),2)))", true);
+                                        "pow((PzP[I]-PzP[J]),2)))" );
 
     defineMacro("RECOILMASS2", 2,      "(pow((EnP[I]-EnP[J]),2)-"
                                         "pow((PxP[I]-PxP[J]),2)-"
                                         "pow((PyP[I]-PyP[J]),2)-"
-                                        "pow((PzP[I]-PzP[J]),2))", true);
+                                        "pow((PzP[I]-PzP[J]),2))" );
 
     defineMacro("DOTPRODUCT",  2,      "((PxP[I])*(PxP[J])+"
                                         "(PyP[I])*(PyP[J])+"
-                                        "(PzP[I])*(PzP[J]))", true);
+                                        "(PzP[I])*(PzP[J]))" );
 
     defineMacro("COSINE",      1,            "((PzP[I])/" 
                                     "(sqrt(pow((PxP[I]),2)+" 
                                           "pow((PyP[I]),2)+" 
-                                          "pow((PzP[I]),2))))", true);
+                                          "pow((PzP[I]),2))))" );
 
     defineMacro("COSINE",      2,      "(((PxP[I])*(PxP[J])+" 
                                          "(PyP[I])*(PyP[J])+" 
@@ -356,7 +360,7 @@ FSTree::makeStandardDefinitions(){
                                           "pow((PzP[I]),2)))/"  
                                     "(sqrt(pow((PxP[J]),2)+" 
                                           "pow((PyP[J]),2)+" 
-                                          "pow((PzP[J]),2))))", true);
+                                          "pow((PzP[J]),2))))" );
 
         {TString pmag = "(sqrt((pow(PxP[J]),2)+"
                               "(pow(PyP[J]),2)+"
@@ -379,14 +383,14 @@ FSTree::makeStandardDefinitions(){
          TString pmagp = "(sqrt(pow("+pparp+",2)+pow("+pperp+",2)))";
          TString helcosine = "("+pparp+"/"+pmagp+")";
 
-    defineMacro("HELCOSINE", 2,  helcosine, true);}
+    defineMacro("HELCOSINE", 2,  helcosine );}
 
   }
 }
 
 
 void
-FSTree::defineFourVector(TString indexName, TString En, TString Px, TString Py, TString Pz, bool force){
+FSTree::defineFourVector(TString indexName, TString En, TString Px, TString Py, TString Pz){
   indexName = FSString::removeWhiteSpace(indexName);
   En = FSString::removeWhiteSpace(En);
   Px = FSString::removeWhiteSpace(Px);
@@ -395,9 +399,7 @@ FSTree::defineFourVector(TString indexName, TString En, TString Px, TString Py, 
   makeStandardDefinitions();
   map<TString,TString>::const_iterator mapItr = m_mapDefinedEn.find(indexName);
   if (mapItr != m_mapDefinedEn.end()){
-    cout << "FSTree WARNING:  four-vector named " << indexName << " already exists" << endl;
-    if (force)   cout << "   overwriting it with the new definition" << endl;
-    if (!force){ cout << "   ignoring the new definition" << endl; return; }
+    cout << "FSTree WARNING:  overwriting four-vector named " << indexName << endl;
   }
   m_mapDefinedEn[indexName] = En;
   m_mapDefinedPx[indexName] = Px;
@@ -425,7 +427,7 @@ FSTree::showDefinedFourVectors(){
 
 
 void
-FSTree::defineMacro(TString macroName, int numFourVectors, TString macro, bool force){
+FSTree::defineMacro(TString macroName, int numFourVectors, TString macro){
   macroName = FSString::removeWhiteSpace(macroName);
   macro     = FSString::removeWhiteSpace(macro);
   makeStandardDefinitions();
@@ -436,9 +438,7 @@ FSTree::defineMacro(TString macroName, int numFourVectors, TString macro, bool f
   }
   if (((numFourVectors == 1) && (m_mapDefined1VMacros.find(macroName) != m_mapDefined1VMacros.end())) ||
       ((numFourVectors == 2) && (m_mapDefined2VMacros.find(macroName) != m_mapDefined2VMacros.end()))){
-    cout << "FSTree::defineMacro WARNING: macro named " << macroName << " already defined" << endl;
-    if (force)   cout << "   overwriting it with the new definition" << endl;
-    if (!force){ cout << "   ignoring the new definition" << endl; return; }
+    cout << "FSTree::defineMacro WARNING: overwriting macro named " << macroName << endl;
   }
   if ((numFourVectors == 1) && (!macro.Contains("[I]"))){
     cout << "FSTree::defineMacro WARNING: for numFourVectors = 1, macro should contain [I]" << endl;
