@@ -137,7 +137,7 @@ FSString::double2SignNumberExponent(double x, int precision, bool fixdecimal, bo
 
 TString
 FSString::double2TString(double x, int precision, bool scientific, bool fixdecimal, bool show){
-  pair<int, pair<double,int>> sne = FSString::double2SignNumberExponent(x,precision,fixdecimal,show);
+  pair<int, pair<double,int> > sne = FSString::double2SignNumberExponent(x,precision,fixdecimal,show);
   int isign = sne.first;  double ax = sne.second.first;  int exp = sne.second.second;
   int totalDigits = precision;  if (fixdecimal) totalDigits = exp - precision + 1;
   TString saxInt = "0";  TString saxFrac = "";
