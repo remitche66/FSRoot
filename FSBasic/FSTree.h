@@ -64,7 +64,7 @@ class FSTree{
 
     static void defineMacro(TString macroName, int numFourVectors, TString macro, bool force = false);
     static void showDefinedMacros();
-    static void testMacro(TString variable){ expandVariable(variable,true); }
+    static void testMacro(TString variable){ cout << expandVariable(variable,true) << endl; }
 
 
       // ********************************************************
