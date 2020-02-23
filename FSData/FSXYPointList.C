@@ -41,15 +41,17 @@ FSXYPointList::addXYPointsFromFile(TString fileName){
       m_vectorXYPoints.push_back(xyp);
       xyp->display(m_vectorXYPoints.size());
     }
-    else if (words[0] == "addXYPointCategory"){
+    else if (words[0] == "addCategory"){
       if (words.size() < 3){
-        cout << "FSXYPointList ERROR: problem with addXYPointCategory command" << endl;
+        cout << "FSXYPointList ERROR: problem with addCategory command" << endl;
         exit(0);
       }
-      vector<FSXYPoint*> vxyp = getXYPoints(words[1]);
-      for (unsigned int i = 0; i < vxyp.size(); i++){
-        for (unsigned int j = 2; j < words.size(); j++){
-          vxyp[i]->addCategory(words[j]);
+      TString newCategory = words[1];
+      for (unsigned int i = 2; i < words.size(); i++){
+        TString oldCategory = words[i];
+        vector<FSXYPoint*> vxyp = getXYPoints(oldCategory);
+        for (unsigned int j = 0; j < vxyp.size(); j++){
+          vxyp[j]->addCategory(newCategory);
         }
       }
     }
