@@ -1,7 +1,7 @@
 {
 
 cout << "--------------------------------------------------" << endl;
-cout << "--- Loading the FSRoot Macros (v1.2) ---" << endl;
+cout << "------   Loading the FSRoot Macros (v2.0)   ------" << endl;
 cout << "--------------------------------------------------" << endl;
 
 
@@ -55,6 +55,9 @@ gROOT->LoadMacro("FSBasic/FSCanvas.C+");
 
 cout << "Loading FSBasic/FSString.h..." << endl;
 gROOT->LoadMacro("FSBasic/FSString.C+");
+
+cout << "Loading FSBasic/FSSystem.h..." << endl;
+gROOT->LoadMacro("FSBasic/FSSystem.C+");
 
 cout << "Loading FSBasic/FSPhysics.C..." << endl;
 gROOT->LoadMacro("FSBasic/FSPhysics.C+");
@@ -134,10 +137,9 @@ gROOT->LoadMacro("FSFit/FSFitUtilities.C+");
 cout << "Loading FSAnalysis/FSHistogramAnalysis.C..." << endl;
 gROOT->LoadMacro("FSAnalysis/FSHistogramAnalysis.C+");
 
-
-cout << "------------------------------------------" << endl;
-cout << "--- Finished loading the FSRoot Macros ---" << endl;
-cout << "------------------------------------------" << endl;
+cout << "--------------------------------------------------" << endl;
+cout << "-----   Finished loading the FSRoot Macros   -----" << endl;
+cout << "--------------------------------------------------" << endl;
 
 
 
