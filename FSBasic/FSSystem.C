@@ -1,4 +1,5 @@
 #include <iostream>
+#include <fstream>
 #include "TSystem.h"
 #include "TSystemDirectory.h"
 #include "TSystemFile.h"
@@ -65,6 +66,25 @@ FSSystem::getAbsolutePaths(TString path, bool show){
   }
   return paths;
 }
+
+
+  // **********************************
+  //   CHECK IF PATH POINTS TO A PROPER ROOT FILE
+  // **********************************
+
+bool
+FSSystem::checkRootFormat(TString path){
+  if (getAbsolutePath(path) == "") return false;
+  ifstream infile(path.Data()); string instring;
+  if (!getline(infile,instring)){ infile.close(); return false; }
+  TString inTString(FSString::string2TString(instring));
+  if (!inTString.Contains("root")){ infile.close(); return false; }
+  if (inTString.Index("root") != 0){ infile.close(); return false; }
+  if (!getline(infile,instring)){ infile.close(); return false; }
+  infile.close(); 
+  return true;
+}
+
 
 
   // ****************************

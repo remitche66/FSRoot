@@ -11,6 +11,7 @@
 #include "TFile.h"
 #include "FSBasic/FSControl.h"
 #include "FSBasic/FSString.h"
+#include "FSBasic/FSSystem.h"
 #include "FSBasic/FSCut.h"
 #include "FSBasic/FSTree.h"
 
@@ -63,19 +64,12 @@ FSTree::getTChain(TString fileName, TString ntName,
       cout << "FSTree: creating new TChain with index " << index << endl;
     nt = new TChain(ntName);
     if (addFilesIndividually){
-      vector<TString> fileList;
-      {
-        TChain ntTemp(ntName); 
-        ntTemp.Add(fileName);
-        TIter next(ntTemp.GetListOfFiles());
-        while ( TChainElement* el = (TChainElement*) next()){
-          fileList.push_back(el->GetTitle());
-        }
-      }
+      vector<TString> fileList = FSSystem::getAbsolutePaths(fileName);
       for (unsigned int i = 0; i < fileList.size(); i++){
-         TChain ntTemp(ntName);
-         ntTemp.Add(fileList[i]);
-         if ((ntTemp.GetEntries() > 0) && (ntTemp.GetNbranches() > 0)){
+         if (!FSSystem::checkRootFormat(fileList[i])) continue;
+         TFile file(fileList[i]);
+         TTree* tree = (TTree*)file.Get(ntName);
+         if ((tree) && (tree->GetEntries() > 0) && (tree->GetNbranches() > 0)){
            if (FSControl::DEBUG) 
              cout << "FSTree: adding file to TChain " << fileList[i] << endl;
            nt->Add(fileList[i]);
