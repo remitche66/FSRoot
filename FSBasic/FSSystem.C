@@ -7,6 +7,9 @@
 #include "FSBasic/FSSystem.h"
 
 
+map< TString, TString > FSSystem::m_cachePath;
+map< TString, vector<TString> > FSSystem::m_cachePaths;
+
 
   // **********************************
   //   MAKE AN ABSOLUTE PATH NAME
@@ -32,15 +35,19 @@ FSSystem::makeAbsolutePathName(TString path){
   // **********************************
 
 TString
-FSSystem::getAbsolutePath(TString path){
-  path = makeAbsolutePathName(path); if (path == "") return TString("");
-  if (!(path.Contains("*")||path.Contains("?"))){
-    if (gSystem->AccessPathName(path)) return TString("");
+FSSystem::getAbsolutePath(TString path, bool useCache){
+  if (useCache){ if (m_cachePath.find(path) != m_cachePath.end()) return m_cachePath[path]; }
+  TString newPath = path;
+  newPath = makeAbsolutePathName(newPath);
+  if (newPath == ""){}
+  else if (!(newPath.Contains("*")||newPath.Contains("?"))){
+    if (gSystem->AccessPathName(newPath)) newPath = "";
   }
   else{
-    if (getAbsolutePaths(path).size() == 0) return TString("");
+    if (getAbsolutePaths(newPath,useCache).size() == 0) newPath = "";
   }
-  return path;
+  if (useCache) m_cachePath[path] = newPath;
+  return newPath;
 }
 
   // **********************************
@@ -48,14 +55,16 @@ FSSystem::getAbsolutePath(TString path){
   // **********************************
 
 vector<TString>
-FSSystem::getAbsolutePaths(TString path, bool show){
+FSSystem::getAbsolutePaths(TString path, bool useCache, bool show){
+  if (useCache){ if (m_cachePaths.find(path) != m_cachePaths.end()) return m_cachePaths[path]; }
+  TString newPath = path;
   vector<TString> paths;
-  if (!(path.Contains("*") || path.Contains("?"))){
-    path = getAbsolutePath(path);
-    if (path != "") paths.push_back(path);
+  if (!(newPath.Contains("*") || newPath.Contains("?"))){
+    newPath = getAbsolutePath(newPath);
+    if (newPath != "") paths.push_back(newPath);
   }
   else{
-    paths = getAbsolutePathsWildcards(path);
+    paths = getAbsolutePathsWildcards(newPath);
   }
   if (show){
     cout << "------ ABSOLUTE PATHS ---------" << endl;
@@ -64,6 +73,7 @@ FSSystem::getAbsolutePaths(TString path, bool show){
     }
     cout << "-------------------------------" << endl;
   }
+  if (useCache) m_cachePaths[path] = paths;
   return paths;
 }
 

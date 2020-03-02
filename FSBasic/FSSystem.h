@@ -29,7 +29,7 @@ class FSSystem{
       //    -- returns empty if the path doesn't exist
       // **********************************
 
-    static TString getAbsolutePath(TString path);
+    static TString getAbsolutePath(TString path, bool useCache = true);
 
       // **********************************
       //   GET A VECTOR OF ABSOLUTE PATHS TO FILES OR DIRECTORIES
@@ -38,7 +38,7 @@ class FSSystem{
       //    -- returns existing paths
       // **********************************
 
-    static vector<TString> getAbsolutePaths(TString path, bool show = false);
+    static vector<TString> getAbsolutePaths(TString path, bool useCache = true, bool show = false);
 
       // **********************************
       //   CHECK IF PATH POINTS TO A PROPER ROOT FILE
@@ -57,6 +57,9 @@ class FSSystem{
     static vector<TString> getDirectoryContents(TString directory, TString pattern, bool show = false);
     static vector<TString> getDirectoryStructure(TString path, bool show = false);
     static vector<TString> getAbsolutePathsWildcards(TString path, bool show = false);
+
+    static map< TString, TString >  m_cachePath;
+    static map< TString, vector<TString> >  m_cachePaths;
 
 };
 
