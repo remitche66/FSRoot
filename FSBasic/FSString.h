@@ -25,6 +25,14 @@ class FSString{
 
 
       // ********************************************************
+      // PAD A TSTRING WITH SPACES 
+      //   LRC = "L", "R", or "C" for left, right, or center-justified
+      // ********************************************************
+
+    static TString padTString(TString input, int length, TString LRC = "R");
+
+
+      // ********************************************************
       // COMPARE TSTRINGS WITH WILDCARDS (* and ?)
       // ********************************************************
 

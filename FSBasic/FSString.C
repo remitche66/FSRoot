@@ -28,6 +28,26 @@ FSString::TString2string(TString input){
 
 
   // ********************************************************
+  // PAD A TSTRING WITH SPACES 
+  //   LRC = "L", "R", or "C" for left, right, or center-justified
+  // ********************************************************
+
+TString
+FSString::padTString(TString input, int length, TString LRC){
+  int spacesT = length - input.Length();
+  if (spacesT <= 0) return input;
+  int spacesL = 0;
+  int spacesR = 0;
+  if (LRC == "L") spacesR = spacesT;
+  if (LRC == "R") spacesL = spacesT;
+  if (LRC == "C"){ spacesL = spacesT/2;  spacesR = spacesT - spacesL; }
+  for (int i = 0; i < spacesL; i++){ input = " " + input; }
+  for (int i = 0; i < spacesR; i++){ input = input + " "; }
+  return input;
+}
+
+
+  // ********************************************************
   // COMPARE TSTRINGS WITH WILDCARDS (* and ?)
   // ********************************************************
 
