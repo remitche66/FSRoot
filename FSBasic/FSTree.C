@@ -200,7 +200,7 @@ FSTree::skimTree(TString fileNameInput, TString chainName,
 
   vector< pair<TString,double> > fsCuts = FSCut::expandCuts(cuts);
   if (fsCuts.size() == 1){ cuts = fsCuts[0].first; }
-  else{ cout << "FSTree::skimTree Error: multidimensional sidebands not allowed" << endl; exit(1); }
+  else{ cout << "FSTree::skimTree ERROR: multidimensional sidebands not allowed" << endl; return; }
 
   // expand variable macros
 
@@ -528,11 +528,6 @@ FSTree::parseVariable(TString variable, bool show){
         if (index >= 2 && TString(tempVar[index-2]).IsAlpha())
           prefix = TString(tempVar[index-2]) + prefix;}
       expression = prefix + expression;
-      if (!tempVar.Contains(expression)){
-        cout << "FSTree::parseVariable ERROR: problem parsing variable = " 
-             << variable << endl;
-        exit(0);
-      }
       tempVar.Replace(tempVar.Index(expression),expression.Length(),"");
       parsedExpression[0] = expression;
       parsedExpression[1] = prefix;
