@@ -1007,6 +1007,12 @@ FSString::makeBounds(int nbinsX, double lowerX, double upperX, int nbinsY, doubl
   return newBounds;
 }
 
+TString
+FSString::makeBounds(int dimension){
+  if (dimension == 1) return TString("(10,0.0,1.0)");
+  if (dimension == 2) return TString("(10,0.0,1.0,10,0.0,1.0)");
+  return TString("");
+}
 
   // ********************************************************
   // STRIP EXTRA WHITESPACE AROUND STRINGS AND REMOVE TABS
