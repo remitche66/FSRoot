@@ -488,10 +488,15 @@ FSModeHistogram::expandHistogramIndexTree(TString index){
   for (unsigned int i = 0; i < expandedIndicesTemp.size(); i++){
     TString index = expandedIndicesTemp[i];
     map<TString,TString> indexMap = FSHistogram::parseHistogramIndex(index);
-    if (indexMap.find("{-CA-}") == indexMap.end())
-      { expandedIndices.push_back(index); continue; }
+    if (indexMap.find("{-CA-}") == indexMap.end()){ 
+      cout << "expandHistogramIndexTree ERROR (no category?)" << endl; exit(0); }
     TString category = indexMap["{-CA-}"];
     vector<FSModeInfo*> modeVector = FSModeCollection::modeVector(category);
+    if (modeVector.size() == 0){ 
+      indexMap["{-CA-}"] = "NO_MODES";
+      expandedIndices.push_back(FSHistogram::getHistogramIndex(indexMap));
+      continue;
+    }
     for (unsigned int iM = 0; iM < modeVector.size(); iM++){
       TString indexM = modeVector[iM]->modeString(index);
               indexM = modeVector[iM]->modeCuts(indexM);
@@ -504,7 +509,7 @@ FSModeHistogram::expandHistogramIndexTree(TString index){
         }
         if (usedIndex) continue;
         map<TString,TString> comboMap = FSHistogram::parseHistogramIndex(combos[iC]);
-        comboMap.erase("{-CA-}");
+        comboMap["{-CA-}"] = modeVector[iM]->modeString();
         expandedIndices.push_back(FSHistogram::getHistogramIndex(comboMap));
       }
     }
