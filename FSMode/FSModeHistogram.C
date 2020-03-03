@@ -493,7 +493,7 @@ FSModeHistogram::expandHistogramIndexTree(TString index){
     TString category = indexMap["{-CA-}"];
     vector<FSModeInfo*> modeVector = FSModeCollection::modeVector(category);
     if (modeVector.size() == 0){ 
-      indexMap["{-CA-}"] = "NO_MODES";
+      indexMap["{-CA-}"] = "!!NO_MODES!!";
       expandedIndices.push_back(FSHistogram::getHistogramIndex(indexMap));
       continue;
     }
