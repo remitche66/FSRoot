@@ -41,7 +41,7 @@ class FSSystem{
     static vector<TString> getAbsolutePaths(TString path, bool useCache = true, bool show = false);
 
       // **********************************
-      //   CHECK IF PATH POINTS TO A PROPER ROOT FILE
+      //   CHECK IF PATH POINTS TO A PROPER ROOT FILE (OR FILES)
       // **********************************
 
     static bool checkRootFormat(TString path, TString objectName = "");

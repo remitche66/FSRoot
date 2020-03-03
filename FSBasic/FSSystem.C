@@ -80,22 +80,26 @@ FSSystem::getAbsolutePaths(TString path, bool useCache, bool show){
 
 
   // **********************************
-  //   CHECK IF PATH POINTS TO A PROPER ROOT FILE
+  //   CHECK IF PATH POINTS TO A PROPER ROOT FILE (OR FILES)
   // **********************************
 
 bool
 FSSystem::checkRootFormat(TString path, TString objectName){
-  TString newPath = getAbsolutePath(path);
-  if (newPath == "") return false;
-  ifstream infile(newPath.Data()); string instring;
-  if (!getline(infile,instring)){ infile.close(); return false; }
-  TString inTString(FSString::string2TString(instring));
-  if (!inTString.Contains("root")){ infile.close(); return false; }
-  if (inTString.Index("root") != 0){ infile.close(); return false; }
-  if (!getline(infile,instring)){ infile.close(); return false; }
-  infile.close(); 
-  if (objectName != ""){
-    TFile tfile(newPath); tfile.cd(); return (bool) tfile.FindObjectAny(objectName); }
+  vector<TString> newPaths = getAbsolutePaths(path);
+  if (newPaths.size() == 0) return false;
+  for (unsigned int i = 0; i < newPaths.size(); i++){
+    TString newPath = newPaths[i];
+    if (newPath == "") return false;
+    ifstream infile(newPath.Data()); string instring;
+    if (!getline(infile,instring)){ infile.close(); return false; }
+    TString inTString(FSString::string2TString(instring));
+    if (!inTString.Contains("root")){ infile.close(); return false; }
+    if (inTString.Index("root") != 0){ infile.close(); return false; }
+    if (!getline(infile,instring)){ infile.close(); return false; }
+    infile.close(); 
+    if (objectName != ""){
+      TFile tfile(newPath); tfile.cd(); if (!tfile.FindObjectAny(objectName)) return false; }
+  }
   return true;
 }
 
