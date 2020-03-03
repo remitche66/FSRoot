@@ -968,6 +968,30 @@ FSString::parseBounds(TString bounds){
   return boundVector;
 }
 
+bool
+FSString::checkBounds(int dimension, TString bounds){
+  bounds = FSString::removeWhiteSpace(bounds);
+  vector<TString> spacers; spacers.push_back(","); spacers.push_back("(");  spacers.push_back(")");
+  vector<TString> parts = parseTString(bounds,spacers,true);
+  if (dimension == 1 && parts.size() == 7){
+    if ((parts[0] != "(") || (parts[6] != ")")) return false;
+    if (!parts[1].IsFloat() || parts[1].Contains(".")) return false;
+    if ((parts[2] != ",") || (parts[4] != ",")) return false;
+    if (!parts[3].IsFloat() || !parts[5].IsFloat()) return false;
+  }
+  else if (dimension == 2 && parts.size() == 13){
+    if ((parts[0] != "(") || (parts[12] != ")")) return false;
+    if (!parts[1].IsFloat() || parts[1].Contains(".")) return false;
+    if (!parts[7].IsFloat() || parts[7].Contains(".")) return false;
+    if ((parts[2] != ",") || (parts[4] != ",")) return false;
+    if ((parts[6] != ",") || (parts[8] != ",") || (parts[10] != ",")) return false;
+    if (!parts[3].IsFloat() || !parts[5].IsFloat()) return false;
+    if (!parts[9].IsFloat() || !parts[11].IsFloat()) return false;
+  }
+  else{ return false; }
+  return true;
+}
+
 TString
 FSString::makeBounds(int nbinsX, double lowerX, double upperX, int nbinsY, double lowerY, double upperY){
   TString newBounds("");

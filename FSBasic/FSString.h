@@ -223,6 +223,7 @@ class FSString{
     static double parseBoundsBinSizeX(TString bounds);
     static TString makeBounds(int nbinsX,      double lowerX,      double upperX,
                               int nbinsY = -1, double lowerY = -1, double upperY = -1);
+    static bool checkBounds(int dimension, TString bounds);
 
 
       // ********************************************************
