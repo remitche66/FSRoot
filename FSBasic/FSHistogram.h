@@ -207,6 +207,8 @@ class FSHistogram{
     static void printIndexInfo(TString index);
     static void printIndexInfo(TString index, vector<TString> subIndices);
 
+    static TString checkIndex(TString index, TString type = "");
+
 
       // make histogram names
 
@@ -261,6 +263,7 @@ class FSHistogramInfo{
 
     TString m_index;
     bool m_waitingForEventLoop;
+    TString m_status;
     vector<FSHistogramInfo*> m_basicHistograms;
     pair<TH1F*,TH2F*> m_histPair;
     pair< ROOT::RDF::RResultPtr<TH1D>, ROOT::RDF::RResultPtr<TH2D> > m_histPairRDF;
