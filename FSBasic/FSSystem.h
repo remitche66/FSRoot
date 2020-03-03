@@ -44,7 +44,7 @@ class FSSystem{
       //   CHECK IF PATH POINTS TO A PROPER ROOT FILE
       // **********************************
 
-    static bool checkRootFormat(TString path);
+    static bool checkRootFormat(TString path, TString objectName = "");
 
 
 

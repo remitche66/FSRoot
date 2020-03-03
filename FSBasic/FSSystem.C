@@ -3,6 +3,7 @@
 #include "TSystem.h"
 #include "TSystemDirectory.h"
 #include "TSystemFile.h"
+#include "TFile.h"
 #include "FSBasic/FSString.h"
 #include "FSBasic/FSSystem.h"
 
@@ -83,15 +84,18 @@ FSSystem::getAbsolutePaths(TString path, bool useCache, bool show){
   // **********************************
 
 bool
-FSSystem::checkRootFormat(TString path){
-  if (getAbsolutePath(path) == "") return false;
-  ifstream infile(path.Data()); string instring;
+FSSystem::checkRootFormat(TString path, TString objectName){
+  TString newPath = getAbsolutePath(path);
+  if (newPath == "") return false;
+  ifstream infile(newPath.Data()); string instring;
   if (!getline(infile,instring)){ infile.close(); return false; }
   TString inTString(FSString::string2TString(instring));
   if (!inTString.Contains("root")){ infile.close(); return false; }
   if (inTString.Index("root") != 0){ infile.close(); return false; }
   if (!getline(infile,instring)){ infile.close(); return false; }
   infile.close(); 
+  if (objectName != ""){
+    TFile tfile(newPath); tfile.cd(); return (bool) tfile.FindObjectAny(objectName); }
   return true;
 }
 
