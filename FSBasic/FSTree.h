@@ -28,13 +28,6 @@ class FSTree{
 
 
       // ********************************************************
-      // SET UP A TFILE AND CACHE IT
-      // ********************************************************
-
-    static TFile* getTFile(TString fileName);
-
-
-      // ********************************************************
       // SKIM A TREE AND OUTPUT TO A DIFFERENT FILE
       // ********************************************************
 
@@ -89,7 +82,6 @@ class FSTree{
       // ********************************************************
 
     static void clearChainCache();
-    static void clearFileCache();
 
 
   private:
@@ -101,7 +93,6 @@ class FSTree{
       // global caches
 
     static map< TString, TChain*> m_chainCache;
-    static map< TString, TFile*> m_fileCache;
 
       // defined four-vectors
 

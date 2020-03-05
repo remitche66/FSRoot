@@ -20,7 +20,6 @@
 
 
 map< TString, TChain*> FSTree::m_chainCache;
-map< TString, TFile*> FSTree::m_fileCache;
 
 map< TString, TString > FSTree::m_mapDefinedPx;
 map< TString, TString > FSTree::m_mapDefinedPy;
@@ -127,43 +126,6 @@ FSTree::getTChain(TString fileName, TString ntName, TString& STATUS){
 
 
   return nt;
-
-}
-
-
-  // ********************************************************
-  // GET A TFILE FROM THE CACHE OR CREATE A NEW ONE
-  // ********************************************************
-
-TFile*
-FSTree::getTFile(TString fileName){
-  fileName = FSString::removeWhiteSpace(fileName);
-  TFile* tf;
-
-    // clear the file cache if there is no file caching
-
-  if (!FSControl::FILECACHING) clearFileCache();
-
-    // create an index for this file and search for it
-
-  TString index(fileName);
-  map<TString,TFile*>::const_iterator mapItr = m_fileCache.find(index);
-  if (mapItr != m_fileCache.end()){
-    if (FSControl::DEBUG) 
-      cout << "FSTree: found TFile with index " << index << endl;
-    tf = m_fileCache[index];
-  }
-
-    // create the file from scratch if not found
-
-  else{
-    if (FSControl::DEBUG) 
-      cout << "FSTree: creating new TFile with index " << index << endl;
-    tf = new TFile(fileName);
-    m_fileCache[index] = tf;
-  }
-
-  return tf;
 
 }
 
@@ -679,18 +641,5 @@ FSTree::clearChainCache(){
   m_chainCache.clear();
   if (FSControl::DEBUG) 
     cout << "FSTree: done clearing chain cache" << endl;
-}
-
-void
-FSTree::clearFileCache(){
-  if (FSControl::DEBUG) 
-    cout << "FSTree: clearing file cache" << endl;
-  for (map<TString,TFile*>::iterator rmItr = m_fileCache.begin();
-       rmItr != m_fileCache.end(); rmItr++){
-    if (rmItr->second) delete rmItr->second;
-  }
-  m_fileCache.clear();
-  if (FSControl::DEBUG) 
-    cout << "FSTree: done clearing file cache" << endl;
 }
 

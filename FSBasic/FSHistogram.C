@@ -117,9 +117,9 @@ FSHistogram::getTHNFBasicFile(TString index){
 
     // find the histogram in a file 
   TH1F* hist1d  = NULL;  TH2F* hist2d  = NULL; 
-  TFile* tf = FSTree::getTFile(fileName); tf->cd();
-  if (dimension == 1) hist1d = (TH1F*) gDirectory->FindObjectAny(histName);
-  if (dimension == 2) hist2d = (TH2F*) gDirectory->FindObjectAny(histName);
+  TFile file(fileName);  file.cd();
+  if (dimension == 1) hist1d = (TH1F*) file.FindObjectAny(histName);
+  if (dimension == 2) hist2d = (TH2F*) file.FindObjectAny(histName);
   if (hist1d) getTH1F(hist1d)->SetName(makeFSRootTempName());
   if (hist2d) getTH2F(hist2d)->SetName(makeFSRootTempName());
   return pair<TH1F*,TH2F*>(hist1d,hist2d);
@@ -830,7 +830,6 @@ FSHistogram::readHistogramCache(string cacheName){
       cout << "histogram already exists: " << getFSHistogramInfo(index)->getHistName() << endl;
       continue;
     }
-    FSTree::clearFileCache();  // (subtle: reusing the same cache name)
     pair<TH1F*,TH2F*> histPair = getTHNFBasicFile(getHistogramIndexFile(dim,fileName,histName));
     if (histPair.first)  histPair.first->SetName(makeFSRootHistName());
     if (histPair.second) histPair.second->SetName(makeFSRootHistName());
