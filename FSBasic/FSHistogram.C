@@ -1139,7 +1139,7 @@ FSHistogram::checkIndex(TString index, TString type){
     TString fileName = iMap["{-FN-}"];
     TString histName = iMap["{-HN-}"];
     if (!FSSystem::checkRootFormat(fileName)) return TString("!!BAD_FILE!!");
-    if (!FSSystem::checkRootFormat(fileName,histName)) return TString("!!NO_HISTOGRAM!!");
+    //if (!FSSystem::checkRootFormat(fileName,histName)) return TString("!!NO_HISTOGRAM!!");
   }
     // checks on tree (NT)
   if (type == "TREE"){

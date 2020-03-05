@@ -10,6 +10,7 @@
 
 map< TString, TString > FSSystem::m_cachePath;
 map< TString, vector<TString> > FSSystem::m_cachePaths;
+map< TString, bool > FSSystem::m_cacheRoot;
 
 
   // **********************************
@@ -84,23 +85,26 @@ FSSystem::getAbsolutePaths(TString path, bool useCache, bool show){
   // **********************************
 
 bool
-FSSystem::checkRootFormat(TString path, TString objectName){
-  vector<TString> newPaths = getAbsolutePaths(path);
-  if (newPaths.size() == 0) return false;
-  for (unsigned int i = 0; i < newPaths.size(); i++){
+FSSystem::checkRootFormat(TString path, bool useCache){
+  if (useCache){ if (m_cacheRoot.find(path) != m_cacheRoot.end()) return m_cacheRoot[path]; }
+  vector<TString> newPaths = getAbsolutePaths(path,useCache);
+  bool rootFormat = true;
+  if (newPaths.size() == 0) rootFormat = false;
+  for (unsigned int i = 0; rootFormat && i < newPaths.size(); i++){
     TString newPath = newPaths[i];
-    if (newPath == "") return false;
+    if (newPath == ""){ rootFormat = false; break; }
     ifstream infile(newPath.Data()); string instring;
-    if (!getline(infile,instring)){ infile.close(); return false; }
+    if (!getline(infile,instring)){ infile.close(); rootFormat = false; break; }
     TString inTString(FSString::string2TString(instring));
-    if (!inTString.Contains("root")){ infile.close(); return false; }
-    if (inTString.Index("root") != 0){ infile.close(); return false; }
-    if (!getline(infile,instring)){ infile.close(); return false; }
+    if (!inTString.Contains("root")){ infile.close(); rootFormat = false; break; }
+    if (inTString.Index("root") != 0){ infile.close(); rootFormat = false; break; }
+    if (!getline(infile,instring)){ infile.close(); rootFormat = false; break; }
     infile.close(); 
-    if (objectName != ""){
-      TFile tfile(newPath); tfile.cd(); if (!tfile.FindObjectAny(objectName)) return false; }
+    //if (objectName != ""){
+      //TFile tfile(newPath); tfile.cd(); if (!tfile.FindObjectAny(objectName)) return false; }
   }
-  return true;
+  if (useCache) m_cacheRoot[path] = rootFormat;
+  return rootFormat;
 }
 
 

@@ -44,7 +44,7 @@ class FSSystem{
       //   CHECK IF PATH POINTS TO A PROPER ROOT FILE (OR FILES)
       // **********************************
 
-    static bool checkRootFormat(TString path, TString objectName = "");
+    static bool checkRootFormat(TString path, bool useCache = true);
 
 
 
@@ -60,6 +60,7 @@ class FSSystem{
 
     static map< TString, TString >  m_cachePath;
     static map< TString, vector<TString> >  m_cachePaths;
+    static map< TString, bool >  m_cacheRoot;
 
 };
 
