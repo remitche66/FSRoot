@@ -1134,6 +1134,7 @@ FSHistogram::checkIndex(TString index, TString type){
     TString fileName = iMap["{-FN-}"];
     if (FSSystem::getAbsolutePath(fileName) == "") return TString("!!NO_FILE!!");
   }
+  /*
     // checks on hisgotram (HN)
   if (type == "FILE"){
     TString fileName = iMap["{-FN-}"];
@@ -1149,6 +1150,7 @@ FSHistogram::checkIndex(TString index, TString type){
     if (!(chain) || (chain->GetEntries() == 0) || (chain->GetNbranches() == 0))
       return TString("!!NO_TREE!!");
   }
+  */
     // checks on category (CA)
   if (type == "TREE"){
     TString category = iMap["{-CA-}"];

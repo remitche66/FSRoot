@@ -37,11 +37,16 @@ bool FSTree::m_madeStandardDefinitions = false;
   // ********************************************************
 
 TChain*
-FSTree::getTChain(TString fileName, TString ntName, 
-                              bool addFilesIndividually){
+FSTree::getTChain(TString fileName, TString ntName){
+  TString STATUS;
+  return getTChain(fileName,ntName,STATUS);
+}
+
+TChain*
+FSTree::getTChain(TString fileName, TString ntName, TString& STATUS){
   fileName = FSString::removeWhiteSpace(fileName);
   ntName   = FSString::removeWhiteSpace(ntName);
-  TChain* nt = NULL;
+  TChain* nt = NULL;  STATUS = "OKAY";
 
     // clear the chain cache if there is no chain caching
 
@@ -63,25 +68,29 @@ FSTree::getTChain(TString fileName, TString ntName,
     if (FSControl::DEBUG) 
       cout << "FSTree: creating new TChain with index " << index << endl;
     nt = new TChain(ntName);
-    if (addFilesIndividually){
-      vector<TString> fileList = FSSystem::getAbsolutePaths(fileName);
-      for (unsigned int i = 0; i < fileList.size(); i++){
-         if (!FSSystem::checkRootFormat(fileList[i])) continue;
-         TFile file(fileList[i]);
-         TTree* tree = (TTree*)file.Get(ntName);
-         if ((tree) && (tree->GetEntries() > 0) && (tree->GetNbranches() > 0)){
-           if (FSControl::DEBUG) 
-             cout << "FSTree: adding file to TChain " << fileList[i] << endl;
-           nt->Add(fileList[i]);
-        }
+    vector<TString> fileList = FSSystem::getAbsolutePaths(fileName);
+    int nFiles = 0;
+    for (unsigned int i = 0; i < fileList.size(); i++){
+      if (!FSSystem::checkRootFormat(fileList[i])) continue;
+      TFile file(fileList[i]);
+      TTree* tree = (TTree*)file.Get(ntName);
+      if ((tree) && (tree->GetEntries() > 0) && (tree->GetNbranches() > 0)){
+        if (FSControl::DEBUG) 
+          cout << "FSTree: adding file to TChain " << fileList[i] << endl;
+        nt->Add(fileList[i]);  nFiles++;
       }
     }
-    else{
-      nt->Add(fileName);
-    }
-    if ((nt->GetEntries() == 0) || (nt->GetNbranches() == 0)){
+    if (nFiles == 0){
+      STATUS = "!!NO_FILE!!";
       if (FSControl::DEBUG) 
-	cout << "FSTree: null TChain with index " << index << endl;
+        cout << "FSTree: null TChain with index " << index << endl;
+      delete nt;
+      nt = NULL;
+    }
+    else if ((nt->GetEntries() == 0) || (nt->GetNbranches() == 0)){
+      STATUS = "!!NO_TREE!!";
+      if (FSControl::DEBUG) 
+        cout << "FSTree: null TChain with index " << index << endl;
       delete nt;
       nt = NULL;
     }

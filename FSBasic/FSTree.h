@@ -23,8 +23,8 @@ class FSTree{
       // SET UP A TCHAIN AND CACHE IT
       // ********************************************************
 
-    static TChain* getTChain(TString fileName, TString ntName, 
-                             bool addFilesIndividually = true);
+    static TChain* getTChain(TString fileName, TString ntName); 
+    static TChain* getTChain(TString fileName, TString ntName, TString& STATUS); 
 
 
       // ********************************************************
