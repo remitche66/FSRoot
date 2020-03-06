@@ -99,11 +99,12 @@ FSHistogram::getTH2F(TString fileName, TString histName){
 
 
 pair<TH1F*,TH2F*> 
-FSHistogram::getTHNFBasicFile(TString index){
+FSHistogram::getTHNFBasicFile(TString index, TString& STATUS){
 
     // initial checks
   index = FSString::removeWhiteSpace(index);
-  if (checkIndex(index,"FILE").Contains("!!")) return getTHNFBasicEmpty(index); 
+  STATUS = checkIndex(index,"FILE");
+  if (STATUS.Contains("!!")) return getTHNFBasicEmpty(index); 
 
     // adjust the input parameters
   map<TString,TString> mapIndex = parseHistogramIndex(index);
@@ -122,6 +123,7 @@ FSHistogram::getTHNFBasicFile(TString index){
   if (dimension == 2) hist2d = (TH2F*) file.FindObjectAny(histName);
   if (hist1d) getTH1F(hist1d)->SetName(makeFSRootTempName());
   if (hist2d) getTH2F(hist2d)->SetName(makeFSRootTempName());
+  if (!hist1d && !hist2d){ STATUS = "!!NO_HISTOGRAM!!"; return getTHNFBasicEmpty(index); }
   return pair<TH1F*,TH2F*>(hist1d,hist2d);
 
 }
@@ -159,11 +161,12 @@ FSHistogram::getTH2F(TString fileName, TString ntName,
 
 
 pair<TH1F*,TH2F*> 
-FSHistogram::getTHNFBasicTree(TString index){
+FSHistogram::getTHNFBasicTree(TString index, TString& STATUS){
  
     // initial checks
   index = FSString::removeWhiteSpace(index);
-  if (checkIndex(index,"TREE").Contains("!!")) return getTHNFBasicEmpty(index); 
+  STATUS = checkIndex(index,"TREE");
+  if (STATUS.Contains("!!")) return getTHNFBasicEmpty(index); 
 
     // adjust the input parameters
   map<TString,TString> mapIndex = parseHistogramIndex(index);
@@ -188,7 +191,9 @@ FSHistogram::getTHNFBasicTree(TString index){
   if (cuts != "") scaleTimesCuts += ("*("+cuts+")");
 
   // use project to create a histogram
-  TChain* chain = FSTree::getTChain(fileName,ntName);
+  TString treeSTATUS;
+  TChain* chain = FSTree::getTChain(fileName,ntName,treeSTATUS);
+  if (treeSTATUS.Contains("!!")){ STATUS = treeSTATUS; return getTHNFBasicEmpty(index); } 
   chain->Project(hbounds, variable, scaleTimesCuts);
   if (dimension == 1) hist1d = (TH1F*) gDirectory->FindObject(hname); 
   if (dimension == 2) hist2d = (TH2F*) gDirectory->FindObject(hname); 
@@ -205,16 +210,13 @@ FSHistogram::getTHNFBasicTree(TString index){
 
 
 pair< ROOT::RDF::RResultPtr<TH1D>, ROOT::RDF::RResultPtr<TH2D> >
-FSHistogram::getTHNFBasicTreeRDF(TString index){
+FSHistogram::getTHNFBasicTreeRDF(TString index, TString& STATUS){
   pair< ROOT::RDF::RResultPtr<TH1D>, ROOT::RDF::RResultPtr<TH2D> > histPairRDF;
 
     // initial checks
   index = FSString::removeWhiteSpace(index);
-  if (FSControl::DEBUG){
-    cout << "FSHistogram::getTHNFBasicTreeRDF DEBUG: setting up histogram" << endl;
-    printIndexInfo(index);
-  }
-  if (checkIndex(index,"TREE").Contains("!!")) return histPairRDF;
+  STATUS = checkIndex(index,"TREE");
+  if (STATUS.Contains("!!")) return histPairRDF; 
 
     // adjust the input parameters
   map<TString,TString> mapIndex = parseHistogramIndex(index);
@@ -238,6 +240,10 @@ FSHistogram::getTHNFBasicTreeRDF(TString index){
   double yhigh = FSString::parseBoundsUpperY(bounds);
   TString rdfIndex = "{-FN-}"+fileName + "{-NT-}"+ntName;
   TString hname = makeFSRootTempName();
+  if (FSControl::DEBUG){
+    cout << "FSHistogram::getTHNFBasicTreeRDF DEBUG: setting up histogram" << endl;
+    printIndexInfo(index);
+  }
 
     // find the right RDataFrame object
   ROOT::RDataFrame* RDF;
@@ -251,7 +257,15 @@ FSHistogram::getTHNFBasicTreeRDF(TString index){
       if (FSSystem::checkRootFormat(allFiles[i]))
         rootFiles.push_back(FSString::TString2string(allFiles[i]));
     }
-    RDF = new ROOT::RDataFrame(sNT, rootFiles);
+    if (rootFiles.size() == 0){ STATUS = "!!NO_FILE!!";  return histPairRDF; } 
+    vector<string> rootFiles2;
+    for (unsigned int i = 0; i < rootFiles.size(); i++){
+      TFile file(FSString::string2TString(rootFiles[i]));
+      if (file.FindObjectAny(ntName))
+        rootFiles2.push_back(FSString::TString2string(rootFiles[i]));
+    }
+    if (rootFiles2.size() == 0){ STATUS = "!!NO_TREE!!";  return histPairRDF; } 
+    RDF = new ROOT::RDataFrame(sNT, rootFiles2);
     m_RDataFrameCache[rdfIndex] = RDF;
   }
 
@@ -350,11 +364,12 @@ FSHistogram::getTH2FContents(TString fileName, TString ntName, TString variable,
 
 TTree* 
 FSHistogram::getTHNFBasicContents(TTree* histTree, TString index,
-                                vector< pair<TString,TString> > extraTreeContents){
+                                vector< pair<TString,TString> > extraTreeContents, TString& STATUS){
 
     // initial checks
   index = FSString::removeWhiteSpace(index);
-  if (checkIndex(index,"TREE").Contains("!!")) return histTree;
+  STATUS = checkIndex(index,"TREE");
+  if (STATUS.Contains("!!")) return histTree;
 
     // adjust the input parameters
   map<TString,TString> mapIndex = parseHistogramIndex(index);
@@ -391,10 +406,6 @@ FSHistogram::getTHNFBasicContents(TTree* histTree, TString index,
 
     // get the x and y variable names
   vector<TString> vars = FSString::parseTString(variable,":");
-  if ((int)vars.size() != dimension){
-    cout << "FSHistogram::getTHNFBasicContents ERROR:  bad variable format" << endl;
-    exit(0);
-  }
   TString varX("");  if (dimension >= 1)  varX = vars[0];
   TString varY("");  if (dimension == 2){ varX = vars[1]; varY = vars[0]; }
 
@@ -413,7 +424,9 @@ FSHistogram::getTHNFBasicContents(TTree* histTree, TString index,
   }
 
     // get the old tree
-  TTree* nt = FSTree::getTChain(fileName,ntName);
+  TString treeSTATUS;
+  TTree* nt = FSTree::getTChain(fileName,ntName,treeSTATUS);
+  if (treeSTATUS.Contains("!!")){ STATUS = treeSTATUS; return histTree; }
 
     // set up the TTreeFormula objects
   if (cuts == "") cuts = "(1==1)";
@@ -492,11 +505,12 @@ FSHistogram::getTH2FFormula(TF2* function, TString bounds, int numRandomTrials){
 
 
 pair<TH1F*,TH2F*>
-FSHistogram::getTHNFBasicFormula(TString index){
+FSHistogram::getTHNFBasicFormula(TString index, TString& STATUS){
 
     // initial checks
   index = FSString::removeWhiteSpace(index);
-  if (checkIndex(index,"FORMULA").Contains("!!")) return getTHNFBasicEmpty(index); 
+  STATUS = checkIndex(index,"FORMULA");
+  if (STATUS.Contains("!!")) return getTHNFBasicEmpty(index); 
 
     // adjust the input parameters
   map<TString,TString> mapIndex = parseHistogramIndex(index);
@@ -773,8 +787,9 @@ FSHistogram::dumpHistogramCache(string cacheName){
     rootCache->cd();
     FSHistogramInfo* histInfo = vecHistInfo[i];
     TString histIndex = histInfo->m_index;
-    if (histInfo->m_basicHistograms.size() > 0) continue;
-    if (histInfo->m_waitingForEventLoop) continue;
+    if (!histInfo->basic()) continue;
+    if (histInfo->waitingForEventLoop()) continue;
+    if (histInfo->status().Contains("!!")) continue;
     pair<TH1F*,TH2F*> histPair = histInfo->getTHNF();
     if (histPair.first || histPair.second) 
       textCache << histIndex << endl;
@@ -830,7 +845,8 @@ FSHistogram::readHistogramCache(string cacheName){
       cout << "histogram already exists: " << getFSHistogramInfo(index)->getHistName() << endl;
       continue;
     }
-    pair<TH1F*,TH2F*> histPair = getTHNFBasicFile(getHistogramIndexFile(dim,fileName,histName));
+    TString cacheIndex(getHistogramIndexFile(dim,fileName,histName)); TString STATUS;
+    pair<TH1F*,TH2F*> histPair = getTHNFBasicFile(cacheIndex,STATUS);
     if (histPair.first)  histPair.first->SetName(makeFSRootHistName());
     if (histPair.second) histPair.second->SetName(makeFSRootHistName());
     getFSHistogramInfo(index)->m_histPair = histPair;
@@ -854,15 +870,23 @@ void
 FSHistogram::clearHistogramCache(int histNumber){
   if (FSControl::DEBUG) 
     cout << "FSHistogram: clearing histogram cache " << histNumber << endl;
+  for (int iBasic = 0; iBasic < 2; iBasic++){
   for (map<TString,FSHistogramInfo*>::iterator rmItr = m_FSHistogramInfoCache.begin();
        rmItr != m_FSHistogramInfoCache.end(); ){
     bool eraseIt = false;
     FSHistogramInfo* hInfo = rmItr->second;
     if (!hInfo) eraseIt = true;  // shouldn't happen 
     if (hInfo){
-      TString hName = hInfo->getHistName();
+      if (hInfo->basic() != (bool)iBasic){ rmItr++; continue; }
       if (histNumber < 0) eraseIt = true;
-      if (histNumber > 0 && getFSRootHistNumber(hName) == histNumber) eraseIt = true;
+      if (histNumber > 0){
+        if (getFSRootHistNumber(hInfo->getHistName()) == histNumber) eraseIt = true;
+        for (unsigned int i = 0; i < hInfo->m_basicHistograms.size(); i++){
+          if (getFSRootHistNumber(hInfo->m_basicHistograms[i]->getHistName()) == histNumber){
+             eraseIt = true; break;
+          }
+        }
+      }
     }
     if (eraseIt){
       if (hInfo){
@@ -874,7 +898,7 @@ FSHistogram::clearHistogramCache(int histNumber){
       rmItr = m_FSHistogramInfoCache.erase(rmItr);
     }
     else{ rmItr++; }
-  }
+  }}
   if (FSControl::DEBUG) 
     cout << "FSHistogram: done clearing histogram cache" << endl;
 }
@@ -922,12 +946,12 @@ FSHistogram::showHistogramCache(int histNumber, bool showDetails){
 
 
 pair<TH1F*,TH2F*>
-FSHistogram::getTHNFBasicIndex(TString index){
+FSHistogram::getTHNFBasicIndex(TString index, TString& STATUS){
   index = FSString::removeWhiteSpace(index);
-  if (index.Contains("{-TP-}FILE"))    return getTHNFBasicFile(index);
-  if (index.Contains("{-TP-}TREE"))    return getTHNFBasicTree(index);
+  if (index.Contains("{-TP-}FILE"))    return getTHNFBasicFile(index,STATUS);
+  if (index.Contains("{-TP-}TREE"))    return getTHNFBasicTree(index,STATUS);
   if (index.Contains("{-TP-}EMPTY"))   return getTHNFBasicEmpty(index);
-  if (index.Contains("{-TP-}FORMULA")) return getTHNFBasicFormula(index);
+  if (index.Contains("{-TP-}FORMULA")) return getTHNFBasicFormula(index,STATUS);
   return pair<TH1F*,TH2F*>(NULL,NULL);
 }
 
@@ -1133,23 +1157,6 @@ FSHistogram::checkIndex(TString index, TString type){
     TString fileName = iMap["{-FN-}"];
     if (FSSystem::getAbsolutePath(fileName) == "") return TString("!!NO_FILE!!");
   }
-  /*
-    // checks on hisgotram (HN)
-  if (type == "FILE"){
-    TString fileName = iMap["{-FN-}"];
-    TString histName = iMap["{-HN-}"];
-    if (!FSSystem::checkRootFormat(fileName)) return TString("!!BAD_FILE!!");
-    //if (!FSSystem::checkRootFormat(fileName,histName)) return TString("!!NO_HISTOGRAM!!");
-  }
-    // checks on tree (NT)
-  if (type == "TREE"){
-    TString fileName = iMap["{-FN-}"];
-    TString ntName   = iMap["{-NT-}"];
-    TChain* chain = FSTree::getTChain(fileName,ntName);
-    if (!(chain) || (chain->GetEntries() == 0) || (chain->GetNbranches() == 0))
-      return TString("!!NO_TREE!!");
-  }
-  */
     // checks on category (CA)
   if (type == "TREE"){
     TString category = iMap["{-CA-}"];
@@ -1159,7 +1166,9 @@ FSHistogram::checkIndex(TString index, TString type){
   if (type == "TREE"){
     TString variable = iMap["{-VA-}"];
     if (variable == "") return TString("!!NO_VARIABLE!!");
-    if (!FSString::checkParentheses(variable)) return TString("!!BAD_VARIABLE!!");
+    if ((!FSString::checkParentheses(variable))
+        || ((int)FSString::parseTString(variable,":").size() != dimension))
+      return TString("!!BAD_VARIABLE!!");
   }
     // checks on cuts (CU)
   if (type == "TREE"){
@@ -1223,9 +1232,9 @@ FSHistogram::executeRDataFrame(){
   for (map< TString, FSHistogramInfo* >::iterator mapItr = m_FSHistogramInfoCache.begin();
        mapItr != m_FSHistogramInfoCache.end(); mapItr++){
     FSHistogramInfo* histInfo = mapItr->second;
-    if ((histInfo->m_waitingForEventLoop) && (histInfo->m_basicHistograms.size() == 0)){
+    if ((histInfo->m_waitingForEventLoop) && (histInfo->basic())){
       histInfo->m_waitingForEventLoop = false;
-      if (histInfo->m_status.Contains("!!")) continue;
+      if (histInfo->status().Contains("!!")) continue;
       cout << "    FILLING HISTOGRAM...  " << std::flush;
       map<TString,TString> indexMap = parseHistogramIndex(histInfo->m_index);
       double scale = 1.0;  
@@ -1249,7 +1258,7 @@ FSHistogram::executeRDataFrame(){
   for (map< TString, FSHistogramInfo* >::iterator mapItr = m_FSHistogramInfoCache.begin();
        mapItr != m_FSHistogramInfoCache.end(); mapItr++){
     FSHistogramInfo* histInfo = mapItr->second;
-    if ((histInfo->m_waitingForEventLoop) && (histInfo->m_basicHistograms.size() != 0)){
+    if ((histInfo->m_waitingForEventLoop) && (!histInfo->basic())){
       cout << "    FILLING COMPOSITE...  " << std::flush;
       histInfo->m_waitingForEventLoop = false;
       pair<TH1F*,TH2F*> hComp = histInfo->m_histPair;
@@ -1282,7 +1291,7 @@ FSHistogram::disableRDataFrame(){
   for (map<TString, FSHistogramInfo*>::iterator mapItr = m_FSHistogramInfoCache.begin();
            mapItr != m_FSHistogramInfoCache.end(); mapItr++){
     FSHistogramInfo* histInfo = mapItr->second;
-    if (histInfo && histInfo->m_waitingForEventLoop){
+    if (histInfo && histInfo->waitingForEventLoop()){
       if (histInfo->m_histPair.first) 
         rmHist.push_back(getFSRootHistNumber(histInfo->m_histPair.first->GetName()));
       if (histInfo->m_histPair.second) 
@@ -1302,10 +1311,8 @@ FSHistogram::disableRDataFrame(){
 FSHistogramInfo::FSHistogramInfo(TString index, vector<TString> expandedIndices){
   m_index = index;  m_histPair.first = NULL;  m_histPair.second = NULL;
   m_waitingForEventLoop = false;  m_status = "OKAY";
-  if (expandedIndices.size() == 0) m_status = FSHistogram::checkIndex(index);
   for (unsigned int i = 0; i < expandedIndices.size(); i++){
     m_basicHistograms.push_back(FSHistogram::getFSHistogramInfo(expandedIndices[i]));
-    if (m_basicHistograms[i]->m_status.Contains("!!")) m_status = "!!BAD_COMPONENT!!";
   }
 }
 
@@ -1320,30 +1327,27 @@ FSHistogramInfo::getTHNF(){
 
     // case 2:  set up histograms but don't fill them yet
   else if (FSHistogram::m_USEDATAFRAME && m_index.Contains("{-TP-}TREE")){
-    TString eIndex(m_index); eIndex.Replace(eIndex.Index("{-TP-}TREE"),10,"{-TP-}EMPTY");
-    m_histPair = FSHistogram::getTHNFBasicIndex(eIndex);
+    m_histPair = FSHistogram::getTHNFBasicEmpty(m_index);
     if (m_histPair.first)  FSHistogram::getTH1F(m_histPair.first)->SetName(FSHistogram::makeFSRootHistName());
     if (m_histPair.second) FSHistogram::getTH2F(m_histPair.second)->SetName(FSHistogram::makeFSRootHistName());
     m_waitingForEventLoop = true;
 
       // case 2a: set up a single histogram
-    if (m_basicHistograms.size() == 0){
+    if (basic()){
       cout << "    SETTING HISTOGRAM...  " << std::flush;
-      m_histPairRDF = FSHistogram::getTHNFBasicTreeRDF(m_index);
+      m_histPairRDF = FSHistogram::getTHNFBasicTreeRDF(m_index,m_status);
     }
 
       // case 2b: set up a composite histogram
     else{
       cout << "    SETTING COMPOSITE...  " << getHistName() 
            << "   (from " << m_basicHistograms.size() << " elements)" << endl;
-      m_waitingForEventLoop = false;
       vector< pair<TH1F*,TH2F*> > vBasic;
       for (unsigned int i = 0; i < m_basicHistograms.size(); i++){
         vBasic.push_back(m_basicHistograms[i]->getTHNF());
-        if (m_basicHistograms[i]->m_waitingForEventLoop) m_waitingForEventLoop = true;
       }
         // case 2c: if the basic histograms all exist, fill the composite
-      if (!m_waitingForEventLoop){
+      if (!waitingForEventLoop()){
         for (unsigned int i = 0; i < vBasic.size(); i++){
           pair<TH1F*,TH2F*> hNew = vBasic[i];
           if (m_histPair.first  && hNew.first)  m_histPair.first->Add(hNew.first);
@@ -1355,9 +1359,9 @@ FSHistogramInfo::getTHNF(){
   }
 
     // case 3: create a single histogram
-  else if (m_basicHistograms.size() == 0){
+  else if (basic()){
     cout << "    CREATING HISTOGRAM... " << std::flush;
-    m_histPair = FSHistogram::getTHNFBasicIndex(m_index);
+    m_histPair = FSHistogram::getTHNFBasicIndex(m_index,m_status);
     if (m_histPair.first)  FSHistogram::getTH1F(m_histPair.first)->SetName(FSHistogram::makeFSRootHistName());
     if (m_histPair.second) FSHistogram::getTH2F(m_histPair.second)->SetName(FSHistogram::makeFSRootHistName());
   }
@@ -1386,21 +1390,47 @@ FSHistogramInfo::getTHNF(){
 TTree* 
 FSHistogramInfo::getTHNFContents(vector< pair<TString,TString> > extraTreeContents){
   TTree* histTree = NULL;
-  if (m_basicHistograms.size() == 0){
+  if (basic()){
     cout << "    CREATING TREE FROM HISTOGRAM..." << std::flush;
-    histTree = FSHistogram::getTHNFBasicContents(histTree,m_index,extraTreeContents);
+    histTree = FSHistogram::getTHNFBasicContents(histTree,m_index,extraTreeContents,m_status);
   }
   else{
     cout << "    CREATING COMPOSITE TREE FROM HISTOGRAM... " << endl;
     for (unsigned int i = 0; i < m_basicHistograms.size(); i++){
+      TString tmpStatus;
       histTree = FSHistogram::getTHNFBasicContents(histTree,
-                                     m_basicHistograms[i]->m_index,extraTreeContents);
+                                     m_basicHistograms[i]->m_index,extraTreeContents,tmpStatus);
     }
     cout << "    FINISHED COMPOSITE TREE FROM HISTOGRAM... " << std::flush;
   }
-  cout << " #entries = " << histTree->GetEntries() << endl;
+  cout << infoString() << "   (entries = " << histTree->GetEntries() << ")" << endl;
   return histTree;
 }
+
+bool
+FSHistogramInfo::waitingForEventLoop(){
+  if (basic()) return m_waitingForEventLoop;
+  m_waitingForEventLoop = false;
+  for (unsigned int i = 0; i < m_basicHistograms.size(); i++){
+    if (m_basicHistograms[i]->waitingForEventLoop()){
+      m_waitingForEventLoop = true;  break;
+    }
+  }
+  return m_waitingForEventLoop;
+}
+
+TString
+FSHistogramInfo::status(){
+  if (m_basicHistograms.size() == 0) return m_status;
+  m_status = "OKAY";
+  for (unsigned int i = 0; i < m_basicHistograms.size(); i++){
+    if (m_basicHistograms[i]->status().Contains("!!")){
+      m_status = "!!BAD_COMPONENT!!";  break;
+    }
+  }
+  return m_status;
+}
+
 
 void
 FSHistogramInfo::show(bool showDetails){
@@ -1419,12 +1449,12 @@ FSHistogramInfo::infoString(){
   TString info("");
   TString name = getHistName();  if (name == "") name = "NO NAME";
   info += FSString::padTString(name,20,"L");
-  info += FSString::padTString(m_status,20,"L");
+  info += FSString::padTString(status(),20,"L");
   if (m_histPair.first)  info += "   (entries = " +
     FSString::double2TString(m_histPair.first->GetEntries(),0,false,true) + ")";
   if (m_histPair.second)  info += "   (entries = " +
     FSString::double2TString(m_histPair.second->GetEntries(),0,false,true) + ")";
-  if (m_waitingForEventLoop) info += "  (WAITING) ";
+  if (waitingForEventLoop()) info += "  (WAITING) ";
   return info;
 }
 

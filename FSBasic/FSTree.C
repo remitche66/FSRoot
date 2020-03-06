@@ -67,7 +67,7 @@ FSTree::getTChain(TString fileName, TString ntName, TString& STATUS){
     if (FSControl::DEBUG) 
       cout << "FSTree: creating new TChain with index " << index << endl;
     nt = new TChain(ntName);
-    vector<TString> fileList = FSSystem::getAbsolutePaths(fileName);
+    vector<TString> fileList = FSSystem::getAbsolutePaths(fileName,true,FSControl::DEBUG);
     int nFiles = 0;
     for (unsigned int i = 0; i < fileList.size(); i++){
       if (!FSSystem::checkRootFormat(fileList[i])) continue;

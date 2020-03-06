@@ -159,24 +159,23 @@ class FSHistogram{
       // BASIC FUNCTIONS: HISTOGRAMS ALWAYS GO THROUGH THESE
       // ********************************************************
 
-    static pair<TH1F*,TH2F*> getTHNFBasicFile(TString index);
-    static pair<TH1F*,TH2F*> getTHNFBasicTree(TString index);
+    static pair<TH1F*,TH2F*> getTHNFBasicFile(TString index, TString& STATUS);
+    static pair<TH1F*,TH2F*> getTHNFBasicTree(TString index, TString& STATUS);
     static pair<TH1F*,TH2F*> getTHNFBasicEmpty(TString index);
-    static pair<TH1F*,TH2F*> getTHNFBasicFormula(TString index);
+    static pair<TH1F*,TH2F*> getTHNFBasicFormula(TString index, TString& STATUS);
 
     static TTree* getTHNFBasicContents(TTree* histTree, TString index,
-                                vector< pair<TString,TString> > extraTreeContents = 
-                                  vector< pair<TString,TString> >());
+                         vector< pair<TString,TString> > extraTreeContents, TString& STATUS);
 
     static pair< ROOT::RDF::RResultPtr<TH1D>, 
-                 ROOT::RDF::RResultPtr<TH2D> >  getTHNFBasicTreeRDF(TString index);
+                 ROOT::RDF::RResultPtr<TH2D> >  getTHNFBasicTreeRDF(TString index, TString& STATUS);
 
 
       // ********************************************************
       // GENERALIZED BASIC FUNCTIONS CREATED FROM INDICES
       // ********************************************************
 
-    static pair<TH1F*,TH2F*> getTHNFBasicIndex(TString index);
+    static pair<TH1F*,TH2F*> getTHNFBasicIndex(TString index, TString& STATUS);
 
 
       // *******************************************
@@ -258,6 +257,9 @@ class FSHistogramInfo{
     TString getHistName(){ if (m_histPair.first)  return m_histPair.first->GetName();
                            if (m_histPair.second) return m_histPair.second->GetName(); 
                            return TString(""); };
+    bool basic() { return (m_basicHistograms.size() == 0); }
+    bool waitingForEventLoop();
+    TString status();
     TString infoString();
     void show(bool showDetails = false);
 
