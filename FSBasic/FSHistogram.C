@@ -1449,6 +1449,9 @@ FSHistogramInfo::infoString(){
   TString info("");
   TString name = getHistName();  if (name == "") name = "NO NAME";
   info += FSString::padTString(name,20,"L");
+  if (m_index.Contains("{-CA-}")){
+    map<TString,TString> iMap = FSHistogram::parseHistogramIndex(m_index);
+    info += FSString::padTString(iMap["{-CA-}"],20,"L");}
   info += FSString::padTString(status(),20,"L");
   if (m_histPair.first)  info += "   (entries = " +
     FSString::double2TString(m_histPair.first->GetEntries(),0,false,true) + ")";

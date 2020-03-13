@@ -225,7 +225,7 @@ FSTree::skimTree(TString fileNameInput, TString chainName,
   // copy the tree with selection criteria
 
   TTree* tree2 = nt->CopyTree(newCuts);
-  if (newChainName != "") tree2->SetName(newChainName);
+  if (newChainName != ""){ tree2->SetName(newChainName); tree2->SetTitle(newChainName); }
   if (!FSControl::QUIET){
     cout << "\tNumber of entries kept:" << endl;
     cout << tree2->GetEntries() << endl;
@@ -239,7 +239,7 @@ FSTree::skimTree(TString fileNameInput, TString chainName,
   // write the tree to file2
 
   tree2->AutoSave();
-  //tree2->Write();
+  file2->Write();
   file2->Close();
 
   clearChainCache();

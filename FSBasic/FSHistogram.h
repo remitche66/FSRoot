@@ -14,7 +14,17 @@
 #include "TF1.h"
 #include "TF2.h"
 #include "TFormula.h"
+#include "RVersion.h"
 #include "ROOT/RDataFrame.hxx"
+
+#if ROOT_VERSION_CODE > ROOT_VERSION(3,1,5)
+    // new code
+#else
+    // old code
+#endif
+/*
+See $ROOTSYS/include/RVersion.h
+*/
 
 using namespace std;
 class FSHistogramInfo;
