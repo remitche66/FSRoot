@@ -255,8 +255,8 @@ FSTree::skimTree(TString fileNameInput, TString chainName,
 
   // write the tree to file2
 
-  tree2->AutoSave();
-  file2->Write();
+  //tree2->AutoSave();
+  tree2->Write();
   file2->Close();
 
   clearChainCache();
