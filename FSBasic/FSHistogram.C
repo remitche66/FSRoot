@@ -1403,7 +1403,7 @@ FSHistogramInfo::getTHNFContents(vector< pair<TString,TString> > extraTreeConten
     }
     cout << "    FINISHED COMPOSITE TREE FROM HISTOGRAM... " << std::flush;
   }
-  cout << infoString() << "   (entries = " << histTree->GetEntries() << ")" << endl;
+  cout << infoString() << "(entries = " << histTree->GetEntries() << ")" << endl;
   return histTree;
 }
 
@@ -1451,11 +1451,11 @@ FSHistogramInfo::infoString(){
   info += FSString::padTString(name,20,"L");
   if (m_index.Contains("{-CA-}")){
     map<TString,TString> iMap = FSHistogram::parseHistogramIndex(m_index);
-    info += FSString::padTString(iMap["{-CA-}"],20,"L");}
-  info += FSString::padTString(status(),20,"L");
-  if (m_histPair.first)  info += "   (entries = " +
+    info += FSString::padTString(iMap["{-CA-}"],18,"L");}
+  info += FSString::padTString(status(),18,"L");
+  if (m_histPair.first)  info += "(entries = " +
     FSString::double2TString(m_histPair.first->GetEntries(),0,false,true) + ")";
-  if (m_histPair.second)  info += "   (entries = " +
+  if (m_histPair.second)  info += "(entries = " +
     FSString::double2TString(m_histPair.second->GetEntries(),0,false,true) + ")";
   if (waitingForEventLoop()) info += "  (WAITING) ";
   return info;
