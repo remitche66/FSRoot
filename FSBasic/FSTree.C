@@ -256,6 +256,8 @@ FSTree::skimTree(TString fileNameInput, TString chainName,
   // write the tree to file2
 
   //tree2->AutoSave();
+  if (tree2->GetEntries() < 5)
+    { TTree* tree3 = tree2->CloneTree(); delete tree2; tree2 = tree3; }
   tree2->Write();
   file2->Close();
 
