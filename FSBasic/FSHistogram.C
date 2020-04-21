@@ -123,7 +123,7 @@ FSHistogram::getTHNFBasicFile(TString index, TString& STATUS){
   if (dimension == 2) hist2d = (TH2F*) file.FindObjectAny(histName);
   if (hist1d) getTH1F(hist1d)->SetName(makeFSRootTempName());
   if (hist2d) getTH2F(hist2d)->SetName(makeFSRootTempName());
-  if (!hist1d && !hist2d){ STATUS = "!!NO_HISTOGRAM!!"; return getTHNFBasicEmpty(index); }
+  if (!hist1d && !hist2d){ STATUS = "!!NO_HIST!!"; return getTHNFBasicEmpty(index); }
   return pair<TH1F*,TH2F*>(hist1d,hist2d);
 
 }
@@ -1146,7 +1146,7 @@ FSHistogram::checkIndex(TString index, TString type){
   type = iMap["{-TP-}"];    if (type == "") return TString("!!NO_TYPE!!");
     // checks on dimension (ND)
   int dimension = FSString::TString2int(iMap["{-ND-}"]);
-  if ((dimension != 1) && (dimension != 2)) return TString("!!BAD_DIMENSION!!"); 
+  if ((dimension != 1) && (dimension != 2)) return TString("!!BAD_DIM!!"); 
     // checks on bounds (BO)
   if (type == "TREE" || type == "FORMULA" || type == "EMPTY"){
     TString bounds = iMap["{-BO-}"];
@@ -1165,10 +1165,10 @@ FSHistogram::checkIndex(TString index, TString type){
     // checks on variable (VA)
   if (type == "TREE"){
     TString variable = iMap["{-VA-}"];
-    if (variable == "") return TString("!!NO_VARIABLE!!");
+    if (variable == "") return TString("!!NO_VAR!!");
     if ((!FSString::checkParentheses(variable))
         || ((int)FSString::parseTString(variable,":").size() != dimension))
-      return TString("!!BAD_VARIABLE!!");
+      return TString("!!BAD_VAR!!");
   }
     // checks on cuts (CU)
   if (type == "TREE"){
@@ -1178,7 +1178,7 @@ FSHistogram::checkIndex(TString index, TString type){
     // checks on formula (FO)
   if (type == "FORMULA"){
     TString formula = iMap["{-FO-}"];
-    if (!FSString::checkParentheses(formula)) return TString("!!BAD_FORMULA!!");
+    if (!FSString::checkParentheses(formula)) return TString("!!BAD_FUNC!!");
   }
     // checks on scale (SC)
   if (type == "TREE"){
@@ -1425,7 +1425,7 @@ FSHistogramInfo::status(){
   m_status = "OKAY";
   for (unsigned int i = 0; i < m_basicHistograms.size(); i++){
     if (m_basicHistograms[i]->status().Contains("!!")){
-      m_status = "!!BAD_COMPONENT!!";  break;
+      m_status = "!!BAD_COMP!!";  break;
     }
   }
   return m_status;
@@ -1452,7 +1452,7 @@ FSHistogramInfo::infoString(){
   if (m_index.Contains("{-CA-}")){
     map<TString,TString> iMap = FSHistogram::parseHistogramIndex(m_index);
     info += FSString::padTString(iMap["{-CA-}"],18,"L");}
-  info += FSString::padTString(status(),18,"L");
+  info += FSString::padTString(status(),15,"L");
   if (m_histPair.first)  info += "(entries = " +
     FSString::double2TString(m_histPair.first->GetEntries(),0,false,true) + ")";
   if (m_histPair.second)  info += "(entries = " +
