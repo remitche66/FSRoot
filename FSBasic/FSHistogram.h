@@ -240,7 +240,7 @@ class FSHistogram{
     static bool m_USEDATAFRAME;
     static bool m_USEDATAFRAMENOW;
     static map< TString, ROOT::RDataFrame* > m_RDataFrameCache;
-    static map< TString, TString > m_RDFVariableDefinitions;
+    static map< TString, pair<TString,TString> > m_RDFVariableDefinitions;
     static unsigned int m_RDFVariableCounter;
 
 };

@@ -27,7 +27,7 @@ unsigned int FSHistogram::m_indexFSRootTempName = 0;
 bool FSHistogram::m_USEDATAFRAME = false;
 bool FSHistogram::m_USEDATAFRAMENOW = false;
 map< TString, ROOT::RDataFrame* > FSHistogram::m_RDataFrameCache;
-map< TString, TString > FSHistogram::m_RDFVariableDefinitions;
+map< TString, pair<TString,TString> > FSHistogram::m_RDFVariableDefinitions;
 unsigned int FSHistogram::m_RDFVariableCounter = 0;
 
 
@@ -230,7 +230,11 @@ FSHistogram::getTHNFBasicTreeRDF(TString index, TString& STATUS){
   if (cuts == "") cuts = "(1==1)";
   string sFN   = FSString::TString2string(fileName);
   string sNT   = FSString::TString2string(ntName);
-  string sVAR  = FSString::TString2string(variable);
+  string sVARX = FSString::TString2string(variable);
+  string sVARY = "";
+  if (dimension == 2){ vector<TString> vars = FSString::parseTString(variable,":");
+                       sVARX = FSString::TString2string(vars[1]);
+                       sVARY = FSString::TString2string(vars[0]); }
   string sCUTS = FSString::TString2string(cuts);
   int nbinsx = FSString::parseBoundsNBinsX(bounds);
   double xlow = FSString::parseBoundsLowerX(bounds);
@@ -270,26 +274,30 @@ FSHistogram::getTHNFBasicTreeRDF(TString index, TString& STATUS){
   }
 
     // find the name of the variable
-  TString varName(""); string sVarName("");
+  TString varNameX(""); string sVarNameX("");
+  TString varNameY(""); string sVarNameY("");
   if (m_RDFVariableDefinitions.find(variable) != m_RDFVariableDefinitions.end()){
-    varName = m_RDFVariableDefinitions[variable];
+    varNameX = m_RDFVariableDefinitions[variable].first;
+    varNameY = m_RDFVariableDefinitions[variable].second;
   }
   else{
-    varName = "VAR" + FSString::int2TString(m_RDFVariableCounter++);
-    m_RDFVariableDefinitions[variable] = varName;
+    varNameX = "VARX" + FSString::int2TString(m_RDFVariableCounter++);
+    varNameY = "VARY" + FSString::int2TString(m_RDFVariableCounter);
+    m_RDFVariableDefinitions[variable] = pair<TString,TString>(varNameX,varNameY);
   }
-  sVarName = FSString::TString2string(varName);
+  sVarNameX = FSString::TString2string(varNameX);
+  sVarNameY = FSString::TString2string(varNameY);
 
     // set up the histogram
   if (dimension == 1){
     histPairRDF.first = RDF->Filter(sCUTS)
-                            .Define(sVarName,sVAR)
-                            .Histo1D({hname,hname,nbinsx,xlow,xhigh},sVarName);
+                            .Define(sVarNameX,sVARX)
+                            .Histo1D({hname,hname,nbinsx,xlow,xhigh},sVarNameX);
   }
   if (dimension == 2){
     histPairRDF.second = RDF->Filter(sCUTS)
-                            .Define(sVarName,sVAR)
-                            .Histo2D({hname,hname,nbinsx,xlow,xhigh,nbinsy,ylow,yhigh},sVarName);
+                            .Define(sVarNameX,sVARX).Define(sVarNameY,sVARY)
+                            .Histo2D({hname,hname,nbinsx,xlow,xhigh,nbinsy,ylow,yhigh},sVarNameX,sVarNameY);
   }
 
   return histPairRDF;
