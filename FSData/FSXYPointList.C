@@ -13,6 +13,12 @@
 vector<FSXYPoint*> FSXYPointList::m_vectorXYPoints;
 
 
+void
+FSXYPointList::addXYPointFromString(TString inputString){
+  FSXYPoint* xyp = new FSXYPoint();
+  xyp->setValuesFromString(inputString);
+  m_vectorXYPoints.push_back(xyp);
+}
 
 void
 FSXYPointList::addXYPointsFromFile(TString fileName){

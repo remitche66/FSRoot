@@ -21,6 +21,8 @@ class FSXYPointList{
 
     static void addXYPointsFromFile(TString fileName);
 
+    static void addXYPointFromString(TString inputString);
+
     static void addDerivedXYPoints(TString newCategory, TString oldCategory1, TString operation, 
                                    TString oldCategory2, double xTolerance = 1.0e-8);
 
