@@ -209,6 +209,30 @@ FSModeInfo::modeGlueXFormat(){
   return gluexFormat;
 }
 
+TString
+FSModeInfo::modeComboFormat(int min){
+  TString cF("");
+  int np;
+  np = modeNGamma     ();  for (int i = 0; i < np; i++){ cF += ((TString)"[gamma"  +(i+min)+"],"); }
+  np = modeNEp        ();  for (int i = 0; i < np; i++){ cF += ((TString)"[e+"     +(i+min)+"],"); }
+  np = modeNEm        ();  for (int i = 0; i < np; i++){ cF += ((TString)"[e-"     +(i+min)+"],"); }
+  np = modeNMp        ();  for (int i = 0; i < np; i++){ cF += ((TString)"[mu+"    +(i+min)+"],"); }
+  np = modeNMm        ();  for (int i = 0; i < np; i++){ cF += ((TString)"[mu-"    +(i+min)+"],"); }
+  np = modeNPi0       ();  for (int i = 0; i < np; i++){ cF += ((TString)"[pi0"    +(i+min)+"],"); }
+  np = modeNPip       ();  for (int i = 0; i < np; i++){ cF += ((TString)"[pi+"    +(i+min)+"],"); }
+  np = modeNPim       ();  for (int i = 0; i < np; i++){ cF += ((TString)"[pi-"    +(i+min)+"],"); }
+  np = modeNKp        ();  for (int i = 0; i < np; i++){ cF += ((TString)"[K+"     +(i+min)+"],"); }
+  np = modeNKm        ();  for (int i = 0; i < np; i++){ cF += ((TString)"[K-"     +(i+min)+"],"); }
+  np = modeNKs        ();  for (int i = 0; i < np; i++){ cF += ((TString)"[Ks"     +(i+min)+"],"); }
+  np = modeNEta       ();  for (int i = 0; i < np; i++){ cF += ((TString)"[eta"    +(i+min)+"],"); }
+  np = modeNPp        ();  for (int i = 0; i < np; i++){ cF += ((TString)"[p+"     +(i+min)+"],"); }
+  np = modeNPm        ();  for (int i = 0; i < np; i++){ cF += ((TString)"[p-"     +(i+min)+"],"); }
+  np = modeNLambda    ();  for (int i = 0; i < np; i++){ cF += ((TString)"[Lambda" +(i+min)+"],"); }
+  np = modeNALambda   ();  for (int i = 0; i < np; i++){ cF += ((TString)"[ALambda"+(i+min)+"],"); }
+  if (cF.Length() != 0) cF = FSString::subString(cF,0,cF.Length()-1);
+  return cF;
+}
+
 
 vector<TString> 
 FSModeInfo::particles(){ 
@@ -576,8 +600,9 @@ FSModeInfo::isModeString(TString mString){
   if (parts.size() != 1) return false;
   vector<TString> codes = FSString::parseTString(mString,"_");
   if (codes.size() < 2) return false;
-  if (!codes[codes.size()-1].IsDigit()) return false;
   if (codes[codes.size()-2].Length() == 0) return false;
+  if (codes[codes.size()-1].Length() == 0) return false;
+  if (!codes[codes.size()-1].IsDigit()) return false;
   TString last(codes[codes.size()-2][codes[codes.size()-2].Length()-1]);
   if (!last.IsDigit()) return false;
   return true;

@@ -93,6 +93,7 @@ class FSModeInfo{
     TString        modeString(TString original = "", int counter = -1);
     TString        modeDescription();
     TString        modeGlueXFormat();
+    TString        modeComboFormat(int minimumIndex = 0);
 
     vector<TString> particles();
 
