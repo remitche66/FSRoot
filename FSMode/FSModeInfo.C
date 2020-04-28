@@ -150,6 +150,19 @@ FSModeInfo::modeString(TString original, int counter){
     stmp += modeGlueXFormat();
     original.Replace(original.Index("MODEGLUEX"),9,stmp);
   }
+  while (original.Contains("MODECOMBO")){
+    int minimumIndex = 0;
+    TString MODECOMBO("MODECOMBO");
+    if (original.Index("MODECOMBO")+9 < original.Length()){
+      TString digit = original[original.Index("MODECOMBO")+9];
+      if (digit.IsDigit()){
+        MODECOMBO += digit;
+        minimumIndex = FSString::TString2int(digit);
+      }
+    }
+    TString stmp = modeComboFormat(minimumIndex);
+    original.Replace(original.Index(MODECOMBO),MODECOMBO.Length(),stmp);
+  }
   while (original.Contains("MODECOUNTER") && counter >= 0){
     int digits = 0;
     while (original.Index("MODECOUNTER")+11+digits < original.Length() &&

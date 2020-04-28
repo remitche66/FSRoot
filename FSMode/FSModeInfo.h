@@ -82,6 +82,7 @@ class FSModeInfo{
       //      "MODECODE1"
       //      "MODECODE2"
       //      "MODEGLUEX"
+      //      "MODECOMBO"
       //    if "counter" is also given and non-negative:
       //      "MODECOUNTER"
       //        or "MODECOUNTERXXXX" to pad with zeros
