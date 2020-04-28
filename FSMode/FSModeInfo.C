@@ -37,7 +37,6 @@ FSModeInfo::FSModeInfo(int mCode1, int mCode2){
 FSModeInfo::FSModeInfo(TString mString){
   vector<TString> parts = FSString::parseTString(mString);
   vector<TString> extraCategories;
-  vector<TString> extendedCategories;
   int code1 = 0;
   int code2 = 0;
   for (unsigned int i = 0; i < parts.size(); i++){
@@ -75,107 +74,11 @@ FSModeInfo::FSModeInfo(TString mString){
     }
     else{
       TString cat = parts[i];
-      if (cat.Length() > 2 && cat[0] == '_' && cat[cat.Length()-1] == '_'){
-        cat.Replace(0,1,"");
-        cat.Replace(cat.Length()-1,1,"");
-        extendedCategories.push_back(cat);
-      }
       extraCategories.push_back(cat);
     }
   }
-  unsigned int ncat = extendedCategories.size();
-  if (ncat == 7){
-    extendedCategories.push_back(extendedCategories[6]+"_"+
-                                 extendedCategories[5]);
-    extendedCategories.push_back(extendedCategories[6]+"_"+
-                                 extendedCategories[5]+"_"+
-                                 extendedCategories[4]);
-    extendedCategories.push_back(extendedCategories[6]+"_"+
-                                 extendedCategories[5]+"_"+
-                                 extendedCategories[4]+"_"+
-                                 extendedCategories[3]);
-    extendedCategories.push_back(extendedCategories[6]+"_"+
-                                 extendedCategories[5]+"_"+
-                                 extendedCategories[4]+"_"+
-                                 extendedCategories[3]+"_"+
-                                 extendedCategories[2]);
-    extendedCategories.push_back(extendedCategories[6]+"_"+
-                                 extendedCategories[5]+"_"+
-                                 extendedCategories[4]+"_"+
-                                 extendedCategories[3]+"_"+
-                                 extendedCategories[2]+"_"+
-                                 extendedCategories[1]);
-    extendedCategories.push_back(extendedCategories[6]+"_"+
-                                 extendedCategories[5]+"_"+
-                                 extendedCategories[4]+"_"+
-                                 extendedCategories[3]+"_"+
-                                 extendedCategories[2]+"_"+
-                                 extendedCategories[1]+"_"+
-                                 extendedCategories[0]);
-  }
-  if (ncat == 6){
-    extendedCategories.push_back(extendedCategories[5]+"_"+
-                                 extendedCategories[4]);
-    extendedCategories.push_back(extendedCategories[5]+"_"+
-                                 extendedCategories[4]+"_"+
-                                 extendedCategories[3]);
-    extendedCategories.push_back(extendedCategories[5]+"_"+
-                                 extendedCategories[4]+"_"+
-                                 extendedCategories[3]+"_"+
-                                 extendedCategories[2]);
-    extendedCategories.push_back(extendedCategories[5]+"_"+
-                                 extendedCategories[4]+"_"+
-                                 extendedCategories[3]+"_"+
-                                 extendedCategories[2]+"_"+
-                                 extendedCategories[1]);
-    extendedCategories.push_back(extendedCategories[5]+"_"+
-                                 extendedCategories[4]+"_"+
-                                 extendedCategories[3]+"_"+
-                                 extendedCategories[2]+"_"+
-                                 extendedCategories[1]+"_"+
-                                 extendedCategories[0]);
-  }
-  if (ncat == 5){
-    extendedCategories.push_back(extendedCategories[4]+"_"+
-                                 extendedCategories[3]);
-    extendedCategories.push_back(extendedCategories[4]+"_"+
-                                 extendedCategories[3]+"_"+
-                                 extendedCategories[2]);
-    extendedCategories.push_back(extendedCategories[4]+"_"+
-                                 extendedCategories[3]+"_"+
-                                 extendedCategories[2]+"_"+
-                                 extendedCategories[1]);
-    extendedCategories.push_back(extendedCategories[4]+"_"+
-                                 extendedCategories[3]+"_"+
-                                 extendedCategories[2]+"_"+
-                                 extendedCategories[1]+"_"+
-                                 extendedCategories[0]);
-  }
-  if (ncat == 4){
-    extendedCategories.push_back(extendedCategories[3]+"_"+
-                                 extendedCategories[2]);
-    extendedCategories.push_back(extendedCategories[3]+"_"+
-                                 extendedCategories[2]+"_"+
-                                 extendedCategories[1]);
-    extendedCategories.push_back(extendedCategories[3]+"_"+
-                                 extendedCategories[2]+"_"+
-                                 extendedCategories[1]+"_"+
-                                 extendedCategories[0]);
-  }
-  if (ncat == 3){
-    extendedCategories.push_back(extendedCategories[2]+"_"+
-                                 extendedCategories[1]);
-    extendedCategories.push_back(extendedCategories[2]+"_"+
-                                 extendedCategories[1]+"_"+
-                                 extendedCategories[0]);
-  }
-  if (ncat == 2){
-    extendedCategories.push_back(extendedCategories[1]+"_"+
-                                 extendedCategories[0]);
-  }
   m_modeCode = pair<int,int>(code1,code2);
   addStandardCategories();
-  addCategory(extendedCategories);
   addCategory(extraCategories);
   if (particles().size() == 0){ cout << "FSModeInfo WARNING: creating mode with no particles" << endl; }
 }
