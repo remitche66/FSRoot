@@ -30,6 +30,16 @@ FSCut::defineCut(TString cutName, TString cut,
 
 
       // ********************************************************
+      // FIND A CUT
+      // ********************************************************
+
+bool
+FSCut::findCut(TString cutName){
+  return (m_cutCache.find(cutName) != m_cutCache.end());
+}
+
+
+      // ********************************************************
       // DISPLAY CUTS
       // ********************************************************
 
@@ -224,7 +234,7 @@ FSCut::getCut(TString cutName){
   // ********************************************************
 
 void
-FSCut::clearCutCache(){
+FSCut::clearCuts(){
   if (FSControl::DEBUG) 
     cout << "FSCut: clearing cut cache" << endl;
   m_cutCache.clear();
