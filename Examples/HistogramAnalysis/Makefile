@@ -1,22 +1,20 @@
-#! gnumake
+ROOT_CFLAGS   := $(shell root-config --cflags)
+ROOT_LIBFLAGS := $(shell root-config --libs) -lMinuit -lMathCore -lMathMore -lTreePlayer
 
-ROOTFLAGS     = $(shell root-config --cflags)
-ROOTLIBS      = $(shell root-config --libs) -lMinuit -lMathCore -lMathMore -lTreePlayer
+FSROOT_LIBFLAGS := -L$(FSROOT)/lib -lFSRoot
+FSROOT_INCFLAGS := -I$(FSROOT)
 
-FSBASIC_LIBS = $(FSROOT)/FSBasic/FSControl.o $(FSROOT)/FSBasic/FSCanvas.o $(FSROOT)/FSBasic/FSTree.o $(FSROOT)/FSBasic/FSHistogram.o $(FSROOT)/FSBasic/FSCut.o $(FSROOT)/FSBasic/FSString.o $(FSROOT)/FSBasic/FSPhysics.o
-FSMODE_LIBS = $(FSROOT)/FSMode/FSModeInfo.o $(FSROOT)/FSMode/FSModeTree.o $(FSROOT)/FSMode/FSModeHistogram.o $(FSROOT)/FSMode/FSModeCollection.o $(FSROOT)/FSMode/FSModeString.o
-FSDATA_LIBS = $(FSROOT)/FSData/FSEEDataSet.o $(FSROOT)/FSData/FSEEDataSetList.o $(FSROOT)/FSData/FSEEXS.o $(FSROOT)/FSData/FSEEXSList.o $(FSROOT)/FSData/FSXYPoint.o $(FSROOT)/FSData/FSXYPointList.o
-FSFIT_LIBS = $(FSROOT)/FSFit/FSFitFunctions.o $(FSROOT)/FSFit/FSFitPrivate.o $(FSROOT)/FSFit/FSFitUtilities.o
-FSANALYSIS_LIBS = $(FSROOT)/FSAnalysis/FSHistogramAnalysis.o
+EXE_SRCFILES := $(wildcard *.cc)
+EXE_EXEFILES := $(foreach file,$(EXE_SRCFILES),$(file:.cc=))
 
-MYINCLUDES = -I. -I$(FSROOT)/
+EXTRA_SRCFILES := $(wildcard *.C)
+EXTRA_INCFILES := $(wildcard *.h)
 
-all: $(FSBASIC_LIBS) $(FSMODE_LIBS) $(FSDATA_LIBS) $(FSFIT_LIBS) $(FSANALYSIS_LIBS)
+all: $(EXE_EXEFILES)
 
-%: %.cc $(FSBASIC_LIBS) $(FSMODE_LIBS) $(FSDATA_LIBS) $(FSFIT_LIBS) $(FSANALYSIS_LIBS)
-	g++  $(ROOTFLAGS) $(MYINCLUDES) -c -o $*.o $*.cc
-	g++  $(ROOTFLAGS) $(MYINCLUDES) $(ROOTLIBS) $(FSBASIC_LIBS) $(FSMODE_LIBS) $(FSDATA_LIBS) $(FSFIT_LIBS) $(FSANALYSIS_LIBS) $*.o -o $*
-
+$(EXE_EXEFILES): $(EXE_SRCFILES) $(EXTRA_SRCFILES) $(EXTRA_INCFILES)
+	g++ $(ROOT_CFLAGS) $(ROOT_LIBFLAGS) $(FSROOT_LIBFLAGS) $(FSROOT_INCFLAGS) -I. -o $@ $@.cc $(EXTRA_SRCFILES)
 
 clean:
-	@rm -f *.o $* */*.o
+	rm -rf $(EXE_EXEFILES)
+
