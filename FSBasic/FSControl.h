@@ -1,7 +1,13 @@
 #if !defined(FSCONTROL_H)
 #define FSCONTROL_H
 
+#include <TROOT.h>
+#include <TStyle.h>
 #include "TString.h"
+#include "TTreeFormula.h"
+#include "TTree.h"
+#include "TH2.h"
+#include "TH1.h"
 
 using namespace std;
 
@@ -16,6 +22,39 @@ class FSControl{
     static bool QUIET;              // turns off almost all printing
 
     static TString CHAINFRIEND;     // add a friend when creating a TChain
+
+    static void globalTweaks(){
+
+      // *******************
+      // FORMATTING TWEAKS
+      // *******************
+
+      gStyle->SetFillColor(10);
+      gStyle->SetCanvasColor(10);
+      gStyle->SetPadColor(10);
+      gStyle->SetFillStyle(1001);
+      gStyle->SetCanvasBorderMode(0);      
+
+      gStyle->SetMarkerStyle(20);
+      gStyle->SetMarkerSize(0.5);      
+
+      gStyle->SetPadLeftMargin(0.145);
+      gStyle->SetPadBottomMargin(0.15);
+      gStyle->SetCanvasDefH(600.0);
+      gStyle->SetCanvasDefW(600.0);      
+
+      gStyle->SetTitleOffset(1.5,"Y");      
+      
+      // *******************
+      // ROOT TWEAKS
+      // *******************
+
+      TTreeFormula::SetMaxima(100000,10000,10000);
+      TTree::SetMaxTreeSize(100e9);
+      TH1::SetDefaultSumw2(true);
+      TH2::SetDefaultSumw2(true);
+
+    }
 
 };
 
