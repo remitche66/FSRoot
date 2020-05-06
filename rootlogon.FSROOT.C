@@ -5,6 +5,37 @@ cout << "------   Loading the FSRoot Macros (v2.0)   ------" << endl;
 cout << "--------------------------------------------------" << endl;
 
 
+// **********
+// FORMATTING
+// **********
+
+gStyle->SetFillColor(10);
+gStyle->SetCanvasColor(10);
+gStyle->SetPadColor(10);
+gStyle->SetFillStyle(1001);
+gStyle->SetCanvasBorderMode(0);
+
+gStyle->SetMarkerStyle(20);
+gStyle->SetMarkerSize(0.5);
+
+gStyle->SetPadLeftMargin(0.145);
+gStyle->SetPadBottomMargin(0.15);
+gStyle->SetCanvasDefH(600.0);
+gStyle->SetCanvasDefW(600.0);
+
+gStyle->SetTitleOffset(1.5,"Y");
+
+
+// ***********
+// ROOT TWEAKS
+// ***********
+
+TTreeFormula::SetMaxima(100000,10000,10000);
+TTree::SetMaxTreeSize(100e9);
+TH1::SetDefaultSumw2(true);
+TH2::SetDefaultSumw2(true);
+
+
 // *****************
 // INCLUDE FILES
 // *****************
@@ -18,7 +49,6 @@ gROOT->ProcessLine(".include ${FSROOT}");
 
 cout << "Loading FSBasic/FSControl.h..." << endl;
 gROOT->LoadMacro("FSBasic/FSControl.C+");
-           FSControl::globalTweaks();
 
 cout << "Loading FSBasic/FSCanvas.C..." << endl;
 gROOT->LoadMacro("FSBasic/FSCanvas.C+");
