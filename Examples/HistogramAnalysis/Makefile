@@ -5,6 +5,15 @@ FSROOT_LIBFILE  := $(FSROOT)/lib/libFSRoot.a
 FSROOT_LIBFLAGS := -L$(FSROOT)/lib -lFSRoot
 FSROOT_INCFLAGS := -I$(FSROOT)
 
+###############################
+# should be able to link to the library and not the individual
+# object files -- but can't for some reason on stanley
+# shouldn't need any of this:
+FSROOT_SRCDIRS := $(FSROOT)/FSBasic $(FSROOT)/FSMode $(FSROOT)/FSData $(FSROOT)/FSFit $(FSROOT)/FSAnalysis
+FSROOT_SRCFILES := $(foreach dir,$(FSROOT_SRCDIRS),$(wildcard $(dir)/*.C))
+FSROOT_OBJFILES := $(FSROOT_SRCFILES:%.C=%.o)
+###############################
+
 EXE_SRCFILES := $(wildcard *.cc)
 EXE_EXEFILES := $(foreach file,$(EXE_SRCFILES),$(file:.cc=))
 
@@ -14,7 +23,10 @@ EXTRA_INCFILES := $(wildcard *.h)
 all: $(EXE_EXEFILES)
 
 %: %.cc $(EXTRA_SRCFILES) $(EXTRA_INCFILES) $(FSROOT_LIBFILE)
-	g++ $(ROOT_CFLAGS) $(ROOT_LIBFLAGS) $(FSROOT_LIBFLAGS) $(FSROOT_INCFLAGS) -I. -o $@ $@.cc $(EXTRA_SRCFILES)
+	# DO THIS FOR NOW:
+	g++ $(ROOT_CFLAGS) $(ROOT_LIBFLAGS) $(FSROOT_OBJFILES) $(FSROOT_INCFLAGS) -I. -o $@ $@.cc $(EXTRA_SRCFILES)
+	# THIS WOULD BE BETTER:
+	#g++ $(ROOT_CFLAGS) $(ROOT_LIBFLAGS) $(FSROOT_LIBFLAGS) $(FSROOT_INCFLAGS) -I. -o $@ $@.cc $(EXTRA_SRCFILES)
 
 clean:
 	rm -rf $(EXE_EXEFILES)
