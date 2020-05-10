@@ -508,9 +508,8 @@ FSHistogram::getTH1FFormula(TF1* function, TString bounds, int numRandomTrials){
 #if ROOT_VERSION_CODE >= ROOT_VERSION(6,18,0)
   return getTH1FFormula(function->GetFormula()->GetExpFormula(),bounds,numRandomTrials);
 #else
-  cout << function->GetName() << endl;
-  cout << "getTH1Formula(function,"+bounds+","+
-           FSString::int2TString(numRandomTrials)+")" << endl;
+  cout << "getTH1Formula(" << function->GetName() << "," << bounds << ","
+           << numRandomTrials << ")" << endl;
   cout << "ROOT version too old" << endl; exit(0);
 #endif
 }
@@ -520,9 +519,8 @@ FSHistogram::getTH2FFormula(TF2* function, TString bounds, int numRandomTrials){
 #if ROOT_VERSION_CODE >= ROOT_VERSION(6,18,0)
   return getTH2FFormula(function->GetFormula()->GetExpFormula(),bounds,numRandomTrials);
 #else
-  cout << function->GetName() << endl;
-  cout << "getTH2Formula(function,"+bounds+","+
-           FSString::int2TString(numRandomTrials)+")" << endl;
+  cout << "getTH2Formula(" << function->GetName() << "," << bounds << ","
+           << numRandomTrials << ")" << endl;
   cout << "ROOT version too old" << endl; exit(0);
 #endif
 }
@@ -1249,6 +1247,7 @@ FSHistogram::enableRDataFrame(bool executeImmediately, int numThreads){
   m_USEDATAFRAME = true;
   m_USEDATAFRAMENOW = executeImmediately;
 #else
+  cout << "enableRDataFrame(" << executeImmediately << "," << numThreads << ")" << endl;
   cout << "To use RDataFrame, the ROOT version should be greater than 6.18" << endl;
   exit(0);
 #endif

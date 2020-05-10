@@ -479,9 +479,9 @@ FSModeHistogram::readHistogramCache(string cacheName){
   // ***********************************************
 
 vector<TString>
-FSModeHistogram::expandHistogramIndexTree(TString index){
+FSModeHistogram::expandHistogramIndexTree(TString inIndex){
     // expand FSCuts using the same method as FSHistogram
-  vector<TString> expandedIndices = FSHistogram::expandHistogramIndexTree(index);
+  vector<TString> expandedIndices = FSHistogram::expandHistogramIndexTree(inIndex);
     // expand modes
   vector<TString> expandedIndicesTemp = expandedIndices;
   expandedIndices.clear();

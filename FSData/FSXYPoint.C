@@ -13,9 +13,9 @@ FSXYPoint::FSXYPoint(){
   clear();
 }
 
-FSXYPoint::FSXYPoint(TString name, double scale, FSXYPoint* xyp){
+FSXYPoint::FSXYPoint(TString inName, double scale, FSXYPoint* xyp){
   clear();
-  setNAME(name);
+  setNAME(inName);
   m_XVL  =         xyp->xValueLow();
   m_XVH  =         xyp->xValueHigh();
   m_XL   =         xyp->xLabel();
@@ -31,7 +31,7 @@ FSXYPoint::FSXYPoint(TString name, double scale, FSXYPoint* xyp){
 }
 
 
-FSXYPoint::FSXYPoint(TString name, TString operation, FSXYPoint* xyp1, FSXYPoint* xyp2){
+FSXYPoint::FSXYPoint(TString inName, TString operation, FSXYPoint* xyp1, FSXYPoint* xyp2){
   clear();
   if ((operation != "*") && (operation != "/") && (operation != "+") && (operation != "-")){
     cout << "FSXYPoint ERROR: bad operation: " << operation << endl;
@@ -41,7 +41,7 @@ FSXYPoint::FSXYPoint(TString name, TString operation, FSXYPoint* xyp1, FSXYPoint
     cout << "FSXYPoint ERROR: divide by zero" << endl;
     exit(0);
   }
-  setNAME(name);
+  setNAME(inName);
   m_XVL  = xyp1->xValueLow();
   m_XVH  = xyp1->xValueHigh();
   m_XL   = xyp1->xLabel();
@@ -130,10 +130,10 @@ FSXYPoint::setValuesFromString(TString sValues){
 
 void
 FSXYPoint::setNAME(vector<TString> longerName){
-  TString name("");
+  TString inName("");
   for (unsigned int i = 0; i < longerName.size(); i++){
-    name += longerName[i]; if (i != longerName.size()-1) name += " "; }
-  setNAME(name);
+    inName += longerName[i]; if (i != longerName.size()-1) inName += " "; }
+  setNAME(inName);
 }
 
 bool
@@ -324,7 +324,7 @@ FSXYPoint::addCategory(TString category){
 }
 
 void
-FSXYPoint::addCategories(vector<TString> categories){
-  for (unsigned int i = 0; i < categories.size(); i++){ addCategory(categories[i]); }
+FSXYPoint::addCategories(vector<TString> inCategories){
+  for (unsigned int i = 0; i < inCategories.size(); i++){ addCategory(inCategories[i]); }
 }
 
