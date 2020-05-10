@@ -22,5 +22,5 @@ $(FSROOT_LIBDIR):
 	mkdir $(FSROOT_LIBDIR)
 
 clean:
-	rm -rf $(FSROOT_LIBDIR) $(FSROOT_OBJFILES)
+	rm -rf $(FSROOT_LIBDIR) $(FSROOT_OBJFILES) */*.so */*.pcm */*.d
 

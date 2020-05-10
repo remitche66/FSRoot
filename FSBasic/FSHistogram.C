@@ -26,10 +26,11 @@ unsigned int FSHistogram::m_indexFSRootHistName = 0;
 unsigned int FSHistogram::m_indexFSRootTempName = 0;
 bool FSHistogram::m_USEDATAFRAME = false;
 bool FSHistogram::m_USEDATAFRAMENOW = false;
-map< TString, ROOT::RDataFrame* > FSHistogram::m_RDataFrameCache;
 map< TString, pair<TString,TString> > FSHistogram::m_RDFVariableDefinitions;
 unsigned int FSHistogram::m_RDFVariableCounter = 0;
-
+#if ROOT_VERSION_CODE >= ROOT_VERSION(6,18,0)
+map< TString, ROOT::RDataFrame* > FSHistogram::m_RDataFrameCache;
+#endif
 
 TString FSAND("&&");
 TString FSOR("||");
@@ -209,6 +210,7 @@ FSHistogram::getTHNFBasicTree(TString index, TString& STATUS){
 } 
 
 
+#if ROOT_VERSION_CODE >= ROOT_VERSION(6,18,0)
 pair< ROOT::RDF::RResultPtr<TH1D>, ROOT::RDF::RResultPtr<TH2D> >
 FSHistogram::getTHNFBasicTreeRDF(TString index, TString& STATUS){
   pair< ROOT::RDF::RResultPtr<TH1D>, ROOT::RDF::RResultPtr<TH2D> > histPairRDF;
@@ -303,7 +305,7 @@ FSHistogram::getTHNFBasicTreeRDF(TString index, TString& STATUS){
   return histPairRDF;
 
 }
-
+#endif
 
 
 pair<TH1F*,TH2F*> 
@@ -1228,14 +1230,20 @@ FSHistogram::makeFSRootTempName(){
 
 void
 FSHistogram::enableRDataFrame(bool executeImmediately, int numThreads){
+#if ROOT_VERSION_CODE >= ROOT_VERSION(6,18,0)
   ROOT::EnableImplicitMT(numThreads);
   m_USEDATAFRAME = true;
   m_USEDATAFRAMENOW = executeImmediately;
+#else
+  cout << "To use RDataFrame, the ROOT version should be greater than 6.18" << endl;
+  exit(0);
+#endif
 }
 
 
 void
 FSHistogram::executeRDataFrame(){
+#if ROOT_VERSION_CODE >= ROOT_VERSION(6,18,0)
     // first loop over the basic histograms
   for (map< TString, FSHistogramInfo* >::iterator mapItr = m_FSHistogramInfoCache.begin();
        mapItr != m_FSHistogramInfoCache.end(); mapItr++){
@@ -1280,11 +1288,16 @@ FSHistogram::executeRDataFrame(){
       cout << histInfo->infoString() << endl;
     }
   }
+#else
+  cout << "To use RDataFrame, the ROOT version should be greater than 6.18" << endl;
+  exit(0);
+#endif
 }
 
 
 void
 FSHistogram::disableRDataFrame(){
+#if ROOT_VERSION_CODE >= ROOT_VERSION(6,18,0)
   ROOT::DisableImplicitMT();
   m_USEDATAFRAME = false;
   m_USEDATAFRAMENOW = false;
@@ -1307,6 +1320,10 @@ FSHistogram::disableRDataFrame(){
     }
   }
   for (unsigned int i = 0; i < rmHist.size(); i++){ clearHistogramCache(rmHist[i]); }
+#else
+  cout << "To use RDataFrame, the ROOT version should be greater than 6.18" << endl;
+  exit(0);
+#endif
 }
 
 
@@ -1343,7 +1360,12 @@ FSHistogramInfo::getTHNF(){
       // case 2a: set up a single histogram
     if (basic()){
       cout << "    SETTING HISTOGRAM...  " << std::flush;
+#if ROOT_VERSION_CODE >= ROOT_VERSION(6,18,0)
       m_histPairRDF = FSHistogram::getTHNFBasicTreeRDF(m_index,m_status);
+#else
+  cout << "To use RDataFrame, the ROOT version should be greater than 6.18" << endl;
+  exit(0);
+#endif
     }
 
       // case 2b: set up a composite histogram

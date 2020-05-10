@@ -15,16 +15,9 @@
 #include "TF2.h"
 #include "TFormula.h"
 #include "RVersion.h"
+#if ROOT_VERSION_CODE >= ROOT_VERSION(6,18,0)
 #include "ROOT/RDataFrame.hxx"
-
-#if ROOT_VERSION_CODE > ROOT_VERSION(3,1,5)
-    // new code
-#else
-    // old code
 #endif
-/*
-See $ROOTSYS/include/RVersion.h
-*/
 
 using namespace std;
 class FSHistogramInfo;
@@ -159,7 +152,6 @@ class FSHistogram{
 
 
 
-
     friend class FSModeHistogram;
     friend class FSHistogramInfo;
 
@@ -177,8 +169,11 @@ class FSHistogram{
     static TTree* getTHNFBasicContents(TTree* histTree, TString index,
                          vector< pair<TString,TString> > extraTreeContents, TString& STATUS);
 
+#if ROOT_VERSION_CODE >= ROOT_VERSION(6,18,0)
     static pair< ROOT::RDF::RResultPtr<TH1D>, 
                  ROOT::RDF::RResultPtr<TH2D> >  getTHNFBasicTreeRDF(TString index, TString& STATUS);
+    static map< TString, ROOT::RDataFrame* > m_RDataFrameCache;
+#endif
 
 
       // ********************************************************
@@ -239,7 +234,6 @@ class FSHistogram{
 
     static bool m_USEDATAFRAME;
     static bool m_USEDATAFRAMENOW;
-    static map< TString, ROOT::RDataFrame* > m_RDataFrameCache;
     static map< TString, pair<TString,TString> > m_RDFVariableDefinitions;
     static unsigned int m_RDFVariableCounter;
 
@@ -278,7 +272,9 @@ class FSHistogramInfo{
     TString m_status;
     vector<FSHistogramInfo*> m_basicHistograms;
     pair<TH1F*,TH2F*> m_histPair;
+#if ROOT_VERSION_CODE >= ROOT_VERSION(6,18,0)
     pair< ROOT::RDF::RResultPtr<TH1D>, ROOT::RDF::RResultPtr<TH2D> > m_histPairRDF;
+#endif
 
 };
 
