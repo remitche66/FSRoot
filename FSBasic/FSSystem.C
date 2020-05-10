@@ -28,7 +28,12 @@ FSSystem::makeAbsolutePathName(TString path){
     return TString("");
   }
   if (!gSystem->IsAbsoluteFileName(newPath))
+#if ROOT_VERSION_CODE >= ROOT_VERSION(6,18,0)
     newPath = gSystem->PrependPathName(gSystem->GetWorkingDirectory().c_str(),newPath);
+#else
+  cout << "need an absolute path in older ROOT versions" << endl;
+  exit(0);
+#endif
   return newPath;
 }
 
