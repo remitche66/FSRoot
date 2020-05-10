@@ -39,7 +39,7 @@ FSEEXSList::addXSFromFile(TString fileName){
       TString dataSetName(words[2]);
       TString sourceName(words[3]);
       FSEEXS* fsxs = addXS(reactionName,dataSetName,sourceName);
-      double x[20];
+      double x[20] = {};
       if (nWords[ixsType] > 4) x[4] = FSString::TString2double(words[4]); 
       if (nWords[ixsType] > 5) x[5] = FSString::TString2double(words[5]); 
       if (nWords[ixsType] > 6) x[6] = FSString::TString2double(words[6]); 
