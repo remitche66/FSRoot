@@ -27,29 +27,6 @@ map<TString, float> FSModeHistogram::m_mcComponentsMap;
 map<TString, map<TString, float> > FSModeHistogram::m_cacheComponentsMap;
 
 
-      // ********************************************************
-      // CREATE A TREE IN THE SAME WAY AS A HISTOGRAM
-      // ********************************************************
-
-
-TTree*
-FSModeHistogram::getTH1FContents(TString fileName, TString ntName, TString category, 
-       TString variable, TString bounds, TString cuts, TString options, float scale,
-       vector< pair<TString,TString> > extraTreeContents){
-  TTree* histTree = FSHistogram::setTHNFContents(1,extraTreeContents);
-  getTHNF(1,fileName,ntName,category,variable,bounds,cuts,options,scale,histTree,extraTreeContents);
-  return histTree;
-}
-
-TTree*
-FSModeHistogram::getTH2FContents(TString fileName, TString ntName, TString category, 
-       TString variable, TString bounds, TString cuts, TString options, float scale,
-       vector< pair<TString,TString> > extraTreeContents){
-  TTree* histTree = FSHistogram::setTHNFContents(2,extraTreeContents);
-  getTHNF(2,fileName,ntName,category,variable,bounds,cuts,options,scale,histTree,extraTreeContents);
-  return histTree;
-}
-
 
   // ********************************************************
   // CREATE A HISTOGRAM FROM A TREE
@@ -58,151 +35,56 @@ FSModeHistogram::getTH2FContents(TString fileName, TString ntName, TString categ
 TH1F* 
 FSModeHistogram::getTH1F(TString fileName, TString ntName, TString category,
                        TString variable, TString bounds,
-                       TString cuts,     TString options,
-                       float scale){
-  return getTHNF(1,fileName,ntName,category,
-                             variable,bounds,cuts,options,scale,NULL).first;
+                       TString cuts, double scale, bool TESTONLY){
+  pair<TString, vector<TString> > 
+    indices = getHistogramIndexTree(1,fileName,ntName,category,variable,bounds,cuts,scale);
+  if (TESTONLY){ FSHistogram::printIndexInfo(indices.first,indices.second); return NULL; }
+  TH1F* hist = FSHistogram::getFSHistogramInfo(indices.first,indices.second)->getTHNF().first;
+  if (FSHistogram::m_USEDATAFRAME && FSHistogram::m_USEDATAFRAMENOW)
+    FSHistogram::executeRDataFrame();
+  return FSHistogram::getTH1F(hist);
 }
+
 
 
 TH2F* 
 FSModeHistogram::getTH2F(TString fileName, TString ntName, TString category,
                        TString variable, TString bounds,
-                       TString cuts,     TString options,
-                       float scale){
-  return getTHNF(2,fileName,ntName,category,
-                             variable,bounds,cuts,options,scale,NULL).second;
+                       TString cuts, double scale, bool TESTONLY){
+  pair<TString, vector<TString> > 
+    indices = getHistogramIndexTree(2,fileName,ntName,category,variable,bounds,cuts,scale);
+  if (TESTONLY){ FSHistogram::printIndexInfo(indices.first,indices.second); return NULL; }
+  TH2F* hist = FSHistogram::getFSHistogramInfo(indices.first,indices.second)->getTHNF().second;
+  if (FSHistogram::m_USEDATAFRAME && FSHistogram::m_USEDATAFRAMENOW)
+    FSHistogram::executeRDataFrame();
+  return FSHistogram::getTH2F(hist);
 }
 
 
-pair<TH1F*,TH2F*> 
-FSModeHistogram::getTHNF(int dimension,
-                       TString fileName, TString ntName, TString category,
-                       TString variable, TString bounds,
-                       TString cuts,     TString options,
-                       float scale,      TTree* histTree,
-                       vector< pair<TString,TString> > extraTreeContents){
+      // ********************************************************
+      // CREATE A TREE IN THE SAME WAY AS A HISTOGRAM
+      // ********************************************************
 
 
-  vector<FSModeInfo*> modeVector = FSModeCollection::modeVector(category);
-  if (modeVector.size() == 0){
-    cout << "FSModeHistogram:  there are no modes associated with this category..." << endl;
-    cout << "                ... returning NULL" << endl;
-  }
-
-    // expand "cuts" using FSCut and check for multidimensional sidebands
-    //   note: this section of code is the same as FSHistogram...
-    //           it could be organized better, probably
-
-
-  vector< pair<TString,double> > fsCuts = FSCut::expandCuts(cuts);
-  if (fsCuts.size() == 1){ cuts = fsCuts[0].first; scale *= fsCuts[0].second; }
-
-
-    // make histograms using multidimensional sidebands
-
-  if (fsCuts.size() > 1){
-
-      // loop over sideband cuts and add to a running total
-
-    TH1F* hist1d = NULL;
-    TH2F* hist2d = NULL;
-    for (unsigned int i = 0; i < fsCuts.size(); i++){
-      TString cuts_i = fsCuts[i].first;
-      double scale_i = scale * fsCuts[i].second;
-      pair<TH1F*,TH2F*> histPair = FSModeHistogram::getTHNF(dimension, fileName, ntName,
-                       category, variable, bounds, cuts_i, options, scale_i, histTree,
-                       extraTreeContents);
-      if (dimension == 1){
-        TH1F* hi = histPair.first;
-        hist1d = FSHistogram::addTH1F("FSMODECUTTOTAL",hi);
-      }
-      if (dimension == 2){
-        TH2F* hi = histPair.second;
-        hist2d = FSHistogram::addTH2F("FSMODECUTTOTAL",hi);
-      }
-    }
-
-      // clear the add cache and return new histograms
-
-    pair<TH1F*,TH2F*> newHists = FSHistogram::addTempHistToCache(hist1d,hist2d);
-    FSHistogram::clearAddCache("FSMODECUTTOTAL");
-    return newHists;
-
-  }
-
-
-  // loop over all modes in this category
-
-  TH1F* hist1d = NULL;
-  TH2F* hist2d = NULL;
-
-  for (unsigned int i = 0; i < modeVector.size(); i++){
-    if (!FSControl::QUIET){cout << endl; modeVector[i]->display(i+1);}
-
-    TString fileName_i = modeVector[i]->modeString(fileName);
-    TString ntName_i   = modeVector[i]->modeString(ntName);
-    TString variable_i = modeVector[i]->modeString(variable);
-    TString cuts_i("");  if (cuts != "") cuts_i = modeVector[i]->modeString(cuts);
-                                         cuts_i = modeVector[i]->modeCuts(cuts_i);
-
-    vector<TString> indices;
-    vector<TString> combinatorics = 
-      modeVector[i]->modeCombinatorics((variable_i+" "+cuts_i),FSControl::DEBUG);
-
-      // loop over all combinatorics within this mode
-
-    for (unsigned int j = 0; j < combinatorics.size(); j++){
-
-      TString variable_j("");
-      TString cuts_j("");
-      vector<TString> parts = FSString::parseTString(combinatorics[j]," ");
-      if (parts.size() >= 1) variable_j = parts[0];
-      if (parts.size() >= 2) cuts_j     = parts[1];
-
-        // make histograms and add to the running total
-
-      if (dimension == 1){
-        TString index = FSHistogram::getTH1FIndex(fileName_i,ntName_i,variable_j,
-                                                         bounds,cuts_j,options,scale);
-        bool usedIndex = false;
-        for (unsigned int iindex = 0; iindex < indices.size(); iindex++){
-          if (indices[iindex] == index){ usedIndex = true; break; }
-        }
-        if (usedIndex) continue;
-        indices.push_back(index);
-        TH1F* hij = FSHistogram::getTHNF(dimension,fileName_i,ntName_i,variable_j,
-                                              bounds,cuts_j,options,scale,histTree,
-                                              extraTreeContents).first;
-        hist1d = FSHistogram::addTH1F("MODEHISTOGRAMTOTAL",hij);
-      }
-
-      if (dimension == 2){
-        TString index = FSHistogram::getTH2FIndex(fileName_i,ntName_i,variable_j,
-                                                         bounds,cuts_j,options,scale);
-        bool usedIndex = false;
-        for (unsigned int iindex = 0; iindex < indices.size(); iindex++){
-          if (indices[iindex] == index){ usedIndex = true; break; }
-        }
-        if (usedIndex) continue;
-        indices.push_back(index);
-        TH2F* hij = FSHistogram::getTHNF(dimension,fileName_i,ntName_i,variable_j,
-                                              bounds,cuts_j,options,scale,histTree,
-                                              extraTreeContents).second;
-        hist2d = FSHistogram::addTH2F("MODEHISTOGRAMTOTAL",hij);
-      }
-
-    }
-  }
-
-    // make copies of the resulting totals and return
-
-  pair<TH1F*,TH2F*> newHists = FSHistogram::addTempHistToCache(hist1d,hist2d);
-  FSHistogram::clearAddCache("MODEHISTOGRAMTOTAL");
-  return newHists;
-
+TTree*
+FSModeHistogram::getTH1FContents(TString fileName, TString ntName, TString category, 
+       TString variable, TString bounds, TString cuts, double scale,
+       vector< pair<TString,TString> > extraTreeContents){
+  pair<TString, vector<TString> > 
+    indices = getHistogramIndexTree(1,fileName,ntName,category,variable,bounds,cuts,scale);
+  return FSHistogram::getFSHistogramInfo(indices.first,indices.second)
+                                        ->getTHNFContents(extraTreeContents);
 }
 
+TTree*
+FSModeHistogram::getTH2FContents(TString fileName, TString ntName, TString category, 
+       TString variable, TString bounds, TString cuts, double scale,
+       vector< pair<TString,TString> > extraTreeContents){
+  pair<TString, vector<TString> > 
+    indices = getHistogramIndexTree(2,fileName,ntName,category,variable,bounds,cuts,scale);
+  return FSHistogram::getFSHistogramInfo(indices.first,indices.second)
+                                        ->getTHNFContents(extraTreeContents);
+}
 
 
 
@@ -215,7 +97,7 @@ void
 FSModeHistogram::drawTH1F(TString fileName, TString ntName, TString category,
                         TString variable, TString bounds,
                         TString cuts,     TString options,
-                        float scale, TCanvas* c1){
+                        double scale, TCanvas* c1){
   drawTHNF(1,fileName,ntName,category,variable,bounds,cuts,options,scale,c1);
 }
 
@@ -223,7 +105,7 @@ void
 FSModeHistogram::drawTH2F(TString fileName, TString ntName, TString category,
                         TString variable, TString bounds,
                         TString cuts,     TString options,
-                        float scale, TCanvas* c1){
+                        double scale, TCanvas* c1){
   drawTHNF(2,fileName,ntName,category,variable,bounds,cuts,options,scale,c1);
 }
 
@@ -233,7 +115,7 @@ FSModeHistogram::drawTHNF(int dimension,
                        TString fileName, TString ntName, TString category,
                        TString variable, TString bounds,
                        TString cuts,     TString options,
-                       float scale, TCanvas* c1){
+                       double scale, TCanvas* c1){
 
   vector<FSModeInfo*> modeVector = FSModeCollection::modeVector(category);
 
@@ -257,13 +139,13 @@ FSModeHistogram::drawTHNF(int dimension,
 
     if (dimension == 1){
       hist1d = getTH1F(fileName,ntName,category_i,
-                       variable,bounds,cuts,options,scale);
+                       variable,bounds,cuts,scale);
       hist1d->SetTitle(title_i);
       hist1d->Draw(options);
     }
     if (dimension == 2){
       hist2d = getTH2F(fileName,ntName,category_i,
-                       variable,bounds,cuts,options,scale);
+                       variable,bounds,cuts,scale);
       hist2d->SetTitle(title_i);
       hist2d->Draw(options);
     }
@@ -286,7 +168,7 @@ vector<TString>
 FSModeHistogram::getMCComponents(TString fileName, TString ntName, 
                                 TString category, TString variable, 
                                 TString bounds, TString cuts,
-                                TString options, float scale, bool moreInfo){
+                                double scale, bool moreInfo){
     // initial setup
 
   vector<TString> components;
@@ -294,15 +176,9 @@ FSModeHistogram::getMCComponents(TString fileName, TString ntName,
 
     // create an index for caching
 
-  TString index;
-  index += "(fn)";  index += fileName;
-  index += "(nt)";  index += ntName;
-  index += "(ca)";  index += category;
-  index += "(va)";  index += variable;
-  index += "(bo)";  index += bounds;
-  index += "(cu)";  index += cuts;
-  index += "(op)";  index += options;  index += (int) moreInfo;
-  index += "(sc)";  index += FSString::double2TString(scale,8,true);
+  TString index = getHistogramIndexTree(1,fileName,ntName,category,
+                                       variable,bounds,cuts,scale).first;
+  if (moreInfo) index += "{-MI-}";
 
     // search the cache for this mode
 
@@ -326,7 +202,7 @@ FSModeHistogram::getMCComponents(TString fileName, TString ntName,
       extraTreeContents.push_back(pair<TString,TString>("MCDecayParticle5","MCDecayParticle5"));
       extraTreeContents.push_back(pair<TString,TString>("MCDecayParticle6","MCDecayParticle6"));
     }
-    TTree* histTree = getTH1FContents(fileName,ntName,category,"1.234","(10,1.0,2.0)",cuts,options,scale,extraTreeContents);
+    TTree* histTree = getTH1FContents(fileName,ntName,category,"1.234","(10,1.0,2.0)",cuts,scale,extraTreeContents);
 
       // set the branch addresses for the new tree
 
@@ -435,8 +311,8 @@ FSModeHistogram::getMCComponentSize(TString modeString){
 TH1F*
 FSModeHistogram::drawMCComponents(TString fileName, TString ntName, 
                                 TString category, TString variable, 
-                                TString bounds, TString cuts, TString options,
-                                float scale, TCanvas* c1){
+                                TString bounds, TString cuts,
+                                double scale, TCanvas* c1){
 
 
     // create the original histogram
@@ -446,7 +322,7 @@ FSModeHistogram::drawMCComponents(TString fileName, TString ntName,
     cout << "FSModeHistogram::drawMCComponents ERROR: no modes for category = " << category << endl;
     exit(0);
   }
-  TH1F* htot = getTH1F(fileName,ntName,category,variable,bounds,cuts,options,scale);
+  TH1F* htot = getTH1F(fileName,ntName,category,variable,bounds,cuts,scale);
   FSModeInfo* modeInfo = modeVector[0];
   htot->SetTitle(FSModeString::rootSymbols(modeInfo->modeDescription()));
   if (modeVector.size() > 1) htot->SetTitle("category = "+category);
@@ -459,7 +335,7 @@ FSModeHistogram::drawMCComponents(TString fileName, TString ntName,
     // get a vector of the MC components
 
   vector<TString> components = getMCComponents(fileName,ntName,category,
-                                               variable,bounds,cuts,options,scale);
+                                               variable,bounds,cuts,scale);
 
     // make a stack of MC components
 
@@ -479,7 +355,7 @@ FSModeHistogram::drawMCComponents(TString fileName, TString ntName,
     mcCut += FSModeInfo(components[i]).modeCode2();
     mcCut += "))";
 
-    TH1F* hcomp = getTH1F(fileName,ntName,category,variable,bounds,mcCut,options,scale);
+    TH1F* hcomp = getTH1F(fileName,ntName,category,variable,bounds,mcCut,scale);
     if (i != 0) hcomp->SetFillColor(i+1);
     hcomp->SetLineColor(i+1);
     stack->Add(hcomp,"hist");
@@ -595,4 +471,77 @@ FSModeHistogram::readHistogramCache(string cacheName){
   FSHistogram::readHistogramCache(cacheName);
   readComponentsCache(cacheName);
 }
+
+
+
+  // ***********************************************
+  // helper functions to interact with the FSHistogramInfo class
+  // ***********************************************
+
+vector<TString>
+FSModeHistogram::expandHistogramIndexTree(TString inIndex){
+    // expand FSCuts using the same method as FSHistogram
+  vector<TString> expandedIndices = FSHistogram::expandHistogramIndexTree(inIndex);
+    // expand modes
+  vector<TString> expandedIndicesTemp = expandedIndices;
+  expandedIndices.clear();
+  for (unsigned int i = 0; i < expandedIndicesTemp.size(); i++){
+    TString index = expandedIndicesTemp[i];
+    map<TString,TString> indexMap = FSHistogram::parseHistogramIndex(index);
+    if (indexMap.find("{-CA-}") == indexMap.end()){ 
+      cout << "expandHistogramIndexTree ERROR (no category?)" << endl; exit(0); }
+    TString category = indexMap["{-CA-}"];
+    vector<FSModeInfo*> modeVector = FSModeCollection::modeVector(category);
+    if (modeVector.size() == 0){ 
+      indexMap["{-CA-}"] = "!!NO_MODES!!";
+      expandedIndices.push_back(FSHistogram::getHistogramIndex(indexMap));
+      continue;
+    }
+    for (unsigned int iM = 0; iM < modeVector.size(); iM++){
+      TString indexM = modeVector[iM]->modeString(index);
+              indexM = modeVector[iM]->modeCuts(indexM);
+      vector<TString> combos = modeVector[iM]->modeCombinatorics(indexM);
+      for (unsigned int iC = 0; iC < combos.size(); iC++){
+         // checking for duplicates (but this should also be in modeCombinatorics)
+        bool usedIndex = false;
+        for (unsigned int iE = 0; iE < expandedIndices.size(); iE++){
+          if (expandedIndices[iE] == combos[iC]){ usedIndex = true; break; }
+        }
+        if (usedIndex) continue;
+        map<TString,TString> comboMap = FSHistogram::parseHistogramIndex(combos[iC]);
+        comboMap["{-CA-}"] = modeVector[iM]->modeString();
+        expandedIndices.push_back(FSHistogram::getHistogramIndex(comboMap));
+      }
+    }
+  }
+  return expandedIndices;
+}
+
+pair<TString, vector<TString> >
+FSModeHistogram::getHistogramIndexTree(int dimension,
+                      TString fileName, TString ntName, TString category,
+                      TString variable, TString bounds,
+                      TString cuts, double scale){
+  TString index;
+  fileName = FSString::removeWhiteSpace(fileName);
+  ntName   = FSString::removeWhiteSpace(ntName);
+  category = FSString::removeWhiteSpace(category);
+  variable = FSString::removeWhiteSpace(variable);
+  bounds   = FSString::removeWhiteSpace(bounds);
+  cuts     = FSString::removeWhiteSpace(cuts);
+  index += "{-TP-}TREE";
+  if (dimension == 1) index += "{-ND-}1D";
+  if (dimension == 2) index += "{-ND-}2D";
+  index += "{-FN-}";  index += fileName;
+  index += "{-NT-}";  index += ntName;
+  index += "{-CA-}";  index += category;
+  index += "{-VA-}";  index += FSTree::reorderVariable(variable);
+  index += "{-BO-}";  index += bounds;
+  index += "{-CU-}";  index += FSTree::reorderVariable(cuts);
+  index += "{-SC-}";  index += FSString::double2TString(scale,8,true);
+  vector<TString> subIndices = expandHistogramIndexTree(index);
+  if (subIndices.size() == 1){ index = subIndices[0]; subIndices.clear(); }
+  return pair<TString, vector<TString> > (index,subIndices);
+}
+
 

@@ -23,15 +23,8 @@ class FSTree{
       // SET UP A TCHAIN AND CACHE IT
       // ********************************************************
 
-    static TChain* getTChain(TString fileName, TString ntName, 
-                             bool addFilesIndividually = true);
-
-
-      // ********************************************************
-      // SET UP A TFILE AND CACHE IT
-      // ********************************************************
-
-    static TFile* getTFile(TString fileName);
+    static TChain* getTChain(TString fileName, TString ntName); 
+    static TChain* getTChain(TString fileName, TString ntName, TString& STATUS); 
 
 
       // ********************************************************
@@ -54,7 +47,18 @@ class FSTree{
       //               -(XXPzP2+XXPzP3)**2))"
       // ********************************************************
 
-    static TString expandVariable(TString variable);
+    static TString reorderVariable(TString variable, bool show = false);
+    static TString expandVariable(TString variable, bool show = false);
+
+
+      // ********************************************************
+      // DEFINE AND SHOW VARIABLE MACROS
+      // ********************************************************
+
+    static void defineMacro(TString macroName, int numFourVectors, TString macro);
+    static void showDefinedMacros();
+    static void testMacro(TString variable){ cout << expandVariable(variable,true) << endl; }
+
 
       // ********************************************************
       // DEFINE SPECIAL FOUR-VECTORS
@@ -70,6 +74,7 @@ class FSTree{
       // ********************************************************
 
     static void defineFourVector(TString indexName, TString En, TString Px, TString Py, TString Pz);
+    static void showDefinedFourVectors();
   
 
       // ********************************************************
@@ -77,15 +82,17 @@ class FSTree{
       // ********************************************************
 
     static void clearChainCache();
-    static void clearFileCache();
 
 
   private:
 
+    static vector< vector<TString> > parseVariable(TString variable, bool show = false);
+    static void makeStandardDefinitions();
+    static bool m_madeStandardDefinitions;
+
       // global caches
 
     static map< TString, TChain*> m_chainCache;
-    static map< TString, TFile*> m_fileCache;
 
       // defined four-vectors
 
@@ -94,6 +101,11 @@ class FSTree{
     static map< TString, TString > m_mapDefinedPz;
     static map< TString, TString > m_mapDefinedEn;
 
+      // defined macros
+
+    static map< TString, TString > m_mapDefined1VMacros;
+    static map< TString, TString > m_mapDefined2VMacros;
+    static vector< TString > m_vectorDefinedMacroKeywords;
 
 };
 

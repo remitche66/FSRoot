@@ -28,6 +28,26 @@ FSString::TString2string(TString input){
 
 
   // ********************************************************
+  // PAD A TSTRING WITH SPACES 
+  //   LRC = "L", "R", or "C" for left, right, or center-justified
+  // ********************************************************
+
+TString
+FSString::padTString(TString input, int length, TString LRC){
+  int spacesT = length - input.Length();
+  if (spacesT <= 0) return input;
+  int spacesL = 0;
+  int spacesR = 0;
+  if (LRC == "L") spacesR = spacesT;
+  if (LRC == "R") spacesL = spacesT;
+  if (LRC == "C"){ spacesL = spacesT/2;  spacesR = spacesT - spacesL; }
+  for (int i = 0; i < spacesL; i++){ input = " " + input; }
+  for (int i = 0; i < spacesR; i++){ input = input + " "; }
+  return input;
+}
+
+
+  // ********************************************************
   // COMPARE TSTRINGS WITH WILDCARDS (* and ?)
   // ********************************************************
 
@@ -447,6 +467,18 @@ FSString::parseTString(TString input, vector<TString> spacers, bool recordSpacer
   input = FSString::removeTabs(input);
   vector<TString> words;
   words.push_back(input);
+        // try to account for tricky special cases by sorting, or throw a warning
+      if (spacers.size() > 1){
+        for (unsigned int i = 0; i < spacers.size()-1; i++){
+          for (unsigned int j = i+1; j < spacers.size(); j++){
+            if (recordSpacers && (spacers[i].Contains(spacers[j]) ||
+                                  spacers[j].Contains(spacers[i])))
+              cout << "FSString::parseTString WARNING: spacers within spacers" << endl;
+            if (spacers[i].Length() < spacers[j].Length()){
+              TString temp = spacers[i];
+              spacers[i] = spacers[j];
+              spacers[j] = temp;
+      } } } }
   for (unsigned int i = 0; i < spacers.size(); i++){
     words = FSString::parseTString(words,spacers[i],recordSpacers);
   }
@@ -936,6 +968,30 @@ FSString::parseBounds(TString bounds){
   return boundVector;
 }
 
+bool
+FSString::checkBounds(int dimension, TString bounds){
+  bounds = FSString::removeWhiteSpace(bounds);
+  vector<TString> spacers; spacers.push_back(","); spacers.push_back("(");  spacers.push_back(")");
+  vector<TString> parts = parseTString(bounds,spacers,true);
+  if (dimension == 1 && parts.size() == 7){
+    if ((parts[0] != "(") || (parts[6] != ")")) return false;
+    if (!parts[1].IsFloat() || parts[1].Contains(".")) return false;
+    if ((parts[2] != ",") || (parts[4] != ",")) return false;
+    if (!parts[3].IsFloat() || !parts[5].IsFloat()) return false;
+  }
+  else if (dimension == 2 && parts.size() == 13){
+    if ((parts[0] != "(") || (parts[12] != ")")) return false;
+    if (!parts[1].IsFloat() || parts[1].Contains(".")) return false;
+    if (!parts[7].IsFloat() || parts[7].Contains(".")) return false;
+    if ((parts[2] != ",") || (parts[4] != ",")) return false;
+    if ((parts[6] != ",") || (parts[8] != ",") || (parts[10] != ",")) return false;
+    if (!parts[3].IsFloat() || !parts[5].IsFloat()) return false;
+    if (!parts[9].IsFloat() || !parts[11].IsFloat()) return false;
+  }
+  else{ return false; }
+  return true;
+}
+
 TString
 FSString::makeBounds(int nbinsX, double lowerX, double upperX, int nbinsY, double lowerY, double upperY){
   TString newBounds("");
@@ -951,6 +1007,12 @@ FSString::makeBounds(int nbinsX, double lowerX, double upperX, int nbinsY, doubl
   return newBounds;
 }
 
+TString
+FSString::makeBounds(int dimension){
+  if (dimension == 1) return TString("(10,0.0,1.0)");
+  if (dimension == 2) return TString("(10,0.0,1.0,10,0.0,1.0)");
+  return TString("");
+}
 
   // ********************************************************
   // STRIP EXTRA WHITESPACE AROUND STRINGS AND REMOVE TABS

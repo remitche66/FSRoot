@@ -30,13 +30,12 @@ class FSModeHistogram{
 
     static TH1F* getTH1F(TString fileName, TString ntName, TString category,
                                 TString variable, TString bounds,
-                                TString cuts,     TString options = "",
-                                float scale = 1.0);
+                                TString cuts, double scale = 1.0, bool TESTONLY = false);
 
     static TH2F* getTH2F(TString fileName, TString ntName, TString category,
                                 TString variable, TString bounds,
-                                TString cuts,     TString options = "",
-                                float scale = 1.0);
+                                TString cuts, double scale = 1.0, bool TESTONLY = false);
+
 
       // ********************************************************
       // CREATE A TREE IN THE SAME WAY A HISTOGRAM IS CREATED ABOVE
@@ -51,16 +50,14 @@ class FSModeHistogram{
 
     static TTree*  getTH1FContents(TString fileName, TString ntName, TString category,
                                    TString variable, TString bounds, 
-                                   TString cuts, TString options = "",
-                                   float scale = 1.0,
+                                   TString cuts, double scale = 1.0,
                                    vector< pair<TString,TString> > extraTreeContents = 
                                      vector< pair<TString,TString> >());
 
 
     static TTree*  getTH2FContents(TString fileName, TString ntName, TString category,
                                    TString variable, TString bounds, 
-                                   TString cuts, TString options = "",
-                                   float scale = 1.0,
+                                   TString cuts, double scale = 1.0,
                                    vector< pair<TString,TString> > extraTreeContents = 
                                      vector< pair<TString,TString> >());
 
@@ -73,12 +70,12 @@ class FSModeHistogram{
     static void drawTH1F(TString fileName, TString ntName, TString category,
                                 TString variable, TString bounds,
                                 TString cuts,     TString options = "",
-                                float scale = 1.0, TCanvas* c1 = NULL);
+                                double scale = 1.0, TCanvas* c1 = NULL);
 
     static void drawTH2F(TString fileName, TString ntName, TString category,
                                 TString variable, TString bounds,
                                 TString cuts,     TString options = "",
-                                float scale = 1.0, TCanvas* c1 = NULL);
+                                double scale = 1.0, TCanvas* c1 = NULL);
 
 
 
@@ -89,13 +86,13 @@ class FSModeHistogram{
 
     static TH1F* drawMCComponents(TString fileName, TString ntName, 
                                 TString category, TString variable, 
-                                TString bounds, TString cuts, TString options = "",
-                                float scale = 1.0, TCanvas* c1 = NULL);
+                                TString bounds, TString cuts,
+                                double scale = 1.0, TCanvas* c1 = NULL);
 
     static vector<TString> getMCComponents(TString fileName, TString ntName, 
                                 TString category, TString variable, 
-                                TString bounds, TString cuts, TString options = "",
-                                float scale = 1.0, bool moreInfo = false);
+                                TString bounds, TString cuts,
+                                double scale = 1.0, bool moreInfo = false);
 
     static float getMCComponentSize(TString modeString);
 
@@ -112,6 +109,16 @@ class FSModeHistogram{
   private:
 
 
+      // helper functions to interact with the FSHistogramInfo class
+
+    static vector<TString> expandHistogramIndexTree(TString index);
+    static pair<TString, vector<TString> >  getHistogramIndexTree(int dimension,
+                                              TString fileName, TString ntName, TString category,
+                                              TString variable, TString bounds,
+                                              TString cuts, double scale = 1.0);
+
+
+
       // MC components
 
     static map<TString, float> m_mcComponentsMap;
@@ -122,20 +129,11 @@ class FSModeHistogram{
 
       // helper functions for histograms
 
-    static pair<TH1F*,TH2F*> getTHNF(int dimension,
-                                   TString fileName, TString ntName, TString category,
-                                   TString variable, TString bounds,
-                                   TString cuts,     TString options,
-                                   float scale,      TTree* histTree,
-                                   vector< pair<TString,TString> > extraTreeContents = 
-                                     vector< pair<TString,TString> >());
-
-
     static void drawTHNF(int dimension,
                          TString fileName, TString ntName, TString category,
                          TString variable, TString bounds,
                          TString cuts,     TString options,
-                         float scale, TCanvas* c1);
+                         double scale, TCanvas* c1);
 
 };
 

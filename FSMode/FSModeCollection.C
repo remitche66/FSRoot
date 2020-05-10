@@ -171,34 +171,6 @@ FSModeCollection::modeInfoForCategory(TString category){
 
 
   // *******************************************************
-  // DISPLAY MODES IN THE COLLECTION
-  // *******************************************************
-
-void 
-FSModeCollection::display(TString category){
-  vector<FSModeInfo*> mvec = modeVector(category);
-  for (unsigned int i = 0; i < mvec.size(); i++){
-    mvec[i]->display(i+1);
-  }
-}
-
-
-  // *******************************************************
-  // CLEAR THE COLLECTION
-  // *******************************************************
-
-void 
-FSModeCollection::clear(){
-  for (map< pair<int,int>, FSModeInfo*>::iterator mapitr = m_modeInfoMap.begin();
-       mapitr != m_modeInfoMap.end(); mapitr++){
-    if ((*mapitr).second) delete (*mapitr).second;
-  }
-  m_modeInfoMap.clear();
-}
-
-
-
-  // *******************************************************
   // FORM A VECTOR OF MODES FROM A SET OF CATEGORIES
   // *******************************************************
 
@@ -235,6 +207,19 @@ FSModeCollection::modeVectorElement(TString category, unsigned int index){
   FSModeInfo* mElement = NULL;
   if (index < mVector.size()) mElement = mVector[index];
   return mElement;
+}
+
+
+  // *******************************************************
+  // PRINT COMBINATORICS TO THE SCREEN FOR TESTING
+  // *******************************************************
+
+ void
+FSModeCollection::testCombinatorics(TString category, TString testString){
+  vector<FSModeInfo*> mVector = modeVector(category);
+  for (unsigned int i = 0; i < mVector.size(); i++){
+    mVector[i]->modeCombinatorics(testString,true);
+  }
 }
 
 
@@ -299,3 +284,31 @@ FSModeCollection::printStrings(TString category, TString inputLine, TString outp
   }
   fout.close();
 }
+
+
+  // *******************************************************
+  // DISPLAY MODES IN THE COLLECTION
+  // *******************************************************
+
+void 
+FSModeCollection::display(TString category){
+  vector<FSModeInfo*> mvec = modeVector(category);
+  for (unsigned int i = 0; i < mvec.size(); i++){
+    mvec[i]->display(i+1);
+  }
+}
+
+
+  // *******************************************************
+  // CLEAR THE COLLECTION
+  // *******************************************************
+
+void 
+FSModeCollection::clear(){
+  for (map< pair<int,int>, FSModeInfo*>::iterator mapitr = m_modeInfoMap.begin();
+       mapitr != m_modeInfoMap.end(); mapitr++){
+    if ((*mapitr).second) delete (*mapitr).second;
+  }
+  m_modeInfoMap.clear();
+}
+

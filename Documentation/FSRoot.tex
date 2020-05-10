@@ -16,10 +16,16 @@
 
 \begin{document}
 
+% works down to v5.34.09
+% checks for 6.18
+% less than 6.18 can't use:
+%   FSSystem::makeAbsolutePathName(TString path)
+%   RDataFrame methods
+%   FSHistogram::getTH1FFormula(TF1* function, TString bounds, int numRandomTrials)
 
 \title{Notes on the \FSR\ Package}
 \author{Ryan Mitchell}
-\date{\today~~~(v1.1)}
+\date{\today~~~(v2.0)}
 \maketitle
 
 \abstract{
@@ -39,10 +45,12 @@
 
 \section{Installation and Initial Setup}
 
-The source code is located here:
-\begin{verbatim}
-    https://github.com/remitche66/FSRoot
-\end{verbatim}
+The \FSR\ utilities are built around the \ROOT\ framework, so a working version of \ROOT\ is a prerequisite.  Notes on \ROOT\ versions: \\
+-- {\it {\tt v6.18} and after}: \FSR\ should work \\
+-- {\it {\tt v5.34.09} up to {\tt v6.18}}: \FSR\ should work, but without some functionality (e.g. {\tt RDataFrame}) \\
+-- {\it {\tt v5.34.08} and before}: \FSR\ may or may not work 
+
+The \FSR\ source code is on {\tt GitHub}: \\ {\tt https://github.com/remitche66/FSRoot}
 
 \begin{enumerate}
 
@@ -62,37 +70,34 @@ and unpack:
 
 \item Set the location of \FSR\ in your login shell script (e.g. {\tt .cshrc}):
 \begin{verbatim}
-    setenv FSROOT [xxxxx]/FSRoot
+    setenv FSROOT [path]/FSRoot
 \end{verbatim}
 
-\item Also probably add the \FSR\ directory to {\tt \$DYLD\_LIBRARY\_PATH} and {\tt \$LD\_LIBRARY\_PATH}.  This allows you to compile code including \FSR\ functions.  For example:
+\item To build a static library (which will appear as {\tt \$FSROOT/lib/libFSRoot.a}) use:
+\begin{verbatim}
+    > cd $FSROOT
+    > make
+\end{verbatim}
+
+\item To use \FSR\ interactively within a \ROOT\ session, add these lines to your {\tt .rootrc} file (usually found in your home directory):
+\begin{verbatim}
+    Unix.*.Root.DynamicPath: .:$(FSROOT):$(ROOTSYS)/lib:
+    Unix.*.Root.MacroPath:   .:$(FSROOT):
+    Rint.Logon:    $(FSROOT)/rootlogon.FSROOT.C
+    Rint.Logoff:   $(FSROOT)/rootlogoff.FSROOT.C
+\end{verbatim}
+The last two lines load and unload \FSR\ when you open and close \ROOT.
+Alternatively, you could load \FSR\ manually from \ROOT:
+\begin{verbatim}
+    root> .x $FSROOT/rootlogon.FSROOT.C
+\end{verbatim}
+Now when \FSR\ is loaded and compiled, you should see a message saying ``Loading the FSRoot Macros'' along with output from the compilation.  [Note that the {\tt rootlogon.FSROOT.C} file also sets up default styles, which are not essential.  If these conflict with styles you have defined elsewhere, you can tweak or remove these.]
+
+\item It may be sometimes necessary to add the \FSR\ directory to library path variables:
 \begin{verbatim}
     setenv DYLD_LIBRARY_PATH $DYLD_LIBRARY_PATH\:$FSROOT
     setenv   LD_LIBRARY_PATH   $LD_LIBRARY_PATH\:$FSROOT
 \end{verbatim}
-
-\item There is usually a {\tt .rootrc} file in your home directory that \ROOT\ uses for initialization.  Add lines like these to {\tt .rootrc}, telling \ROOT\ the location of \FSR:
-\begin{verbatim}
-    Unix.*.Root.DynamicPath: .:$(FSROOT):$(ROOTSYS)/lib:
-    Unix.*.Root.MacroPath:   .:$(FSROOT):
-\end{verbatim}
-
-\item To load and unload \FSR\ automatically when you open and close \ROOT, you can also add lines like these to the {\tt .rootrc}:
-\begin{verbatim}
-    Rint.Logon:    $(FSROOT)/rootlogon.FSROOT.C
-    Rint.Logoff:   $(FSROOT)/rootlogoff.FSROOT.C
-\end{verbatim}
-Alternatively, you could have those lines point to other login and logoff files and then load and unload \FSR\ from those files with lines like these [this is the method to use in the case that you want to load several different sets of macros]:
-\begin{verbatim}
-    gROOT->ProcessLine(".x $FSROOT/rootlogon.FSROOT.C");
-    gROOT->ProcessLine(".x $FSROOT/rootlogoff.FSROOT.C");
-\end{verbatim}
-As a third alternative, you could load \FSR\ manually from \ROOT:
-\begin{verbatim}
-    > .x $FSROOT/rootlogon.FSROOT.C
-\end{verbatim}
-
-\item When \FSR\ is loaded and compiled, you should see a message saying ``Loading the FSRoot Macros'' along with the output of the compilation.  The {\tt rootlogon.FSROOT.C} file also sets up default styles, which are not essential.  If these conflict with styles you have defined elsewhere, it could be worthwhile to tweak or remove these.
 
 \end{enumerate}
 
@@ -102,17 +107,17 @@ As a third alternative, you could load \FSR\ manually from \ROOT:
 \subsection{Basic Conventions: the {\tt TTree} format}
 \label{sec:conventions}
 
-Some \FSR\ operations on variables within a \ROOT\ {\tt TTree} assume a particular format within the tree.  
+Some \FSR\ operations on \ROOT\ {\tt TTree} variables assume a particular format for the {\tt TTree}.  
 
 Four-vectors are assumed to take the form:
 \begin{verbatim}
     [AB]EnP[CD], [AB]PxP[CD], [AB]PyP[CD], [AB]PzP[CD]
 \end{verbatim}
-where {\tt [CD]} is a particle label (often ``1'', ``2'', ``3'', ``2a'', etc., but also ``CM'' or ``B'' or other) and {\tt [AB]} labels the type of four-vector (for example, ``R'' for raw or ``K'' for kinematically fit or ``MC'' for Monte Carlo, etc.).  The \FSR\ code does not assume anything about the conventions for {\tt [AB]} -- it can be anything up to two characters long~(or nothing).  For {\tt [CD]}, the final state utilities described in Sec.~\ref{sec:modes} require the final state particles appear in a given order and thus assume a numbering convention for {\tt [CD]}, described in Sec.~\ref{sec:modeconv}.  The utilities described in this section do not assume a specific form for {\tt [CD]} -- they can be anything one or two characters long~(but not empty).
+where {\tt [CD]} is a particle label (often ``1'', ``2'', ``3'', ``2a'', etc., but also ``CM'' or ``B'' or other) and {\tt [AB]} labels the type of four-vector (for example, ``R'' for raw or ``K'' for kinematically fit or ``MC'' for Monte Carlo, etc.).  The \FSR\ code does not assume anything about the conventions for {\tt [AB]} -- it can be anything up to two characters long~(or nothing).  For {\tt [CD]}, the final state utilities described in Sec.~\ref{sec:modes} require the final state particles appear in a given order, and thus assume a numbering convention for {\tt [CD]}, described in Sec.~\ref{sec:modeconv}.  The utilities described in this section do not assume a specific form for {\tt [CD]} -- they can be anything one or two characters long~(but not empty).
 
 Variable names for run numbers~({\tt Run}), event numbers~({\tt Event}), and the $\chi^2$/dof from a kinematic fit~({\tt Chi2DOF}) are also hard-coded in a very limited number of places (like in the function that ranks combinations within an event by $\chi^2$/dof, described in Sec.~\ref{sec:modetree}).
 
-Maybe a future version of \FSR\ could make these formats customizable.
+[Perhaps a future version of \FSR\ will make the assumed {\tt TTree} format customizable.]
 
 
 \subsection{Basic Histogram Utilities: the {\tt FSHistogram} class}
@@ -131,7 +136,8 @@ Cuts can be added in the fifth argument:
     > FSHistogram::getTH1F(fileName,treeName,"Chi2DOF",
         "(60,0.0,6.0)","Chi2DOF<5.0")->Draw();
 \end{verbatim}
-The variable and cut arguments can contain shortcuts.  For example, {\tt MASS(I,J)} is expanded into the total invariant mass of particles {\tt I} and {\tt J}, where {\tt I} and {\tt J} are not necessarily numbers~(they are the {\tt [CD]} in Sec.~\ref{sec:conventions}).  Characters in front of {\tt MASS}~(for example) are prepended to the variable names (the {\tt [AB]} in Sec.~\ref{sec:conventions}).  This is all done in the function {\tt FSTree::expandVariable}, which can also be used on its own to explicitly see what it is doing.    See {\tt FSTree::expandVariable} for more options beyond {\tt MASS}~(for example, {\tt RECOILMASS}, {\tt MOMENTUM}, {\tt COSINE}, etc.).  An example for {\tt FSHistogram::getTH1F}:
+The variable and cut arguments can contain shortcuts.  For example, {\tt MASS(I,J)} is expanded into the total invariant mass of particles {\tt I} and {\tt J}, where {\tt I} and {\tt J} are not necessarily numbers~(they are the {\tt [CD]} in Sec.~\ref{sec:conventions}).  Characters in front of {\tt MASS}~(for example) are prepended to the variable names (the {\tt [AB]} in Sec.~\ref{sec:conventions}).  This is all done in the function {\tt FSTree::expandVariable}, which can also be run independently for testing.  
+A list of all macros can be seen using {\tt FSTree::showDefinedMacros}~(for example, {\tt RECOILMASS}, {\tt MOMENTUM}, {\tt COSINE}, etc.).  An example for {\tt FSHistogram::getTH1F}:
 \begin{verbatim}
     > FSHistogram::getTH1F(fileName,treeName,"MASS(1,2)",
         "(100,3.0,3.2)","Chi2DOF<5.0&&abs(RMASS(2,3)-1.0)<0.2")->Draw();
@@ -139,14 +145,18 @@ The variable and cut arguments can contain shortcuts.  For example, {\tt MASS(I,
 Examples for {\tt FSTree::expandVariable}:
 \begin{verbatim}
     > cout << FSTree::expandVariable("MASS(1,2)+MASS(2,3)") << endl;
-      // ==> "(sqrt((EnP1+EnP2)**2-(PxP1+PxP2)**2-(PyP1+PyP2)**2-(PzP1+PzP2)**2))
-             +(sqrt((EnP2+EnP3)**2-(PxP2+PxP3)**2-(PyP2+PyP3)**2-(PzP2+PzP3)**2))"
+      // ==> "(sqrt(pow(((EnP1+EnP2)),2)-pow(((PxP1+PxP2)),2)
+                   -pow(((PyP1+PyP2)),2)-pow(((PzP1+PzP2)),2)))
+             +(sqrt(pow(((EnP2+EnP3)),2)-pow(((PxP2+PxP3)),2)
+                   -pow(((PyP2+PyP3)),2)-pow(((PzP2+PzP3)),2)))"
+
     > cout << FSTree::expandVariable("ABMASS(1,C)") << endl;
-      // ==> "(sqrt((ABEnP1+ABEnPC)**2-(ABPxP1+ABPxPC)**2
-                   -(ABPyP1+ABPyPC)**2-(ABPzP1+ABPzPC)**2))"
+      // ==> "(sqrt(pow(((ABEnP1+ABEnPC)),2)-pow(((ABPxP1+ABPxPC)),2)
+                   -pow(((ABPyP1+ABPyPC)),2)-pow(((ABPzP1+ABPzPC)),2)))"
+
     > cout << FSTree::expandVariable("RECOILMASS(CM;D,2)") << endl;
-      // ==> "(sqrt((EnPCM-(EnP2+EnPD))**2-(PxPCM-(PxP2+PxPD))**2
-                   -(PyPCM-(PyP2+PyPD))**2-(PzPCM-(PzP2+PzPD))**2))"
+      // ==> "(sqrt(pow(((EnPCM)-(EnP2+EnPD)),2)-pow(((PxPCM)-(PxP2+PxPD)),2)
+                   -pow(((PyPCM)-(PyP2+PyPD)),2)-pow(((PzPCM)-(PzP2+PzPD)),2)))"
 \end{verbatim}
 Histograms are automatically cached so they are made only once.  To save histograms at the end of a session, use the function:
 \begin{verbatim}
@@ -160,9 +170,9 @@ To clear a cache from memory during a session:
 \begin{verbatim}
     > FSHistogram::clearHistogramCache(); 
 \end{verbatim}
-To see more verbose output during a session:
+To see the contents of the cache:
 \begin{verbatim}
-    > FSControl::DEBUG = true;
+    > FSHistogram::showHistogramCache(); 
 \end{verbatim}
 
 \subsection{Basic Cut Utilities: the {\tt FSCut} class}
@@ -301,11 +311,16 @@ Information about an individual final state is carried by the {\tt FSModeInfo} c
 The {\tt FSModeInfo} class also handles particle combinatorics within a given final state through the {\tt modeCombinatorics} member function.  This is done using place holders like ``[pi+]'', ``[pi-]'', ``[K+]'', ``[K+3]'', ``[tk+]'', ``[pi0]'', etc., which are replaced by particle indices.  While the {\tt modeCombinatorics} function is rarely used explicitly by the user, it can be useful for cross-checking that the behavior of the combinatorics is what you want. For example:
 \begin{verbatim}
     > mi.modeCombinatorics("K+[K+], K-[K-], K+(again)[K+], K+(other one)[K+2]",true);
+      // ==>  *******************************
       // ==>  *** MODE COMBINATORICS TEST ***
-      // ==>  K+3, K-4, K+(again)3, K+(other one)2
-      // ==>  K+3, K-5, K+(again)3, K+(other one)2
-      // ==>  K+2, K-4, K+(again)2, K+(other one)3
-      // ==>  K+2, K-5, K+(again)2, K+(other one)3
+      // ==>  *******************************
+      // ==>        mode =  K+  K+  K-  K-  pi+  pi-  pi0  eta 
+      // ==>       input = K+[K+], K-[K-], K+(again)[K+], K+(other one)[K+2]
+      // ==>    combinations:
+      // ==>           (1) K+2,K-4,K+(again)2,K+(otherone)3
+      // ==>           (2) K+2,K-5,K+(again)2,K+(otherone)3
+      // ==>           (3) K+3,K-4,K+(again)3,K+(otherone)2
+      // ==>           (4) K+3,K-5,K+(again)3,K+(otherone)2
       // ==>  *******************************
 \end{verbatim}
 

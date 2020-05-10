@@ -25,6 +25,14 @@ class FSString{
 
 
       // ********************************************************
+      // PAD A TSTRING WITH SPACES 
+      //   LRC = "L", "R", or "C" for left, right, or center-justified
+      // ********************************************************
+
+    static TString padTString(TString input, int length, TString LRC = "R");
+
+
+      // ********************************************************
       // COMPARE TSTRINGS WITH WILDCARDS (* and ?)
       // ********************************************************
 
@@ -215,6 +223,8 @@ class FSString{
     static double parseBoundsBinSizeX(TString bounds);
     static TString makeBounds(int nbinsX,      double lowerX,      double upperX,
                               int nbinsY = -1, double lowerY = -1, double upperY = -1);
+    static TString makeBounds(int dimension);
+    static bool checkBounds(int dimension, TString bounds);
 
 
       // ********************************************************

@@ -22,12 +22,25 @@ class FSCut{
     static void defineCut(TString cutName, TString cut, 
                           TString cutSideBand = "", double weight = 1.0);
 
+      // ********************************************************
+      // FIND A CUT
+      // ********************************************************
+
+    static bool findCut(TString cutName);
+
 
       // ********************************************************
       // DISPLAY CUTS
       // ********************************************************
 
     static void display(TString cutName = "");
+
+
+      // ********************************************************
+      // TEST CUTS
+      // ********************************************************
+
+    static void testCuts(TString cuts){ expandCuts(cuts,true); }
 
 
       // ********************************************************
@@ -42,7 +55,7 @@ class FSCut{
       // CLEAR GLOBAL CACHES
       // ********************************************************
 
-    static void clearCutCache();
+    static void clearCuts();
 
 
   private:

@@ -1,37 +1,26 @@
-#! gnumake
+ROOT_CFLAGS   := $(shell root-config --cflags)
+ROOT_LIBFLAGS := $(shell root-config --libs) -lMinuit -lMathCore -lMathMore -lTreePlayer
 
-ROOTFLAGS     = $(shell root-config --cflags)
-ROOTLIBS      = $(shell root-config --libs) -lMinuit -lMathCore -lMathMore -lTreePlayer -lgsl -lgslcblas
+FSROOT_SRCDIRS := FSBasic FSMode FSData FSFit FSAnalysis
+FSROOT_LIBDIR := lib
+FSROOT_LIBFILE := lib/libFSRoot.a
+FSROOT_SRCFILES := $(foreach dir,$(FSROOT_SRCDIRS),$(wildcard $(dir)/*.C))
+FSROOT_INCFLAGS := -I$(FSROOT)
+FSROOT_OBJFILES := $(FSROOT_SRCFILES:%.C=%.o)
 
-FSBASIC_LIBS = FSBasic/FSControl.o FSBasic/FSCanvas.o FSBasic/FSTree.o FSBasic/FSHistogram.o FSBasic/FSCut.o FSBasic/FSString.o FSBasic/FSPhysics.o
-FSMODE_LIBS = FSMode/FSModeInfo.o FSMode/FSModeTree.o FSMode/FSModeHistogram.o FSMode/FSModeCollection.o FSMode/FSModeString.o
-FSDATA_LIBS = FSData/FSEEDataSet.o FSData/FSEEDataSetList.o FSData/FSEEXS.o FSData/FSEEXSList.o FSData/FSXYPoint.o FSData/FSXYPointList.o
-FSFIT_LIBS = FSFit/FSFitFunctions.o FSFit/FSFitPrivate.o FSFit/FSFitUtilities.o
-FSANALYSIS_LIBS = FSAnalysis/FSHistogramAnalysis.o
+all:  $(FSROOT_LIBFILE) 
 
-MYINCLUDES = -I. -I$(FSROOT)/
+$(FSROOT_LIBFILE): $(FSROOT_OBJFILES)
+	ar -rsv $@ $(FSROOT_OBJFILES) && ranlib $(FSROOT_LIBFILE)
 
-all: $(FSBASIC_LIBS) $(FSMODE_LIBS) $(FSDATA_LIBS) $(FSFIT_LIBS) $(FSANALYSIS_LIBS)
+$(FSROOT_OBJFILES): | $(FSROOT_LIBDIR)
 
-%: %.cc $(FSBASIC_LIBS) $(FSMODE_LIBS) $(FSDATA_LIBS) $(FSFIT_LIBS) $(FSANALYSIS_LIBS)
-	g++  $(ROOTFLAGS) $(MYINCLUDES) -c -o $*.o $*.cc
-	g++  $(ROOTFLAGS) $(MYINCLUDES) $(ROOTLIBS) $(FSBASIC_LIBS) $(FSMODE_LIBS) $(FSDATA_LIBS) $(FSFIT_LIBS) $(FSANALYSIS_LIBS) $*.o -o $*
+%.o: %.C %.h
+	g++ $(ROOT_CFLAGS) $(FSROOT_INCFLAGS) -c -o $@ $*.C
 
-FSBasic/%.o: FSBasic/%.h FSBasic/%.C
-	g++ $(ROOTFLAGS) $(MYINCLUDES) -c -o FSBasic/$*.o FSBasic/$*.C
-
-FSMode/%.o: FSMode/%.h FSMode/%.C
-	g++ $(ROOTFLAGS) $(MYINCLUDES) -c -o FSMode/$*.o FSMode/$*.C
-
-FSData/%.o: FSData/%.h FSData/%.C
-	g++ $(ROOTFLAGS) $(MYINCLUDES) -c -o FSData/$*.o FSData/$*.C
-
-FSFit/%.o: FSFit/%.h FSFit/%.C
-	g++ $(ROOTFLAGS) $(MYINCLUDES) -c -o FSFit/$*.o FSFit/$*.C
-
-FSAnalysis/%.o: FSAnalysis/%.h FSAnalysis/%.C
-	g++ $(ROOTFLAGS) $(MYINCLUDES) -c -o FSAnalysis/$*.o FSAnalysis/$*.C
-
+$(FSROOT_LIBDIR):
+	mkdir $(FSROOT_LIBDIR)
 
 clean:
-	@rm -f *.o $* */*.o
+	rm -rf $(FSROOT_LIBDIR) $(FSROOT_OBJFILES) */*.so */*.pcm */*.d
+

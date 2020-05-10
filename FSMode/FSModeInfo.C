@@ -37,7 +37,6 @@ FSModeInfo::FSModeInfo(int mCode1, int mCode2){
 FSModeInfo::FSModeInfo(TString mString){
   vector<TString> parts = FSString::parseTString(mString);
   vector<TString> extraCategories;
-  vector<TString> extendedCategories;
   int code1 = 0;
   int code2 = 0;
   for (unsigned int i = 0; i < parts.size(); i++){
@@ -75,107 +74,11 @@ FSModeInfo::FSModeInfo(TString mString){
     }
     else{
       TString cat = parts[i];
-      if (cat.Length() > 2 && cat[0] == '_' && cat[cat.Length()-1] == '_'){
-        cat.Replace(0,1,"");
-        cat.Replace(cat.Length()-1,1,"");
-        extendedCategories.push_back(cat);
-      }
       extraCategories.push_back(cat);
     }
   }
-  unsigned int ncat = extendedCategories.size();
-  if (ncat == 7){
-    extendedCategories.push_back(extendedCategories[6]+"_"+
-                                 extendedCategories[5]);
-    extendedCategories.push_back(extendedCategories[6]+"_"+
-                                 extendedCategories[5]+"_"+
-                                 extendedCategories[4]);
-    extendedCategories.push_back(extendedCategories[6]+"_"+
-                                 extendedCategories[5]+"_"+
-                                 extendedCategories[4]+"_"+
-                                 extendedCategories[3]);
-    extendedCategories.push_back(extendedCategories[6]+"_"+
-                                 extendedCategories[5]+"_"+
-                                 extendedCategories[4]+"_"+
-                                 extendedCategories[3]+"_"+
-                                 extendedCategories[2]);
-    extendedCategories.push_back(extendedCategories[6]+"_"+
-                                 extendedCategories[5]+"_"+
-                                 extendedCategories[4]+"_"+
-                                 extendedCategories[3]+"_"+
-                                 extendedCategories[2]+"_"+
-                                 extendedCategories[1]);
-    extendedCategories.push_back(extendedCategories[6]+"_"+
-                                 extendedCategories[5]+"_"+
-                                 extendedCategories[4]+"_"+
-                                 extendedCategories[3]+"_"+
-                                 extendedCategories[2]+"_"+
-                                 extendedCategories[1]+"_"+
-                                 extendedCategories[0]);
-  }
-  if (ncat == 6){
-    extendedCategories.push_back(extendedCategories[5]+"_"+
-                                 extendedCategories[4]);
-    extendedCategories.push_back(extendedCategories[5]+"_"+
-                                 extendedCategories[4]+"_"+
-                                 extendedCategories[3]);
-    extendedCategories.push_back(extendedCategories[5]+"_"+
-                                 extendedCategories[4]+"_"+
-                                 extendedCategories[3]+"_"+
-                                 extendedCategories[2]);
-    extendedCategories.push_back(extendedCategories[5]+"_"+
-                                 extendedCategories[4]+"_"+
-                                 extendedCategories[3]+"_"+
-                                 extendedCategories[2]+"_"+
-                                 extendedCategories[1]);
-    extendedCategories.push_back(extendedCategories[5]+"_"+
-                                 extendedCategories[4]+"_"+
-                                 extendedCategories[3]+"_"+
-                                 extendedCategories[2]+"_"+
-                                 extendedCategories[1]+"_"+
-                                 extendedCategories[0]);
-  }
-  if (ncat == 5){
-    extendedCategories.push_back(extendedCategories[4]+"_"+
-                                 extendedCategories[3]);
-    extendedCategories.push_back(extendedCategories[4]+"_"+
-                                 extendedCategories[3]+"_"+
-                                 extendedCategories[2]);
-    extendedCategories.push_back(extendedCategories[4]+"_"+
-                                 extendedCategories[3]+"_"+
-                                 extendedCategories[2]+"_"+
-                                 extendedCategories[1]);
-    extendedCategories.push_back(extendedCategories[4]+"_"+
-                                 extendedCategories[3]+"_"+
-                                 extendedCategories[2]+"_"+
-                                 extendedCategories[1]+"_"+
-                                 extendedCategories[0]);
-  }
-  if (ncat == 4){
-    extendedCategories.push_back(extendedCategories[3]+"_"+
-                                 extendedCategories[2]);
-    extendedCategories.push_back(extendedCategories[3]+"_"+
-                                 extendedCategories[2]+"_"+
-                                 extendedCategories[1]);
-    extendedCategories.push_back(extendedCategories[3]+"_"+
-                                 extendedCategories[2]+"_"+
-                                 extendedCategories[1]+"_"+
-                                 extendedCategories[0]);
-  }
-  if (ncat == 3){
-    extendedCategories.push_back(extendedCategories[2]+"_"+
-                                 extendedCategories[1]);
-    extendedCategories.push_back(extendedCategories[2]+"_"+
-                                 extendedCategories[1]+"_"+
-                                 extendedCategories[0]);
-  }
-  if (ncat == 2){
-    extendedCategories.push_back(extendedCategories[1]+"_"+
-                                 extendedCategories[0]);
-  }
   m_modeCode = pair<int,int>(code1,code2);
   addStandardCategories();
-  addCategory(extendedCategories);
   addCategory(extraCategories);
   if (particles().size() == 0){ cout << "FSModeInfo WARNING: creating mode with no particles" << endl; }
 }
@@ -247,6 +150,19 @@ FSModeInfo::modeString(TString original, int counter){
     stmp += modeGlueXFormat();
     original.Replace(original.Index("MODEGLUEX"),9,stmp);
   }
+  while (original.Contains("MODECOMBO")){
+    int minimumIndex = 0;
+    TString MODECOMBO("MODECOMBO");
+    if (original.Index("MODECOMBO")+9 < original.Length()){
+      TString digit = original[original.Index("MODECOMBO")+9];
+      if (digit.IsDigit()){
+        MODECOMBO += digit;
+        minimumIndex = FSString::TString2int(digit);
+      }
+    }
+    TString stmp = modeComboFormat(minimumIndex);
+    original.Replace(original.Index(MODECOMBO),MODECOMBO.Length(),stmp);
+  }
   while (original.Contains("MODECOUNTER") && counter >= 0){
     int digits = 0;
     while (original.Index("MODECOUNTER")+11+digits < original.Length() &&
@@ -304,6 +220,30 @@ FSModeInfo::modeGlueXFormat(){
   np = modeNLambda    ();  for (int i = 0; i < np; i++){ gluexFormat += "_18"; }
   np = modeNALambda   ();  for (int i = 0; i < np; i++){ gluexFormat += "_26"; }
   return gluexFormat;
+}
+
+TString
+FSModeInfo::modeComboFormat(int min){
+  TString cF("");
+  int np;
+  np = modeNGamma  ();  for (int i = 0; i < np; i++){ cF += "[gamma"  ; cF += (i+min); cF += "],"; }
+  np = modeNEp     ();  for (int i = 0; i < np; i++){ cF += "[e+"     ; cF += (i+min); cF += "],"; }
+  np = modeNEm     ();  for (int i = 0; i < np; i++){ cF += "[e-"     ; cF += (i+min); cF += "],"; }
+  np = modeNMp     ();  for (int i = 0; i < np; i++){ cF += "[mu+"    ; cF += (i+min); cF += "],"; }
+  np = modeNMm     ();  for (int i = 0; i < np; i++){ cF += "[mu-"    ; cF += (i+min); cF += "],"; }
+  np = modeNPi0    ();  for (int i = 0; i < np; i++){ cF += "[pi0"    ; cF += (i+min); cF += "],"; }
+  np = modeNPip    ();  for (int i = 0; i < np; i++){ cF += "[pi+"    ; cF += (i+min); cF += "],"; }
+  np = modeNPim    ();  for (int i = 0; i < np; i++){ cF += "[pi-"    ; cF += (i+min); cF += "],"; }
+  np = modeNKp     ();  for (int i = 0; i < np; i++){ cF += "[K+"     ; cF += (i+min); cF += "],"; }
+  np = modeNKm     ();  for (int i = 0; i < np; i++){ cF += "[K-"     ; cF += (i+min); cF += "],"; }
+  np = modeNKs     ();  for (int i = 0; i < np; i++){ cF += "[Ks"     ; cF += (i+min); cF += "],"; }
+  np = modeNEta    ();  for (int i = 0; i < np; i++){ cF += "[eta"    ; cF += (i+min); cF += "],"; }
+  np = modeNPp     ();  for (int i = 0; i < np; i++){ cF += "[p+"     ; cF += (i+min); cF += "],"; }
+  np = modeNPm     ();  for (int i = 0; i < np; i++){ cF += "[p-"     ; cF += (i+min); cF += "],"; }
+  np = modeNLambda ();  for (int i = 0; i < np; i++){ cF += "[Lambda" ; cF += (i+min); cF += "],"; }
+  np = modeNALambda();  for (int i = 0; i < np; i++){ cF += "[ALambda"; cF += (i+min); cF += "],"; }
+  if (cF.Length() != 0) cF = FSString::subString(cF,0,cF.Length()-1);
+  return cF;
 }
 
 
@@ -673,8 +613,9 @@ FSModeInfo::isModeString(TString mString){
   if (parts.size() != 1) return false;
   vector<TString> codes = FSString::parseTString(mString,"_");
   if (codes.size() < 2) return false;
-  if (!codes[codes.size()-1].IsDigit()) return false;
   if (codes[codes.size()-2].Length() == 0) return false;
+  if (codes[codes.size()-1].Length() == 0) return false;
+  if (!codes[codes.size()-1].IsDigit()) return false;
   TString last(codes[codes.size()-2][codes[codes.size()-2].Length()-1]);
   if (!last.IsDigit()) return false;
   return true;
@@ -701,7 +642,7 @@ FSModeInfo::setSubmode (TString particleName,
 
 vector<TString>
 FSModeInfo::modeCombinatorics(TString varString, bool printCombinatorics, bool removeDuplicates){
-
+  TString varStringOriginal = varString;
   vector<TString> allCombinatorics;
 
 
@@ -919,33 +860,58 @@ FSModeInfo::modeCombinatorics(TString varString, bool printCombinatorics, bool r
 
   }
 
+    // order the macro variables (e.g. MASS(3,2) --> MASS(2,3))
+
+  for (unsigned int i = 0; i < allCombinatorics.size(); i++){
+    allCombinatorics[i] = FSTree::reorderVariable(allCombinatorics[i]);
+  }
+
     // remove duplicate combinations
 
   if (removeDuplicates && allCombinatorics.size() > 1){
     vector<TString> copyOriginal = allCombinatorics;
-    vector<TString> copyExpanded = allCombinatorics;
     allCombinatorics.clear();
-    for (unsigned int i = 0; i < copyExpanded.size(); i++){
-      copyExpanded[i] = FSTree::expandVariable(copyOriginal[i]);
-    }
-    for (unsigned int i = 0; i < copyExpanded.size(); i++){
-      if (copyExpanded[i] != ""){
-        for (unsigned int j = i+1; j < copyExpanded.size(); j++){
-          if (copyExpanded[j] != ""){
-            if (copyExpanded[i] == copyExpanded[j]) copyExpanded[j] = "";
+    for (unsigned int i = 0; i < copyOriginal.size()-1; i++){
+      if (copyOriginal[i] != ""){
+        for (unsigned int j = i+1; j < copyOriginal.size(); j++){
+          if (copyOriginal[j] != ""){
+            if (copyOriginal[i] == copyOriginal[j]) copyOriginal[j] = "";
           }
         }
+      }
+    }
+    for (unsigned int i = 0; i < copyOriginal.size(); i++){
+      if (copyOriginal[i] != ""){
         allCombinatorics.push_back(copyOriginal[i]);
       }
     }
   }
 
+    // do a final sort (for aesthetics)
+
+  if (allCombinatorics.size() > 1){
+    for (unsigned int i = 0; i < allCombinatorics.size()-1; i++){
+    for (unsigned int j = i+1; j < allCombinatorics.size(); j++){
+      if (FSString::TString2string(allCombinatorics[j]) < 
+          FSString::TString2string(allCombinatorics[i])){
+        TString temp = allCombinatorics[i];
+        allCombinatorics[i] = allCombinatorics[j];
+        allCombinatorics[j] = temp;
+      }
+    }}
+  }
+
     // print the combinatorics to the screen for debugging
 
   if (printCombinatorics){
+    cout << "*******************************" << endl;
     cout << "*** MODE COMBINATORICS TEST ***" << endl;
+    cout << "*******************************" << endl;
+    cout << "      mode = " << modeString("MODEDESCRIPTION") << endl;
+    cout << "     input = " << varStringOriginal << endl;
+    cout << "  combinations:" << endl;
     for (unsigned int i = 0; i < allCombinatorics.size(); i++){
-      cout << allCombinatorics[i] << endl;
+      cout << "         (" << i+1 << ") "  << allCombinatorics[i] << endl;
     }
     cout << "*******************************" << endl;
   }

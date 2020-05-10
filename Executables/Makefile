@@ -1,22 +1,33 @@
-#! gnumake
+ROOT_CFLAGS   := $(shell root-config --cflags)
+ROOT_LIBFLAGS := $(shell root-config --libs) -lMinuit -lMathCore -lMathMore -lTreePlayer
 
-ROOTFLAGS     = $(shell root-config --cflags)
-ROOTLIBS      = $(shell root-config --libs) -lMinuit -lMathCore -lMathMore -lTreePlayer
+FSROOT_LIBFILE  := $(FSROOT)/lib/libFSRoot.a
+FSROOT_LIBFLAGS := -L$(FSROOT)/lib -lFSRoot
+FSROOT_INCFLAGS := -I$(FSROOT)
 
-FSBASIC_LIBS = $(FSROOT)/FSBasic/FSControl.o $(FSROOT)/FSBasic/FSCanvas.o $(FSROOT)/FSBasic/FSTree.o $(FSROOT)/FSBasic/FSHistogram.o $(FSROOT)/FSBasic/FSCut.o $(FSROOT)/FSBasic/FSString.o $(FSROOT)/FSBasic/FSPhysics.o
-FSMODE_LIBS = $(FSROOT)/FSMode/FSModeInfo.o $(FSROOT)/FSMode/FSModeTree.o $(FSROOT)/FSMode/FSModeHistogram.o $(FSROOT)/FSMode/FSModeCollection.o $(FSROOT)/FSMode/FSModeString.o
-FSDATA_LIBS = $(FSROOT)/FSData/FSEEDataSet.o $(FSROOT)/FSData/FSEEDataSetList.o $(FSROOT)/FSData/FSEEXS.o $(FSROOT)/FSData/FSEEXSList.o $(FSROOT)/FSData/FSXYPoint.o $(FSROOT)/FSData/FSXYPointList.o
-FSFIT_LIBS = $(FSROOT)/FSFit/FSFitFunctions.o $(FSROOT)/FSFit/FSFitPrivate.o $(FSROOT)/FSFit/FSFitUtilities.o
-FSANALYSIS_LIBS = $(FSROOT)/FSAnalysis/FSHistogramAnalysis.o
+###############################
+# should be able to link to the library and not the individual
+# object files -- but can't for some reason on stanley
+# shouldn't need any of this:
+FSROOT_SRCDIRS := $(FSROOT)/FSBasic $(FSROOT)/FSMode $(FSROOT)/FSData $(FSROOT)/FSFit $(FSROOT)/FSAnalysis
+FSROOT_SRCFILES := $(foreach dir,$(FSROOT_SRCDIRS),$(wildcard $(dir)/*.C))
+FSROOT_OBJFILES := $(FSROOT_SRCFILES:%.C=%.o)
+###############################
 
-MYINCLUDES = -I. -I$(FSROOT)/
+EXE_SRCFILES := $(wildcard *.cc)
+EXE_EXEFILES := $(foreach file,$(EXE_SRCFILES),$(file:.cc=))
 
-all: $(FSBASIC_LIBS) $(FSMODE_LIBS) $(FSDATA_LIBS) $(FSFIT_LIBS) $(FSANALYSIS_LIBS)
+EXTRA_SRCFILES := $(wildcard *.C)
+EXTRA_INCFILES := $(wildcard *.h)
 
-%: %.cc $(FSBASIC_LIBS) $(FSMODE_LIBS) $(FSDATA_LIBS) $(FSFIT_LIBS) $(FSANALYSIS_LIBS)
-	g++  $(ROOTFLAGS) $(MYINCLUDES) -c -o $*.o $*.cc
-	g++  $(ROOTFLAGS) $(MYINCLUDES) $(ROOTLIBS) $(FSBASIC_LIBS) $(FSMODE_LIBS) $(FSDATA_LIBS) $(FSFIT_LIBS) $(FSANALYSIS_LIBS) $*.o -o $*
+all: $(EXE_EXEFILES)
 
+%: %.cc $(EXTRA_SRCFILES) $(EXTRA_INCFILES) $(FSROOT_LIBFILE)
+	# DO THIS FOR NOW:
+	g++ $(ROOT_CFLAGS) $(ROOT_LIBFLAGS) $(FSROOT_OBJFILES) $(FSROOT_INCFLAGS) -I. -o $@ $@.cc $(EXTRA_SRCFILES)
+	# THIS WOULD BE BETTER:
+	#g++ $(ROOT_CFLAGS) $(ROOT_LIBFLAGS) $(FSROOT_LIBFLAGS) $(FSROOT_INCFLAGS) -I. -o $@ $@.cc $(EXTRA_SRCFILES)
 
 clean:
-	@rm -f *.o $* */*.o
+	rm -rf $(EXE_EXEFILES)
+

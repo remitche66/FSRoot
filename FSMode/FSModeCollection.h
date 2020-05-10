@@ -59,6 +59,13 @@ class FSModeCollection{
 
 
       // *******************************************************
+      // PRINT COMBINATORICS TO THE SCREEN FOR TESTING
+      // *******************************************************
+
+    static void testCombinatorics(TString category, TString testString);
+
+
+      // *******************************************************
       // TELL DIFFERENT ANALYSIS ALGORITHMS WHICH MODES TO FIND
       // *******************************************************
 
