@@ -913,7 +913,7 @@ FSHistogram::clearHistogramCache(int histNumber){
         if (hInfo->m_histPair.second) delete hInfo->m_histPair.second;
         delete hInfo;
       }
-      rmItr = m_FSHistogramInfoCache.erase(rmItr);
+      m_FSHistogramInfoCache.erase(rmItr++);
     }
     else{ rmItr++; }
   }}
