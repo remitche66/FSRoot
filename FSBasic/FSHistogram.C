@@ -505,12 +505,20 @@ FSHistogram::getTH2FFormula(TString formula, TString bounds, int numRandomTrials
 
 TH1F*
 FSHistogram::getTH1FFormula(TF1* function, TString bounds, int numRandomTrials){
+#if ROOT_VERSION_CODE >= ROOT_VERSION(6,18,0)
   return getTH1FFormula(function->GetFormula()->GetExpFormula(),bounds,numRandomTrials);
+#else
+  cout << "ROOT version too old" << endl; exit(0);
+#endif
 }
 
 TH2F*
 FSHistogram::getTH2FFormula(TF2* function, TString bounds, int numRandomTrials){
+#if ROOT_VERSION_CODE >= ROOT_VERSION(6,18,0)
   return getTH2FFormula(function->GetFormula()->GetExpFormula(),bounds,numRandomTrials);
+#else
+  cout << "ROOT version too old" << endl; exit(0);
+#endif
 }
 
 
