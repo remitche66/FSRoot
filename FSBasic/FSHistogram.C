@@ -581,7 +581,7 @@ FSHistogram::getTH1FRandom(TH1F* hist, int numRandomTrials){
   TH1F* rhist = getTH1F((TH1F*)hist->Clone(makeFSRootTempName()));  rhist->Reset();
   TAxis* axisX = rhist->GetXaxis(); 
   int nbinsX = axisX->GetNbins(); 
-  double fMax; double fMin;  hist->GetMinimumAndMaximum(fMin,fMax);
+  double fMax = hist->GetBinContent(hist->GetMaximumBin());
   int numAccepted = 0;  //int numAttempts = 0;
   while (numAccepted < numRandomTrials){
     //numAttempts++;
@@ -604,7 +604,7 @@ FSHistogram::getTH2FRandom(TH2F* hist, int numRandomTrials){
   TH2F* rhist = getTH2F((TH2F*)hist->Clone(makeFSRootTempName()));  rhist->Reset();
   TAxis* axisX = rhist->GetXaxis(); TAxis* axisY = rhist->GetYaxis();
   int nbinsX = axisX->GetNbins();   int nbinsY = axisX->GetNbins();
-  double fMax; double fMin;  hist->GetMinimumAndMaximum(fMin,fMax);
+  double fMax = hist->GetBinContent(hist->GetMaximumBin());
   int numAccepted = 0;  //int numAttempts = 0;
   while (numAccepted < numRandomTrials){
     //numAttempts++;
