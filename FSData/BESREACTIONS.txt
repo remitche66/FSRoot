@@ -28,27 +28,6 @@ xs1  reactionETAJPSI  2011:4009  measured    32.1  2.8  172.8
 
 
 ###############
-#  K+ K- J/psi
-###############
-
-# from table 8 of the memo
-xs2  reactionKKJPSI  2013:4190  measured   2.20   1  0  0.25  -1
-xs2  reactionKKJPSI  2013:4210  measured   1.40   1  0  0.25  -1
-xs2  reactionKKJPSI  2013:4220  measured   2.60   2  0  0.25  -1
-xs2  reactionKKJPSI  2013:4230  measured   5.57  88  1  0.25  -1
-xs2  reactionKKJPSI  2013:4245  measured   2.00   2  0  0.25  -1
-xs2  reactionKKJPSI  2013:4260  measured   2.88  45  1  0.25  -1
-xs2  reactionKKJPSI  2013:4310  measured   0.75   1  1  0.25  -1
-xs2  reactionKKJPSI  2013:4360  measured   0.45   7  2  0.25  -1
-xs2  reactionKKJPSI  2013:4390  measured   0.71   1  0  0.25  -1
-xs2  reactionKKJPSI  201n:4420  measured   1.02  33 16  0.25  -1
-xs2  reactionKKJPSI  2014:4470  measured   4.00  12  0  0.25  -1
-xs2  reactionKKJPSI  2014:4530  measured   5.00  16  0  0.25  -1
-xs2  reactionKKJPSI  2014:4575  measured   2.07   3  0  0.25  -1
-xs2  reactionKKJPSI  2014:4600  measured   1.50  28  6  0.25  -1
-
-
-###############
 #  omega chicJ
 ###############
 
@@ -119,7 +98,7 @@ xs1  reactionDDSTARPI  2014:4600  measured    462    13   3605
 #  pi+ pi- hc
 ###############
 
-# from the PRL and from the new memo
+# from the PRL
 xs1  reactionPIPIHC  2013:3900  measured  0.0    4.0   0.0
 xs1  reactionPIPIHC  2011:4009	measured  1.5    1.5   5.0
 xs1  reactionPIPIHC  2013:4090	measured  0.0    6.0   0.0
@@ -132,101 +111,7 @@ xs1  reactionPIPIHC  2013:4260	measured  41.0   2.8   415.8
 xs1  reactionPIPIHC  2013:4310	measured  61.9   12.9   34.6
 xs1  reactionPIPIHC  2013:4360	measured  52.3   3.7   356.9
 xs1  reactionPIPIHC  2013:4390	measured  41.8   10.8   30.0
-# from the new memo
-xs1  reactionPIPIHC  201n:4420  measured  42.3   2.4   631.4
-xs1  reactionPIPIHC  2014:4470  measured  17.0   5.7    26.9
-xs1  reactionPIPIHC  2014:4530  measured  3.0    4.3   4.8
-xs1  reactionPIPIHC  2014:4575  measured  8.1    8.0    5.5
-xs1  reactionPIPIHC  2014:4600  measured  5.7    1.9   47
-# from the new memo
-xs2  reactionPIPIHC  2014-R:4100  measured   -20.4  0 3 0.537  -1
-xs2  reactionPIPIHC  2014-R:4110  measured   -14.5  1 4 0.534  -1
-xs2  reactionPIPIHC  2014-R:4120  measured   -7.1   1 3 0.531  -1
-xs2  reactionPIPIHC  2014-R:4130  measured   5.3    2 3 0.528  -1
-xs2  reactionPIPIHC  2014-R:4140  measured   -9.1   4 9 0.525  -1
-xs2  reactionPIPIHC  2014-R:4145  measured   -0.5   1 2 0.524  -1
-xs2  reactionPIPIHC  2014-R:4150  measured   -12.9  1 4 0.522  -1
-xs2  reactionPIPIHC  2014-R:4160  measured   11.3   1 0 0.519  -1
-xs2  reactionPIPIHC  2014-R:4170  measured   2.1    3 5 0.516  -1
-xs2  reactionPIPIHC  2014-R:4180  measured   -0.3   1 2 0.514  -1
-xs2  reactionPIPIHC  2014-R:4190  measured   -18.1  0 3 0.511  -1
-xs2  reactionPIPIHC  2014-R:4195  measured   -0.4   2 4 0.510  -1
-xs2  reactionPIPIHC  2014-R:4200  measured   46.6   6 4 0.508  -1
-xs2  reactionPIPIHC  2014-R:4203  measured   -13.6  2 6 0.507  -1
-xs2  reactionPIPIHC  2014-R:4206  measured   -0.2   1 2 0.506  -1
-xs2  reactionPIPIHC  2014-R:4210  measured   17.1   4 5 0.505  -1
-xs2  reactionPIPIHC  2014-R:4215  measured   -11.6  1 4 0.504  -1
-xs2  reactionPIPIHC  2014-R:4220  measured   27.80  3 1 0.503  -1
-xs2  reactionPIPIHC  2014-R:4225  measured   5.3    1 1 0.501  -1
-xs2  reactionPIPIHC  2014-R:4230  measured   64.4   7 2 0.500  -1
-xs2  reactionPIPIHC  2014-R:4235  measured   58.5   9 7 0.499  -1
-xs2  reactionPIPIHC  2014-R:4240  measured   62.1   9 7 0.497  -1
-xs2  reactionPIPIHC  2014-R:4243  measured   51.4   6 2 0.496  -1
-xs2  reactionPIPIHC  2014-R:4245  measured   36.5   6 5 0.496  -1
-xs2  reactionPIPIHC  2014-R:4248  measured   66.9   7 1 0.495  -1
-xs2  reactionPIPIHC  2014-R:4250  measured   46.5   7 5 0.495  -1
-xs2  reactionPIPIHC  2014-R:4255  measured   51.4 10 10 0.493  -1
-xs2  reactionPIPIHC  2014-R:4260  measured   5.5    4 7 0.492  -1
-xs2  reactionPIPIHC  2014-R:4265  measured   66.5   9 5 0.491  -1
-xs2  reactionPIPIHC  2014-R:4270  measured   20.7   3 2 0.489  -1
-xs2  reactionPIPIHC  2014-R:4275  measured   15.7   3 3 0.488  -1
-xs2  reactionPIPIHC  2014-R:4280  measured   10.5   3 4 0.487  -1
-xs2  reactionPIPIHC  2014-R:4285  measured   93.0  13 8 0.485  -1
-xs2  reactionPIPIHC  2014-R:4290  measured   19.9   4 4 0.484  -1
-xs2  reactionPIPIHC  2014-R:4300  measured   1.2    3 6 0.481  -1
-xs2  reactionPIPIHC  2014-R:4310  measured   52.2   9 8 0.479  -1
-xs2  reactionPIPIHC  2014-R:4320  measured   16.4  7 11 0.476  -1
-xs2  reactionPIPIHC  2014-R:4330  measured   65.6   8 3 0.473  -1
-xs2  reactionPIPIHC  2014-R:4340  measured   61.2   9 6 0.471  -1
-xs2  reactionPIPIHC  2014-R:4350  measured   55.6   6 1 0.468  -1
-xs2  reactionPIPIHC  2014-R:4360  measured   86.9   11  6   0.466  -1
-xs2  reactionPIPIHC  2014-R:4370  measured   76.0   8	1   0.463  -1
-xs2  reactionPIPIHC  2014-R:4380  measured   29.1   6	7   0.461  -1
-xs2  reactionPIPIHC  2014-R:4390  measured   60.1   8	6   0.458  -1
-xs2  reactionPIPIHC  2014-R:4395  measured   24.7   4	4   0.457  -1
-xs2  reactionPIPIHC  2014-R:4400  measured   3.1    3	6   0.456  -1
-xs2  reactionPIPIHC  2014-R:4410  measured   17.0   4	6   0.453  -1
-xs2  reactionPIPIHC  2014-R:4420  measured   32.9   7	9   0.451  -1
-xs2  reactionPIPIHC  2014-R:4425  measured   91.4   9	2   0.450  -1
-xs2  reactionPIPIHC  2014-R:4430  measured   20.4    2	1   0.448  -1
-xs2  reactionPIPIHC  2014-R:4440  measured   38.8   4	1   0.446  -1
-xs2  reactionPIPIHC  2014-R:4450  measured   1.2    1	2   0.443  -1
-xs2  reactionPIPIHC  2014-R:4460  measured   45.6   7	5   0.441  -1
-xs2  reactionPIPIHC  2014-R:4480  measured   67.7   8	3   0.436  -1
-xs2  reactionPIPIHC  2014-R:4500  measured   -1.6   2	5   0.431  -1
-xs2  reactionPIPIHC  2014-R:4520  measured   8.2    3	5   0.427  -1
-xs2  reactionPIPIHC  2014-R:4540  measured   -13.3  1	6   0.422  -1
-xs2  reactionPIPIHC  2014-R:4550  measured   6.9    2	3   0.420  -1
-xs2  reactionPIPIHC  2014-R:4560  measured   -16.4  0	4   0.417  -1
-xs2  reactionPIPIHC  2014-R:4570  measured   3.3    2	4   0.415  -1
-xs2  reactionPIPIHC  2014-R:4580  measured   12.7   3	4   0.413  -1
-xs2  reactionPIPIHC  2014-R:4590  measured   -12.2  0	3   0.411  -1
 
-
-###############
-#  pi+ pi- J/psi
-###############
-
-
-# from the paper draft
-xs1  reactionPIPIJPSI  2013:3810  measured   16.7  3.3   34.7
-xs1  reactionPIPIJPSI  2013:3900  measured   17.1  3.4   36.1
-xs1  reactionPIPIJPSI  2011:4009  measured   15.8  1.3   325
-xs1  reactionPIPIJPSI  2013:4090  measured   15.0  3.1   33.9
-xs1  reactionPIPIJPSI  2013:4190  measured   15.5  3.8   26.9
-xs1  reactionPIPIJPSI  2013:4210  measured   53.4  5.4   114.9
-xs1  reactionPIPIJPSI  2013:4220  measured   60.3  5.7   130.5
-xs1  reactionPIPIJPSI  2013:4230  measured   85.1  1.6   3853.1
-xs1  reactionPIPIJPSI  2013:4245  measured   84.4  6.3   203.5
-xs1  reactionPIPIJPSI  2013:4260  measured   59.4  1.5   2220.1
-xs1  reactionPIPIJPSI  2013:4310  measured   52.0  5.7   101.7
-xs1  reactionPIPIJPSI  2013:4360  measured   25.8  1.3   619.7
-xs1  reactionPIPIJPSI  2013:4390  measured   20.0  3.2   50.5 
-xs1  reactionPIPIJPSI  201n:4420  measured   11.9  0.7   564.2
-xs1  reactionPIPIJPSI  2014:4470  measured   13.3  2.1   63.4 
-xs1  reactionPIPIJPSI  2014:4530  measured   10.6  1.9   50.0 
-xs1  reactionPIPIJPSI  2014:4575  measured   13.4  3.2   26.1 
-xs1  reactionPIPIJPSI  2014:4600  measured   6.4   0.7   143.4
 
 
 ###############
