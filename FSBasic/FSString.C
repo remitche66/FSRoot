@@ -14,7 +14,7 @@
 
 TString
 FSString::string2TString(string input){
-  return TString(input);
+  return TString(input.c_str());
 }
 
 string
