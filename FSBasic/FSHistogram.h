@@ -136,10 +136,20 @@ class FSHistogram{
 
       // ********************************************************
       // INTERACT WITH THE HISTOGRAM CACHE
+      //    histograms in the cache are named:  "FSRootHist:(histNumber)"
+      //       for example, a histogram named "FSRootHist:000003"
+      //                       has histNuber = 3
+      //    indexComponent is a two-letter symbol that picks out
+      //        part of the index (for example, "CU" is for cuts)
       // ********************************************************
 
-    static void clearHistogramCache(int histNumber = -1);
-    static void showHistogramCache(int histNumber = -1, bool showDetails = false);
+    static void clearHistogramCache(TString histName = "");
+    static void showHistogramCache(TString histName = "", bool showDetails = false);
+    static TString getHistogramInfo(TString histName = "", TString indexComponent = "");
+
+    static void clearHistogramCache(int histNumber);
+    static void showHistogramCache(int histNumber, bool showDetails = false);
+    static TString getHistogramInfo(int histNumber, TString indexComponent = "");
 
 
       // ********************************************************
@@ -216,7 +226,7 @@ class FSHistogram{
 
       // make histogram names
 
-    static TString makeFSRootHistName();
+    static TString makeFSRootHistName(int histNumber = -1);
     static int getFSRootHistNumber(TString hName);
     static TString makeFSRootTempName();
 
@@ -226,6 +236,7 @@ class FSHistogram{
     static map< TString, FSHistogramInfo* >  m_FSHistogramInfoCache;
     static unsigned int m_indexFSRootHistName;
     static unsigned int m_indexFSRootTempName;
+    static vector<TString> getFSHistogramInfoCacheIndices(TString histName = "", bool exactOnly = true);
 
 
       // *******************************************

@@ -888,78 +888,80 @@ FSHistogram::readHistogramCache(string cacheName){
   // CLEAR GLOBAL CACHES
   // ********************************************************
 
+
 void
-FSHistogram::clearHistogramCache(int histNumber){
+FSHistogram::clearHistogramCache(TString histName){
   if (FSControl::DEBUG) 
-    cout << "FSHistogram: clearing histogram cache " << histNumber << endl;
-  for (int iBasic = 0; iBasic < 2; iBasic++){
-  for (map<TString,FSHistogramInfo*>::iterator rmItr = m_FSHistogramInfoCache.begin();
-       rmItr != m_FSHistogramInfoCache.end(); ){
-    bool eraseIt = false;
-    FSHistogramInfo* hInfo = rmItr->second;
-    if (!hInfo) eraseIt = true;  // shouldn't happen 
-    if (hInfo){
-      if (hInfo->basic() != (bool)iBasic){ rmItr++; continue; }
-      if (histNumber < 0) eraseIt = true;
-      if (histNumber > 0){
-        if (getFSRootHistNumber(hInfo->getHistName()) == histNumber) eraseIt = true;
-        for (unsigned int i = 0; i < hInfo->m_basicHistograms.size(); i++){
-          if (getFSRootHistNumber(hInfo->m_basicHistograms[i]->getHistName()) == histNumber){
-             eraseIt = true; break;
-          }
-        }
-      }
-    }
-    if (eraseIt){
-      if (hInfo){
-        hInfo->m_basicHistograms.clear();
-        if (hInfo->m_histPair.first)  delete hInfo->m_histPair.first;
-        if (hInfo->m_histPair.second) delete hInfo->m_histPair.second;
-        delete hInfo;
-      }
-      m_FSHistogramInfoCache.erase(rmItr++);
-    }
-    else{ rmItr++; }
-  }}
+    cout << "FSHistogram: clearing histogram cache " << histName << endl;
+  vector<TString> indices = getFSHistogramInfoCacheIndices(histName,false);
+  for (unsigned int iIndex = 0; iIndex < indices.size(); iIndex++){
+    FSHistogramInfo* hInfo = m_FSHistogramInfoCache[indices[iIndex]];
+    m_FSHistogramInfoCache.erase(indices[iIndex]);
+    if (!hInfo) continue;
+    hInfo->m_basicHistograms.clear();
+    if (hInfo->m_histPair.first)  delete hInfo->m_histPair.first;
+    if (hInfo->m_histPair.second) delete hInfo->m_histPair.second;
+    delete hInfo;
+  }
   if (FSControl::DEBUG) 
     cout << "FSHistogram: done clearing histogram cache" << endl;
 }
 
 void
-FSHistogram::showHistogramCache(int histNumber, bool showDetails){
+FSHistogram::clearHistogramCache(int histNumber){
+  if (histNumber <= 0) clearHistogramCache();
+  if (histNumber > 0)  clearHistogramCache(makeFSRootHistName(histNumber));
+}
+
+
+
+void
+FSHistogram::showHistogramCache(TString histName, bool showDetails){
+  vector<TString> indices = getFSHistogramInfoCacheIndices(histName,true);
   cout << "-------------------------------------" << endl;
   cout << "-- CONTENTS OF THE HISTOGRAM CACHE --" << endl;
   cout << "-------------------------------------" << endl;
-  vector<FSHistogramInfo*> vecHistInfo;
-  for (map<TString,FSHistogramInfo*>::iterator mpItr = m_FSHistogramInfoCache.begin();
-       mpItr != m_FSHistogramInfoCache.end(); mpItr++){
-    if (histNumber < 0){ vecHistInfo.push_back(mpItr->second); continue; }
-    TString hName(""); if (mpItr->second) hName = mpItr->second->getHistName();
-    if (histNumber > 0 && getFSRootHistNumber(hName) == histNumber)
-      vecHistInfo.push_back(mpItr->second);
-  }
-  for (unsigned int i = 0; i < vecHistInfo.size(); i++){
-    if (!vecHistInfo[i]){
-      cout << "FSHistogram ERROR: null FSHistogramInfo pointer in cache" << endl;
-      exit(0);
-    }
-  }
-  if (vecHistInfo.size() == 0) return;
-  for (unsigned int i = 0; i < vecHistInfo.size()-1; i++){
-  for (unsigned int j = i+1; j < vecHistInfo.size(); j++){
-    if (FSString::TString2string(vecHistInfo[j]->getHistName()) <
-        FSString::TString2string(vecHistInfo[i]->getHistName())){
-      FSHistogramInfo* temp = vecHistInfo[i];
-      vecHistInfo[i] = vecHistInfo[j];
-      vecHistInfo[j] = temp;
+  if (indices.size() == 0) return;
+  for (unsigned int i = 0; i < indices.size()-1; i++){
+  for (unsigned int j = i+1; j < indices.size(); j++){
+    if (FSString::TString2string(m_FSHistogramInfoCache[indices[j]]->getHistName()) <
+        FSString::TString2string(m_FSHistogramInfoCache[indices[i]]->getHistName())) {
+      TString temp = indices[i];
+      indices[i]   = indices[j];
+      indices[j]   = temp;
     }
   }}
-  for (unsigned int i = 0; i < vecHistInfo.size(); i++){
-    vecHistInfo[i]->show(showDetails);
+  for (unsigned int i = 0; i < indices.size(); i++){
+    m_FSHistogramInfoCache[indices[i]]->show(showDetails);
     if (!showDetails) cout << "-------------------------------------" << endl;
   }
 }
 
+
+void
+FSHistogram::showHistogramCache(int histNumber, bool showDetails){
+  if (histNumber <= 0) showHistogramCache("",showDetails);
+  if (histNumber > 0)  showHistogramCache(makeFSRootHistName(histNumber),showDetails);
+}
+
+
+TString
+FSHistogram::getHistogramInfo(TString histName, TString indexComponent){
+  vector<TString> indices = getFSHistogramInfoCacheIndices(histName,true);
+  if (indices.size() != 1) return TString("");
+  if (indexComponent == "") return indices[0];
+  if (indexComponent.Length() != 2) return TString("");
+  indexComponent = "{-"+indexComponent+"-}";
+  map<TString,TString> indexMap = parseHistogramIndex(indices[0]);
+  if (indexMap.find(indexComponent) == indexMap.end()) return TString("");
+  return indexMap[indexComponent];
+}
+
+TString
+FSHistogram::getHistogramInfo(int histNumber, TString indexComponent){
+  if (histNumber <= 0) return TString("");
+  return getHistogramInfo(makeFSRootHistName(histNumber),indexComponent);
+}
 
 
   // ********************************************************
@@ -1012,6 +1014,25 @@ FSHistogram::getFSHistogramInfo(TString index, vector<TString> subIndices){
   return histInfo;
 }
 
+
+vector<TString>
+FSHistogram::getFSHistogramInfoCacheIndices(TString histName, bool exactOnly){
+  vector<TString> indices;
+  for (map< TString, FSHistogramInfo* >::iterator mapItr = m_FSHistogramInfoCache.begin();
+       mapItr != m_FSHistogramInfoCache.end(); mapItr++){
+    FSHistogramInfo* histInfo = mapItr->second;
+    if (!histInfo) continue;
+    if (histName == ""){ indices.push_back(mapItr->first); continue; }
+    if (histName == histInfo->getHistName()){ indices.push_back(mapItr->first); continue; }
+    if (exactOnly) continue;
+    for (unsigned int i = 0; i < histInfo->m_basicHistograms.size(); i++){
+      if (!histInfo->m_basicHistograms[i]) continue;
+      if (histName == histInfo->m_basicHistograms[i]->getHistName()){
+        indices.push_back(mapItr->first); continue; }
+    }
+  }
+  return indices;
+}
 
 
   // ***********************************************
@@ -1214,9 +1235,10 @@ FSHistogram::checkIndex(TString index, TString type){
 
 
 TString
-FSHistogram::makeFSRootHistName(){
+FSHistogram::makeFSRootHistName(int histNumber){
   TString hname("FSRootHist:");
-  hname += FSString::int2TString(++m_indexFSRootHistName,6);
+  if (histNumber <= 0) histNumber = (++m_indexFSRootHistName);
+  hname += FSString::int2TString(histNumber,6);
   return hname;
 }
 
