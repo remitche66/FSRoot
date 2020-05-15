@@ -258,6 +258,7 @@ FSTree::makeStandardDefinitions(){
   if (!m_madeStandardDefinitions){
     m_madeStandardDefinitions = true;
 
+    defineFourVector("B3BEAM",  "BeamEnergy","BeamEnergy*sin(0.011)","0.0","BeamEnergy*cos(0.011)");
     defineFourVector("BES3BEAM","BeamEnergy","BeamEnergy*sin(0.011)","0.0","BeamEnergy*cos(0.011)");
     defineFourVector("BES3CMS","2.0*BeamEnergy","2.0*BeamEnergy*sin(0.011)","0.0","0.0");
 
