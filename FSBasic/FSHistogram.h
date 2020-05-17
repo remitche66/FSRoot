@@ -103,10 +103,14 @@ class FSHistogram{
     static TH1F* getTH1FRandom(TH1F* hist, int numRandomTrials);
     static TH2F* getTH2FRandom(TH2F* hist, int numRandomTrials);
 
-    static TH1F* getTH1F(TH2F* hist2d, TString projectionAxis = "X", bool function = false);
+    static TH1F* getTH1F(TH2F* hist2d, TString projectionAxis = "X", bool function = false,
+                                        double range1 = 0.0, double range2 = -1.0);
 
-    static pair<double,double> integral(TH1F* hist, bool function = false);
-    static pair<double,double> integral(TH2F* hist, bool function = false);
+    static pair<double,double> integral(TH1F* hist, bool function = false, 
+                                        double x1 = 0.0, double x2 = -1.0);
+    static pair<double,double> integral(TH2F* hist, bool function = false,
+                                        double x1 = 0.0, double x2 = -1.0,
+                                        double y1 = 0.0, double y2 = -1.0);
 
 
       // ********************************************************

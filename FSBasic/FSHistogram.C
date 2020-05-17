@@ -635,28 +635,28 @@ FSHistogram::getTH2FRandom(TH2F* hist, int numRandomTrials){
 
 
 TH1F*
-FSHistogram::getTH1F(TH2F* hist2d, TString projectionAxis, bool function){
+FSHistogram::getTH1F(TH2F* hist2d, TString projectionAxis, bool function,
+                      double range1, double range2){
   TH1F* hist = NULL;
-  if (projectionAxis == "x") projectionAxis = "X";
-  if (projectionAxis == "y") projectionAxis = "Y";
+  if (!hist2d) return hist;
+  projectionAxis.ToUpper();
   if ((projectionAxis != "X") && (projectionAxis != "Y")) return hist;
-  int nbins1 = hist2d->GetNbinsX();
-  int nbins2 = hist2d->GetNbinsY();
-  double low1  = hist2d->GetXaxis()->GetXmin();
-  double high1 = hist2d->GetXaxis()->GetXmax();
-  double low2  = hist2d->GetYaxis()->GetXmin();
-  double high2 = hist2d->GetYaxis()->GetXmax();
-  if (projectionAxis == "Y"){
-    int iswap = nbins1; nbins1 = nbins2; nbins2 = iswap;
-    double dswap = low1; low1 = low2; low2 = dswap;
-    dswap = high1; high1 = high2; high2 = dswap;
-  }
+  TAxis* axis1 = hist2d->GetXaxis(); if (projectionAxis == "Y") axis1 = hist2d->GetYaxis();
+  TAxis* axis2 = hist2d->GetYaxis(); if (projectionAxis == "Y") axis2 = hist2d->GetXaxis();
+  int nbins1 = axis1->GetNbins();
+  int nbins2 = axis2->GetNbins();
+  double low1  = axis1->GetXmin();
+  double high1 = axis1->GetXmax();
+  if ((nbins1 == 0) || (nbins2 == 0)) return hist;
+  if (low1 >= high1) return hist;
   hist = new TH1F("histProject","",nbins1,low1,high1);
   for (int i1 = 1; i1 <= nbins1; i1++){
     double proj = 0.0;
     double eproj = 0.0;
     double eproj2 = 0.0;
     for (int i2 = 1; i2 <= nbins2; i2++){
+      double r0 = axis2->GetBinCenter(i2);
+      if ((range2 > range1) && ((r0 < range1) || (r0 > range2))) continue;
       int ix = i1; int iy = i2;
       if (projectionAxis == "Y"){ ix = i2; iy = i1; }
       proj += hist2d->GetBinContent(ix,iy); 
@@ -664,7 +664,7 @@ FSHistogram::getTH1F(TH2F* hist2d, TString projectionAxis, bool function){
       eproj2 += (eproj*eproj);
     }
     eproj = sqrt(eproj2);
-    if (function){ proj = proj/nbins2*(high2-low2); eproj = eproj/nbins2*(high2-low2); }
+    if (function){ double w = axis2->GetBinWidth(1); proj *= w; eproj *= w; }
     hist->SetBinContent(i1,proj);
     hist->SetBinError(i1,eproj);
   }
@@ -676,29 +676,33 @@ FSHistogram::getTH1F(TH2F* hist2d, TString projectionAxis, bool function){
 }
 
 pair<double,double>
-FSHistogram::integral(TH1F* hist, bool function){
+FSHistogram::integral(TH1F* hist, bool function, double x1, double x2){
   if (!hist) return pair<double,double> (0.0,0.0);
+  if (hist->GetNbinsX() == 0) return pair<double,double> (0.0,0.0);
+  if (hist->GetBinWidth(1) == 0) return pair<double,double> (0.0,0.0);
   int nbins = hist->GetNbinsX();
-  double low  = hist->GetXaxis()->GetXmin();
-  double high = hist->GetXaxis()->GetXmax();
   double total = 0.0;
   double etotal = 0.0;
   double etotal2 = 0.0;
   for (int i = 1; i <= nbins; i++){
+    double x0 = hist->GetBinCenter(i);
+    if ((x2 > x1) && ((x0 < x1) || (x0 > x2))) continue;
     total += hist->GetBinContent(i);
     etotal = hist->GetBinError(i);
     etotal2 += etotal*etotal;
   }
   etotal = sqrt(etotal2);
-  if (function){ total = total/nbins*(high-low); etotal = etotal/nbins*(high-low); }
+  if (function){ double w = hist->GetBinWidth(1); total *= w; etotal *= w; }
   return pair<double,double> (total,etotal);
 }
 
 pair<double,double>
-FSHistogram::integral(TH2F* hist, bool function){
+FSHistogram::integral(TH2F* hist, bool function, double x1, double x2, double y1, double y2){
   if (!hist) return pair<double,double> (0.0,0.0);
-  TH1F* hist1d = getTH1F(hist,"X",function);
-  return integral(hist1d,function);
+  TH1F* hist1d = getTH1F(hist,"X",function,y1,y2);
+  pair<double,double> answer = integral(hist1d,function,x1,x2);
+  delete hist1d;
+  return answer;
 }
 
 
