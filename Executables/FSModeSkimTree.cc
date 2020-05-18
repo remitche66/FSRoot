@@ -9,7 +9,7 @@ void printUsage();
 
 int main(int argc, char* argv[]){
 
-  if (argc != 11){ 
+  if (argc < 5){ 
     cout << "FSModeSkimTree ERROR: Wrong number of arguments." << endl;
     printUsage();
     exit(0);
@@ -20,7 +20,7 @@ int main(int argc, char* argv[]){
   TString fileNameOutput = "";
   TString mode = "";
   TString cuts = "";
-  for (int i = 1; i <= 9; i++){
+  for (int i = 1; i < argc-1; i++){
     TString arg(argv[i]);
     if (arg == "-i")    fileNameInput = argv[i+1];
     if (arg == "-o")    fileNameOutput = argv[i+1];
@@ -28,12 +28,12 @@ int main(int argc, char* argv[]){
     if (arg == "-cuts") cuts = argv[i+1];
     if (arg == "-nt")   chainName = argv[i+1];
   }
-
-  if ((fileNameInput == "") || (fileNameOutput == "") || (mode == "") || (cuts == "") || (chainName == "")){
-    cout << "FSModeSkimTree ERROR: Wrong input parameters." << endl;
-    printUsage();
+  if (chainName == "") chainName = FSTree::getTreeNameFromFile(fileNameInput);
+  if (chainName == ""){
+    cout << "FSSkimTree ERROR: No tree name found." << endl;
     exit(0);
   }
+  if (mode == ""){ FSModeInfo mi(chainName); mode = mi.modeString(); }
 
   cout << "********************" << endl;
   cout << "RUNNING FSModeSkimTree" << endl;
@@ -44,6 +44,12 @@ int main(int argc, char* argv[]){
   cout << "TreeName:       " << chainName << endl;
   cout << "Mode:           " << mode << endl;
   cout << "********************" << endl << endl;
+
+  if ((fileNameInput == "") || (fileNameOutput == "")){
+    cout << "FSModeSkimTree ERROR: Wrong input parameters." << endl;
+    printUsage();
+    exit(0);
+  }
 
   cout << "FSModeSkimTree: mode to skim (make sure this shows the right particles)..." << endl << endl;
   FSModeCollection::addModeInfo(mode);

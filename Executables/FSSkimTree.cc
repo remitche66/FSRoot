@@ -8,7 +8,7 @@ void printUsage();
 
 int main(int argc, char* argv[]){
 
-  if (argc < 7){ 
+  if (argc < 5){ 
     cout << "FSSkimTree ERROR: Wrong number of arguments." << endl;
     printUsage();
     exit(0);
@@ -18,7 +18,7 @@ int main(int argc, char* argv[]){
   TString chainName = "";
   TString fileNameOutput = "";
   TString cuts = "";
-  for (int i = 1; i <= 7; i++){
+  for (int i = 1; i < argc-1; i++){
     TString arg(argv[i]);
     if (arg == "-i")    fileNameInput = argv[i+1];
     if (arg == "-o")    fileNameOutput = argv[i+1];
@@ -31,12 +31,6 @@ int main(int argc, char* argv[]){
     exit(0);
   }
 
-  if ((fileNameInput == "") || (fileNameOutput == "") || (cuts == "")){
-    cout << "FSSkimTree ERROR: Wrong input parameters." << endl;
-    printUsage();
-    exit(0);
-  }
-
   cout << "********************" << endl;
   cout << "RUNNING FSSkimTree" << endl;
   cout << "********************" << endl;
@@ -45,6 +39,12 @@ int main(int argc, char* argv[]){
   cout << "CutString:      " << cuts << endl;
   cout << "TreeName:       " << chainName << endl;
   cout << "********************" << endl;
+
+  if ((fileNameInput == "") || (fileNameOutput == "")){
+    cout << "FSSkimTree ERROR: Wrong input parameters." << endl;
+    printUsage();
+    exit(0);
+  }
 
   FSTree::skimTree(fileNameInput, chainName, fileNameOutput, cuts);
 
