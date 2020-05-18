@@ -6,6 +6,7 @@
 #include "TChainElement.h"
 #include "TObjArray.h"
 #include "TString.h"
+#include "TKey.h"
 #include "TH1F.h"
 #include "TH2F.h"
 #include "TFile.h"
