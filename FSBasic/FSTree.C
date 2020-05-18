@@ -130,6 +130,30 @@ FSTree::getTChain(TString fileName, TString ntName, TString& STATUS){
 }
 
 
+TString
+FSTree::getTreeNameFromFile(TString fileName){
+  TString treeName("");
+  vector<TString> fileNames = FSSystem::getAbsolutePaths(fileName, false);
+  if (fileNames.size() == 0) return treeName;
+  fileName = fileNames[0];
+  if (!FSSystem::checkRootFormat(fileName,false)) return treeName;
+  TFile* inFile = new TFile(fileName);
+  if (!inFile) return treeName;
+  TIter nextkey(inFile->GetListOfKeys());
+  while (TKey* key = (TKey*)nextkey() ){
+    TObject* obj = key->ReadObj();
+    if (obj->IsA()->InheritsFrom("TTree")){
+      TTree* tree = (TTree*)obj;
+      treeName = tree->GetName();
+    }
+  }
+  inFile->Close();
+  delete inFile;
+  return treeName;
+}
+
+
+
 
   // ********************************************************
   // SKIM A TREE AND OUTPUT TO A DIFFERENT FILE
@@ -145,6 +169,7 @@ FSTree::skimTree(TString fileNameInput, TString chainName,
   cuts = FSString::removeWhiteSpace(cuts);
   newChainName = FSString::removeWhiteSpace(newChainName);
   printCommandFile = FSString::removeWhiteSpace(printCommandFile);
+  if (chainName == "") chainName = getTreeNameFromFile(fileNameInput);
 
   // just write the command to a file and return
 
@@ -185,7 +210,7 @@ FSTree::skimTree(TString fileNameInput, TString chainName,
   if (!FSControl::QUIET){
     cout << endl;
     cout << "Copying File:" << endl;
-    cout << "\t" << fileNameInput << endl;
+    cout << "\t" << fileNameInput << " (tree = " << chainName << ")" << endl;
     cout << "To File:" << endl;
     cout << "\t" << fileNameOutput << endl;
     cout << endl;

@@ -26,6 +26,8 @@ class FSTree{
     static TChain* getTChain(TString fileName, TString ntName); 
     static TChain* getTChain(TString fileName, TString ntName, TString& STATUS); 
 
+    static TString getTreeNameFromFile(TString fileName);
+
 
       // ********************************************************
       // SKIM A TREE AND OUTPUT TO A DIFFERENT FILE
