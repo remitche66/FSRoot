@@ -8,7 +8,7 @@ void printUsage();
 
 int main(int argc, char* argv[]){
 
-  if (argc != 9){ 
+  if (argc < 7){ 
     cout << "FSSkimTree ERROR: Wrong number of arguments." << endl;
     printUsage();
     exit(0);
@@ -25,8 +25,13 @@ int main(int argc, char* argv[]){
     if (arg == "-cuts") cuts = argv[i+1];
     if (arg == "-nt")   chainName = argv[i+1];
   }
+  if (chainName == "") chainName = FSTree::getTreeNameFromFile(fileNameInput);
+  if (chainName == ""){
+    cout << "FSSkimTree ERROR: No tree name found." << endl;
+    exit(0);
+  }
 
-  if ((fileNameInput == "") || (fileNameOutput == "") || (cuts == "") || (chainName == "")){
+  if ((fileNameInput == "") || (fileNameOutput == "") || (cuts == "")){
     cout << "FSSkimTree ERROR: Wrong input parameters." << endl;
     printUsage();
     exit(0);
