@@ -62,7 +62,8 @@ class FSModeCollection{
       // PRINT COMBINATORICS TO THE SCREEN FOR TESTING
       // *******************************************************
 
-    static void testCombinatorics(TString category, TString testString);
+    static void testCombinatorics(TString category, TString testString,
+                                    bool expandCuts = false);
 
 
       // *******************************************************
