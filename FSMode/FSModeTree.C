@@ -169,7 +169,7 @@ FSModeTree::createChi2Friends(TString fileName, TString ntName, TString category
     for (int ientry = 0; ientry < nt->GetEntries(); ientry++){
       nt->GetEntry(ientry);
       if (ientry > 0 && ientry % 10000 == 0) cout << "\t" << ientry << endl;
-      if (CHI2 > 10000.0) CHI2 = 10000.0;  int ICHI2 = (int)(1000.0*CHI2);
+      if (CHI2 < 0 || CHI2 > 10000.0) CHI2 = 10000.0;  int ICHI2 = (int)(1000.0*CHI2);
       if (mc){ MCHELP = MCHELP-(int)MCHELP;  MCHELP = (int)(10000*MCHELP);  RUN += MCHELP;  EVENT += MCHELP; }
       pair<int,int> pRunEvent = pair<int,int>((int)RUN,(int)EVENT);
       map<int, vector<int> > mModeChi2;
@@ -242,7 +242,7 @@ FSModeTree::createChi2Friends(TString fileName, TString ntName, TString category
     for (int ientry = 0; ientry < nt->GetEntries(); ientry++){
       nt->GetEntry(ientry);
       if (ientry > 0 && ientry % 10000 == 0) cout << "\t" << ientry << endl;
-      if (CHI2 > 10000.0) CHI2 = 10000.0;  int ICHI2 = (int)(1000.0*CHI2);
+      if (CHI2 < 0 || CHI2 > 10000.0) CHI2 = 10000.0;  int ICHI2 = (int)(1000.0*CHI2);
       if (mc){ MCHELP = MCHELP-(int)MCHELP;  MCHELP = (int)(10000*MCHELP);  RUN += MCHELP;  EVENT += MCHELP; }
       pair<int,int> pRunEvent = pair<int,int>((int)RUN,(int)EVENT);
       map<int, vector<int> > mModeChi2;
