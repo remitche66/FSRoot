@@ -133,6 +133,7 @@ FSModeTree::createChi2Friends(TString fileName, TString ntName, TString category
   if (modeVector.size() == 0){
     cout << "FSModeTree:  there are no modes associated with this category..." << endl;
     cout << "                ... skipping createChi2Friends" << endl;
+    return;
   }
 
 
@@ -140,25 +141,19 @@ FSModeTree::createChi2Friends(TString fileName, TString ntName, TString category
   //           loop over all trees and record RUN, EVENT, CHI2, IMODE in
   //               map< pair<RUN,EVENT>, map<IMODE, vector<CHI2> > >
 
-  map< pair<int,int>, map<int, vector<float> > >  chi2map;
+  map< pair<int,int>, map<int, vector<int> > >  chi2map;
 
 
     // loop over all modes in this category
 
   for (unsigned int i = 0; i < modeVector.size(); i++){
-
     TString fileName_i = modeVector[i]->modeString(fileName);
     TString ntName_i   = modeVector[i]->modeString(ntName);
-
-
-      // set up the TChain and the RUN, EVENT, CHI2, and IMODE variables
-
     TChain* nt = FSTree::getTChain(fileName_i,ntName_i);
     if (!nt){
       cout << "FSModeTree: trouble creating TChain inside createChi2Friends" << endl;
       continue;
     }
-
     int IMODE = i + 1;
     Double_t RUN, EVENT, CHI2, MCHELP = 0.0;
     nt->SetBranchAddress("Run",    &RUN);
@@ -174,20 +169,21 @@ FSModeTree::createChi2Friends(TString fileName, TString ntName, TString category
     for (int ientry = 0; ientry < nt->GetEntries(); ientry++){
       nt->GetEntry(ientry);
       if (ientry > 0 && ientry % 10000 == 0) cout << "\t" << ientry << endl;
-
-      if (mc){ MCHELP = MCHELP-(int)MCHELP;  MCHELP = (int)(10000*MCHELP);  RUN *= MCHELP;  EVENT += MCHELP; }
-
+      if (CHI2 > 10000.0) CHI2 = 10000.0;  int ICHI2 = (int)(1000.0*CHI2);
+      if (mc){ MCHELP = MCHELP-(int)MCHELP;  MCHELP = (int)(10000*MCHELP);  RUN += MCHELP;  EVENT += MCHELP; }
       pair<int,int> pRunEvent = pair<int,int>((int)RUN,(int)EVENT);
-
-      map<int, vector<float> > mModeChi2;
+      map<int, vector<int> > mModeChi2;
       if (chi2map.find(pRunEvent) != chi2map.end()) mModeChi2 = chi2map[pRunEvent];
+      vector<int> vChi2I;  vector<int> vChi20;
+      if (mModeChi2.find(IMODE) != mModeChi2.end()) vChi2I = mModeChi2[IMODE];
+      if (mModeChi2.find(0)     != mModeChi2.end()) vChi20 = mModeChi2[0];
 
-      vector<float> vChi2;
-      if (mModeChi2.find(IMODE) != mModeChi2.end()) vChi2 = mModeChi2[IMODE];
-
-      vChi2.push_back((float)CHI2);
-      std::sort(vChi2.begin(), vChi2.end());
-      mModeChi2[IMODE] = vChi2;
+      vChi2I.push_back(ICHI2);
+      vChi20.push_back(ICHI2);
+      std::sort(vChi2I.begin(), vChi2I.end());
+      std::sort(vChi20.begin(), vChi20.end());
+      mModeChi2[IMODE] = vChi2I;
+      mModeChi2[0]     = vChi20;
       chi2map[pRunEvent] = mModeChi2;
     }
 
@@ -200,26 +196,19 @@ FSModeTree::createChi2Friends(TString fileName, TString ntName, TString category
 
 
   for (unsigned int i = 0; i < modeVector.size(); i++){
-
     TString fileName_i = modeVector[i]->modeString(fileName);
     TString ntName_i   = modeVector[i]->modeString(ntName);
-
-
-      // set up the TChain and the RUN, EVENT, CHI2, and IMODE variables
-
     TChain* nt = FSTree::getTChain(fileName_i,ntName_i);
     if (!nt){
       cout << "FSModeTree: trouble creating TChain inside createChi2Friends" << endl;
       continue;
     }
-
     int IMODE = i + 1;
     Double_t RUN, EVENT, CHI2, MCHELP = 0.0;
     nt->SetBranchAddress("Run",    &RUN);
     nt->SetBranchAddress("Event",  &EVENT);
     nt->SetBranchAddress("Chi2",   &CHI2);
     if (mc) nt->SetBranchAddress("MCDecayParticlePxP1", &MCHELP);
-
 
       // create new files to hold the friend trees
 
@@ -231,8 +220,6 @@ FSModeTree::createChi2Friends(TString fileName, TString ntName, TString category
 
 
       // set up the new friend trees
-
-    float EPSILON = 0.0001;
 
     TString ntName_chi2(ntName_i);
     ntName_chi2 += "_chi";
@@ -255,32 +242,41 @@ FSModeTree::createChi2Friends(TString fileName, TString ntName, TString category
     for (int ientry = 0; ientry < nt->GetEntries(); ientry++){
       nt->GetEntry(ientry);
       if (ientry > 0 && ientry % 10000 == 0) cout << "\t" << ientry << endl;
-
-      if (mc){ MCHELP = MCHELP-(int)MCHELP;  MCHELP = (int)(10000*MCHELP);  RUN *= MCHELP;  EVENT += MCHELP; }
-
+      if (CHI2 > 10000.0) CHI2 = 10000.0;  int ICHI2 = (int)(1000.0*CHI2);
+      if (mc){ MCHELP = MCHELP-(int)MCHELP;  MCHELP = (int)(10000*MCHELP);  RUN += MCHELP;  EVENT += MCHELP; }
       pair<int,int> pRunEvent = pair<int,int>((int)RUN,(int)EVENT);
-
-      map<int, vector<float> > mModeChi2;
+      map<int, vector<int> > mModeChi2;
       if (chi2map.find(pRunEvent) != chi2map.end()) mModeChi2 = chi2map[pRunEvent];
+      vector<int> vChi2I;  vector<int> vChi20;
+      if (mModeChi2.find(IMODE) != mModeChi2.end()) vChi2I = mModeChi2[IMODE];
+      if (mModeChi2.find(0)     != mModeChi2.end()) vChi20 = mModeChi2[0];
 
-      vector<float> vChi2;
-      if (mModeChi2.find(IMODE) != mModeChi2.end()) vChi2 = mModeChi2[IMODE];
-
-      NCOMBINATIONS = vChi2.size();
+      NCOMBINATIONS = vChi2I.size();
+      NCOMBINATIONSGLOBAL = vChi20.size();
 
       CHI2RANK = 1;
-      for (unsigned int ichi2 = 0; ichi2 < vChi2.size(); ichi2++){
-        if (vChi2[ichi2]+EPSILON < CHI2) CHI2RANK++;
+      if (vChi2I.size() > 1){
+        for (unsigned int ix = 0; ix < vChi2I.size()-1; ix++){
+          if (ICHI2 >= vChi2I[ix] && ICHI2 <= vChi2I[ix+1]){
+            vChi2I[ix+1] = -10000000;
+            mModeChi2[IMODE] = vChi2I;
+            chi2map[pRunEvent] = mModeChi2;
+            break;
+          }
+          CHI2RANK++;
+        }
       }
 
-      NCOMBINATIONSGLOBAL = 0;
       CHI2RANKGLOBAL = 1;
-      for (map<int, vector<float> >::const_iterator mItr = mModeChi2.begin(); 
-           mItr != mModeChi2.end(); mItr++){
-        vector<float> vChi2Temp = mItr->second;
-        for (unsigned int ichi2 = 0; ichi2 < vChi2Temp.size(); ichi2++){
-          NCOMBINATIONSGLOBAL++;
-          if (vChi2Temp[ichi2]+EPSILON < CHI2) CHI2RANKGLOBAL++;
+      if (vChi20.size() > 1){
+        for (unsigned int ix = 0; ix < vChi20.size()-1; ix++){
+          if (ICHI2 >= vChi20[ix] && ICHI2 <= vChi20[ix+1]){
+            vChi20[ix+1] = -10000000;
+            mModeChi2[0] = vChi20;
+            chi2map[pRunEvent] = mModeChi2;
+            break;
+          }
+          CHI2RANKGLOBAL++;
         }
       }
 
@@ -297,5 +293,3 @@ FSModeTree::createChi2Friends(TString fileName, TString ntName, TString category
   }
 
 }
-
-
