@@ -220,25 +220,26 @@ FSModeInfo::modeGlueXFormat(){
 }
 
 TString
-FSModeInfo::modeComboFormat(int min){
+FSModeInfo::modeComboFormat(int min, TString tag){
   TString cF("");
   int np;
-  np = modeNGamma  ();  for (int i = 0; i < np; i++){ cF += "[gamma"  ; cF += (i+min); cF += "],"; }
-  np = modeNEp     ();  for (int i = 0; i < np; i++){ cF += "[e+"     ; cF += (i+min); cF += "],"; }
-  np = modeNEm     ();  for (int i = 0; i < np; i++){ cF += "[e-"     ; cF += (i+min); cF += "],"; }
-  np = modeNMp     ();  for (int i = 0; i < np; i++){ cF += "[mu+"    ; cF += (i+min); cF += "],"; }
-  np = modeNMm     ();  for (int i = 0; i < np; i++){ cF += "[mu-"    ; cF += (i+min); cF += "],"; }
-  np = modeNPi0    ();  for (int i = 0; i < np; i++){ cF += "[pi0"    ; cF += (i+min); cF += "],"; }
-  np = modeNPip    ();  for (int i = 0; i < np; i++){ cF += "[pi+"    ; cF += (i+min); cF += "],"; }
-  np = modeNPim    ();  for (int i = 0; i < np; i++){ cF += "[pi-"    ; cF += (i+min); cF += "],"; }
-  np = modeNKp     ();  for (int i = 0; i < np; i++){ cF += "[K+"     ; cF += (i+min); cF += "],"; }
-  np = modeNKm     ();  for (int i = 0; i < np; i++){ cF += "[K-"     ; cF += (i+min); cF += "],"; }
-  np = modeNKs     ();  for (int i = 0; i < np; i++){ cF += "[Ks"     ; cF += (i+min); cF += "],"; }
-  np = modeNEta    ();  for (int i = 0; i < np; i++){ cF += "[eta"    ; cF += (i+min); cF += "],"; }
-  np = modeNPp     ();  for (int i = 0; i < np; i++){ cF += "[p+"     ; cF += (i+min); cF += "],"; }
-  np = modeNPm     ();  for (int i = 0; i < np; i++){ cF += "[p-"     ; cF += (i+min); cF += "],"; }
-  np = modeNLambda ();  for (int i = 0; i < np; i++){ cF += "[Lambda" ; cF += (i+min); cF += "],"; }
-  np = modeNALambda();  for (int i = 0; i < np; i++){ cF += "[ALambda"; cF += (i+min); cF += "],"; }
+  TString ind[10]; for (int i = 0; i < 10; i++){ ind[i] = FSString::int2TString(i+min) + tag; }
+  np = modeNGamma  ();  for (int i = 0; i < np; i++){ cF += "[gamma"  ; cF += ind[i] + "],"; }
+  np = modeNEp     ();  for (int i = 0; i < np; i++){ cF += "[e+"     ; cF += ind[i] + "],"; }
+  np = modeNEm     ();  for (int i = 0; i < np; i++){ cF += "[e-"     ; cF += ind[i] + "],"; }
+  np = modeNMp     ();  for (int i = 0; i < np; i++){ cF += "[mu+"    ; cF += ind[i] + "],"; }
+  np = modeNMm     ();  for (int i = 0; i < np; i++){ cF += "[mu-"    ; cF += ind[i] + "],"; }
+  np = modeNPi0    ();  for (int i = 0; i < np; i++){ cF += "[pi0"    ; cF += ind[i] + "],"; }
+  np = modeNPip    ();  for (int i = 0; i < np; i++){ cF += "[pi+"    ; cF += ind[i] + "],"; }
+  np = modeNPim    ();  for (int i = 0; i < np; i++){ cF += "[pi-"    ; cF += ind[i] + "],"; }
+  np = modeNKp     ();  for (int i = 0; i < np; i++){ cF += "[K+"     ; cF += ind[i] + "],"; }
+  np = modeNKm     ();  for (int i = 0; i < np; i++){ cF += "[K-"     ; cF += ind[i] + "],"; }
+  np = modeNKs     ();  for (int i = 0; i < np; i++){ cF += "[Ks"     ; cF += ind[i] + "],"; }
+  np = modeNEta    ();  for (int i = 0; i < np; i++){ cF += "[eta"    ; cF += ind[i] + "],"; }
+  np = modeNPp     ();  for (int i = 0; i < np; i++){ cF += "[p+"     ; cF += ind[i] + "],"; }
+  np = modeNPm     ();  for (int i = 0; i < np; i++){ cF += "[p-"     ; cF += ind[i] + "],"; }
+  np = modeNLambda ();  for (int i = 0; i < np; i++){ cF += "[Lambda" ; cF += ind[i] + "],"; }
+  np = modeNALambda();  for (int i = 0; i < np; i++){ cF += "[ALambda"; cF += ind[i] + "],"; }
   if (cF.Length() != 0) cF = FSString::subString(cF,0,cF.Length()-1);
   return cF;
 }
