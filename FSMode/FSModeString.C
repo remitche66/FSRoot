@@ -79,6 +79,9 @@ FSModeString::rootSymbols(TString input){
   while (input.Contains("#eta+-0")){
     input.Replace(input.Index("#eta+-0"),7,"#eta_{+-0}");
   }
+  while (input.Contains("#eta000")){
+    input.Replace(input.Index("#eta000"),7,"#eta_{000}");
+  }
   while (input.Contains("p+")){
     input.Replace(input.Index("p+"),2,"p^{+}");
   }
@@ -190,6 +193,9 @@ FSModeString::latexSymbols(TString input){
   }
   while (input.Contains("#eta+-0")){
     input.Replace(input.Index("#eta+-0"),7,"\\eta_{+-0}");
+  }
+  while (input.Contains("#eta000")){
+    input.Replace(input.Index("#eta000"),7,"\\eta_{000}");
   }
   while (input.Contains("p+")){
     input.Replace(input.Index("p+"),2,"p^{+}");
