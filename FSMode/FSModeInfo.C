@@ -670,6 +670,11 @@ FSModeInfo::modeCombinatorics(TString varString, bool printCombinatorics, bool r
     vector< vector<int> > combinatorics;
     vector< TString > modifiedStrings;
 
+    if (!FSString::checkParentheses(expandedVarStrings[isubmode],"[","]")){
+      cout << "FSModeInfo WARNING: possible problem with brackets in " << 
+                 expandedVarStrings[isubmode] << endl; 
+    }
+
        // first make lists like this (for example K+ K+ K- K- pi+ pi- pi0 pi0):
        //    particleLists              replaceStrings
        //      1 2                          [K+]
@@ -677,93 +682,52 @@ FSModeInfo::modeCombinatorics(TString varString, bool printCombinatorics, bool r
        //      7 8                          [pi0]
        //      5                            [pi+]
 
-    for (int i = 0; i < 10; i++){
-      TString particle;
-      TString pI(FSString::int2TString(i));  if (pI == "0") pI = "";
-      particle = "[ALL";  particle += pI;  particle += "]";
-      if (expandedVarStrings[isubmode].Contains(particle)){ replaceStrings.push_back(particle); 
-	particleLists.push_back(modeParticleIndices()); }
-      particle = "[Lambda";  particle += pI;  particle += "]";
-      if (expandedVarStrings[isubmode].Contains(particle)){ replaceStrings.push_back(particle); 
-	particleLists.push_back(modeLambdaIndices()); }
-      particle = "[ALambda";  particle += pI;  particle += "]";
-      if (expandedVarStrings[isubmode].Contains(particle)){ replaceStrings.push_back(particle); 
-	particleLists.push_back(modeALambdaIndices()); }
-      particle = "[tk";  particle += pI;  particle += "]";
-      if (expandedVarStrings[isubmode].Contains(particle)){ replaceStrings.push_back(particle); 
-	particleLists.push_back(modeTkIndices()); }
-      particle = "[tk+";  particle += pI;  particle += "]";
-      if (expandedVarStrings[isubmode].Contains(particle)){ replaceStrings.push_back(particle); 
-	particleLists.push_back(modeTkpIndices()); }
-      particle = "[tk-";  particle += pI;  particle += "]";
-      if (expandedVarStrings[isubmode].Contains(particle)){ replaceStrings.push_back(particle); 
-	particleLists.push_back(modeTkmIndices()); }
-      particle = "[l";  particle += pI;  particle += "]";
-      if (expandedVarStrings[isubmode].Contains(particle)){ replaceStrings.push_back(particle); 
-	particleLists.push_back(modeLIndices()); }
-      particle = "[l+";  particle += pI;  particle += "]";
-      if (expandedVarStrings[isubmode].Contains(particle)){ replaceStrings.push_back(particle); 
-	particleLists.push_back(modeLpIndices()); }
-      particle = "[l-";  particle += pI;  particle += "]";
-      if (expandedVarStrings[isubmode].Contains(particle)){ replaceStrings.push_back(particle); 
-	particleLists.push_back(modeLmIndices()); }
-      particle = "[e";  particle += pI;  particle += "]";
-      if (expandedVarStrings[isubmode].Contains(particle)){ replaceStrings.push_back(particle); 
-	particleLists.push_back(modeEIndices()); }
-      particle = "[e+";  particle += pI;  particle += "]";
-      if (expandedVarStrings[isubmode].Contains(particle)){ replaceStrings.push_back(particle); 
-	particleLists.push_back(modeEpIndices()); }
-      particle = "[e-";  particle += pI;  particle += "]";
-      if (expandedVarStrings[isubmode].Contains(particle)){ replaceStrings.push_back(particle); 
-	particleLists.push_back(modeEmIndices()); }
-      particle = "[mu";  particle += pI;  particle += "]";
-      if (expandedVarStrings[isubmode].Contains(particle)){ replaceStrings.push_back(particle); 
-	particleLists.push_back(modeMIndices()); }
-      particle = "[mu+";  particle += pI;  particle += "]";
-      if (expandedVarStrings[isubmode].Contains(particle)){ replaceStrings.push_back(particle); 
-	particleLists.push_back(modeMpIndices()); }
-      particle = "[mu-";  particle += pI;  particle += "]";
-      if (expandedVarStrings[isubmode].Contains(particle)){ replaceStrings.push_back(particle); 
-	particleLists.push_back(modeMmIndices()); }
-      particle = "[p";  particle += pI;  particle += "]";
-      if (expandedVarStrings[isubmode].Contains(particle)){ replaceStrings.push_back(particle); 
-	particleLists.push_back(modePIndices()); }
-      particle = "[p+";  particle += pI;  particle += "]";
-      if (expandedVarStrings[isubmode].Contains(particle)){ replaceStrings.push_back(particle); 
-	particleLists.push_back(modePpIndices()); }
-      particle = "[p-";  particle += pI;  particle += "]";
-      if (expandedVarStrings[isubmode].Contains(particle)){ replaceStrings.push_back(particle); 
-	particleLists.push_back(modePmIndices()); }
-      particle = "[eta";  particle += pI;  particle += "]";
-      if (expandedVarStrings[isubmode].Contains(particle)){ replaceStrings.push_back(particle); 
-	particleLists.push_back(modeEtaIndices()); }
-      particle = "[gamma";  particle += pI;  particle += "]";
-      if (expandedVarStrings[isubmode].Contains(particle)){ replaceStrings.push_back(particle); 
-	particleLists.push_back(modeGammaIndices()); }
-      particle = "[K";  particle += pI;  particle += "]";
-      if (expandedVarStrings[isubmode].Contains(particle)){ replaceStrings.push_back(particle); 
-	particleLists.push_back(modeKIndices()); }
-      particle = "[K+";  particle += pI;  particle += "]";
-      if (expandedVarStrings[isubmode].Contains(particle)){ replaceStrings.push_back(particle); 
-	particleLists.push_back(modeKpIndices()); }
-      particle = "[K-";  particle += pI;  particle += "]";
-      if (expandedVarStrings[isubmode].Contains(particle)){ replaceStrings.push_back(particle); 
-	particleLists.push_back(modeKmIndices()); }
-      particle = "[Ks";  particle += pI;  particle += "]";
-      if (expandedVarStrings[isubmode].Contains(particle)){ replaceStrings.push_back(particle); 
-	particleLists.push_back(modeKsIndices()); }
-      particle = "[pi";  particle += pI;  particle += "]";
-      if (expandedVarStrings[isubmode].Contains(particle)){ replaceStrings.push_back(particle); 
-	particleLists.push_back(modePiIndices()); }
-      particle = "[pi+";  particle += pI;  particle += "]";
-      if (expandedVarStrings[isubmode].Contains(particle)){ replaceStrings.push_back(particle); 
-	particleLists.push_back(modePipIndices()); }
-      particle = "[pi-";  particle += pI;  particle += "]";
-      if (expandedVarStrings[isubmode].Contains(particle)){ replaceStrings.push_back(particle); 
-	particleLists.push_back(modePimIndices()); }
-      particle = "[pi0";  particle += pI;  particle += "]";
-      if (expandedVarStrings[isubmode].Contains(particle)){ replaceStrings.push_back(particle); 
-	particleLists.push_back(modePi0Indices()); }
+    vector<TString> spacers;  spacers.push_back("[");  spacers.push_back("]");
+    vector<TString> parts = FSString::parseTString(expandedVarStrings[isubmode],spacers,true);
+    if (parts.size() < 3){
+      allCombinatorics.push_back(expandedVarStrings[isubmode]);
+      continue;
+    }
+    for (unsigned int i = 0; i < parts.size()-2; i++){
+      if ((parts[i] == "[") && (parts[i+2] == "]")){
+        TString contents = parts[i+1];
+        TString replaceString("");  replaceString += ("[" + contents + "]");
+        bool found = false;
+        for (unsigned int itmp = 0; itmp < replaceStrings.size(); itmp++){
+          if (replaceStrings[itmp] == replaceString){ found = true; break; }
+        }
+        if (found) continue;
+               // (careful with the order of these lines...)
+             if (contents.Index("ALL")     == 0){ particleLists.push_back(modeParticleIndices()); }
+        else if (contents.Index("Lambda")  == 0){ particleLists.push_back(modeLambdaIndices()); }
+        else if (contents.Index("ALambda") == 0){ particleLists.push_back(modeALambdaIndices()); }
+        else if (contents.Index("eta")     == 0){ particleLists.push_back(modeEtaIndices()); }
+        else if (contents.Index("gamma")   == 0){ particleLists.push_back(modeGammaIndices()); }
+        else if (contents.Index("tk+")     == 0){ particleLists.push_back(modeTkpIndices()); }
+        else if (contents.Index("tk-")     == 0){ particleLists.push_back(modeTkmIndices()); }
+        else if (contents.Index("tk")      == 0){ particleLists.push_back(modeTkIndices()); }
+        else if (contents.Index("pi+")     == 0){ particleLists.push_back(modePipIndices()); }
+        else if (contents.Index("pi-")     == 0){ particleLists.push_back(modePimIndices()); }
+        else if (contents.Index("pi0")     == 0){ particleLists.push_back(modePi0Indices()); }
+        else if (contents.Index("pi")      == 0){ particleLists.push_back(modePiIndices()); }
+        else if (contents.Index("mu+")     == 0){ particleLists.push_back(modeMpIndices()); }
+        else if (contents.Index("mu-")     == 0){ particleLists.push_back(modeMmIndices()); }
+        else if (contents.Index("mu")      == 0){ particleLists.push_back(modeMIndices()); }
+        else if (contents.Index("Ks")      == 0){ particleLists.push_back(modeKsIndices()); }
+        else if (contents.Index("K+")      == 0){ particleLists.push_back(modeKpIndices()); }
+        else if (contents.Index("K-")      == 0){ particleLists.push_back(modeKmIndices()); }
+        else if (contents.Index("K")       == 0){ particleLists.push_back(modeKIndices()); }
+        else if (contents.Index("e+")      == 0){ particleLists.push_back(modeEpIndices()); }
+        else if (contents.Index("e-")      == 0){ particleLists.push_back(modeEmIndices()); }
+        else if (contents.Index("e")       == 0){ particleLists.push_back(modeEIndices()); }
+        else if (contents.Index("l+")      == 0){ particleLists.push_back(modeLpIndices()); }
+        else if (contents.Index("l-")      == 0){ particleLists.push_back(modeLmIndices()); }
+        else if (contents.Index("l")       == 0){ particleLists.push_back(modeLIndices()); }
+        else if (contents.Index("p+")      == 0){ particleLists.push_back(modePpIndices()); }
+        else if (contents.Index("p-")      == 0){ particleLists.push_back(modePmIndices()); }
+        else if (contents.Index("p")       == 0){ particleLists.push_back(modePIndices()); }
+        if (particleLists.size() > replaceStrings.size()) replaceStrings.push_back(replaceString);
+      }
     }
 
       // check for a complete final state
