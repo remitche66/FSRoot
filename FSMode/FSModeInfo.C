@@ -223,7 +223,8 @@ TString
 FSModeInfo::modeComboFormat(int min, TString tag){
   TString cF("");
   int np;
-  TString ind[10]; for (int i = 0; i < 10; i++){ ind[i] = FSString::int2TString(i+min) + tag; }
+  if (tag != "") tag = "_" + tag + "_";  
+  TString ind[10]; for (int i = 0; i < 10; i++){ind[i] = tag + FSString::int2TString(i+min);}
   np = modeNGamma  ();  for (int i = 0; i < np; i++){ cF += "[gamma"  ; cF += ind[i] + "],"; }
   np = modeNEp     ();  for (int i = 0; i < np; i++){ cF += "[e+"     ; cF += ind[i] + "],"; }
   np = modeNEm     ();  for (int i = 0; i < np; i++){ cF += "[e-"     ; cF += ind[i] + "],"; }
