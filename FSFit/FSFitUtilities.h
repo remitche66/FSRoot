@@ -299,6 +299,14 @@ class FSFitUtilities{
       return FSFitMinuitList::getMinuit(mName)->fitStatus();
     }
 
+      // Get a likelihood scan.
+
+    static TH1F* getLikelihoodScan(TString mName, TString fpName, double xLow, double xHigh, unsigned int nSteps, double xScale=1.0){
+      // need to make sure the parameter is released before we try to scan so we get the best likelihood to start
+      FSFitUtilities::releaseParameter(fpName);
+      return FSFitMinuitList::getMinuit(mName)->scanLikelihood(fpName, xLow, xHigh, nSteps, xScale);
+    }
+
 
     // *************************
     //  RESET EVERYTHING

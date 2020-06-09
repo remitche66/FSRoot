@@ -400,9 +400,19 @@ class FSFitFunction{
       // the integral of the function
 
     virtual double integral(double x1, double x2) {
-      cout << "FSFitFunction ERROR: integral is not defined" << endl;
-      exit(0); 
-      return -1.0 + 0.0*(x2-x1);
+      // take number of steps to be proportional to the number of free parameters 
+      //  first guess: multiply by 10
+      unsigned int nSteps = m_fpNames.size()*10;
+      double stepSize = (x2-x1)/nSteps;
+      double total=0.0;
+      for(unsigned int i=0;i<nSteps;i++){
+        double m1 = fx(x1+i*stepSize);
+        double m2 = fx(x1+(i+0.5)*stepSize);
+        double m3 = fx(x1+(i+0.5)*stepSize);
+        double m4 = fx(x1+(i+1)*stepSize);
+        total+=stepSize/6.0*(m1+2*m2+2*m3+m4);
+      }
+      return total;
     }
 
     double integral(vector< pair<double,double> > xLimits){
@@ -934,6 +944,34 @@ class FSFitMinuit {
         m_minuit->mnexcm("MINOS",calls,1,err);
       postFSFitSetup(true);
     }
+
+
+    TH1F* scanLikelihood(TString fpName, double xLow, double xHigh, unsigned int nSteps, double xScale=1.0){
+      Double_t calls[1]; calls[0]=10000;
+      Int_t err;
+      TH1F *likelihoodCurve = new TH1F("likelihoodCurve","",nSteps,xLow*xScale,xHigh*xScale);
+      // first do a regular fit by calling migrad
+      migrad(1); // maybe do check
+      // then loop over the allowed x values in nSteps steps by fixing just the fpName parameter and refitting.
+      double x = xLow;
+      double stepSize = (double)(xHigh-xLow)/nSteps;
+      int outflag;
+      double minimum = fcnValue();
+      for (unsigned int i = 0; i < nSteps; i++){
+        x+=stepSize;
+        //FSFitUtilities::fixParameter(fpName,x);
+        FSFitParameter* par = FSFitParameterList::getParameter(fpName);
+        m_minuit->mnparm(par->parNumber()-1,par->fpName(),x,par->step(),  0.0,0.0, outflag);
+       // fix the parameter to the value
+              m_minuit->FixParameter(par->parNumber()-1);
+              // using migrad is 3x slower for some reason
+       m_minuit->mnexcm("MIGRAD",calls,1,err);
+       //migrad(0);
+       likelihoodCurve->SetBinContent(likelihoodCurve->FindBin(x*xScale),exp(-(fcnValue()-minimum)/2.0));
+      }
+      return likelihoodCurve;
+    }
+
 
     double fcnValue(){
       double fmin;  double fedm;  double errdef;
