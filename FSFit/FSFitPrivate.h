@@ -397,12 +397,22 @@ class FSFitFunction{
     virtual double efx(double x) { return 0.0*x; }
 
 
-      // the integral of the function
+     // the integral of the function
 
     virtual double integral(double x1, double x2) {
-      cout << "FSFitFunction ERROR: integral is not defined" << endl;
-      exit(0); 
-      return -1.0 + 0.0*(x2-x1);
+      // we want a reasonable number of steps, but I am not sure what that is
+      unsigned int nSteps = m_fpNames.size()*10;
+      // number of steps should be proportional to the number of free parameters since that affects the maximum curviness. Lets just multiply it by 10 and see how it goes.
+      double stepSize = (x2-x1)/nSteps;
+      double total=0.0;
+      for(unsigned int i=0;i<nSteps;i++){
+	double m1 = fx(x1+i*stepSize);
+	double m2 = fx(x1+(i+0.5)*stepSize);
+	double m3 = fx(x1+(i+0.5)*stepSize);
+	double m4 = fx(x1+(i+1)*stepSize);
+	total+=stepSize/6.0*(m1+2*m2+2*m3+m4);
+      }
+      return total;
     }
 
     double integral(vector< pair<double,double> > xLimits){
@@ -934,6 +944,37 @@ class FSFitMinuit {
       postFSFitSetup(true);
     }
 
+
+    TH1F* scanLikelihood(TString fpName, double xLow, double xHigh, unsigned int N, double scale=1.0){
+      Double_t calls[1]; calls[0]=10000;
+      Int_t err;
+      // here we want to fix the total number to be different and leave all other parameters alone.
+      // We also want to scale the x axis to a ratio of BFs in my case - only affects the final histogram
+      TH1F *likelihoodCurve = new TH1F("likelihoodCurve","",N,xLow*scale,xHigh*scale);
+      // first do a regular fit by calling migrad
+      migrad(1);
+      // could check this fit status and if it fails then we exit
+      
+      // then loop over the allowed x values in N steps by fixing just the signal number and refitting.
+      double x = xLow;
+      double stepSize = (double)(xHigh-xLow)/N;
+      int outflag;
+      double minimum = fcnValue();
+      for (unsigned int i = 0; i < N; i++){
+	   x+=stepSize;
+	   //FSFitUtilities::fixParameter(fpName,x);
+	   FSFitParameter* par = FSFitParameterList::getParameter(fpName);
+	   m_minuit->mnparm(par->parNumber()-1,par->fpName(),x,par->step(),  0.0,0.0, outflag);
+	  // fix the parameter to the value
+          m_minuit->FixParameter(par->parNumber()-1);
+          // using migrad is 3x slower for some reason
+	  m_minuit->mnexcm("MIGRAD",calls,1,err);
+	  //migrad(0);
+	  likelihoodCurve->SetBinContent(likelihoodCurve->FindBin(x*scale),exp(-(fcnValue()-minimum)/2.0));
+        }
+	 return likelihoodCurve;
+    }
+  
     double fcnValue(){
       double fmin;  double fedm;  double errdef;
       int npari; int nparx; int istat;
@@ -1004,9 +1045,13 @@ class FSFitMinuit {
         vector<double> vx  = FSFitDataSetList::getDataSet(dName)->x();
         FSFitFunction* func = FSFitFunctionList::getFunction(fName);
         double mu = func->integral(FSFitDataSetList::getDataSet(dName)->xLimits());
+	//cout << "getting the TF1" << endl;
+	double min = FSFitFunctionList::getFunction(fName)->fx(3.872);
+	//cout << "got TF1, now getting min" << endl;
+	//double min = f->GetMinimum();
         if (mu <= 0){
-          cout << "FSFitMinuit::unbinned WARNING: total integral of fit function is negative " 
-               << func->fName() << endl;
+          //cout << "FSFitMinuit::unbinned WARNING: total integral of fit function is negative " 
+	  //<< func->fName() << endl;
         }
         double sumlnfx = 0.0;
         for (unsigned int idata = 0; idata < vx.size(); idata++){
@@ -1014,16 +1059,16 @@ class FSFitMinuit {
           double fx = func->fx(x);
           double lnfx = 0.0;
           if (fx  > 0) lnfx = log(fx);
-          if (fx <= 0){
+          if (fx <= 0||min<0){
             fcnProblem = true;
             //lnfx = -1.0e3; // NOT SURE EXACTLY HOW TO DO THIS
-            cout << "FSFitMinuit::unbinned WARNING: negative fit function" << endl;
+            
           }
-          sumlnfx += lnfx;
+	  sumlnfx += lnfx;
         }
-        fcn += 2.0*(mu - sumlnfx);
+        fcn += 2.0*(abs(mu) - sumlnfx);
       }
-      if (fcnProblem) fcn += 1.0e3;
+      if (fcnProblem) fcn += 1.0e8;
       return fcn;
     }
 

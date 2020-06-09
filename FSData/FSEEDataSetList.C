@@ -135,8 +135,9 @@ FSEEDataSetList::addDataSetsFromFile(TString fileName){
       if (words.size() > 3) lumMax = FSString::TString2double(words[3]);
       for (unsigned int i = 0; i < FSEEDataSet::m_vectorLumCategories.size(); i++){
         if (FSEEDataSet::m_vectorLumCategories[i].first == category){
-          cout << "FSEEDataSetList ERROR: duplicate lumCategory command" << endl;
-          exit(0);
+          cout << "FSEEDataSetList ERROR: duplicate lumCategory command, input ignored" << endl;
+	  return;
+          //exit(0);
         }
       }
       pair<double,double> lumPair(lumMin,lumMax);

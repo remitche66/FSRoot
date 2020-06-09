@@ -47,6 +47,9 @@ class FSFitUtilities{
     }
 
 
+ 
+
+  
       // Return a TF1* associated with a given function (for drawing).
 
     static TF1* getTF1(TString fName){
@@ -312,6 +315,20 @@ class FSFitUtilities{
     }
 
 
+  static TH1F* getLikelihoodScan(TString mName, TString fpName, double xLow, double xHigh, unsigned int nSteps, double scale=1.0){
+      // need to make sure the parameter is released before we try to scan so we get the best likelihood to start
+      FSFitUtilities::releaseParameter(fpName);
+      return FSFitMinuitList::getMinuit(mName)->scanLikelihood(fpName, xLow, xHigh, nSteps, scale);
+    }
+  
+  /*
+/////////// this is the one for use with multithreading
+  static TH1F* getLikelihoodScan(TString mName, TString fpName, double xLow, double xHigh, unsigned int nSteps, double scale=1.0, const UInt_t poolSize=4U){
+      // need to make sure the parameter is released before we try to scan so we get the best likelihood to start
+      FSFitUtilities::releaseParameter(fpName);
+      return FSFitMinuitList::getMinuit(mName)->scanLikelihood(fpName, xLow, xHigh, nSteps, scale, poolSize);
+    }
+  */
 };
 
 

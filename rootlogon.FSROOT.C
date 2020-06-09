@@ -30,7 +30,7 @@ gStyle->SetTitleOffset(1.5,"Y");
 // ROOT TWEAKS
 // ***********
 
-TTreeFormula::SetMaxima(100000,10000,10000);
+TTreeFormula::SetMaxima(10000000,1000000,1000000);
 TTree::SetMaxTreeSize(100e9);
 TH1::SetDefaultSumw2(true);
 TH2::SetDefaultSumw2(true);
@@ -139,7 +139,10 @@ cout << "------------------------------------------" << endl;
 cout << "--- Finished loading the FSRoot Macros ---" << endl;
 cout << "------------------------------------------" << endl;
 
+// my utilities
 
+ cout << "Loading Analyze.C" << endl;
+gROOT->LoadMacro("$HOME/Grad/pi0chic/chic0/analyze.C");
 
 }
 
