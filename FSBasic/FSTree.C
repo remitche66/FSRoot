@@ -363,12 +363,12 @@ FSTree::makeStandardDefinitions(){
                                           "pow((PyP[J]),2)+" 
                                           "pow((PzP[J]),2))))" );
 
-        {TString pmag = "(sqrt((pow(PxP[J]),2)+"
-                              "(pow(PyP[J]),2)+"
-                              "(pow(PzP[J]),2)))";
-         TString bmag = "(sqrt((pow(PxP[I]),2)+"
-                              "(pow(PyP[I]),2)+"
-                              "(pow(PzP[I]),2)))";
+        {TString pmag = "(sqrt(pow((PxP[J]),2)+" 
+                              "pow((PyP[J]),2)+" 
+                              "pow((PzP[J]),2)))";
+         TString bmag = "(sqrt(pow((PxP[I]),2)+"
+                              "pow((PyP[I]),2)+"
+                              "pow((PzP[I]),2)))";
          TString Ep   = "(EnP[J])";
          TString Eb   = "(EnP[I])";
          TString costheta = "(((PxP[I])*(PxP[J])+"
