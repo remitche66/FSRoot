@@ -284,13 +284,17 @@ FSTree::makeStandardDefinitions(){
   if (!m_madeStandardDefinitions){
     m_madeStandardDefinitions = true;
 
-    defineFourVector("B3BEAM",  "BeamEnergy","BeamEnergy*sin(0.011)","0.0","BeamEnergy*cos(0.011)");
+      // Special four-vectors for BESIII
+      // (B3BEAM included for backwards compatibility)
     defineFourVector("BES3BEAM","BeamEnergy","BeamEnergy*sin(0.011)","0.0","BeamEnergy*cos(0.011)");
     defineFourVector("BES3CMS","2.0*BeamEnergy","2.0*BeamEnergy*sin(0.011)","0.0","0.0");
+    defineFourVector("B3BEAM", "2.0*BeamEnergy","2.0*BeamEnergy*sin(0.011)","0.0","0.0");
 
+      // Special four-vectors for CLEO
     defineFourVector("CLEOBEAM","BeamEnergy","BeamEnergy*sin(-0.003)","0.0","BeamEnergy*cos(-0.003)");
     defineFourVector("CLEOCMS","2.0*BeamEnergy","2.0*BeamEnergy*sin(-0.003)","0.0","0.0");
 
+      // Special four-vectors for GlueX
     defineFourVector("GLUEXBEAM","EnPB","PxPB","PyPB","PzPB");
     defineFourVector("GLUEXTARGET","0.938272","0.0","0.0","0.0");
     defineFourVector("GLUEXCMS","(EnPB+0.938272)","PxPB","PyPB","PzPB");
