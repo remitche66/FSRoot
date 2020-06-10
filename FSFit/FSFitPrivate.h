@@ -1044,8 +1044,9 @@ class FSFitMinuit {
         FSFitFunction* func = FSFitFunctionList::getFunction(fName);
         double mu = func->integral(FSFitDataSetList::getDataSet(dName)->xLimits());
         if (mu <= 0){
-          cout << "FSFitMinuit::unbinned WARNING: total integral of fit function is negative " 
-               << func->fName() << endl;
+          cout << "FSFitMinuit::unbinned WARNING: integral of function "
+               << func->fName() << " is negative, taking absolute value. " << endl; 
+          mu = abs(mu);
         }
         double sumlnfx = 0.0;
         for (unsigned int idata = 0; idata < vx.size(); idata++){
@@ -1056,7 +1057,7 @@ class FSFitMinuit {
           if (fx <= 0){
             fcnProblem = true;
             //lnfx = -1.0e3; // NOT SURE EXACTLY HOW TO DO THIS
-            cout << "FSFitMinuit::unbinned WARNING: negative fit function" << endl;
+            cout << "FSFitMinuit::unbinned WARNING: negative fit function, adding 1.0e3" << endl;
           }
           sumlnfx += lnfx;
         }
