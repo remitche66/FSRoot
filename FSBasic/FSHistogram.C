@@ -440,14 +440,21 @@ FSHistogram::getTHNFBasicContents(TTree* histTree, TString index,
 
     // set up the TTreeFormula objects
   if (cuts == "") cuts = "(1==1)";
-  TTreeFormula* cutsF = NULL; if (dimension >= 1) cutsF = new TTreeFormula("cutsF", cuts, nt);
-  TTreeFormula* varXF = NULL; if (dimension >= 1) varXF = new TTreeFormula("varXF", varX, nt);
-  TTreeFormula* varYF = NULL; if (dimension == 2) varYF = new TTreeFormula("varYF", varY, nt);
+  TObjArray* formulas = new TObjArray();
+  TTreeFormula* cutsF = NULL; 
+  TTreeFormula* varXF = NULL; 
+  TTreeFormula* varYF = NULL; 
+  if (dimension >= 1){ cutsF = new TTreeFormula("cutsF", cuts, nt); formulas->Add(cutsF); }
+  if (dimension >= 1){ varXF = new TTreeFormula("varXF", varX, nt); formulas->Add(varXF); }
+  if (dimension == 2){ varYF = new TTreeFormula("varYF", varY, nt); formulas->Add(varYF); }
   vector<TTreeFormula*> varEF;
   for (unsigned int i = 0; i < extraTreeContents.size(); i++){
     TString varName("varEF"); varName += i;
-    varEF.push_back(new TTreeFormula(varName,extraTreeContents[i].second,nt));
+    TTreeFormula* cutEXTRA = new TTreeFormula(varName,extraTreeContents[i].second,nt);
+    formulas->Add(cutEXTRA);
+    varEF.push_back(cutEXTRA);
   }
+  nt->SetNotify(formulas);
 
     // get cut values according to the histogram bounds
   double xLow  = 0.0;  if (dimension >= 1)  xLow = FSString::parseBoundsLowerX(bounds);
@@ -478,6 +485,8 @@ FSHistogram::getTHNFBasicContents(TTree* histTree, TString index,
   for (unsigned int i = 0; i < varEF.size(); i++){
     if (varEF[i]) delete varEF[i];
   }
+  nt->SetNotify(nullptr);
+  delete formulas;
   return histTree;
 }
 

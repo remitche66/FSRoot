@@ -202,7 +202,7 @@ FSModeHistogram::getMCComponents(TString fileName, TString ntName,
       extraTreeContents.push_back(pair<TString,TString>("MCDecayParticle5","MCDecayParticle5"));
       extraTreeContents.push_back(pair<TString,TString>("MCDecayParticle6","MCDecayParticle6"));
     }
-    TTree* histTree = getTH1FContents(fileName,ntName,category,"1.234","(10,1.0,2.0)",cuts,scale,extraTreeContents);
+    TTree* histTree = getTH1FContents(fileName,ntName,category,variable,bounds,cuts,scale,extraTreeContents);
 
       // set the branch addresses for the new tree
 
