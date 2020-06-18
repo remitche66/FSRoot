@@ -90,17 +90,24 @@ class FSModeHistogram{
                                 double scale = 1.0, TCanvas* c1 = NULL);
 
     static vector< pair<TString, float> > 
-      getMCComponentsAndSizes(TString fileName, TString ntName, 
+        getMCComponentsAndSizes(TString fileName, TString ntName, 
                                 TString category, TString variable, 
                                 TString bounds, TString cuts,
                                 double scale = 1.0, bool moreInfo = false, bool show = false);
 
-    static vector<TString> getMCComponents(TString fileName, TString ntName, 
+    static vector<TString> 
+                getMCComponents(TString fileName, TString ntName, 
                                 TString category, TString variable, 
                                 TString bounds, TString cuts,
                                 double scale = 1.0, bool moreInfo = false, bool show = false);
 
-    static TString parseMCComponent(TString component, float fraction = -1.0);
+    static vector<TH1F*>
+            getMCComponentsTH1F(TString fileName, TString ntName, 
+                                TString category, TString variable, 
+                                TString bounds, TString cuts,
+                                double scale = 1.0);
+
+    static TString formatMCComponent(TString component, float fraction = -1.0);
 
 
       // ********************************************************

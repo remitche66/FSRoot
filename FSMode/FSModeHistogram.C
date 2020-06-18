@@ -280,7 +280,7 @@ FSModeHistogram::getMCComponentsAndSizes(TString fileName, TString ntName,
     cout << "MC Components:" << endl;
     cout << "****************" << endl;
     for (unsigned int i = 0; i < components.size(); i++){
-      cout << parseMCComponent(components[i].first,components[i].second) << endl;
+      cout << formatMCComponent(components[i].first,components[i].second) << endl;
     }
     cout << "****************" << endl;
   }
@@ -303,12 +303,45 @@ FSModeHistogram::getMCComponents(TString fileName, TString ntName,
 }
 
 
+vector<TH1F*>
+FSModeHistogram::getMCComponentsTH1F(TString fileName, TString ntName, 
+                                TString category, TString variable, 
+                                TString bounds, TString cuts,
+                                double scale){
+  vector<TH1F*> histograms;
+  vector< pair<TString,float> > components
+    = getMCComponentsAndSizes(fileName,ntName,category,variable,bounds,cuts,scale,false,true);
+  if (components.size() == 0) return histograms;
+  for (unsigned int i = 0; i < components.size(); i++){
+    double fraction = 100*components[i].second;
+    if (fraction < 0.01 || i > 10) continue;
+    vector<TString> spacers; spacers.push_back(":"); spacers.push_back("_");
+    vector<TString> parts = FSString::parseTString(components[i].first,spacers);
+    if (parts.size() < 3) continue;
+    TString mcExtras = FSString::int2TString(FSString::TString2int(parts[0]));
+    TString mcCode2  = FSString::int2TString(FSString::TString2int(parts[1]));
+    TString mcCode1  = FSString::int2TString(FSString::TString2int(parts[2]));
+    TString mcCut(cuts);
+    if (mcCut != "") mcCut += "&&";
+    mcCut += "((MCDecayCode1==";
+    mcCut += mcCode1;
+    mcCut += ")&&(MCDecayCode2==";
+    mcCut += mcCode2;
+    mcCut += ")&&(MCExtras==";
+    mcCut += mcExtras;
+    mcCut += "))";
+    TH1F* hcomp = getTH1F(fileName,ntName,category,variable,bounds,mcCut,scale);
+    histograms.push_back(hcomp);
+  }
+  return histograms;
+}
+
+
 TH1F*
 FSModeHistogram::drawMCComponents(TString fileName, TString ntName, 
                                 TString category, TString variable, 
                                 TString bounds, TString cuts,
                                 double scale, TCanvas* c1){
-
 
     // create the original histogram
 
@@ -326,78 +359,60 @@ FSModeHistogram::drawMCComponents(TString fileName, TString ntName,
 
   if (!c1) c1 = new TCanvas("cDrawMCComponents","cDrawMCComponents",600,600);
 
-    // get a vector of the MC components
+    // get vectors of the MC components and the histograms
 
   vector< pair<TString,float> > components = 
-    getMCComponentsAndSizes(fileName,ntName,category,variable,bounds,cuts,scale,false,true);
+    getMCComponentsAndSizes(fileName,ntName,category,variable,bounds,cuts,scale);
+  vector<TH1F*> histograms =
+    getMCComponentsTH1F(fileName,ntName,category,variable,bounds,cuts,scale);
 
     // make a stack of MC components
 
   THStack* stack = new THStack("sDrawMCComponents","sDrawMCComponents");
   TLegend* legend = new TLegend(0.7,0.5,1.0,1.0);
-
-  for (unsigned int i = 0; i < components.size(); i++){
-
-    double fraction = 100*components[i].second;
-    if (fraction < 0.01 || i > 10) continue;
-    vector<TString> spacers; spacers.push_back(":"); spacers.push_back("_");
-    vector<TString> parts = FSString::parseTString(components[i].first,spacers);
-    if (parts.size() < 3) continue;
-    TString mcExtras = FSString::int2TString(FSString::TString2int(parts[0]));
-    TString mcCode2  = FSString::int2TString(FSString::TString2int(parts[1]));
-    TString mcCode1  = FSString::int2TString(FSString::TString2int(parts[2]));
-
-    TString mcCut(cuts);
-    if (mcCut != "") mcCut += "&&";
-    mcCut += "((MCDecayCode1==";
-    mcCut += mcCode1;
-    mcCut += ")&&(MCDecayCode2==";
-    mcCut += mcCode2;
-    mcCut += ")&&(MCExtras==";
-    mcCut += mcExtras;
-    mcCut += "))";
-
-    TH1F* hcomp = getTH1F(fileName,ntName,category,variable,bounds,mcCut,scale);
+  for (unsigned int i = 0; i < histograms.size(); i++){
+    TH1F* hcomp = histograms[i];
     if (i != 0) hcomp->SetFillColor(i+1);
     hcomp->SetLineColor(i+1);
     stack->Add(hcomp,"hist");
-
     TString legendString("");
-    legendString += FSModeString::rootSymbols(parseMCComponent(components[i].first,components[i].second));
+    legendString += FSModeString::rootSymbols(formatMCComponent(components[i].first,components[i].second));
     legend->AddEntry(hcomp,legendString,"F");
   }
   htot->Draw();
   stack->Draw("same");
   htot->Draw("same");
   legend->Draw("same");
-
   return htot;
-
 }
 
 
 TString
-FSModeHistogram::parseMCComponent(TString component, float fraction){
+FSModeHistogram::formatMCComponent(TString component, float fraction){
   TString output("");
-  vector<TString> parts1 = FSString::parseTString(component,":");
-  if (parts1.size() == 0 || parts1.size() > 2) return output;
-  vector<TString> parts2;  if (parts1.size() >= 1) parts2 = FSString::parseTString(parts1[0],"_");
-  if (parts2.size() != 3) return output;
-  vector<TString> parts3;  if (parts1.size() == 2) parts3 = FSString::parseTString(parts1[1],"_");
-  TString finalState = FSModeInfo(parts1[0]).modeDescription();
-  TString initialState("");
-  for (unsigned int j = 0; j < parts3.size(); j++){
-    if (parts3[j] == "0") continue;
-    initialState += FSPhysics::pdgName(FSString::TString2int(parts3[j]));
-    if (j != parts3.size()-1) initialState += " ";
-  }
-  TString mcExtras = FSModeInfo::mcExtrasDescription(parts2[0]);
   if (fraction >= 0.0){
     output += "(";
     output += FSString::double2TString(100*fraction,-2,false,true);
     output += ")";
   }
+  vector<TString> parts1 = FSString::parseTString(component,":");
+  vector<TString> parts2;  if (parts1.size() >= 1) parts2 = FSString::parseTString(parts1[0],"_");
+  vector<TString> parts3;  if (parts1.size() == 2) parts3 = FSString::parseTString(parts1[1],"_");
+  if (parts1.size() == 0 || parts1.size() > 2 || parts2.size() != 3){
+    if (output != "") output += " ";
+    output += component;
+    return output;
+  }
+  TString finalState = FSModeInfo(parts1[0]).modeDescription();
+  TString initialState("");
+  for (unsigned int j = 0; j < parts3.size(); j++){
+    if (parts3[j] == "0") continue;
+    if (initialState != "") initialState += " ";
+    initialState += FSPhysics::pdgName(FSString::TString2int(parts3[j]));
+  }
+  TString mcExtras = FSModeInfo::mcExtrasDescription(parts2[0]);
   if (initialState != ""){
+    if (output != "") output += " ";
     output += initialState;
     output += " -> ";
   }
