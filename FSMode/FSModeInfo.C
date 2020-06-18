@@ -197,6 +197,26 @@ FSModeInfo::modeDescription(){
 }
 
 TString
+FSModeInfo::mcExtrasDescription(TString mcExtras){
+  TString description("");
+  int imcExtras = FSString::TString2int(mcExtras);
+  if (imcExtras <= 0) return description;
+  if (imcExtras > 9999) return description;
+  int n1 = 1; int n2 = 10;
+  for (unsigned int iP = 0; iP < 4; iP++){
+    int np = (((imcExtras%n2)-(imcExtras%n1))/n1); n1*=10; n2*=10;
+    for (int i = 0; i < np; i++){
+      if (iP == 3) description += " nu ";
+      if (iP == 2) description += " Kl ";
+      if (iP == 1) description += " n ";
+      if (iP == 0) description += " nbar ";
+    }
+  }
+  return description;
+}
+
+
+TString
 FSModeInfo::modeGlueXFormat(){
   TString gluexFormat("");
   int np;

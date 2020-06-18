@@ -38,6 +38,13 @@
 //                         particle names
 //                         (for example "K+ K- pi+ pi+ pi- pi-")
 //
+//    information about extra mc-generated particles is in mcExtras
+//          (only used in mcExtrasDescription):
+//                  mcExtras = abcd
+//                          a = #neutrinos
+//                          b = #Klong
+//                          c = #neutrons
+//                          d = #anti-neutrons
 //********************************************************************
 //********************************************************************
 
@@ -211,6 +218,12 @@ class FSModeInfo{
 
     static void setSubmode (TString particleName,
                      vector<TString> particleDecays);
+
+      // *************************************************************
+      // INFORMATION FROM MC EXTRAS
+      // *************************************************************
+
+    static TString mcExtrasDescription(TString mcExtras);
 
 
   private:
