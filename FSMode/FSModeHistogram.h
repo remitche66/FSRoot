@@ -93,12 +93,14 @@ class FSModeHistogram{
       getMCComponentsAndSizes(TString fileName, TString ntName, 
                                 TString category, TString variable, 
                                 TString bounds, TString cuts,
-                                double scale = 1.0, bool moreInfo = false);
+                                double scale = 1.0, bool moreInfo = false, bool show = false);
 
     static vector<TString> getMCComponents(TString fileName, TString ntName, 
                                 TString category, TString variable, 
                                 TString bounds, TString cuts,
-                                double scale = 1.0, bool moreInfo = false);
+                                double scale = 1.0, bool moreInfo = false, bool show = false);
+
+    static TString parseMCComponent(TString component, float fraction = -1.0);
 
 
       // ********************************************************
