@@ -310,11 +310,26 @@ FSString::latexMeasurement(double x, TString sign1, double ex1,
 
 TString
 FSString::root2latexSymbols(TString input){
+  while (input.Contains("##")){
+    input.Replace(input.Index("##"),2,"#");
+  }
   while (input.Contains("#")){
     input.Replace(input.Index("#"),1,"\\");
   }
+  while (input.Contains("\\\\")){
+    input.Replace(input.Index("\\\\"),2,"\\");
+  }
+  while (input.Contains("'")){
+    input.Replace(input.Index("'"),1,"^{\\prime}");
+  }
   return input;
 }
+
+TString
+FSString::latexSymbols(TString input){
+  return root2latexSymbols(rootSymbols(input)); 
+}
+
 
   // ********************************************************
   // CONVERT SYMBOLS TO ROOT FORMAT (e.g. "pi+" TO "#pi^{+}")
@@ -415,6 +430,18 @@ FSString::rootSymbols(TString input){
       while (input.Contains("TMP")){
 	input.Replace(input.Index("TMP"),3,"#Lambda");
       }
+  while (input.Contains("nbar")){
+    input.Replace(input.Index("nbar"),4,"n");
+  }
+  while (input.Contains("nu")){
+    input.Replace(input.Index("nu"),2,"TMP");
+  }
+      while (input.Contains("TMP")){
+        input.Replace(input.Index("TMP"),3,"#nu");
+      }
+  while (input.Contains("Kl")){
+    input.Replace(input.Index("Kl"),2,"K_{L}");
+  }
   while (input.Contains("##")){
     input.Replace(input.Index("##"),2,"#");
   }

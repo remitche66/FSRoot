@@ -100,6 +100,7 @@ class FSString{
       // ********************************************************
 
     static TString root2latexSymbols(TString input);
+    static TString latexSymbols(TString input);
 
 
       // ********************************************************
