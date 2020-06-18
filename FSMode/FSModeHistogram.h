@@ -81,7 +81,7 @@ class FSModeHistogram{
 
       // ********************************************************
       // DECONSTRUCT A HISTOGRAM INTO ITS MC COMPONENTS
-      //   (using MCDecayCode1 and MCDecayCode2)
+      //   (using MCDecayCode1, MCDecayCode2, and MCExtras)
       // ********************************************************
 
     static TH1F* drawMCComponents(TString fileName, TString ntName, 
@@ -89,12 +89,16 @@ class FSModeHistogram{
                                 TString bounds, TString cuts,
                                 double scale = 1.0, TCanvas* c1 = NULL);
 
-    static vector<TString> getMCComponents(TString fileName, TString ntName, 
+    static vector< pair<TString, float> > 
+      getMCComponentsAndSizes(TString fileName, TString ntName, 
                                 TString category, TString variable, 
                                 TString bounds, TString cuts,
                                 double scale = 1.0, bool moreInfo = false);
 
-    static float getMCComponentSize(TString modeString);
+    static vector<TString> getMCComponents(TString fileName, TString ntName, 
+                                TString category, TString variable, 
+                                TString bounds, TString cuts,
+                                double scale = 1.0, bool moreInfo = false);
 
 
       // ********************************************************
@@ -121,7 +125,6 @@ class FSModeHistogram{
 
       // MC components
 
-    static map<TString, float> m_mcComponentsMap;
     static map<TString, map<TString, float> > m_cacheComponentsMap;
     static void dumpComponentsCache(string cacheName = "");
     static void readComponentsCache(string cacheName = "");

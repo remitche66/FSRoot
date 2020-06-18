@@ -23,7 +23,6 @@
 #include "FSMode/FSModeHistogram.h"
 
   // static member data
-map<TString, float> FSModeHistogram::m_mcComponentsMap;
 map<TString, map<TString, float> > FSModeHistogram::m_cacheComponentsMap;
 
 
@@ -160,19 +159,19 @@ FSModeHistogram::drawTHNF(int dimension,
 
   // ********************************************************
   // DECONSTRUCT A HISTOGRAM INTO ITS MC COMPONENTS
-  //   (using MCDecayCode1 and MCDecayCode2)
+  //   (using MCDecayCode1, MCDecayCode2, and MCExtras)
   // ********************************************************
 
 
-vector<TString>
-FSModeHistogram::getMCComponents(TString fileName, TString ntName, 
+vector< pair<TString,float> >
+FSModeHistogram::getMCComponentsAndSizes(TString fileName, TString ntName, 
                                 TString category, TString variable, 
                                 TString bounds, TString cuts,
                                 double scale, bool moreInfo){
     // initial setup
 
-  vector<TString> components;
-  m_mcComponentsMap.clear();
+  vector< pair<TString,float> > components;
+  map<TString,float> mcComponentsMap;
 
     // create an index for caching
 
@@ -185,7 +184,7 @@ FSModeHistogram::getMCComponents(TString fileName, TString ntName,
   map<TString, map<TString,float> >::const_iterator 
     mapItr = m_cacheComponentsMap.find(index);
   if (mapItr != m_cacheComponentsMap.end()){
-    m_mcComponentsMap = m_cacheComponentsMap[index];
+    mcComponentsMap = m_cacheComponentsMap[index];
   }
   else{
 
@@ -194,6 +193,7 @@ FSModeHistogram::getMCComponents(TString fileName, TString ntName,
     vector< pair<TString,TString> > extraTreeContents;
     extraTreeContents.push_back(pair<TString,TString>("MCDecayCode1","MCDecayCode1"));
     extraTreeContents.push_back(pair<TString,TString>("MCDecayCode2","MCDecayCode2"));
+    extraTreeContents.push_back(pair<TString,TString>("MCExtras","MCExtras"));
     if (moreInfo){
       extraTreeContents.push_back(pair<TString,TString>("MCDecayParticle1","MCDecayParticle1"));
       extraTreeContents.push_back(pair<TString,TString>("MCDecayParticle2","MCDecayParticle2"));
@@ -206,11 +206,12 @@ FSModeHistogram::getMCComponents(TString fileName, TString ntName,
 
       // set the branch addresses for the new tree
 
-    Double_t dcode1 = 0.0, dcode2 = 0.0;
+    Double_t dcode1 = 0.0, dcode2 = 0.0, dextra = 0.0;
     Double_t dp1 = 0.0, dp2 = 0.0, dp3 = 0.0, 
              dp4 = 0.0, dp5 = 0.0, dp6 = 0.0;
     histTree->SetBranchAddress("MCDecayCode1",&dcode1);
     histTree->SetBranchAddress("MCDecayCode2",&dcode2);
+    histTree->SetBranchAddress("MCExtras",&dextra);
     if (moreInfo){
       histTree->SetBranchAddress("MCDecayParticle1",&dp1);
       histTree->SetBranchAddress("MCDecayParticle2",&dp2);
@@ -224,7 +225,8 @@ FSModeHistogram::getMCComponents(TString fileName, TString ntName,
 
     for (int ientry = 0; ientry < histTree->GetEntries(); ientry++){
       histTree->GetEntry(ientry);
-      TString modeString = FSModeInfo((int)dcode1,(int)dcode2).modeString();
+      TString modeString = FSString::int2TString((int)dextra) + "_" 
+                           + FSModeInfo((int)dcode1,(int)dcode2).modeString();
       if (moreInfo){
         modeString += ":";
         modeString += (int)dp1;  modeString += "_";
@@ -234,37 +236,40 @@ FSModeHistogram::getMCComponents(TString fileName, TString ntName,
         modeString += (int)dp5;  modeString += "_";
         modeString += (int)dp6;
       }
-      map<TString,float>::const_iterator mapItrx = m_mcComponentsMap.find(modeString);
-      if (mapItrx == m_mcComponentsMap.end()){
-        m_mcComponentsMap[modeString] = 0.0;
+      map<TString,float>::const_iterator mapItrx = mcComponentsMap.find(modeString);
+      if (mapItrx == mcComponentsMap.end()){
+        mcComponentsMap[modeString] = 0.0;
       }
-      m_mcComponentsMap[modeString] += scale;
+      mcComponentsMap[modeString] += scale;
+    }
+    for (map<TString,float>::iterator itr = mcComponentsMap.begin(); itr != mcComponentsMap.end(); itr++){
+      if (histTree->GetEntries() > 0) itr->second *= 1.0/histTree->GetEntries(); 
     }
 
-      // cache the new m_mcComponentsMap
+      // cache the new mcComponentsMap
 
-    m_cacheComponentsMap[index] = m_mcComponentsMap;
+    m_cacheComponentsMap[index] = mcComponentsMap;
 
   }
 
     // fill the components vector (ordered from most to least populated)
 
-  for (map<TString,float>::iterator mapItr1 = m_mcComponentsMap.begin();
-       mapItr1 != m_mcComponentsMap.end(); mapItr1++){
+  for (map<TString,float>::iterator mapItr1 = mcComponentsMap.begin();
+       mapItr1 != mcComponentsMap.end(); mapItr1++){
     float max = 0;
     TString maxMode("");
-    for (map<TString,float>::iterator mapItr2 = m_mcComponentsMap.begin();
-      mapItr2 != m_mcComponentsMap.end(); mapItr2++){
+    for (map<TString,float>::iterator mapItr2 = mcComponentsMap.begin();
+      mapItr2 != mcComponentsMap.end(); mapItr2++){
       bool found = false;
       for (unsigned int i = 0; i < components.size(); i++){
-        if (mapItr2->first == components[i]) found = true; 
+        if (mapItr2->first == components[i].first) found = true; 
       }
       if ((!found) && (mapItr2->second >= max)){
         max = mapItr2->second;
         maxMode = mapItr2->first;
       }
     }
-    components.push_back(maxMode);
+    components.push_back(pair<TString,float>(maxMode,max));
   }
 
 
@@ -275,7 +280,7 @@ FSModeHistogram::getMCComponents(TString fileName, TString ntName,
     cout << "MC Components:" << endl;
     cout << "****************" << endl;
     for (unsigned int i = 0; i < components.size(); i++){
-      TString component(components[i]);
+      TString component(components[i].first);
       TString mString(component);
       TString extra("");
       if (moreInfo){
@@ -289,7 +294,7 @@ FSModeHistogram::getMCComponents(TString fileName, TString ntName,
           if (j != extras.size()-1) extra += " ";
         }
       }
-      cout << m_mcComponentsMap[component]
+      cout << mcComponentsMap[component]
            << "\t\t" << extra
            << "\t\t" << FSModeInfo(mString).modeDescription() << endl;
     }
@@ -300,11 +305,17 @@ FSModeHistogram::getMCComponents(TString fileName, TString ntName,
 
 }
 
-float
-FSModeHistogram::getMCComponentSize(TString modeString){
-  map<TString,float>::const_iterator mapItr = m_mcComponentsMap.find(modeString);
-  if (mapItr != m_mcComponentsMap.end()) return mapItr->second;
-  return 0.0;
+vector<TString>
+FSModeHistogram::getMCComponents(TString fileName, TString ntName, 
+                                TString category, TString variable, 
+                                TString bounds, TString cuts,
+                                double scale, bool moreInfo){
+  vector<TString> components;
+  vector< pair<TString,float> > componentsAndSizes 
+    = getMCComponentsAndSizes(fileName,ntName,category,variable,bounds,cuts,scale,moreInfo);
+  for (unsigned int i = 0; i < componentsAndSizes.size(); i++){
+    components.push_back(componentsAndSizes[i].first); }
+  return components;
 }
 
 
@@ -326,7 +337,6 @@ FSModeHistogram::drawMCComponents(TString fileName, TString ntName,
   FSModeInfo* modeInfo = modeVector[0];
   htot->SetTitle(FSModeString::rootSymbols(modeInfo->modeDescription()));
   if (modeVector.size() > 1) htot->SetTitle("category = "+category);
-  float totsize = htot->Integral(1,FSString::parseBoundsNBinsX(bounds));
 
     // make a new TCanvas if one isn't passed in
 
@@ -334,8 +344,8 @@ FSModeHistogram::drawMCComponents(TString fileName, TString ntName,
 
     // get a vector of the MC components
 
-  vector<TString> components = getMCComponents(fileName,ntName,category,
-                                               variable,bounds,cuts,scale);
+  vector< pair<TString,float> > components = 
+    getMCComponentsAndSizes(fileName,ntName,category,variable,bounds,cuts,scale);
 
     // make a stack of MC components
 
@@ -344,15 +354,15 @@ FSModeHistogram::drawMCComponents(TString fileName, TString ntName,
 
   for (unsigned int i = 0; i < components.size(); i++){
 
-    double fraction = 100*getMCComponentSize(components[i])/totsize;
+    double fraction = 100*components[i].second;
     if (fraction < 0.01 || i > 10) continue;
 
     TString mcCut(cuts);
     if (mcCut != "") mcCut += "&&";
     mcCut += "((MCDecayCode1==";
-    mcCut += FSModeInfo(components[i]).modeCode1();
+    mcCut += FSModeInfo(components[i].first).modeCode1();
     mcCut += ")&&(MCDecayCode2==";
-    mcCut += FSModeInfo(components[i]).modeCode2();
+    mcCut += FSModeInfo(components[i].first).modeCode2();
     mcCut += "))";
 
     TH1F* hcomp = getTH1F(fileName,ntName,category,variable,bounds,mcCut,scale);
@@ -364,7 +374,7 @@ FSModeHistogram::drawMCComponents(TString fileName, TString ntName,
     legendString += "(";
     legendString += FSString::double2TString(fraction,-2,false,true);
     legendString += ") ";
-    legendString += FSModeString::rootSymbols(FSModeInfo(components[i]).modeDescription());
+    legendString += FSModeString::rootSymbols(FSModeInfo(components[i].first).modeDescription());
     legend->AddEntry(hcomp,legendString,"F");
 
   }
@@ -381,9 +391,9 @@ FSModeHistogram::drawMCComponents(TString fileName, TString ntName,
     cout << "MC Components:" << endl;
     cout << "****************" << endl;
     for (unsigned int i = 0; i < components.size(); i++){
-      cout << m_mcComponentsMap[components[i]]
-           << "\t\t" << components[i]
-           << "\t\t" << FSModeInfo(components[i]).modeDescription() << endl;
+      cout << components[i].second
+           << "\t\t" << components[i].first
+           << "\t\t" << FSModeInfo(components[i].first).modeDescription() << endl;
     }
     cout << "****************" << endl;
   }
