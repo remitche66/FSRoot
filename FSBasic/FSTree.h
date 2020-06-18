@@ -26,7 +26,14 @@ class FSTree{
     static TChain* getTChain(TString fileName, TString ntName); 
     static TChain* getTChain(TString fileName, TString ntName, TString& STATUS); 
 
-    static TString getTreeNameFromFile(TString fileName);
+
+      // ********************************************************
+      // GET NAMES OF OBJECTS FROM FILES
+      // ********************************************************
+
+    static TString getTreeNameFromFile(TString fileName, TString match = "");
+    static vector<TString> getTObjNamesFromFile(TString fileName, TString objType = "TTree",
+                                                TString match = "", bool show = false);
 
 
       // ********************************************************

@@ -132,28 +132,44 @@ FSTree::getTChain(TString fileName, TString ntName, TString& STATUS){
 
 
 TString
-FSTree::getTreeNameFromFile(TString fileName){
-  TString treeName("");
+FSTree::getTreeNameFromFile(TString fileName, TString match){
+  vector<TString> treeNames = getTObjNamesFromFile(fileName, "TTree", match);
+  if (treeNames.size() > 0) return treeNames[0];
+  return TString("");
+}
+
+
+vector<TString>
+FSTree::getTObjNamesFromFile(TString fileName, TString objType, TString match, bool show){
+  vector<TString> objNames;
   vector<TString> fileNames = FSSystem::getAbsolutePaths(fileName, false);
-  if (fileNames.size() == 0) return treeName;
+  if (fileNames.size() == 0) return objNames;
   fileName = fileNames[0];
-  if (!FSSystem::checkRootFormat(fileName,false)) return treeName;
+  if (!FSSystem::checkRootFormat(fileName,false)) return objNames;
   TFile* inFile = new TFile(fileName);
-  if (!inFile) return treeName;
+  if (!inFile) return objNames;
   TIter nextkey(inFile->GetListOfKeys());
   while (TKey* key = (TKey*)nextkey() ){
     TObject* obj = key->ReadObj();
-    if (obj->IsA()->InheritsFrom("TTree")){
-      TTree* tree = (TTree*)obj;
-      treeName = tree->GetName();
+    if (obj->IsA()->InheritsFrom(objType)){
+      TString objName = obj->GetName();
+      if (match == "" || FSString::compareTStrings(objName,match))
+        objNames.push_back(objName);
     }
   }
   inFile->Close();
   delete inFile;
-  return treeName;
+  if (show){
+    TString objTYPE = objType; objTYPE.ToUpper();
+    cout << "**********************************" << endl;
+    cout << objTYPE << " FROM FILE: " << fileName << endl;
+    cout << "**********************************" << endl;
+    for (unsigned int i = 0; i < objNames.size(); i++){
+      cout << "(" << (i+1) << ")  " << objNames[i] << endl; }
+    cout << "**********************************" << endl;
+  }
+  return objNames;
 }
-
-
 
 
   // ********************************************************
