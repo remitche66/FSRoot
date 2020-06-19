@@ -131,6 +131,11 @@ FSTree::getTChain(TString fileName, TString ntName, TString& STATUS){
 }
 
 
+
+  // ********************************************************
+  // GET NAMES OF OBJECTS FROM FILES AND BRANCH NAMES
+  // ********************************************************
+
 TString
 FSTree::getTreeNameFromFile(TString fileName, TString match){
   vector<TString> treeNames = getTObjNamesFromFile(fileName, "TTree", match);
@@ -169,6 +174,30 @@ FSTree::getTObjNamesFromFile(TString fileName, TString objType, TString match, b
     cout << "**********************************" << endl;
   }
   return objNames;
+}
+
+vector<TString>
+FSTree::getBranchNamesFromTree(TString fileName, TString ntName, TString match, bool show){
+  vector<TString> branches;
+  TString STATUS;
+  TChain* nt = getTChain(fileName,ntName,STATUS);
+  if (STATUS.Contains("!!") || (!nt)){ 
+    cout << "FSTree::getBranchesFromTree WARNING: problem finding tree: " << STATUS << endl;
+    return branches;
+  }
+  TObjArray* branchArray = nt->GetListOfBranches();
+  int branchSize = nt->GetNbranches();
+  for (int i = 0; i < branchSize; i++){
+    TString branch = branchArray->At(i)->GetName();
+    if (match == "" || FSString::compareTStrings(branch,match)) branches.push_back(branch);
+  }
+  if (show){
+    cout << "LIST OF BRANCHES:" << endl;
+    for (unsigned int i = 0; i < branches.size(); i++){
+      cout << "  " << branches[i] << endl;
+    }
+  }
+  return branches;
 }
 
 

@@ -28,11 +28,13 @@ class FSTree{
 
 
       // ********************************************************
-      // GET NAMES OF OBJECTS FROM FILES
+      // GET NAMES OF OBJECTS FROM FILES AND BRANCH NAMES
       // ********************************************************
 
     static TString getTreeNameFromFile(TString fileName, TString match = "");
     static vector<TString> getTObjNamesFromFile(TString fileName, TString objType = "TTree",
+                                                TString match = "", bool show = false);
+    static vector<TString> getBranchNamesFromTree(TString fileName, TString ntName, 
                                                 TString match = "", bool show = false);
 
 
