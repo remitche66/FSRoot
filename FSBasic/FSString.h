@@ -248,6 +248,14 @@ class FSString{
 
 
       // ********************************************************
+      // EXPAND INTEGERS (USEFUL FOR COMBINATORICS)
+      //   e.g. "a12b" ==> "a00b","a01b","a02b","a10b","a11b","a12b"
+      // ********************************************************
+
+    static vector<TString> expandIntegers(TString input, bool show = false);
+
+
+      // ********************************************************
       // VARIOUS CHECKS TO HELP DEBUGGING
       // ********************************************************
 
@@ -268,6 +276,10 @@ class FSString{
        double2SignNumberExponent(double x, int precision = 12, 
                                  bool fixdecimal = false, bool show = false);
 
+      // helper function for expandIntegers
+
+    static vector< vector<int> >
+      pushBackToEach(vector< vector<int> > originalList, vector<int> newPart);
 
 };
 

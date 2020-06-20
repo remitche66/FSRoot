@@ -1165,3 +1165,59 @@ FSString::expandSUM(TString inputString){
   return inputString;
 }
 
+
+  // ********************************************************
+  // EXPAND INTEGERS (USEFUL FOR COMBINATORICS)
+  //   e.g. "a12b" ==> "a00b","a01b","a02b","a10b","a11b","a12b"
+  // ********************************************************
+
+vector<TString>
+FSString::expandIntegers(TString input, bool show){
+    // get all the integers from input
+  vector<int> intInput;
+  for (int i = 0; i < input.Length(); i++){
+    TString digit(input[i]);
+    if (digit.IsDigit()) intInput.push_back(FSString::TString2int(digit));
+  }
+    // make all the combinations
+  vector< vector<int> > expandedIntInputs;
+  for (unsigned int i = 0; i < intInput.size(); i++){
+    vector<int> combo;
+    for (int j = 0; j <= intInput[i]; j++){ combo.push_back(j); }
+    expandedIntInputs = pushBackToEach(expandedIntInputs,combo);
+  }
+    // put these back into string format
+  vector<TString> expandedInput;
+  for (unsigned int i = 0; i < expandedIntInputs.size(); i++){
+    TString newCode = "";  int idigit = 0;
+    for (int j = 0; j < input.Length(); j++){
+      TString digit(input[j]);
+      if (!digit.IsDigit()){ newCode = newCode + digit; }
+      else { newCode += expandedIntInputs[i][idigit++]; }
+    }
+    expandedInput.push_back(newCode);
+  }
+  if (show){
+    cout << "EXPAND INTEGERS" << endl;
+    cout << "  input = " << input << endl;
+    for (unsigned int i = 0; i < expandedInput.size(); i++){
+      cout << "   (" << i+1 << ") " << expandedInput[i] << endl;
+    }
+  }
+  return expandedInput;
+}
+
+
+vector< vector<int> >
+FSString::pushBackToEach(vector< vector<int> > originalList, vector<int> newPart){
+  vector< vector<int> > newList;
+  for (unsigned int i = 0; i < originalList.size() || ((originalList.size()==0)&&(i==0)); i++){
+  for (unsigned int j = 0; j < newPart.size(); j++){
+    vector<int> newComponent;
+    if (originalList.size() != 0) newComponent = originalList[i];
+    newComponent.push_back(newPart[j]);
+    newList.push_back(newComponent);
+  }}
+  return newList;
+}
+
