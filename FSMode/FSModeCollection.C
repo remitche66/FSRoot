@@ -71,16 +71,15 @@ FSModeCollection::removeModeInfo(TString mString){
 map<TString, vector<TString> >
 FSModeCollection::addModesFromFile(TString filename){
 
-  ifstream infile(FSString::TString2string(filename).c_str());
+  vector<TString> lines = FSString::readLinesFromFile(filename);
 
   TString topparticle("");
   TString particle("");
   vector<TString> decays;
   map<TString, vector<TString> > decayMap;
 
-  string sline;
-  while(getline(infile,sline)){
-    TString line = FSString::string2TString(sline);
+  for (unsigned int iL = 0; iL < lines.size(); iL++){
+    TString line = lines[iL];
     vector<TString> words = FSString::parseTString(line);
 
     if (words.size() > 0){

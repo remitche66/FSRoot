@@ -793,11 +793,13 @@ FSString::readLinesFromFile(TString filename){
   vector<TString> lines;  string instring;
   ifstream infile(filename.Data());
   if (!infile){
-    cout << "FSString::readLinesFromFile: can't find " << filename << endl;
+    cout << "FSString::readLinesFromFile WARNING: can't find " << filename << endl;
     return lines;
   }
-  while (getline(infile,instring)){ 
-    lines.push_back(FSString::string2TString(instring)); 
+  while (getline(infile,instring)){
+    TString line = FSString::string2TString(instring);
+    while (line.Contains("\r")){ line.Replace(line.Index("\r"),1,""); }
+    lines.push_back(line); 
   }
   infile.close();
   return lines;

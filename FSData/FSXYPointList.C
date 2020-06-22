@@ -23,15 +23,10 @@ FSXYPointList::addXYPointFromString(TString inputString){
 void
 FSXYPointList::addXYPointsFromFile(TString fileName){
   cout << "FSXYPointList: Reading points from file: " << fileName << endl;
-  ifstream infile(FSString::TString2string(fileName).c_str());
-  if (!infile.is_open()){
-    cout << "FSXYPointList ERROR: cannot find file: " << fileName << endl;
-    exit(0);
-  }
-  string sline;
   vector<TString> fileCategories;
-  while(getline(infile,sline)){
-    TString line = FSString::string2TString(sline);
+  vector<TString> lines = FSString::readLinesFromFile(fileName);
+  for (unsigned int iL = 0; iL < lines.size(); iL++){
+    TString line = lines[iL];
     vector<TString> words = FSString::parseTString(line);
     if (words.size() == 0) continue;
     if (words[0][0] == '#') continue;
