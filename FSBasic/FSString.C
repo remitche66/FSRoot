@@ -798,7 +798,8 @@ FSString::readLinesFromFile(TString filename){
   }
   while (getline(infile,instring)){
     TString line = FSString::string2TString(instring);
-    while (line.Contains("\r")){ line.Replace(line.Index("\r"),1,""); }
+    if (line.Length() > 0 && line[line.Length()-1] == '\r')
+      line.Replace(line.Length()-1,1,"");
     lines.push_back(line); 
   }
   infile.close();
