@@ -39,8 +39,8 @@
 //                         (for example "K+ K- pi+ pi+ pi- pi-")
 //
 //    information about extra mc-generated particles is in mcExtras
-//          (only used in mcExtrasDescription):
-//                  mcExtras = abcd
+//       (used in mcExtrasDescription and decomposing MC into components):
+//                   mcExtras = abcd
 //                          a = #neutrinos
 //                          b = #Klong
 //                          c = #neutrons

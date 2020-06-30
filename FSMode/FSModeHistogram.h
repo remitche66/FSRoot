@@ -81,7 +81,10 @@ class FSModeHistogram{
 
       // ********************************************************
       // DECONSTRUCT A HISTOGRAM INTO ITS MC COMPONENTS
-      //   (using MCDecayCode1, MCDecayCode2, and MCExtras)
+      //   * uses variables MCDecayCode1, MCDecayCode2, and MCExtras
+      //      (described in the FSModeInfo.h header)
+      //   * a single component is labeled by the string:
+      //      MCExtras_MCDecayCode2_MCDecayCode1 
       // ********************************************************
 
     static TH1F* drawMCComponents(TString fileName, TString ntName, 

@@ -46,9 +46,9 @@
 \section{Installation and Initial Setup}
 
 The \FSR\ utilities are built around the \ROOT\ framework, so a working version of \ROOT\ is a prerequisite.  Notes on \ROOT\ versions: \\
--- {\it {\tt v6.18} and after}: \FSR\ should work \\
--- {\it {\tt v5.34.09} up to {\tt v6.18}}: \FSR\ should work, but without some functionality (e.g. {\tt RDataFrame}) \\
--- {\it {\tt v5.34.08} and before}: \FSR\ may or may not work 
+-- {\tt v6.18} and after: \FSR\ should work. \\
+-- {\tt v5.34.09} up to {\tt v6.18}: \FSR\ should work, but without some functionality (e.g. {\tt RDataFrame}). \\
+-- {\tt v5.34.08} and before: \FSR\ may or may not work.
 
 The \FSR\ source code is on {\tt GitHub}: \\ {\tt https://github.com/remitche66/FSRoot}
 
@@ -372,12 +372,13 @@ A list of final states~({\tt FSModeInfo} objects) is managed by the {\tt FSModeC
     > FSModeCollection::addModeInfo("pi+ pi- pi0   3pi omega EXA");
 \end{verbatim}
 
-The {\tt display} method will show final states associated with different combinations of categories:
+The {\tt display} method will show final states associated with different combinations of categories.  Boolean operators~(and is {\tt\&} or {\tt\&\&}; or is {\tt,} or {\tt||}; not is {\tt!}) and wildcards~({\tt*} and {\tt?}) are allowed:
 \begin{verbatim}
     > FSModeCollection::display();                // shows all three
     > FSModeCollection::display("2K");            // shows just the 2K mode
     > FSModeCollection::display("2K,2pi");        // shows 2K and 2pi
     > FSModeCollection::display("EXA");           // shows 2K and 3pi
+    > FSModeCollection::display("EX*");           // shows all three
     > FSModeCollection::display("2K&2pi");        // shows none
     > FSModeCollection::display("2K&!2pi");       // shows 2K
     > FSModeCollection::display("HasPions");      // shows 2pi,3pi
@@ -456,6 +457,19 @@ To explicitly see how the histograms are constructed, use:
 
 The histogram caches also work here:  methods like {\tt FSHistogram::dumpHistogramCache} work as before.
 
+\subsection{Information about MC Components}
+\label{sec:mccomponents}
+
+The {\tt FSModeHistogram} class also includes methods that operate on Monte Carlo truth information.  These methods assume trees include variables called {\tt MCDecayCode1}, {\tt MCDecayCode2}, and {\tt MCExtras} that contain truth information about the final state contents.  {\tt MCDecayCode1} and {\tt MCDecayCode2} have the same format as {\tt modeCode1} and {\tt modeCode2} described in Sec.~\ref{sec:modeconv}. {\tt MCExtras} has the format:
+\begin{verbatim}
+    MCExtras = abcd
+      a = # neutrinos      c = # neutrons    
+      b = # K long         d = # anti-neutrons
+\end{verbatim}
+
+The {\tt FSModeHistogram::drawMCComponents} method takes the same arguments (file name, tree name, category, etc.) as the {\tt FSModeHistogram::getTH1F} method, but draws the histogram with different colors representing different MC components.  
+
+Other methods, like {\tt FSModeHistogram::getMCComponents}, return lists of MC components, where the components are labeled by a single string with format {\tt  MCExtras\_MCDecayCode2\_MCDecayCode1}.
 
 \subsection{Operations on Multiple Trees: the {\tt FSModeTree} class}
 \label{sec:modetree}
@@ -485,6 +499,8 @@ The friend tree is used automatically by {\tt FSModeHistogram} by setting:
     > FSControl::CHAINFRIEND = "chi";
 \end{verbatim}
 
+
+\newpage
 
 \section{Fitting Utilities:  the {\tt FSFit} directory}
 
