@@ -110,6 +110,8 @@ class FSModeHistogram{
                                 TString bounds, TString cuts,
                                 double scale = 1.0);
 
+    static TString getMCComponentCut(TString component);    
+
     static TString formatMCComponent(TString component, float fraction = -1.0);
 
 

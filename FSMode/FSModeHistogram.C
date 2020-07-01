@@ -315,21 +315,9 @@ FSModeHistogram::getMCComponentsTH1F(TString fileName, TString ntName,
   for (unsigned int i = 0; i < components.size(); i++){
     double fraction = 100*components[i].second;
     if (fraction < 0.01 || i > 10) continue;
-    vector<TString> spacers; spacers.push_back(":"); spacers.push_back("_");
-    vector<TString> parts = FSString::parseTString(components[i].first,spacers);
-    if (parts.size() < 3) continue;
-    TString mcExtras = FSString::int2TString(FSString::TString2int(parts[0]));
-    TString mcCode2  = FSString::int2TString(FSString::TString2int(parts[1]));
-    TString mcCode1  = FSString::int2TString(FSString::TString2int(parts[2]));
     TString mcCut(cuts);
     if (mcCut != "") mcCut += "&&";
-    mcCut += "((MCDecayCode1==";
-    mcCut += mcCode1;
-    mcCut += ")&&(MCDecayCode2==";
-    mcCut += mcCode2;
-    mcCut += ")&&(MCExtras==";
-    mcCut += mcExtras;
-    mcCut += "))";
+    mcCut += getMCComponentCut(components[i].first);
     TH1F* hcomp = getTH1F(fileName,ntName,category,variable,bounds,mcCut,scale);
     histograms.push_back(hcomp);
   }
@@ -346,13 +334,14 @@ FSModeHistogram::drawMCComponents(TString fileName, TString ntName,
     // create the original histogram
 
   vector<FSModeInfo*> modeVector = FSModeCollection::modeVector(category);
-  if (modeVector.size() == 0){
+  if (modeVector.size() == 0 && category != ""){
     cout << "FSModeHistogram::drawMCComponents ERROR: no modes for category = " << category << endl;
     exit(0);
   }
   TH1F* htot = getTH1F(fileName,ntName,category,variable,bounds,cuts,scale);
-  FSModeInfo* modeInfo = modeVector[0];
-  htot->SetTitle(FSModeString::rootSymbols(modeInfo->modeDescription()));
+  FSModeInfo* modeInfo = NULL; if (modeVector.size() > 0) modeInfo = modeVector[0];
+  htot->SetTitle("");
+  if (modeInfo) htot->SetTitle(FSModeString::rootSymbols(modeInfo->modeDescription()));
   if (modeVector.size() > 1) htot->SetTitle("category = "+category);
 
     // make a new TCanvas if one isn't passed in
@@ -384,6 +373,25 @@ FSModeHistogram::drawMCComponents(TString fileName, TString ntName,
   htot->Draw("same");
   legend->Draw("same");
   return htot;
+}
+
+TString
+FSModeHistogram::getMCComponentCut(TString component){
+  TString mcCut("(1==1)");
+  vector<TString> spacers; spacers.push_back(":"); spacers.push_back("_");
+  vector<TString> parts = FSString::parseTString(component,spacers);
+  if (parts.size() < 3) return mcCut;
+  TString mcExtras = FSString::int2TString(FSString::TString2int(parts[0]));
+  TString mcCode2  = FSString::int2TString(FSString::TString2int(parts[1]));
+  TString mcCode1  = FSString::int2TString(FSString::TString2int(parts[2]));
+  mcCut  = "((MCExtras==";
+  mcCut += FSString::TString2int(mcExtras);
+  mcCut += ")&&(MCDecayCode2==";
+  mcCut += FSString::TString2int(mcCode2);
+  mcCut += ")&&(MCDecayCode1==";
+  mcCut += FSString::TString2int(mcCode1);
+  mcCut += "))";
+  return mcCut;
 }
 
 
@@ -515,7 +523,9 @@ vector<TString>
 FSModeHistogram::expandHistogramIndexTree(TString inIndex){
     // expand FSCuts using the same method as FSHistogram
   vector<TString> expandedIndices = FSHistogram::expandHistogramIndexTree(inIndex);
-    // expand modes
+    // if there are no modes, return
+  if (!inIndex.Contains("{-CA-}")) return expandedIndices;
+    // if there are modes, expand them
   vector<TString> expandedIndicesTemp = expandedIndices;
   expandedIndices.clear();
   for (unsigned int i = 0; i < expandedIndicesTemp.size(); i++){
@@ -567,7 +577,8 @@ FSModeHistogram::getHistogramIndexTree(int dimension,
   if (dimension == 2) index += "{-ND-}2D";
   index += "{-FN-}";  index += fileName;
   index += "{-NT-}";  index += ntName;
-  index += "{-CA-}";  index += category;
+  if (category != "" || FSModeCollection::modeVector().size() != 0){
+  index += "{-CA-}";  index += category; }
   index += "{-VA-}";  index += FSTree::reorderVariable(variable);
   index += "{-BO-}";  index += bounds;
   index += "{-CU-}";  index += FSTree::reorderVariable(cuts);
