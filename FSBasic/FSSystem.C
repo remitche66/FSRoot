@@ -29,7 +29,8 @@ FSSystem::makeAbsolutePathName(TString path){
   }
   if (!gSystem->IsAbsoluteFileName(newPath)){
 #if ROOT_VERSION_CODE >= ROOT_VERSION(6,18,0)
-    newPath = gSystem->PrependPathName(gSystem->GetWorkingDirectory().c_str(),newPath);
+    TString tempPath = newPath;
+    newPath = gSystem->PrependPathName(gSystem->GetWorkingDirectory().c_str(),tempPath);
 #else
     cout << "makeAbsolutePathName(" << path << ")" << endl;
     cout << "ROOT version too old: no relative paths allowed" << endl;
@@ -139,7 +140,8 @@ FSSystem::getDirectoryContents(TString directory, TString pattern, bool show){
     }
   }
   for (unsigned int i = 0; i < paths.size(); i++){
-    paths[i] = gSystem->PrependPathName(directory,paths[i]);
+    TString tempPath = paths[i];
+    paths[i] = gSystem->PrependPathName(directory,tempPath);
   }
   if (show){
     cout << "------ DIRECTORY CONTENTS ---------" << endl;
@@ -203,7 +205,9 @@ FSSystem::getAbsolutePathsWildcards(TString path, bool show){
     }
     else{
       for (unsigned int j = 0; j < paths.size(); j++){
-        paths[j] = gSystem->PrependPathName(paths[j],parts[i]);
+        TString tempPath = paths[j];
+        TString tempPart = parts[i];
+        paths[j] = gSystem->PrependPathName(tempPath,tempPart);
       }
     }
   }
