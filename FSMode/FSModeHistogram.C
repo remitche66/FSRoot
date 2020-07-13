@@ -202,6 +202,19 @@ FSModeHistogram::getMCComponentsAndSizes(TString fileName, TString ntName,
       extraTreeContents.push_back(pair<TString,TString>("MCDecayParticle5","MCDecayParticle5"));
       extraTreeContents.push_back(pair<TString,TString>("MCDecayParticle6","MCDecayParticle6"));
     }
+      // first check to make sure the branches exist
+    vector<TString> branches = FSTree::getBranchNamesFromTree(fileName,ntName,"MC*");
+    for (unsigned int i = 0; i < extraTreeContents.size(); i++){
+      bool found = false;
+      for (unsigned int j = 0; j < branches.size(); j++){
+        if (branches[j] == extraTreeContents[i].first){ found = true; break; }
+      }
+      if (!found){
+        cout << "FSModeHistogram::getMCComponentsAndSizes ERROR: variable " << extraTreeContents[i].first <<
+                 " not found" << endl;
+        return components;
+      }
+    }
     TTree* histTree = getTH1FContents(fileName,ntName,category,variable,bounds,cuts,scale,extraTreeContents);
 
       // set the branch addresses for the new tree
@@ -369,9 +382,11 @@ FSModeHistogram::drawMCComponents(TString fileName, TString ntName,
     legend->AddEntry(hcomp,legendString,"F");
   }
   htot->Draw();
-  stack->Draw("same");
-  htot->Draw("same");
-  legend->Draw("same");
+  if (histograms.size() != 0){
+    stack->Draw("same");
+    htot->Draw("same");
+    legend->Draw("same");
+  }
   return htot;
 }
 
