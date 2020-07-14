@@ -428,6 +428,7 @@ int FSModeInfo::modeCCNumber(){
 
 
 bool FSModeInfo::modeContains(TString mString){
+  if (!isModeString(mString)) return false;
   FSModeInfo mitest(mString);
   if (mitest.modeNGamma()   > modeNGamma())   return false;
   if (mitest.modeNEp()      > modeNEp())      return false;
