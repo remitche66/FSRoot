@@ -340,6 +340,21 @@ FSString::rootSymbols(TString input){
   while (input.Contains("\\pm")){
     input.Replace(input.Index("\\pm"),3," #pm ");
   }
+  while (input.Contains("\\")){
+    input.Replace(input.Index("\\"),1,"#");
+  }
+  while (input.Contains("psi")){
+    input.Replace(input.Index("psi"),3,"TMP");
+  }
+      while (input.Contains("TMP")){
+	input.Replace(input.Index("TMP"),3,"#psi");
+      }
+  while (input.Contains("chi")){
+    input.Replace(input.Index("chi"),3,"TMP");
+  }
+      while (input.Contains("TMP")){
+	input.Replace(input.Index("TMP"),3,"#chi");
+      }
   while (input.Contains("omega")){
     input.Replace(input.Index("omega"),5,"TMP");
   }
@@ -352,6 +367,21 @@ FSString::rootSymbols(TString input){
       while (input.Contains("TMP")){
 	input.Replace(input.Index("TMP"),3,"#phi");
       }
+  while (input.Contains("rho")){
+    input.Replace(input.Index("rho"),3,"TMP");
+  }
+      while (input.Contains("TMP")){
+	input.Replace(input.Index("TMP"),3,"#rho");
+      }
+  while (input.Contains("rho+")){
+    input.Replace(input.Index("rho+"),4,"#rho^{+}");
+  }
+  while (input.Contains("rho-")){
+    input.Replace(input.Index("rho-"),4,"#rho^{-}");
+  }
+  while (input.Contains("rho0")){
+    input.Replace(input.Index("rho0"),4,"#rho^{0}");
+  }
   while (input.Contains("etaprime")){
     input.Replace(input.Index("etaprime"),8,"#eta'");
   }
@@ -372,6 +402,18 @@ FSString::rootSymbols(TString input){
   }
   while (input.Contains("e-")){
     input.Replace(input.Index("e-"),2,"e^{-}");
+  }
+  while (input.Contains("tau")){
+    input.Replace(input.Index("tau"),3,"TMP");
+  }
+      while (input.Contains("TMP")){
+	input.Replace(input.Index("TMP"),3,"#tau");
+      }
+  while (input.Contains("tau+")){
+    input.Replace(input.Index("tau+"),4,"#tau^{+}");
+  }
+  while (input.Contains("tau-")){
+    input.Replace(input.Index("tau-"),4,"#tau^{-}");
   }
   while (input.Contains("K+")){
     input.Replace(input.Index("K+"),2,"K^{+}");
@@ -407,10 +449,10 @@ FSString::rootSymbols(TString input){
     input.Replace(input.Index("#eta000"),7,"#eta_{000}");
   }
   while (input.Contains("p+")){
-    input.Replace(input.Index("p+"),2,"p^{+}");
+    input.Replace(input.Index("p+"),2,"p");
   }
   while (input.Contains("p-")){
-    input.Replace(input.Index("p-"),2,"p^{-}");
+    input.Replace(input.Index("p-"),2,"#bar{p}");
   }
   while (input.Contains("gamma")){
     input.Replace(input.Index("gamma"),5,"TMP");
@@ -422,7 +464,7 @@ FSString::rootSymbols(TString input){
     input.Replace(input.Index("ALambda"),7,"TMP");
   }
       while (input.Contains("TMP")){
-	input.Replace(input.Index("TMP"),3,"#Lambda");
+	input.Replace(input.Index("TMP"),3,"#bar{#Lambda}");
       }
   while (input.Contains("Lambda")){
     input.Replace(input.Index("Lambda"),6,"TMP");
@@ -431,7 +473,7 @@ FSString::rootSymbols(TString input){
 	input.Replace(input.Index("TMP"),3,"#Lambda");
       }
   while (input.Contains("nbar")){
-    input.Replace(input.Index("nbar"),4,"n");
+    input.Replace(input.Index("nbar"),4,"#bar{n}");
   }
   while (input.Contains("nu")){
     input.Replace(input.Index("nu"),2,"TMP");
@@ -439,8 +481,20 @@ FSString::rootSymbols(TString input){
       while (input.Contains("TMP")){
         input.Replace(input.Index("TMP"),3,"#nu");
       }
+  while (input.Contains("K_L0")){
+    input.Replace(input.Index("K_L0"),4,"K_{L}");
+  }
   while (input.Contains("Kl")){
     input.Replace(input.Index("Kl"),2,"K_{L}");
+  }
+  while (input.Contains("Delta0")){
+    input.Replace(input.Index("Delta0"),6,"#Delta^{0}");
+  }
+  while (input.Contains("Delta+")){
+    input.Replace(input.Index("Delta+"),6,"#Delta^{+}");
+  }
+  while (input.Contains("Delta++")){
+    input.Replace(input.Index("Delta++"),7,"#Delta^{++}");
   }
   while (input.Contains("##")){
     input.Replace(input.Index("##"),2,"#");
