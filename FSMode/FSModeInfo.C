@@ -7,6 +7,7 @@
 #include "FSBasic/FSControl.h"
 #include "FSBasic/FSString.h"
 #include "FSBasic/FSTree.h"
+#include "FSBasic/FSPhysics.h"
 #include "FSMode/FSModeInfo.h"
 
 // definitions of static variables
@@ -79,6 +80,33 @@ FSModeInfo::FSModeInfo(TString mString){
   addStandardCategories();
   addCategory(extraCategories);
 }
+
+
+FSModeInfo::FSModeInfo(vector<int> pdgIDs){
+  int code1 = 0;
+  int code2 = 0;
+  for (unsigned int i = 0; i < pdgIDs.size(); i++){
+         if (pdgIDs[i] == FSPhysics::kpdgPi0    ) code1 += 1;
+    else if (pdgIDs[i] == FSPhysics::kpdgPim    ) code1 += 10;
+    else if (pdgIDs[i] == FSPhysics::kpdgPip    ) code1 += 100;
+    else if (pdgIDs[i] == FSPhysics::kpdgKs     ) code1 += 1000;
+    else if (pdgIDs[i] == FSPhysics::kpdgKm     ) code1 += 10000;
+    else if (pdgIDs[i] == FSPhysics::kpdgKp     ) code1 += 100000;
+    else if (pdgIDs[i] == FSPhysics::kpdgGamma  ) code1 += 1000000;
+    else if (pdgIDs[i] == FSPhysics::kpdgEta    ) code2 += 1;
+    else if (pdgIDs[i] == FSPhysics::kpdgPm     ) code2 += 10;
+    else if (pdgIDs[i] == FSPhysics::kpdgPp     ) code2 += 100;
+    else if (pdgIDs[i] == FSPhysics::kpdgMum    ) code2 += 1000;
+    else if (pdgIDs[i] == FSPhysics::kpdgMup    ) code2 += 10000;
+    else if (pdgIDs[i] == FSPhysics::kpdgEm     ) code2 += 100000;
+    else if (pdgIDs[i] == FSPhysics::kpdgEp     ) code2 += 1000000;
+    else if (pdgIDs[i] == FSPhysics::kpdgALambda) code2 += 10000000;
+    else if (pdgIDs[i] == FSPhysics::kpdgLambda ) code2 += 100000000;
+  }
+  m_modeCode = pair<int,int>(code1,code2);
+  addStandardCategories();
+}
+
 
 
       // *******************************************************

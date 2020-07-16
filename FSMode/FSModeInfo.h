@@ -77,6 +77,7 @@ class FSModeInfo{
     FSModeInfo (pair < int,int > mCode);
     FSModeInfo (int mCode1, int mCode2);
     FSModeInfo (TString mString);
+    FSModeInfo (vector<int> pdgIDs);
 
 
       // *******************************************************
