@@ -156,7 +156,7 @@ FSString::double2SignNumberExponent(double x, int precision, bool fixdecimal, bo
 }
 
 TString
-FSString::double2TString(double x, int precision, bool scientific, bool fixdecimal, bool show){
+FSString::double2TString(double x, int precision, int scientific, bool fixdecimal, bool show){
   pair<int, pair<double,int> > sne = FSString::double2SignNumberExponent(x,precision,fixdecimal,show);
   int isign = sne.first;  double ax = sne.second.first;  int exp = sne.second.second;
   int totalDigits = precision;  if (fixdecimal) totalDigits = exp - precision + 1;
@@ -168,12 +168,17 @@ FSString::double2TString(double x, int precision, bool scientific, bool fixdecim
   }
   TString saxNum = saxInt + saxFrac;
   TString sDouble(""); if (isign < 0) sDouble = "-";
-  if (scientific){
+  if (scientific >= 1){
     sDouble += saxInt; if (totalDigits > 1){ sDouble += "."; sDouble += saxFrac; }
     if (exp < 0) sDouble += "e-"; if (exp >= 0) sDouble += "e+";
     sDouble += FSString::int2TString(abs(exp),2);
   }
-  if (!scientific){
+  if (scientific <= -1){
+    sDouble += saxInt; if (totalDigits > 1){ sDouble += "."; sDouble += saxFrac; }
+    sDouble += "\\times10^{"; if (exp < 0) sDouble += "-";
+    sDouble += FSString::int2TString(abs(exp)); sDouble += "}";
+  }
+  if (scientific == 0){
     int firstDigitPlace = precision + totalDigits - 1;  if (!fixdecimal) firstDigitPlace = exp;
     int lastDigitPlace = firstDigitPlace - totalDigits + 1;
     int firstPlace = firstDigitPlace; if (firstPlace < 0) firstPlace = 0;

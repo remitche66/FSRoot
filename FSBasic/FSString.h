@@ -73,7 +73,7 @@ class FSString{
       // ********************************************************
 
 
-    static TString double2TString(double x, int precision = 3, bool scientific = false, 
+    static TString double2TString(double x, int precision = 3, int scientific = 0, 
                                           bool fixdecimal = false, bool show = false);
 
     static TString latexMeasurement(double x, double ex1, 
