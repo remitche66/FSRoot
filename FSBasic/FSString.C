@@ -4,6 +4,7 @@
 #include <fstream>
 #include "TString.h"
 #include "TFormula.h"
+#include "TSystem.h"
 #include "FSBasic/FSControl.h"
 #include "FSBasic/FSString.h"
 
@@ -850,6 +851,7 @@ FSString::latexTable(int nrows, int ncols, TString* tableContents,
 vector<TString>
 FSString::readLinesFromFile(TString filename){
   vector<TString> lines;  string instring;
+  filename = gSystem->ExpandPathName(TString2string(filename).c_str());
   ifstream infile(filename.Data());
   if (!infile){
     cout << "FSString::readLinesFromFile WARNING: can't find " << filename << endl;
