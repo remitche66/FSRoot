@@ -734,6 +734,7 @@ FSString::evalBooleanTString(TString input){
 
 void
 FSString::latexHeader(TString filename, bool append){
+  filename = gSystem->ExpandPathName(TString2string(filename).c_str());
   std::ios_base::openmode mode = ios::out;
   if (append) mode = ios::app;
   ofstream outfile(TString2string(filename).c_str(),mode);
@@ -768,6 +769,7 @@ FSString::latexHeader(TString filename, bool append){
 void
 FSString::latexFigure(TString filename, TString figurename, 
                              TString width, TString caption, bool append){
+  filename = gSystem->ExpandPathName(TString2string(filename).c_str());
   std::ios_base::openmode mode = ios::out;
   if (append) mode = ios::app;
   ofstream outfile(TString2string(filename).c_str(),mode);
@@ -784,6 +786,7 @@ FSString::latexFigure(TString filename, TString figurename,
 
 void
 FSString::latexLine(TString filename, TString text, bool append){
+  filename = gSystem->ExpandPathName(TString2string(filename).c_str());
   std::ios_base::openmode mode = ios::out;
   if (append) mode = ios::app;
   ofstream outfile(TString2string(filename).c_str(),mode);
@@ -795,6 +798,7 @@ FSString::latexLine(TString filename, TString text, bool append){
 
 void
 FSString::latexCloser(TString filename, bool append){
+  filename = gSystem->ExpandPathName(TString2string(filename).c_str());
   std::ios_base::openmode mode = ios::out;
   if (append) mode = ios::app;
   ofstream outfile(TString2string(filename).c_str(),mode);
@@ -806,6 +810,7 @@ FSString::latexCloser(TString filename, bool append){
 
 void
 FSString::writeTStringToFile(TString filename, TString text, bool append){
+  filename = gSystem->ExpandPathName(TString2string(filename).c_str());
   std::ios_base::openmode mode = ios::out;
   if (append) mode = ios::app;
   ofstream outfile(TString2string(filename).c_str(),mode);
@@ -824,6 +829,7 @@ FSString::writeTStringToFile(TString filename, TString text, bool append){
 void
 FSString::latexTable(int nrows, int ncols, TString* tableContents, 
                             TString filename, bool append){
+  filename = gSystem->ExpandPathName(TString2string(filename).c_str());
   std::ios_base::openmode mode = ios::out;
   if (append) mode = ios::app;
   ofstream outfile(TString2string(filename).c_str(),mode);
