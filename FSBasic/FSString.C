@@ -110,12 +110,21 @@ FSString::TString2double(TString input){
   // ********************************************************
 
 TString 
-FSString::int2TString(int number, int minimumDigits){
-  TString snumber("");  snumber += number;
-  TString newsnumber("");
-  for (int i = snumber.Length(); i < minimumDigits; i++){ newsnumber += "0"; }
-  newsnumber += snumber;
-  return newsnumber;
+FSString::int2TString(long int number, int minimumDigits, bool useCommas){
+  TString sign("");  if (number < 0) sign = "-";
+  TString snumber("");  snumber += abs(number);
+  if (snumber.Length() < minimumDigits && number >= 0){
+    TString zeros("");
+    for (int i = 0; i < (minimumDigits-snumber.Length()); i++){ zeros += "0"; }
+    snumber = zeros + snumber;
+  }
+  if (useCommas){
+    int length = snumber.Length();
+    for (int i = length-3; i > 0; i -= 3){
+      snumber.Insert(i,",");      
+    }
+  }
+  return (sign+snumber);
 }
 
 

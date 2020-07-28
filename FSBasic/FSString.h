@@ -58,7 +58,7 @@ class FSString{
       //   also add leading zeros if the length is less than minimumDigits
       // ********************************************************
 
-    static TString int2TString(int number, int minimumDigits = 0);
+    static TString int2TString(long int number, int minimumDigits = 0, bool useCommas = false);
 
 
       // ********************************************************
