@@ -700,28 +700,22 @@ FSString::evalLogicalTString(TString input, vector<TString> cats){
     exit(1);
   }
   vector<TString> spacers;
-  spacers.push_back("(");
-  spacers.push_back(")");
-  spacers.push_back(",");
-  spacers.push_back("&");
-  spacers.push_back("|");
-  spacers.push_back("!");
-  vector<TString> words = FSString::parseTString(input,spacers);
+  spacers.push_back("(");  spacers.push_back(")");  spacers.push_back(",");
+  spacers.push_back("&");  spacers.push_back("|");  spacers.push_back("!");
+  vector<TString> words = FSString::parseTString(input,spacers,true);
   for (unsigned int i = 0; i < words.size(); i++){
-  for (unsigned int j = i+1; j < words.size(); j++){
-    if (words[i].Length() < words[j].Length()){ 
-      TString temp = words[i]; words[i] = words[j]; words[j] = temp; }
-  }}
-  for (unsigned int i = 0; i < words.size(); i++){
-    TString found("(1==0)");
-    for (unsigned int ic = 0; ic < cats.size(); ic++){
-      if (FSString::compareTStrings(cats[ic],words[i])){ found = "(1==1)";  break; }
-    }
-    while (input.Contains(words[i])){
-      input.Replace(input.Index(words[i]),words[i].Length(),found);
+    if ((words[i] != "(") && (words[i] != ")") && (words[i] != ",") && 
+        (words[i] != "&") && (words[i] != "|") && (words[i] != "!")){
+      TString found("(1==0)");
+      for (unsigned int ic = 0; ic < cats.size(); ic++){
+        if (FSString::compareTStrings(cats[ic],words[i])){ found = "(1==1)";  break; }
+      }
+      words[i] = found;
     }
   }
-  return evalBooleanTString(input);
+  TString newInput("");
+  for (unsigned int i = 0; i < words.size(); i++){ newInput += words[i]; }
+  return evalBooleanTString(newInput);
 }
 
 
