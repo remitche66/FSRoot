@@ -268,7 +268,7 @@ FSTree::skimTree(TString fileNameInput, TString chainName,
     cout << endl;
     if (nt){
       cout << "\tNumber of entries to skim:" << endl;
-      cout << nt->GetEntries() << endl;
+      cout << FSString::int2TString(nt->GetEntries(),0,true) << endl;
       cout << endl;
     }
   }
@@ -299,7 +299,7 @@ FSTree::skimTree(TString fileNameInput, TString chainName,
   if (newChainName != ""){ tree2->SetName(newChainName); tree2->SetTitle(newChainName); }
   if (!FSControl::QUIET){
     cout << "\tNumber of entries kept:" << endl;
-    cout << tree2->GetEntries() << endl;
+    cout << FSString::int2TString(tree2->GetEntries(),0,true) << endl;
     cout << endl;
     cout << "\tSkim Ratio:" << endl;
     cout << (float) tree2->GetEntries() / (float) nt->GetEntries() << endl;
