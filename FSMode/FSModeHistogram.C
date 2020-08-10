@@ -236,7 +236,13 @@ FSModeHistogram::getMCComponentsAndSizes(TString fileName, TString ntName,
 
       // loop over the new tree and count MC components
 
+    long int nentries = histTree->GetEntries();
+    cout << "  FSModeHistogram::getMCComponentsAndSizes:  looping over " << 
+             FSString::int2TString(nentries,0,true) << " events..." << endl;
     for (int ientry = 0; ientry < histTree->GetEntries(); ientry++){
+      if (ientry > 0 && ientry % 1000000 == 0) 
+        cout << "\t" << FSString::int2TString(ientry,0,true) << " (" 
+             << FSString::double2TString(100*ientry/(double)nentries) << " percent)" << endl;
       histTree->GetEntry(ientry);
       TString modeString = FSString::int2TString((int)dextra) + "_" 
                            + FSModeInfo((int)dcode1,(int)dcode2).modeString();
@@ -267,22 +273,20 @@ FSModeHistogram::getMCComponentsAndSizes(TString fileName, TString ntName,
 
     // fill the components vector (ordered from most to least populated)
 
-  for (map<TString,float>::iterator mapItr1 = mcComponentsMap.begin();
-       mapItr1 != mcComponentsMap.end(); mapItr1++){
-    float max = 0;
-    TString maxMode("");
-    for (map<TString,float>::iterator mapItr2 = mcComponentsMap.begin();
-      mapItr2 != mcComponentsMap.end(); mapItr2++){
-      bool found = false;
-      for (unsigned int i = 0; i < components.size(); i++){
-        if (mapItr2->first == components[i].first) found = true; 
+  cout << "  FSModeHistogram::getMCComponentsAndSizes:  sorting components" << endl;
+  for (map<TString,float>::iterator mapItr = mcComponentsMap.begin();
+       mapItr != mcComponentsMap.end(); mapItr++){
+    components.push_back(pair<TString,float>(mapItr->first,mapItr->second));
+  }
+  if (components.size() > 1){
+    for (unsigned int i = 0; i < components.size()-1; i++){
+    for (unsigned int j = i+1; j < components.size(); j++){
+      if (components[j].second > components[i].second){
+        pair<TString,float> temp = components[i];
+        components[i] = components[j];
+        components[j] = temp;
       }
-      if ((!found) && (mapItr2->second >= max)){
-        max = mapItr2->second;
-        maxMode = mapItr2->first;
-      }
-    }
-    components.push_back(pair<TString,float>(maxMode,max));
+    }}
   }
 
 
