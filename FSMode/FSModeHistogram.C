@@ -274,9 +274,9 @@ FSModeHistogram::getMCComponentsAndSizes(TString fileName, TString ntName,
     // fill the components vector (ordered from most to least populated)
 
   cout << "  FSModeHistogram::getMCComponentsAndSizes:  sorting components" << endl;
-  for (map<TString,float>::iterator mapItr = mcComponentsMap.begin();
-       mapItr != mcComponentsMap.end(); mapItr++){
-    components.push_back(pair<TString,float>(mapItr->first,mapItr->second));
+  for (map<TString,float>::iterator mapItr2 = mcComponentsMap.begin();
+       mapItr2 != mcComponentsMap.end(); mapItr2++){
+    components.push_back(pair<TString,float>(mapItr2->first,mapItr2->second));
   }
   if (components.size() > 1){
     for (unsigned int i = 0; i < components.size()-1; i++){
