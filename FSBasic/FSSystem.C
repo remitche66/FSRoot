@@ -32,9 +32,14 @@ FSSystem::makeAbsolutePathName(TString path){
     TString tempPath = newPath;
     newPath = gSystem->PrependPathName(gSystem->GetWorkingDirectory().c_str(),tempPath);
 #else
-    cout << "makeAbsolutePathName(" << path << ")" << endl;
-    cout << "ROOT version too old: no relative paths allowed" << endl;
-    exit(0);
+    TString tempDir = "$PWD";
+    TString tempPath = newPath;
+    newPath = makeAbsolutePathName(gSystem->PrependPathName(tempDir,tempPath));
+    if (newPath == ""){
+      cout << "makeAbsolutePathName(" << path << ")" << endl;
+      cout << "ROOT version too old: no relative paths allowed" << endl;
+      exit(0);
+    }
 #endif
   }
   return newPath;
