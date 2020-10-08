@@ -185,6 +185,10 @@ FSSystem::getDirectoryStructure(TString path, bool show){
 
 vector<TString>
 FSSystem::getAbsolutePathsWildcards(TString path, bool show){
+  if (!(path.Contains("*") || path.Contains("?"))){
+    cout << "getAbsolutePathsWildcards ERROR:  only use this if there are wildcards" << endl;
+    exit(0);
+  }
   vector<TString> partsTmp = getDirectoryStructure(path,show);
   if (partsTmp.size() == 0) return vector<TString>();
   vector<TString> parts;
@@ -193,13 +197,15 @@ FSSystem::getAbsolutePathsWildcards(TString path, bool show){
   }
   if (parts.size() == 0) return vector<TString>();
   if (parts[0].Contains("*") || parts[0].Contains("?") || parts.size() < 2){
-    cout << "FSSystem::getAbsolutePathsWildcards WARNING: bad path: " << path;
+    cout << "FSSystem::getAbsolutePathsWildcards WARNING: bad path: " << path << endl;
     return vector<TString>();
   }
   vector<TString> paths;
   paths.push_back(parts[0]);
+  bool foundWildcards = false;
   for (unsigned int i = 1; i < parts.size(); i++){
-    if (parts[i].Contains("*") || parts[i].Contains("?")){
+    if (parts[i].Contains("*") || parts[i].Contains("?") || foundWildcards){
+      foundWildcards = true;
       vector<TString> pathsTmp1;
       for (unsigned int j = 0; j < paths.size(); j++){
         vector<TString> pathsTmp2 = getDirectoryContents(paths[j],parts[i]);
