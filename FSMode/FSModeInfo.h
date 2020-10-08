@@ -90,6 +90,7 @@ class FSModeInfo{
       //      "MODECODE1"
       //      "MODECODE2"
       //      "MODEGLUEX"
+      //      "MODELATEX"
       //      "MODECOMBO"
       //    if "counter" is also given and non-negative:
       //      "MODECOUNTER"

@@ -119,6 +119,8 @@ FSModeInfo::FSModeInfo(vector<int> pdgIDs){
       //      "MODECODE1"
       //      "MODECODE2"
       //      "MODEGLUEX"
+      //      "MODELATEX"
+      //      "MODECOMBO"
       //    if "counter" is also given and non-negative:
       //      "MODECOUNTER"
       //        or "MODECOUNTERXXXX" to pad with zeros
@@ -156,6 +158,11 @@ FSModeInfo::modeString(TString original, int counter){
     TString stmp("");  
     stmp += modeDescription();
     original.Replace(original.Index("MODEDESCRIPTION"),15,stmp);
+  }
+  while (original.Contains("MODELATEX")){
+    TString stmp("");  
+    stmp += FSString::latexSymbols(modeDescription());
+    original.Replace(original.Index("MODELATEX"),9,stmp);
   }
   while (original.Contains("MODECODE1")){
     TString stmp("");  
