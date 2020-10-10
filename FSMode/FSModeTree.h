@@ -56,6 +56,17 @@ class FSModeTree{
     static void createChi2Friends(TString fileName, TString ntName, TString category, bool mc = false);
 
 
+    static void createRankingTree(TString fileName, TString ntName, TString category, TString rankVar,
+                                  TString groupVar1, TString groupVar2, TString rankVarName = "");
+
+/*
+[rankVarName]Rank
+[rankVarName]RankGlobal
+[rankVarName]RankCombinations
+[rankVarName]RankCombinationsGlobal
+*/
+
+
 };
 
 

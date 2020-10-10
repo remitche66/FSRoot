@@ -262,3 +262,148 @@ FSModeTree::createChi2Friends(TString fileName, TString ntName, TString category
   }
 }
 
+
+
+
+void
+FSModeTree::createRankingTree(TString fileName, TString ntName, TString category, TString rankVar,
+                              TString groupVar1, TString groupVar2, TString rankVarName){
+
+
+    // get a list of modes associated with this category
+
+  vector<FSModeInfo*> modeVector = FSModeCollection::modeVector(category);
+  if (modeVector.size() == 0){
+    cout << "FSModeTree:  there are no modes associated with this category..." << endl;
+    cout << "                ... skipping createRankingTree" << endl;
+    return;
+  }
+
+    // *** LOOP 1 *** 
+    //           loop over all trees and record GROUPVAR1, GROUPVAR2, RANKVAR, IMODE in
+    //               map< pair<GROUPVAR1,GROUPVAR2>, map<IMODE, vector<RANKVAR> > >
+
+    // *** LOOP 2 *** 
+    //            loop over the trees again and create the friend trees
+    //               using that map to rank entries
+
+  map< pair<int,int>, map<int, vector<int> > >  rankMap;
+
+  for (unsigned int iLoop = 1; iLoop <= 2; iLoop++){
+
+      // loop over all modes in this category 
+
+    for (unsigned int i = 0; i < modeVector.size(); i++){
+      int IMODE = i + 1;
+      TString fileName_i = modeVector[i]->modeString(fileName);
+      TString ntName_i   = modeVector[i]->modeString(ntName);
+
+        // BOTH LOOPS: prepare to read from the original tree for this mode
+
+      TChain* nt = FSTree::getTChain(fileName_i,ntName_i);
+      if (!nt){
+        cout << "FSModeTree: trouble creating TChain inside createRankingTree" << endl;
+        continue;
+      }
+      Double_t GROUPVAR1, GROUPVAR2, RANKVAR;
+      nt->SetBranchAddress(groupVar1,  &GROUPVAR1);
+      nt->SetBranchAddress(groupVar2,  &GROUPVAR2);
+      nt->SetBranchAddress(rankVar,    &RANKVAR);
+
+        // SECOND LOOP: create friend trees
+
+      TFile* rankTFile = NULL;
+      TTree* rankTTree = NULL;
+      Int_t VARRANK;
+      Int_t VARRANKGLOBAL;
+      Int_t NCOMBINATIONS;
+      Int_t NCOMBINATIONSGLOBAL;
+      if (iLoop == 2){
+        TString fileName_var(fileName_i);  fileName_var += ".";  fileName_var += rankVarName;
+        TString ntName_var(ntName_i);  ntName_var += "_";  ntName_var += rankVarName;
+        rankTFile = new TFile(fileName_var,"recreate");  rankTFile->cd();
+        rankTTree = new TTree(ntName_var, ntName_var);
+        TString sVARRANK             = rankVarName + "Rank";
+        TString sVARRANKGLOBAL       = rankVarName + "RankGlobal";
+        TString sNCOMBINATIONS       = rankVarName + "RankCombinations";
+        TString sNCOMBINATIONSGLOBAL = rankVarName + "RankCombinationsGlobal";
+        rankTTree->Branch(sVARRANK,            &VARRANK,            sVARRANK+"/I");
+        rankTTree->Branch(sVARRANKGLOBAL,      &VARRANKGLOBAL,      sVARRANKGLOBAL+"/I");
+        rankTTree->Branch(sNCOMBINATIONS,      &NCOMBINATIONS,      sNCOMBINATIONS+"/I");
+        rankTTree->Branch(sNCOMBINATIONSGLOBAL,&NCOMBINATIONSGLOBAL,sNCOMBINATIONSGLOBAL+"/I");
+      }
+
+        // loop over events in the original tree
+
+      if (iLoop == 1) cout << "FSModeTree::createRankingTree:  first loop over " << fileName_i << endl;
+      if (iLoop == 2) cout << "FSModeTree::createRankingTree:  second loop over " << fileName_i << endl;
+      for (int ientry = 0; ientry < nt->GetEntries(); ientry++){
+        nt->GetEntry(ientry);
+        if (ientry > 0 && ientry % 10000 == 0) cout << "\t" << ientry << endl;
+        int IRANKVAR = 0; int n = 0; while(n < 20 && abs(IRANKVAR) < 10000){IRANKVAR = (int)(pow(10,n)*RANKVAR);}
+        pair<int,int> pRunEvent = pair<int,int>((int)GROUPVAR1,(int)GROUPVAR2);
+        map<int, vector<int> > mModeVar;
+        if (rankMap.find(pRunEvent) != rankMap.end()) mModeVar = rankMap[pRunEvent];
+        vector<int> vVarI;  vector<int> vVar0;
+        if (mModeVar.find(IMODE) != mModeVar.end()) vVarI = mModeVar[IMODE];
+        if (mModeVar.find(0)     != mModeVar.end()) vVar0 = mModeVar[0];
+
+          // FIRST LOOP: just record information
+
+        if (iLoop == 1){
+          vVarI.push_back(IRANKVAR);
+          vVar0.push_back(IRANKVAR);
+          std::sort(vVarI.begin(), vVarI.end());
+          std::sort(vVar0.begin(), vVar0.end());
+          mModeVar[IMODE] = vVarI;
+          mModeVar[0]     = vVar0;
+          rankMap[pRunEvent] = mModeVar;
+        }
+
+          // SECOND LOOP: fill the friend tree
+
+        if (iLoop == 2){
+          NCOMBINATIONS = vVarI.size();
+          VARRANK = 1;
+          if (vVarI.size() > 1){
+            for (unsigned int ix = 0; ix < vVarI.size()-1; ix++){
+              if (IRANKVAR >= vVarI[ix] && IRANKVAR <= vVarI[ix+1]){
+                vVarI[ix+1] = -10000000;
+                mModeVar[IMODE] = vVarI;
+                rankMap[pRunEvent] = mModeVar;
+                break;
+              }
+              VARRANK++;
+            }
+          }
+          NCOMBINATIONSGLOBAL = vVar0.size();
+          VARRANKGLOBAL = 1;
+          if (vVar0.size() > 1){
+            for (unsigned int ix = 0; ix < vVar0.size()-1; ix++){
+              if (IRANKVAR >= vVar0[ix] && IRANKVAR <= vVar0[ix+1]){
+                vVar0[ix+1] = -10000000;
+                mModeVar[0] = vVar0;
+                rankMap[pRunEvent] = mModeVar;
+                break;
+              }
+              VARRANKGLOBAL++;
+            }
+          }
+          rankTTree->Fill();
+        }
+
+      }
+
+        // SECOND LOOP: write out the friend tree
+
+      if (iLoop == 2){
+        rankTFile->cd();
+        rankTTree->Write();
+        //nt->AddFriend(rankTTree);
+        //nt->Write();
+        delete rankTFile;
+      }
+
+    }
+  }
+}
