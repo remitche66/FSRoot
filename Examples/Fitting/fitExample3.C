@@ -97,7 +97,30 @@
   FSFitUtilities::printParameters("pg1");
   FSFitUtilities::printParameters("pg2");
 
-  cout << "FIT STATUS = " << FSFitUtilities::fitStatus("minuit") << endl;
+
+    // print out some information about the fit
+
+  cout << endl << endl << "**** INFORMATION ABOUT THE FIT ****" << endl;
+  cout << "fcnValue          = " << FSFitUtilities::fcnValue("minuit") << endl;
+  cout << "likelihood        = " << FSFitUtilities::likelihood("minuit") << endl;
+  cout << "chisquare         = " << FSFitUtilities::chisquare("minuit") << endl;
+  cout << "nDataPoints       = " << FSFitUtilities::nDataPoints("minuit") << endl;
+  cout << "nFreeParameters   = " << FSFitUtilities::nFreeParameters("minuit") << endl;
+  cout << "nDOF              = " << FSFitUtilities::nDOF("minuit") << endl;
+  cout << "fitStatus         = " << FSFitUtilities::fitStatus("minuit") << endl;
+  cout << "***********************************" << endl << endl;
+
+    // print out some example parameter information
+
+  cout << "**** EXAMPLE PARAMETER INFORMATION ****" << endl;
+  cout << "  [information about the 2nd gaussian width (gaus2:W)]" << endl;
+  cout << "parameterValue                    = " << FSFitUtilities::getParameterValue("gaus2:W") << endl;
+  cout << "parameterError                    = " << FSFitUtilities::getParameterError("gaus2:W") << endl;
+  cout << "parameterErrorLow                 = " << FSFitUtilities::getParameterErrorLow("gaus2:W") << endl;
+  cout << "parameterErrorHigh                = " << FSFitUtilities::getParameterErrorHigh("gaus2:W") << endl;
+  cout << "correlatedError (gaus2:W,gaus1:N) = " << FSFitUtilities::getCorrelatedError("minuit","gaus2:W","gaus1:N") << endl;
+  cout << "correlatedError (poly2:b,poly1:c) = " << FSFitUtilities::getCorrelatedError("minuit","poly2:b","poly1:c") << endl;
+  cout << "***************************************" << endl;
 
 }
 

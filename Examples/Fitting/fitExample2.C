@@ -55,5 +55,29 @@
 
   fpre->Draw("same");
 
+    // print out some information about the fit
+
+  cout << endl << endl << "**** INFORMATION ABOUT THE FIT ****" << endl;
+  cout << "fcnValue          = " << FSFitUtilities::fcnValue("minuit") << endl;
+  cout << "likelihood        = " << FSFitUtilities::likelihood("minuit") << endl;
+  cout << "chisquare         = " << FSFitUtilities::chisquare("minuit") << endl;
+  cout << "nDataPoints       = " << FSFitUtilities::nDataPoints("minuit") << endl;
+  cout << "nFreeParameters   = " << FSFitUtilities::nFreeParameters("minuit") << endl;
+  cout << "nDOF              = " << FSFitUtilities::nDOF("minuit") << endl;
+  cout << "fitStatus         = " << FSFitUtilities::fitStatus("minuit") << endl;
+  cout << "***********************************" << endl << endl;
+
+    // print out some example parameter information
+
+  cout << "**** EXAMPLE PARAMETER INFORMATION ****" << endl;
+  cout << "  [information about the gaussian width (gaus:W)]" << endl;
+  cout << "parameterValue                  = " << FSFitUtilities::getParameterValue("gaus:W") << endl;
+  cout << "parameterError                  = " << FSFitUtilities::getParameterError("gaus:W") << endl;
+  cout << "parameterErrorLow               = " << FSFitUtilities::getParameterErrorLow("gaus:W") << endl;
+  cout << "parameterErrorHigh              = " << FSFitUtilities::getParameterErrorHigh("gaus:W") << endl;
+  cout << "correlatedError (gaus:W,gaus:N) = " << FSFitUtilities::getCorrelatedError("minuit","gaus:W","gaus:N") << endl;
+  cout << "correlatedError (poly:b,poly:c) = " << FSFitUtilities::getCorrelatedError("minuit","poly:b","poly:c") << endl;
+  cout << "***************************************" << endl;
+
 }
 

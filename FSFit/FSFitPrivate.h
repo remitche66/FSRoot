@@ -57,7 +57,8 @@ using namespace std;
 // Note:  Access to every FSFitParameter instance is through the
 //        the global FSFitParameterList class.
 
-// Note:  parNumber is only used internally to number parameters in minuit.
+// Note:  parNumberAll and parNumberFree are only used internally to number 
+//        parameters in minuit.
 
 
 class FSFitParameter{
@@ -80,7 +81,7 @@ class FSFitParameter{
       setErrorLowHigh(parInitializer->errorLow(),parInitializer->errorHigh());
       setStep (parInitializer->step());
       setFixed(parInitializer->fixed());
-      resetParNumber();
+      resetParNumbers();
     }
 
     void resetDefaults(){
@@ -90,7 +91,7 @@ class FSFitParameter{
       resetErrorLowHigh();
       resetStep();
       resetFixed();
-      resetParNumber();
+      resetParNumbers();
     }
 
     FSFitParameter* otherParameter(TString n_fpName);
@@ -107,7 +108,8 @@ class FSFitParameter{
     TString           fName()        { return m_fName; }
     TString           pName()        { return m_pName; }
     TString          description()   { return m_description; }
-    int              parNumber()     { return m_parNumber; }
+    int              parNumberAll()  { return m_parNumberAll; }
+    int              parNumberFree() { return m_parNumberFree; }
     bool             fixed()         { return m_fixed; }
     vector<TString>  constraints()   { return m_constraints; }
 
@@ -183,15 +185,23 @@ class FSFitParameter{
 
       // manage numbering
 
-    void setParNumber(int n_parNumber, bool distribute = true) { 
-      m_parNumber = n_parNumber;
+    void setParNumberAll(int n_parNumberAll, bool distribute = true) { 
+      m_parNumberAll = n_parNumberAll;
       if (distribute){
         for (unsigned int i = 0; i < m_constraints.size(); i++){
-          otherParameter(m_constraints[i])->setParNumber(n_parNumber,false);
+          otherParameter(m_constraints[i])->setParNumberAll(n_parNumberAll,false);
         }
       }
     }
-    void resetParNumber() { setParNumber(-1); }
+    void setParNumberFree(int n_parNumberFree, bool distribute = true) { 
+      m_parNumberFree = n_parNumberFree;
+      if (distribute){
+        for (unsigned int i = 0; i < m_constraints.size(); i++){
+          otherParameter(m_constraints[i])->setParNumberFree(n_parNumberFree,false);
+        }
+      }
+    }
+    void resetParNumbers() { setParNumberAll(-1); setParNumberFree(-1); }
 
 
       // manage constraints (just a bit confusing), note:
@@ -248,7 +258,7 @@ class FSFitParameter{
 
       // printing
 
-    void print() { cout << m_parNumber << ". ";
+    void print(int parNumber = -1) { cout << parNumber << " (" << m_parNumberAll << "," << m_parNumberFree << "). ";
                    printDescription();
                    if (m_constraints.size() > 0){
                      cout << "\t    constraints:" << endl;
@@ -278,7 +288,8 @@ class FSFitParameter{
     double m_step;
     TString m_description;
     vector<TString> m_constraints;
-    int m_parNumber;
+    int m_parNumberAll;
+    int m_parNumberFree;
     bool m_fixed;
 
 };
@@ -489,30 +500,32 @@ class FSFitFunction{
 
       // done immediately before the numbers are needed, resets all the numbers and recounts
 
-    int numberParameters(int startNumber){
+    pair<int,int> numberParameters(pair<int,int> startNumberAllFree){
       m_fpNamesUnique.clear();
-      int npar = startNumber;
+      int nparAll = startNumberAllFree.first;
+      int nparFree = startNumberAllFree.second;
       for (unsigned int i = 0; i < m_fpNames.size(); i++){
         FSFitParameter* fp = FSFitParameterList::getParameter(m_fpNames[i]);
-        if (fp->parNumber() == -1){
-          fp->setParNumber(npar++);
+        if (fp->parNumberAll() == -1){
+          fp->setParNumberAll(nparAll++);
           m_fpNamesUnique.push_back(m_fpNames[i]);
         }
+        if ((fp->parNumberFree() == -1) && (!fp->fixed())){
+          fp->setParNumberFree(nparFree++);
+        }
       }
-      return npar;
+      return pair<int,int>(nparAll,nparFree);
     }
 
     void resetNumberParameters(){
       for (unsigned int i = 0; i < m_fpNames.size(); i++){
-        FSFitParameterList::getParameter(m_fpNames[i])->resetParNumber();
+        FSFitParameterList::getParameter(m_fpNames[i])->resetParNumbers();
       }
     }
 
     void printParameters(){
-      resetNumberParameters();
-      numberParameters(1);
       for (unsigned int i = 0; i < m_fpNames.size(); i++){
-         FSFitParameterList::getParameter(m_fpNames[i])->print();
+         FSFitParameterList::getParameter(m_fpNames[i])->print(i+1);
       }
     }
 
@@ -961,9 +974,9 @@ class FSFitMinuit {
         x+=stepSize;
         //FSFitUtilities::fixParameter(fpName,x);
         FSFitParameter* par = FSFitParameterList::getParameter(fpName);
-        m_minuit->mnparm(par->parNumber()-1,par->fpName(),x,par->step(),  0.0,0.0, outflag);
+        m_minuit->mnparm(par->parNumberAll()-1,par->fpName(),x,par->step(),  0.0,0.0, outflag);
        // fix the parameter to the value
-              m_minuit->FixParameter(par->parNumber()-1);
+              m_minuit->FixParameter(par->parNumberAll()-1);
               // using migrad is 3x slower for some reason
        m_minuit->mnexcm("MIGRAD",calls,1,err);
        //migrad(0);
@@ -992,6 +1005,21 @@ class FSFitMinuit {
       int npari; int nparx; int istat;
       m_minuit->mnstat(fmin, fedm, errdef, npari, nparx, istat);
       return istat;
+    }
+
+    // this gives sigma_ij = rho_ij * sigma_i * sigma_j (from Will)
+    double correlatedError(TString fpName1, TString fpName2){
+      int par1 = FSFitParameterList::getParameter(fpName1)->parNumberFree();
+      int par2 = FSFitParameterList::getParameter(fpName2)->parNumberFree();
+      int npars = nFreeParameters();
+      if ((par1 < 1) || (par2 < 1) || (par1 > npars) || (par2 > npars)){
+        cout << "correlatedError WARNING: no correlation matrix element for parameters " 
+             << fpName1 << " and " << fpName2 << ", returning zero." << endl;
+        return 0.0;
+      }
+      Double_t matrix[npars][npars];
+      m_minuit->mnemat(&matrix[0][0],npars);
+      return matrix[par1-1][par2-1];
     }
 
     void setParameters(Double_t* par){
@@ -1159,15 +1187,15 @@ class FSFitMinuit {
         TString fName = comps[i].second;
         FSFitFunctionList::getFunction(fName)->resetNumberParameters();
       }
-      int npar = 1;
+      pair<int,int> npar(1,1);
       for (unsigned int i = 0; i < comps.size(); i++){
         TString fName = comps[i].second;
         npar = FSFitFunctionList::getFunction(fName)->numberParameters(npar);
         vector<TString> fpNames = FSFitFunctionList::getFunction(fName)->fpNamesUnique();
         for (unsigned int ip = 0; ip < fpNames.size(); ip++){
           FSFitParameter* par = FSFitParameterList::getParameter(fpNames[ip]);
-          m_minuit->mnparm(par->parNumber()-1,par->fpName(),par->value(),par->step(),  0.0,0.0, outflag);
-          if (par->fixed()) m_minuit->FixParameter(par->parNumber()-1);
+          m_minuit->mnparm(par->parNumberAll()-1,par->fpName(),par->value(),par->step(),  0.0,0.0, outflag);
+          if (par->fixed()) m_minuit->FixParameter(par->parNumberAll()-1);
         }
       }
     }
@@ -1180,7 +1208,7 @@ class FSFitMinuit {
         TString fName = comps[i].second;
         FSFitFunctionList::getFunction(fName)->resetNumberParameters();
       }
-      int npar = 1;
+      pair<int,int> npar(1,1);
       for (unsigned int i = 0; i < comps.size(); i++){
         TString fName = comps[i].second;
         npar = FSFitFunctionList::getFunction(fName)->numberParameters(npar);
@@ -1188,11 +1216,11 @@ class FSFitMinuit {
         for (unsigned int ip = 0; ip < fpNames.size(); ip++){
           FSFitParameter* par = FSFitParameterList::getParameter(fpNames[ip]);
           double value; double error;
-          m_minuit->GetParameter(par->parNumber()-1,value,error);
+          m_minuit->GetParameter(par->parNumberAll()-1,value,error);
           par->setValue(value); par->setError(error);
           if (isMinosFit){
             double elow; double ehigh; double eparab; double globalCorrelation;
-            m_minuit->mnerrs(par->parNumber()-1,ehigh,elow,eparab,globalCorrelation);
+            m_minuit->mnerrs(par->parNumberAll()-1,ehigh,elow,eparab,globalCorrelation);
             par->setErrorLowHigh(fabs(elow),ehigh); par->setError(eparab);
           }
         }

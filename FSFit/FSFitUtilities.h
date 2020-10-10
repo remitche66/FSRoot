@@ -162,7 +162,7 @@ class FSFitUtilities{
     }
 
 
-      // Get parameter values.
+      // Get parameter values and errors.
       //  The low and high errors are only set if minos is called.
 
     static double getParameterValue(TString fpName){
@@ -179,6 +179,11 @@ class FSFitUtilities{
 
     static double getParameterErrorHigh(TString fpName){
       return FSFitParameterList::getParameter(fpName)->errorHigh();
+    }
+
+      // Note: this gives sigma_ij = rho_ij * sigma_i * sigma_j
+    static double getCorrelatedError(TString mName, TString fpName1, TString fpName2){
+      return FSFitMinuitList::getMinuit(mName)->correlatedError(fpName1,fpName2);
     }
 
 
