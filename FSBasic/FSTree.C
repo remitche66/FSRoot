@@ -21,6 +21,7 @@
 
 
 map< TString, TChain*> FSTree::m_chainCache;
+vector<TString> FSTree::m_friendTrees;
 
 map< TString, TString > FSTree::m_mapDefinedPx;
 map< TString, TString > FSTree::m_mapDefinedPy;
@@ -125,11 +126,66 @@ FSTree::getTChain(TString fileName, TString ntName, TString& STATUS){
     }
   }
 
+    // add friends to the tree
+
+  if ((nt) && (m_friendTrees.size() > 0)){
+      // get the list of files for this chain (order matters)
+    vector<TString> fileList;
+    TIter next(nt->GetListOfFiles());
+    while ( TChainElement* el = (TChainElement*) next()){
+      fileList.push_back(el->GetTitle());
+    }
+      // loop over files individually and add the friend tree
+    for (unsigned int i = 0; i < fileList.size(); i++){
+      for (unsigned int j = 0; j < m_friendTrees.size(); j++){
+        TString friendFileName(fileList[i]);
+        friendFileName += ".";
+        friendFileName += m_friendTrees[j];
+        TString friendNTName(ntName);
+        friendNTName += "_";
+        friendNTName += m_friendTrees[j];
+        if (FSControl::DEBUG){
+          cout << "FSTree: adding friend tree... " << endl;
+          cout << "            friend tree name = " << friendNTName << endl;
+          cout << "            friend tree file = " << friendFileName << endl;
+        }
+        nt->AddFriend(friendNTName,friendFileName);
+      }
+    }
+  }
+
 
   return nt;
 
 }
 
+
+void
+FSTree::addFriendTree(TString friendName){
+  friendName = FSString::removeWhiteSpace(friendName);
+  if (friendName == "") return;
+  for (unsigned int i = 0; i < m_friendTrees.size(); i++){ if (m_friendTrees[i] == friendName) return; }
+  m_friendTrees.push_back(friendName);
+}
+
+void
+FSTree::removeFriendTree(TString friendName){
+  friendName = FSString::removeWhiteSpace(friendName);
+  if (friendName == "") return;
+  vector<TString> newFriendTrees;
+  for (unsigned int i = 0; i < m_friendTrees.size(); i++){
+    if (m_friendTrees[i] != friendName) newFriendTrees.push_back(m_friendTrees[i]);
+  }
+  if (m_friendTrees.size() != newFriendTrees.size()){ m_friendTrees.clear(); m_friendTrees = newFriendTrees; } 
+}
+
+void
+FSTree::showFriendTrees(){
+  cout << "FRIEND TREES:" << endl;
+  for (unsigned int i = 0; i < m_friendTrees.size(); i++){
+    cout << "  (" << (i+1) << ")  " << m_friendTrees[i] << endl;
+  }
+}
 
 
   // ********************************************************

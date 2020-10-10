@@ -27,6 +27,17 @@ class FSTree{
     static TChain* getTChain(TString fileName, TString ntName, TString& STATUS); 
 
 
+      // *********************************************************
+      // ADD OR REMOVE FRIEND TREES
+// when using getTChain, tree will have name ntName_friendName
+//                       file will have name fileName.friendName
+      // *********************************************************
+
+    static void addFriendTree(TString friendName);
+    static void removeFriendTree(TString friendName);
+    static void showFriendTrees();
+
+
       // ********************************************************
       // GET NAMES OF OBJECTS FROM FILES AND BRANCH NAMES
       // ********************************************************
@@ -104,6 +115,7 @@ class FSTree{
       // global caches
 
     static map< TString, TChain*> m_chainCache;
+    static vector<TString> m_friendTrees;
 
       // defined four-vectors
 
