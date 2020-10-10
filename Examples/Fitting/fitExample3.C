@@ -45,11 +45,12 @@
   FSFitUtilities::setParameters    ("poly2", 120.0, 0.0, 0.0);
   FSFitUtilities::setParameters    ("gaus2",   2.0, 3.5, 0.01);
 
-  //FSFitUtilities::constrainParameters("poly1:a","poly2:a");
+  FSFitUtilities::constrainParameters("poly1:a","poly2:a");
   //FSFitUtilities::constrainParameters("poly1:b","poly2:b");
   //FSFitUtilities::constrainParameters("poly1:c","poly2:c");
   FSFitUtilities::constrainParameters("gaus1:N","gaus2:N");
   FSFitUtilities::constrainParameters("gaus1:W","gaus2:W");
+  FSFitUtilities::fixParameter("poly2:c",0.0);
 
 
     // draw functions before fit
@@ -118,7 +119,7 @@
   cout << "parameterError                    = " << FSFitUtilities::getParameterError("gaus2:W") << endl;
   cout << "parameterErrorLow                 = " << FSFitUtilities::getParameterErrorLow("gaus2:W") << endl;
   cout << "parameterErrorHigh                = " << FSFitUtilities::getParameterErrorHigh("gaus2:W") << endl;
-  cout << "correlatedError (gaus2:W,gaus1:N) = " << FSFitUtilities::getCorrelatedError("minuit","gaus2:W","gaus1:N") << endl;
+  cout << "correlatedError (gaus2:W,gaus2:M) = " << FSFitUtilities::getCorrelatedError("minuit","gaus2:W","gaus2:M") << endl;
   cout << "correlatedError (poly2:b,poly1:c) = " << FSFitUtilities::getCorrelatedError("minuit","poly2:b","poly1:c") << endl;
   cout << "***************************************" << endl;
 
