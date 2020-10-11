@@ -54,7 +54,7 @@ FSModeTree::skimTree(TString fileNameInput, TString ntName, TString category,
     if (modeVector[0]->modeString(ntName)         != ntName)         loopOverModes = true;
     if (modeVector[0]->modeString(fileNameInput)  != fileNameInput)  loopOverModes = true;
     if (modeVector[0]->modeString(fileNameOutput) != fileNameOutput) loopOverModes = true;
-    if (modeVector[0]->modeCuts(cuts)             != cuts)           loopOverModes = true;
+    if (modeVector[0]->modeString(cuts)           != cuts)           loopOverModes = true;
   }
 
 
@@ -65,7 +65,7 @@ FSModeTree::skimTree(TString fileNameInput, TString ntName, TString category,
       TString ntName_i = modeVector[i]->modeString(ntName);
       TString fileNameInput_i = modeVector[i]->modeString(fileNameInput);
       TString fileNameOutput_i = modeVector[i]->modeString(fileNameOutput);
-      TString cuts_i = modeVector[i]->modeCuts(cuts);
+      TString cuts_i = modeVector[i]->modeString(cuts);
       TString printCommandFile_i = modeVector[i]->modeString(printCommandFile);
         if (printCommandFile == "") printCommandFile_i = "";
       FSTree::skimTree(fileNameInput_i,ntName_i,fileNameOutput_i,

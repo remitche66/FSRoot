@@ -148,9 +148,6 @@ FSModeInfo::modeString(TString original, int counter){
   mString += m_modeCode.second;
   mString += "_";
   mString += m_modeCode.first;
-  if (original == ""){
-    return mString;
-  }
   while (original.Contains("MODESTRING")){
     original.Replace(original.Index("MODESTRING"),10,mString);
   }

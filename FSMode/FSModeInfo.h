@@ -101,7 +101,7 @@ class FSModeInfo{
     pair<int,int>  modeCode();
     int            modeCode1();
     int            modeCode2();
-    TString        modeString(TString original = "", int counter = -1);
+    TString        modeString(TString original = "MODESTRING", int counter = -1);
     TString        modeDescription();
     TString        modeGlueXFormat();
     TString        modeComboFormat(int minimumIndex = 1, TString extraTag = "");
