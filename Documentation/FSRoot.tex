@@ -324,7 +324,7 @@ The {\tt FSModeInfo} class also handles particle combinatorics within a given fi
       // ==>  *******************************
 \end{verbatim}
 
-The {\tt modeCuts} member function uses the results of {\tt modeCombinatorics} to combine combinatorics into a single string using the keywords ``AND'', ``OR'', ``MAX'', and ``MIN'':
+The {\tt modeCuts} member function uses the results of {\tt modeCombinatorics} to combine combinatorics into a single string using the keywords ``AND'', ``OR'', ``MAX'', ``MIN'', and ``LIST''.  It is also called by the {\tt modeString} member function.  Examples:
 \begin{verbatim}
     > cout << mi.modeCuts("OR((ABC[K+]+DEF[K-])>0)") << endl;
       // ==>  "(((ABC2+DEF4)>0)||((ABC2+DEF5)>0)||((ABC3+DEF4)>0)||((ABC3+DEF5)>0))"
@@ -334,6 +334,8 @@ The {\tt modeCuts} member function uses the results of {\tt modeCombinatorics} t
       // ==>  "(((ABC[K+])>=(ABC2))&&((ABC[K+])>=(ABC3)))"
     > cout << mi.modeCuts("MIN(ABC[K+])") << endl;
       // ==>  "(((ABC[K+])<=(ABC2))&&((ABC[K+])<=(ABC3)))"
+    > cout << mi.modeCuts("LIST(ABC[K+])") << endl;
+      // ==>  "ABC2,ABC3"
 \end{verbatim}
 
 Note that most of the functionality of the {\tt FSModeInfo} class is rarely used explicitly.  It is more often combined with other functions and used in higher-level classes~(like {\tt FSModeHistogram}), often producing large strings~(used only internally), like:
