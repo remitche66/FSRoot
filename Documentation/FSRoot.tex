@@ -324,25 +324,37 @@ The {\tt FSModeInfo} class also handles particle combinatorics within a given fi
       // ==>  *******************************
 \end{verbatim}
 
-The {\tt modeCuts} member function uses the results of {\tt modeCombinatorics} to combine combinatorics into a single string using the keywords ``AND'' and ``OR'':
+The {\tt modeCuts} member function uses the results of {\tt modeCombinatorics} to combine combinatorics into a single string using the keywords ``AND'', ``OR'', ``MAX'', and ``MIN'':
 \begin{verbatim}
     > cout << mi.modeCuts("OR((ABC[K+]+DEF[K-])>0)") << endl;
-      // ==>  "(((ABC2+DEF4)>0)||((ABC3+DEF4)>0)||((ABC2+DEF5)>0)||((ABC3+DEF5)>0))"
+      // ==>  "(((ABC2+DEF4)>0)||((ABC2+DEF5)>0)||((ABC3+DEF4)>0)||((ABC3+DEF5)>0))"
     > cout << mi.modeCuts("AND((ABC[K+]+DEF[K-])>0)") << endl;
-      // ==>  "(((ABC2+DEF4)>0)&&((ABC3+DEF4)>0)&&((ABC2+DEF5)>0)&&((ABC3+DEF5)>0))"
+      // ==>  "(((ABC2+DEF4)>0)&&((ABC2+DEF5)>0)&&((ABC3+DEF4)>0)&&((ABC3+DEF5)>0))"
+    > cout << mi.modeCuts("MAX(ABC[K+])") << endl;
+      // ==>  "(((ABC[K+])>=(ABC2))&&((ABC[K+])>=(ABC3)))"
+    > cout << mi.modeCuts("MIN(ABC[K+])") << endl;
+      // ==>  "(((ABC[K+])<=(ABC2))&&((ABC[K+])<=(ABC3)))"
 \end{verbatim}
 
 Note that most of the functionality of the {\tt FSModeInfo} class is rarely used explicitly.  It is more often combined with other functions and used in higher-level classes~(like {\tt FSModeHistogram}), often producing large strings~(used only internally), like:
 \begin{verbatim}
     > FSTree::expandVariable(mi.modeCuts("AND(MASS2([K+],[K-])>MASS2([pi+],[K-]))"))
-      // ==>  "((((EnP2+EnP4)**2-(PxP2+PxP4)**2-(PyP2+PyP4)**2-(PzP2+PzP4)**2)>
-                 ((EnP4+EnP6)**2-(PxP4+PxP6)**2-(PyP4+PyP6)**2-(PzP4+PzP6)**2))&&
-                (((EnP3+EnP4)**2-(PxP3+PxP4)**2-(PyP3+PyP4)**2-(PzP3+PzP4)**2)>
-                 ((EnP4+EnP6)**2-(PxP4+PxP6)**2-(PyP4+PyP6)**2-(PzP4+PzP6)**2))&&
-                (((EnP2+EnP5)**2-(PxP2+PxP5)**2-(PyP2+PyP5)**2-(PzP2+PzP5)**2)>
-                 ((EnP5+EnP6)**2-(PxP5+PxP6)**2-(PyP5+PyP6)**2-(PzP5+PzP6)**2))&&
-                (((EnP3+EnP5)**2-(PxP3+PxP5)**2-(PyP3+PyP5)**2-(PzP3+PzP5)**2)>
-                 ((EnP5+EnP6)**2-(PxP5+PxP6)**2-(PyP5+PyP6)**2-(PzP5+PzP6)**2)))"
+      // ==>  "(((pow(((EnP2+EnP4)),2)-pow(((PxP2+PxP4)),2)
+                                      -pow(((PyP2+PyP4)),2)-pow(((PzP2+PzP4)),2))>
+                 (pow(((EnP4+EnP6)),2)-pow(((PxP4+PxP6)),2)
+                                      -pow(((PyP4+PyP6)),2)-pow(((PzP4+PzP6)),2)))&&
+                ((pow(((EnP2+EnP5)),2)-pow(((PxP2+PxP5)),2)
+                                      -pow(((PyP2+PyP5)),2)-pow(((PzP2+PzP5)),2))>
+                 (pow(((EnP5+EnP6)),2)-pow(((PxP5+PxP6)),2)
+                                      -pow(((PyP5+PyP6)),2)-pow(((PzP5+PzP6)),2)))&&
+                ((pow(((EnP3+EnP4)),2)-pow(((PxP3+PxP4)),2)
+                                      -pow(((PyP3+PyP4)),2)-pow(((PzP3+PzP4)),2))>
+                 (pow(((EnP4+EnP6)),2)-pow(((PxP4+PxP6)),2)
+                                      -pow(((PyP4+PyP6)),2)-pow(((PzP4+PzP6)),2)))&&
+                ((pow(((EnP3+EnP5)),2)-pow(((PxP3+PxP5)),2)
+                                      -pow(((PyP3+PyP5)),2)-pow(((PzP3+PzP5)),2))>
+                 (pow(((EnP5+EnP6)),2)-pow(((PxP5+PxP6)),2)
+                                      -pow(((PyP5+PyP6)),2)-pow(((PzP5+PzP6)),2))))"
 \end{verbatim} 
 
 The {\tt FSModeInfo} object also contains a list of ``categories'' that are used by the {\tt FSModeCollection} class~(next section) for organization.  The {\tt display} method shows information about a given mode, including a list of categories, some of which are added by default.  In the following, the first use of {\tt display} will show the default list of categories; the second will also show the added categories:
