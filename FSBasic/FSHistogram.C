@@ -234,9 +234,8 @@ FSHistogram::getTHNFBasicTreeRDF(TString index, TString& STATUS){
   string sNT   = FSString::TString2string(ntName);
   string sVARX = FSString::TString2string(variable);
   string sVARY = "";
-  if (dimension == 2){ vector<TString> vars = FSString::parseTString(variable,":");
-                       sVARX = FSString::TString2string(vars[1]);
-                       sVARY = FSString::TString2string(vars[0]); }
+  if (dimension == 2){ sVARX = FSString::TString2string(FSString::parseVariableX(variable));
+                       sVARY = FSString::TString2string(FSString::parseVariableY(variable)); }
   string sCUTS = FSString::TString2string(cuts);
   int nbinsx = FSString::parseBoundsNBinsX(bounds);
   double xlow = FSString::parseBoundsLowerX(bounds);
@@ -415,9 +414,8 @@ FSHistogram::getTHNFBasicContents(TTree* histTree, TString index,
   }
 
     // get the x and y variable names
-  vector<TString> vars = FSString::parseTString(variable,":");
-  TString varX("");  if (dimension >= 1)  varX = vars[0];
-  TString varY("");  if (dimension == 2){ varX = vars[1]; varY = vars[0]; }
+  TString varX("");  if (dimension >= 1) varX = FSString::parseVariableX(variable);
+  TString varY("");  if (dimension == 2) varY = FSString::parseVariableY(variable);
 
     // set the addresses of the values to add to histTree
   Double_t x = 0.0;  if (dimension >= 1) histTree->SetBranchAddress("x",  &x);
@@ -1222,8 +1220,8 @@ FSHistogram::checkIndex(TString index, TString type){
   if (type == "TREE"){
     TString variable = iMap["{-VA-}"];
     if (variable == "") return TString("!!NO_VAR!!");
-    if ((!FSString::checkParentheses(variable))
-        || ((int)FSString::parseTString(variable,":").size() != dimension))
+    if ((!FSString::checkParentheses(variable)) ||
+        (!FSString::checkVariable(dimension,variable)))
       return TString("!!BAD_VAR!!");
   }
     // checks on cuts (CU)
