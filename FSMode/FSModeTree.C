@@ -220,27 +220,27 @@ FSModeTree::createChi2Friends(TString fileName, TString ntName, TString category
           NCOMBINATIONS = vChi2I.size();
           CHI2RANK = 1;
           if (vChi2I.size() > 1){
-            for (unsigned int ix = 0; ix < vChi2I.size()-1; ix++){
-              if (ICHI2 >= vChi2I[ix] && ICHI2 <= vChi2I[ix+1]){
-                vChi2I[ix+1] = -10000000;
+            for (unsigned int ix = 0; ix < vChi2I.size(); ix++){
+              if (ICHI2 == vChi2I[ix]){
+                CHI2RANK = ix+1;
+                vChi2I[ix] = -10000000;
                 mModeChi2[IMODE] = vChi2I;
                 chi2map[pRunEvent] = mModeChi2;
                 break;
               }
-              CHI2RANK++;
             }
           }
           NCOMBINATIONSGLOBAL = vChi20.size();
           CHI2RANKGLOBAL = 1;
           if (vChi20.size() > 1){
-            for (unsigned int ix = 0; ix < vChi20.size()-1; ix++){
-              if (ICHI2 >= vChi20[ix] && ICHI2 <= vChi20[ix+1]){
-                vChi20[ix+1] = -10000000;
+            for (unsigned int ix = 0; ix < vChi20.size(); ix++){
+              if (ICHI2 >= vChi20[ix]){
+                CHI2RANKGLOBAL = ix+1;
+                vChi20[ix] = -10000000;
                 mModeChi2[0] = vChi20;
                 chi2map[pRunEvent] = mModeChi2;
                 break;
               }
-              CHI2RANKGLOBAL++;
             }
           }
           chi2TTree->Fill();
