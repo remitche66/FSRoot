@@ -203,7 +203,7 @@ FSModeInfo::modeString(TString original, int counter){
     original.Replace(original.Index("MODECOUNTER"),11+digits,
                      FSString::int2TString(counter,digits));
   }
-  return original;
+  return modeCuts(original);
 }
 
 
@@ -570,67 +570,86 @@ vector<int> FSModeInfo::modeLambdaIndices  (){return modeParticleIndices ("Lambd
 //               MIN(EnP[pi+]) --> (((EnP[pi+])<=(EnP2))&&
 //                                  ((EnP[pi+])<=(EnP3))&&
 //                                  ((EnP[pi+])<=(EnP4)))
+//              LIST(EnP[pi+]) --> EnP2,EnP3,EnP4
 //   (also allows nested functions although it may not be useful)
+//   NOTE:  this method is called by the modeVariable method
 
 TString 
 FSModeInfo::modeCuts(TString varString){
-  varString = FSString::removeWhiteSpace(varString);
-  if (!FSString::checkParentheses(varString)){
-    cout << "FSModeInfo::modeCuts WARNING: problem with parentheses,"
-         << " returning empty string" << endl;
-    return TString("");
-  }
+  //varString = FSString::removeWhiteSpace(varString);
+  //if (!FSString::checkParentheses(varString)){
+  //  cout << "FSModeInfo::modeCuts WARNING: problem with parentheses,"
+  //       << " returning empty string" << endl;
+  //  return TString("");
+  //}
   TString ANDMARK("AND(");
   TString ORMARK("OR(");
   TString MAXMARK("MAX(");
   TString MINMARK("MIN(");
+  TString LISTMARK("LIST(");
   TString newString(varString);
   while (newString.Contains(ANDMARK) || 
          newString.Contains(ORMARK)  ||
          newString.Contains(MAXMARK) ||
-         newString.Contains(MINMARK)){
+         newString.Contains(MINMARK) ||
+         newString.Contains(LISTMARK)){
     int iDeepest = 0;
     TString markDeepest = "";
     TString encString = newString;
     while (encString.Contains(ANDMARK) || 
            encString.Contains(ORMARK)  ||
            encString.Contains(MAXMARK) ||
-           encString.Contains(MINMARK)){
+           encString.Contains(MINMARK) ||
+           encString.Contains(LISTMARK)){
       int indexA = encString.Index(ANDMARK);
       int indexO = encString.Index(ORMARK);
       int indexM = encString.Index(MAXMARK);
       int indexI = encString.Index(MINMARK);
+      int indexL = encString.Index(LISTMARK);
       if (indexA >= 0)        { iDeepest = indexA;  markDeepest = ANDMARK; }
       if (indexO >= iDeepest) { iDeepest = indexO;  markDeepest = ORMARK; }
       if (indexM >= iDeepest) { iDeepest = indexM;  markDeepest = MAXMARK; }
       if (indexI >= iDeepest) { iDeepest = indexI;  markDeepest = MINMARK; }
+      if (indexL >= iDeepest) { iDeepest = indexL;  markDeepest = LISTMARK; }
       encString = FSString::captureParentheses(encString,iDeepest);
-      if (!FSString::checkParentheses(encString)){
+      if (encString == "" || !FSString::checkParentheses(encString)){
         cout << "FSModeInfo::modeCuts WARNING: problem with parentheses,"
              << " returning empty string" << endl;
         return TString("");
       }
     }
-    TString newEncString("((");
+    TString newEncString("");
+    if (markDeepest ==  ANDMARK) newEncString += "((";
+    if (markDeepest ==   ORMARK) newEncString += "((";
+    if (markDeepest ==  MAXMARK) newEncString += "((";
+    if (markDeepest ==  MINMARK) newEncString += "((";
+    if (markDeepest == LISTMARK) newEncString += "";
     vector<TString> combos = modeCombinatorics(encString);
     for (unsigned int j = 0; j < combos.size(); j++){
       if ((markDeepest == MAXMARK) || (markDeepest == MINMARK)){
-        if (newEncString.Length() > 2) newEncString += ")&&(";
+        if (j != 0) newEncString += ")&&(";
         TString comp("");
         if (markDeepest == MAXMARK) comp = ">=";
         if (markDeepest == MINMARK) comp = "<=";
         newEncString += "("+encString+")"+comp+"("+combos[j]+")";
       }
-      if (markDeepest == ANDMARK || markDeepest == ORMARK){
-        if (newEncString.Length() > 2){
-          if (markDeepest == ANDMARK) newEncString += ")&&(";
-          if (markDeepest == ORMARK)  newEncString += ")||(";
-        }
+      if (markDeepest == ANDMARK || markDeepest == ORMARK || markDeepest == LISTMARK){
+        if ((j != 0)&&(markDeepest == ANDMARK))  newEncString += ")&&(";
+        if ((j != 0)&&(markDeepest == ORMARK))   newEncString += ")||(";
+        if ((j != 0)&&(markDeepest == LISTMARK)) newEncString += ",";
         newEncString += combos[j];
       }
     }
-    if (combos.size() == 0) newEncString += "1==1";
-    newEncString += "))";
+    if ((combos.size() == 0)&&(markDeepest ==  ANDMARK)) newEncString += "1==1";
+    if ((combos.size() == 0)&&(markDeepest ==   ORMARK)) newEncString += "1==1";
+    if ((combos.size() == 0)&&(markDeepest ==  MAXMARK)) newEncString += "1==1";
+    if ((combos.size() == 0)&&(markDeepest ==  MINMARK)) newEncString += "1==1";
+    if ((combos.size() == 0)&&(markDeepest == LISTMARK)) newEncString += "";
+    if (markDeepest ==  ANDMARK) newEncString += "))";
+    if (markDeepest ==   ORMARK) newEncString += "))";
+    if (markDeepest ==  MAXMARK) newEncString += "))";
+    if (markDeepest ==  MINMARK) newEncString += "))";
+    if (markDeepest == LISTMARK) newEncString += "";
     encString = markDeepest + encString + ")";
     newString.Replace(newString.Index(encString), encString.Length(), newEncString);
   }

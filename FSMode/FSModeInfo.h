@@ -95,6 +95,7 @@ class FSModeInfo{
       //    if "counter" is also given and non-negative:
       //      "MODECOUNTER"
       //        or "MODECOUNTERXXXX" to pad with zeros
+      //    also calls the modeCuts method (see below)
       // *******************************************************
 
     pair<int,int>  modeCode();
@@ -206,7 +207,9 @@ class FSModeInfo{
       //               MIN(EnP[pi+]) --> (((EnP[pi+])<=(EnP2))&&
       //                                  ((EnP[pi+])<=(EnP3))&&
       //                                  ((EnP[pi+])<=(EnP4)))
+      //              LIST(EnP[pi+]) --> EnP2,EnP3,EnP4
       //   (also allows nested functions although it may not be useful)
+      //   NOTE:  this method is called by the modeVariable method
       // *************************************************************
 
     TString modeCuts(TString varString);
