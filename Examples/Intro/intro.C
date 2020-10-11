@@ -1,3 +1,6 @@
+TString FN("test_ntMODECODE.root");
+TString NT("ntMODECODE");
+
 double mJpsi = 3.096916;
 double mpi0 = 0.134977;
 double mpi = 0.13957;
@@ -124,9 +127,11 @@ void makeTree(double mParent, double mChild1, double mChild2,
     // *********************************************
 
   for (int i = 0; i < 1000000; i++){
+  //for (int i = 0; i < 50; i++){
     if (generator.Generate() < drand48() * maxWt) continue;
     run = 10;
     event = i;
+    //event = (int)(drand48()*2.0);
     chi2dof = 5*gRandom->Rndm(); 
     PxPn[0] = pParent.Px();
     PyPn[0] = pParent.Py();

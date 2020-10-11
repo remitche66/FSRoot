@@ -56,8 +56,9 @@ class FSModeTree{
     static void createChi2Friends(TString fileName, TString ntName, TString category, bool mc = false);
 
 
-    static void createRankingTree(TString fileName, TString ntName, TString category, TString rankVar,
-                                  TString groupVar1, TString groupVar2, TString rankVarName = "");
+    static void createRankingTree(TString fileName, TString ntName, TString category, 
+                                  TString rankVarName, TString rankVar, TString cuts = "",
+                                  TString groupVar1 = "Run", TString groupVar2 = "Event");
 
 /*
 [rankVarName]Rank
