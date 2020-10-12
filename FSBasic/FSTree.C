@@ -133,6 +133,12 @@ FSTree::getTChain(TString fileName, TString ntName, TString& STATUS){
 }
 
 
+
+  // *********************************************************
+  // ADD OR REMOVE FRIEND TREES FROM A LIST OF FRIEND TREES
+  // *********************************************************
+
+
 void
 FSTree::addFriendTree(TString friendName){
   friendName = FSString::removeWhiteSpace(friendName);
@@ -149,7 +155,10 @@ FSTree::removeFriendTree(TString friendName){
   for (unsigned int i = 0; i < m_friendTrees.size(); i++){
     if (m_friendTrees[i] != friendName) newFriendTrees.push_back(m_friendTrees[i]);
   }
-  if (m_friendTrees.size() != newFriendTrees.size()){ m_friendTrees.clear(); m_friendTrees = newFriendTrees; } 
+  if (m_friendTrees.size() != newFriendTrees.size()){ 
+    m_friendTrees.clear(); 
+    m_friendTrees = newFriendTrees;
+  } 
 }
 
 void
@@ -157,6 +166,8 @@ FSTree::showFriendTrees(){
   cout << "FRIEND TREES:" << endl;
   for (unsigned int i = 0; i < m_friendTrees.size(); i++){
     cout << "  (" << (i+1) << ")  " << m_friendTrees[i] << endl;
+    cout << "          treeName = treeName_" << m_friendTrees[i] << endl;
+    cout << "          fileName = fileName." << m_friendTrees[i] << endl;
   }
 }
 

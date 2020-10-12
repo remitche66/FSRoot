@@ -28,9 +28,10 @@ class FSTree{
 
 
       // *********************************************************
-      // ADD OR REMOVE FRIEND TREES
-// when using getTChain, tree will have name ntName_friendName
-//                       file will have name fileName.friendName
+      // ADD OR REMOVE FRIEND TREES FROM A LIST OF FRIEND TREES
+      //   When using getTChain: 
+      //     * the friend tree is named ntName_friendName
+      //     * the corresponding file is named fileName.friendName
       // *********************************************************
 
     static void addFriendTree(TString friendName);
@@ -69,8 +70,8 @@ class FSTree{
       //               -(XXPzP2+XXPzP3)**2))"
       // ********************************************************
 
-    static TString reorderVariable(TString variable, bool show = false);
     static TString expandVariable(TString variable, bool show = false);
+    static TString reorderVariable(TString variable, bool show = false);
 
 
       // ********************************************************
