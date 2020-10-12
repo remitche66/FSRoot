@@ -34,6 +34,7 @@ TTreeFormula::SetMaxima(100000,10000,10000);
 TTree::SetMaxTreeSize(100e9);
 TH1::SetDefaultSumw2(true);
 TH2::SetDefaultSumw2(true);
+TGaxis::SetMaxDigits(4);
 
 
 // *****************
