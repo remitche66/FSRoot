@@ -100,32 +100,6 @@ FSTree::getTChain(TString fileName, TString ntName, TString& STATUS){
     }
   }
 
-    // add a friend to the tree
-
-  if ((nt) && (FSControl::CHAINFRIEND != "")){
-      // get the list of files for this chain (order matters)
-    vector<TString> fileList;
-    TIter next(nt->GetListOfFiles());
-    while ( TChainElement* el = (TChainElement*) next()){
-      fileList.push_back(el->GetTitle());
-    }
-      // loop over files individually and add the friend tree
-    for (unsigned int i = 0; i < fileList.size(); i++){
-      TString friendFileName(fileList[i]);
-      friendFileName += ".";
-      friendFileName += FSControl::CHAINFRIEND;
-      TString friendNTName(ntName);
-      friendNTName += "_";
-      friendNTName += FSControl::CHAINFRIEND;
-      if (FSControl::DEBUG){
-        cout << "FSTree: adding friend tree... " << endl;
-        cout << "            friend tree name = " << friendNTName << endl;
-        cout << "            friend tree file = " << friendFileName << endl;
-      }
-      nt->AddFriend(friendNTName,friendFileName);
-    }
-  }
-
     // add friends to the tree
 
   if ((nt) && (m_friendTrees.size() > 0)){
@@ -153,7 +127,6 @@ FSTree::getTChain(TString fileName, TString ntName, TString& STATUS){
       }
     }
   }
-
 
   return nt;
 
