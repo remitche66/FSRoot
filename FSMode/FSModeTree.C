@@ -158,12 +158,27 @@ FSModeTree::createRankingTree(TString fileName, TString ntName, TString category
   groupVar1   = FSString::removeWhiteSpace(groupVar1);
   groupVar2   = FSString::removeWhiteSpace(groupVar2);
 
+  cout << "******************************************\n"
+          "  BEGIN FSModeTree::createRankingTree\n"
+          "******************************************" << endl;
+  cout << "  fileName    = " << fileName << endl;
+  cout << "  ntName      = " << ntName << endl;
+  cout << "  category    = " << category << endl;
+  cout << "  rankVarName = " << rankVarName << endl;
+  cout << "  rankVar     = " << rankVar << endl;
+  cout << "  cuts        = " << cuts << endl;
+  cout << "  groupVar1   = " << groupVar1 << endl;
+  cout << "  groupVar2   = " << groupVar2 << endl;
+  cout << "******************************************" << endl;
+
+
     // get a list of modes associated with this category
 
   vector<FSModeInfo*> modeVector = FSModeCollection::modeVector(category);
   if (modeVector.size() == 0){
-    cout << "FSModeTree:  there are no modes associated with this category..." << endl;
-    cout << "                ... skipping createRankingTree" << endl;
+    cout << "FSModeTree::createRankingTree WARNING:  " <<
+    endl <<           "there are no modes associated with this category..." <<
+    endl << "                ... skipping createRankingTree" << endl;
     return;
   }
 
@@ -178,6 +193,26 @@ FSModeTree::createRankingTree(TString fileName, TString ntName, TString category
   map< pair<int,int>, map<int, vector<int> > >  rankMap;
 
   for (unsigned int iLoop = 1; iLoop <= 2; iLoop++){
+    TString sLoop = "FIRST"; if (iLoop == 2) sLoop = "SECOND";
+    cout << "\n----- STARTING " << sLoop << " LOOP -----\n" << endl;
+
+      // SECOND LOOP: (FOR DEBUGGING ONLY) find the event with the most combinations
+
+    int DEBUGRUN = 0;
+    int DEBUGEVT = 0;
+    int DEBUGMAXCOMBO = 0;
+    if (iLoop == 2){
+      for (map< pair<int,int>, map<int, vector<int> > >::iterator mRankItr = rankMap.begin();
+            mRankItr != rankMap.end(); ++mRankItr) {
+        pair<int,int> pRE = mRankItr->first;
+        map<int, vector<int> > mMV = mRankItr->second;
+        if ((mMV.find(0) != mMV.end())  && ((int)mMV[0].size() > DEBUGMAXCOMBO)){
+          DEBUGMAXCOMBO = mMV[0].size();
+          DEBUGRUN = pRE.first;
+          DEBUGEVT = pRE.second;
+        }
+      }
+    }
 
       // BOTH LOOPS: loop over all modes in this category 
 
@@ -189,21 +224,22 @@ FSModeTree::createRankingTree(TString fileName, TString ntName, TString category
       TString rankVar_i   = modeVector[i]->modeString(rankVar);
       TString groupVar1_i = modeVector[i]->modeString(groupVar1);
       TString groupVar2_i = modeVector[i]->modeString(groupVar2);
-
-      //cout << "fileName_i = " << fileName_i << endl;
-      //cout << "ntName_i = " << ntName_i << endl;
-      //cout << "cuts_i = " << cuts_i << endl;
-      //cout << "rankVar_i = " << rankVar_i << endl;
-      //cout << "groupVar1_i = " << groupVar1_i << endl;
-      //cout << "groupVar2_i = " << groupVar2_i << endl;
+      cout << "\n----- " << sLoop << " LOOP OVER " << modeVector[i]->modeString() 
+           << "-----" << endl;
+      cout << "  fileName  = " << fileName_i << endl;
+      cout << "  ntName    = " << ntName_i << endl;
+      cout << "  cuts      = " << cuts_i << endl;
+      cout << "  rankVar   = " << rankVar_i << endl;
+      cout << "  groupVar1 = " << groupVar1_i << endl;
+      cout << "  groupVar2 = " << groupVar2_i << endl << endl;
 
         // BOTH LOOPS: prepare to read from the original tree for this mode
 
       TString treeSTATUS;
       TTree* nt = FSTree::getTChain(fileName_i,ntName_i,treeSTATUS);
       if (!nt || treeSTATUS.Contains("!!")){
-        cout << "FSModeTree: trouble creating TChain inside createRankingTree"
-             << " (status = " << treeSTATUS << ")" << endl;
+        cout << "FSModeTree::createRankingTree WARNING:  " <<
+        endl <<           "trouble creating TChain  (status = " << treeSTATUS << ")" << endl;
         continue;
       }
       Double_t GROUPVAR1, GROUPVAR2, RANKVAR;
@@ -223,15 +259,15 @@ FSModeTree::createRankingTree(TString fileName, TString ntName, TString category
       Int_t VARRANKGLOBAL;
       Int_t NCOMBINATIONS;
       Int_t NCOMBINATIONSGLOBAL;
+      TString sVARRANK             = rankVarName + "";
+      TString sVARRANKGLOBAL       = rankVarName + "Global";
+      TString sNCOMBINATIONS       = rankVarName + "Combinations";
+      TString sNCOMBINATIONSGLOBAL = rankVarName + "CombinationsGlobal";
+      TString fileName_rank(fileName_i);  fileName_rank += ".";  fileName_rank += rankVarName;
+      TString ntName_rank(ntName_i);  ntName_rank += "_";  ntName_rank += rankVarName;
       if (iLoop == 2){
-        TString fileName_var(fileName_i);  fileName_var += ".";  fileName_var += rankVarName;
-        TString ntName_var(ntName_i);  ntName_var += "_";  ntName_var += rankVarName;
-        rankTFile = new TFile(fileName_var,"recreate");  rankTFile->cd();
-        rankTTree = new TTree(ntName_var, ntName_var);
-        TString sVARRANK             = rankVarName + "";
-        TString sVARRANKGLOBAL       = rankVarName + "Global";
-        TString sNCOMBINATIONS       = rankVarName + "Combinations";
-        TString sNCOMBINATIONSGLOBAL = rankVarName + "CombinationsGlobal";
+        rankTFile = new TFile(fileName_rank,"recreate");  rankTFile->cd();
+        rankTTree = new TTree(ntName_rank, ntName_rank);
         rankTTree->Branch(sVARRANK,            &VARRANK,            sVARRANK+"/I");
         rankTTree->Branch(sVARRANKGLOBAL,      &VARRANKGLOBAL,      sVARRANKGLOBAL+"/I");
         rankTTree->Branch(sNCOMBINATIONS,      &NCOMBINATIONS,      sNCOMBINATIONS+"/I");
@@ -240,11 +276,12 @@ FSModeTree::createRankingTree(TString fileName, TString ntName, TString category
 
         // BOTH LOOPS: loop over events in the original tree
 
-      if (iLoop == 1) cout << "FSModeTree::createRankingTree:  first loop over " << fileName_i << endl;
-      if (iLoop == 2) cout << "FSModeTree::createRankingTree:  second loop over " << fileName_i << endl;
       unsigned int nEvents = nt->GetEntries();
+      cout << " LOOP OVER ORIGINAL TREE WITH " 
+           << FSString::int2TString(nEvents,0,true) << " ENTRIES" << endl;
       for (unsigned int ientry = 0; ientry < nEvents; ientry++){
-        if (ientry > 0 && ientry % 10000 == 0) cout << "\t" << ientry << endl;
+        if (ientry > 0 && ientry % 100000 == 0)
+          cout << "\tentry = " << FSString::int2TString(ientry,0,true) << endl;
         nt->GetEntry(ientry);
         bool SKIPENTRY = !cutsF->EvalInstance();
         GROUPVAR1 = grp1F->EvalInstance();    
@@ -257,14 +294,16 @@ FSModeTree::createRankingTree(TString fileName, TString ntName, TString category
         vector<int> vVarI;  vector<int> vVar0;
         if (mModeVar.find(IMODE) != mModeVar.end()) vVarI = mModeVar[IMODE];
         if (mModeVar.find(0)     != mModeVar.end()) vVar0 = mModeVar[0];
-
-        //cout << "************" << endl;
-        //cout << "ientry = " << ientry << endl;
-        //cout << "GROUPVAR1 = " << GROUPVAR1 << endl;
-        //cout << "GROUPVAR2 = " << GROUPVAR2 << endl;
-        //cout << "RANKVAR   = " << RANKVAR << endl;
-        //cout << "IRANKVAR  = " << IRANKVAR << endl;
-        //cout << "SKIPENTRY = " << SKIPENTRY << endl;
+        if (ientry == 0)
+          cout << "  INFO FOR THE FIRST THREE ENTRIES " << endl;
+        if (ientry < 3){
+          cout << "    entry = " << ientry << endl;
+          cout << "      GROUPVAR1 = " << GROUPVAR1 << endl;
+          cout << "      GROUPVAR2 = " << GROUPVAR2 << endl;
+          cout << "      RANKVAR   = " << RANKVAR << endl;
+          cout << "      IRANKVAR  = " << IRANKVAR << endl;
+          cout << "      SKIPENTRY = " << SKIPENTRY << endl;
+        }
 
           // FIRST LOOP: just record information
 
@@ -281,9 +320,14 @@ FSModeTree::createRankingTree(TString fileName, TString ntName, TString category
           // SECOND LOOP: fill the friend tree
 
         if (iLoop == 2){
-          //cout << "vVarI = ";
-          //for (unsigned int vvv = 0; vvv < vVarI.size(); vvv++){ cout << vVarI[vvv] << " "; }
-          //cout << endl;
+          if (DEBUGRUN == pRunEvent.first && DEBUGEVT == pRunEvent.second){
+            cout << "DEBUG INFO FOR THE EVENT WITH THE MOST COMBINATIONS ("
+                 << DEBUGRUN << "," << DEBUGEVT << ")" << endl;
+            cout << "IRANKVAR = " << IRANKVAR << endl;
+            cout << "channel list = ";
+            for (unsigned int vvv = 0; vvv < vVarI.size(); vvv++){ cout << vVarI[vvv] << " "; }
+            cout << endl;
+          }
           NCOMBINATIONS = vVarI.size();
           VARRANK = -1;
           if (SKIPENTRY || vVarI.size() == 0){ VARRANK = -1; }
@@ -299,11 +343,13 @@ FSModeTree::createRankingTree(TString fileName, TString ntName, TString category
               }
             }
           }
-          //cout << "NCOMBINATIONS  = " << NCOMBINATIONS << endl;
-          //cout << "VARRANK        = " << VARRANK << endl;
-          //cout << "vVar0 = ";
-          //for (unsigned int vvv = 0; vvv < vVar0.size(); vvv++){ cout << vVar0[vvv] << " "; }
-          //cout << endl;
+          if (DEBUGRUN == pRunEvent.first && DEBUGEVT == pRunEvent.second){
+            cout << sNCOMBINATIONS       << "       = "             << NCOMBINATIONS << endl;
+            cout << sVARRANK             << "                   = " << VARRANK << endl;
+            cout << "global list = ";
+            for (unsigned int vvv = 0; vvv < vVar0.size(); vvv++){ cout << vVar0[vvv] << " "; }
+            cout << endl;
+          }
           NCOMBINATIONSGLOBAL = vVar0.size();
           VARRANKGLOBAL = -1;
           if (SKIPENTRY || vVar0.size() == 0){ VARRANKGLOBAL = -1; }
@@ -319,9 +365,11 @@ FSModeTree::createRankingTree(TString fileName, TString ntName, TString category
               }
             }
           }
+          if (DEBUGRUN == pRunEvent.first && DEBUGEVT == pRunEvent.second){
+            cout << sNCOMBINATIONSGLOBAL << " = "                   << NCOMBINATIONSGLOBAL << endl;
+            cout << sVARRANKGLOBAL       << "             = "       << VARRANKGLOBAL << endl;
+          }
           rankTTree->Fill();
-          //cout << "NCOMBINATIONSGLOBAL  = " << NCOMBINATIONSGLOBAL << endl;
-          //cout << "VARRANKGLOBAL        = " << VARRANKGLOBAL << endl;
         }
 
       }
@@ -334,6 +382,13 @@ FSModeTree::createRankingTree(TString fileName, TString ntName, TString category
         //nt->AddFriend(rankTTree);
         //nt->Write();
         delete rankTFile;
+        cout << "******************************************\n"
+                "  END FSModeTree::createRankingTree\n"
+                "******************************************" << endl;
+        cout << "  new fileName    = " << fileName_rank << endl;
+        cout << "  new ntName      = " << ntName_rank << endl;
+        cout << "  most combos     = " << DEBUGMAXCOMBO << endl;
+        cout << "******************************************" << endl;
       }
 
         // BOTH LOOPS: clean up the TTreeFormula objects
