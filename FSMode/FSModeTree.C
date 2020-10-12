@@ -35,6 +35,13 @@ FSModeTree::skimTree(TString fileNameInput, TString ntName, TString category,
                 	 unsigned int iModeStart, unsigned int iModeEnd,
                          TString printCommandFile){
 
+  fileNameInput  = FSString::removeWhiteSpace(fileNameInput);
+  ntName         = FSString::removeWhiteSpace(ntName);
+  category       = FSString::removeWhiteSpace(category);
+  fileNameOutput = FSString::removeWhiteSpace(fileNameOutput);
+  cuts           = FSString::removeWhiteSpace(cuts);  if (cuts == "") cuts = "1==1";
+
+
     // expand "cuts" using FSCut and check for multidimensional sidebands
 
   vector< pair<TString,double> > fsCuts = FSCut::expandCuts(cuts);
@@ -47,7 +54,7 @@ FSModeTree::skimTree(TString fileNameInput, TString ntName, TString category,
   vector<FSModeInfo*> modeVector  = FSModeCollection::modeVector(category);
 
 
-    // check to see if we need to loop over modes
+    // check if we need to loop over modes
 
   bool loopOverModes = false;
   if (modeVector.size() > 0){
@@ -89,13 +96,22 @@ FSModeTree::skimTree(TString fileNameInput, TString ntName, TString category,
                 	    unsigned int iModeStart, unsigned int iModeEnd,
                             TString printCommandFile){
 
+  fileNameInput  = FSString::removeWhiteSpace(fileNameInput);
+  ntName         = FSString::removeWhiteSpace(ntName);
+  category       = FSString::removeWhiteSpace(category);
+  variable       = FSString::removeWhiteSpace(variable);
+  bounds         = FSString::removeWhiteSpace(bounds);
+  cuts           = FSString::removeWhiteSpace(cuts);  if (cuts == "") cuts = "1==1";
+  fileNameOutput = FSString::removeWhiteSpace(fileNameOutput);
+
     // parse the bounds variable
 
+  if (!FSString::checkBounds(1,bounds)){ 
+    cout << "FSModeTree::skimTree -- bad bounds: " << bounds << endl; return; }
   TString bounds2(bounds);
   while (bounds2.Contains("(")) bounds2.Replace(bounds2.Index("("),1,"");
   while (bounds2.Contains(")")) bounds2.Replace(bounds2.Index(")"),1,"");
   vector<TString> boundParts = FSString::parseTString(bounds2,",");
-  if (boundParts.size() != 3){ cout << "FSModeTree::skimTree -- bad bounds: " << bounds << endl; return; }
   TString upperBound = boundParts[2];
   TString lowerBound = boundParts[1];
 
@@ -125,6 +141,11 @@ FSModeTree::skimTree(TString fileNameInput, TString ntName, TString category,
 
 void
 FSModeTree::createChi2Friends(TString fileName, TString ntName, TString category, bool mc){
+
+  fileName  = FSString::removeWhiteSpace(fileName);
+  ntName    = FSString::removeWhiteSpace(ntName);
+  category  = FSString::removeWhiteSpace(category);
+
 
     // get a list of modes associated with this category
 
@@ -348,10 +369,10 @@ FSModeTree::createRankingTree(TString fileName, TString ntName, TString category
         TString ntName_var(ntName_i);  ntName_var += "_";  ntName_var += rankVarName;
         rankTFile = new TFile(fileName_var,"recreate");  rankTFile->cd();
         rankTTree = new TTree(ntName_var, ntName_var);
-        TString sVARRANK             = rankVarName + "Rank";
-        TString sVARRANKGLOBAL       = rankVarName + "RankGlobal";
-        TString sNCOMBINATIONS       = rankVarName + "RankCombinations";
-        TString sNCOMBINATIONSGLOBAL = rankVarName + "RankCombinationsGlobal";
+        TString sVARRANK             = rankVarName + "";
+        TString sVARRANKGLOBAL       = rankVarName + "Global";
+        TString sNCOMBINATIONS       = rankVarName + "Combinations";
+        TString sNCOMBINATIONSGLOBAL = rankVarName + "CombinationsGlobal";
         rankTTree->Branch(sVARRANK,            &VARRANK,            sVARRANK+"/I");
         rankTTree->Branch(sVARRANKGLOBAL,      &VARRANKGLOBAL,      sVARRANKGLOBAL+"/I");
         rankTTree->Branch(sNCOMBINATIONS,      &NCOMBINATIONS,      sNCOMBINATIONS+"/I");
@@ -468,3 +489,9 @@ FSModeTree::createRankingTree(TString fileName, TString ntName, TString category
     }
   }
 }
+
+void
+FSModeTree::createChi2RankingTree(TString fileName, TString ntName, TString category){
+  createRankingTree(fileName, ntName, category, "Chi2Rank", "1000*Chi2", "", "Run", "Event");
+}
+

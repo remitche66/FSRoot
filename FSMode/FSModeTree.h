@@ -60,6 +60,8 @@ class FSModeTree{
                                   TString rankVarName, TString rankVar, TString cuts = "",
                                   TString groupVar1 = "Run", TString groupVar2 = "Event");
 
+    static void createChi2RankingTree(TString fileName, TString ntName, TString category);
+
 /*
 [rankVarName]Rank
 [rankVarName]RankGlobal
