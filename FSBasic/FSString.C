@@ -1001,7 +1001,7 @@ FSString::expandDefinitions(TString inputString,
 
 
   // ********************************************************
-  // PARSE HISTOGRAM BOUNDS
+  // PARSE HISTOGRAM INPUTS
   // ********************************************************
 
 int    
@@ -1116,6 +1116,37 @@ FSString::makeBounds(int dimension){
   if (dimension == 2) return TString("(10,0.0,1.0,10,0.0,1.0)");
   return TString("");
 }
+
+
+TString 
+FSString::parseVariableX(TString variable){
+  while (variable.Contains("::")){ variable.Replace(variable.Index("::"),2,"COLONCOLON"); }
+  vector<TString> vars = FSString::parseTString(variable,":");
+  TString varXY("");
+  if (vars.size() == 1) varXY = vars[0];
+  if (vars.size() == 2) varXY = vars[1];
+  while (varXY.Contains("COLONCOLON")){ varXY.Replace(varXY.Index("COLONCOLON"),10,"::"); }
+  return varXY;
+}
+
+TString 
+FSString::parseVariableY(TString variable){
+  while (variable.Contains("::")){ variable.Replace(variable.Index("::"),2,"COLONCOLON"); }
+  vector<TString> vars = FSString::parseTString(variable,":");
+  TString varXY("");
+  if (vars.size() == 2) varXY = vars[0];
+  while (varXY.Contains("COLONCOLON")){ varXY.Replace(varXY.Index("COLONCOLON"),10,"::"); }
+  return varXY;
+}
+
+bool
+FSString::checkVariable(int dimension, TString variable){
+  while (variable.Contains("::")){ variable.Replace(variable.Index("::"),2,"COLONCOLON"); }
+  vector<TString> vars = FSString::parseTString(variable,":");
+  if ((int)vars.size() == dimension) return true;
+  return false;
+}
+
 
   // ********************************************************
   // STRIP EXTRA WHITESPACE AROUND STRINGS AND REMOVE TABS

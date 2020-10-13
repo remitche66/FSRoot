@@ -63,7 +63,7 @@ class FSModeCollection{
       // *******************************************************
 
     static void testCombinatorics(TString category, TString testString,
-                                    bool expandCuts = false);
+                                    bool expandString = false);
 
 
       // *******************************************************

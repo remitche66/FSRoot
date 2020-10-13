@@ -214,11 +214,13 @@ FSModeCollection::modeVectorElement(TString category, unsigned int index){
   // *******************************************************
 
 void
-FSModeCollection::testCombinatorics(TString category, TString testString, bool expandCuts){
+FSModeCollection::testCombinatorics(TString category, TString testString, bool expandString){
   vector<FSModeInfo*> mVector = modeVector(category);
+  if (mVector.size() == 0)
+    cout << "FSModeCollection::testCombinatorics: no modes for this category" << endl;
   for (unsigned int i = 0; i < mVector.size(); i++){
     TString testString2 = testString;
-    if (expandCuts) testString2 = mVector[i]->modeCuts(testString2);
+    if (expandString) testString2 = mVector[i]->modeString(testString2);
     mVector[i]->modeCombinatorics(testString2,true);
   }
 }

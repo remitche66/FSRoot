@@ -95,12 +95,13 @@ class FSModeInfo{
       //    if "counter" is also given and non-negative:
       //      "MODECOUNTER"
       //        or "MODECOUNTERXXXX" to pad with zeros
+      //    also calls the modeCuts method (see below)
       // *******************************************************
 
     pair<int,int>  modeCode();
     int            modeCode1();
     int            modeCode2();
-    TString        modeString(TString original = "", int counter = -1);
+    TString        modeString(TString original = "MODESTRING", int counter = -1);
     TString        modeDescription();
     TString        modeGlueXFormat();
     TString        modeComboFormat(int minimumIndex = 1, TString extraTag = "");
@@ -197,9 +198,18 @@ class FSModeInfo{
 
       // *************************************************************
       // USEFUL FOR MAKING CUTS ON INDIVIDIUAL PARTICLE TYPES
-      //  examples:  AND(EnP[pi+]>0) --> ((EnP1>0)&&(EnP2>0)&&(EnP3>0))
+      //  examples for pi+ pi+ pi+ pi- pi- pi-:  
+      //             AND(EnP[pi+]>0) --> ((EnP1>0)&&(EnP2>0)&&(EnP3>0))
       //              OR(EnP[pi+]>0) --> ((EnP1>0)||(EnP2>0)||(EnP3>0))
-      //   (also allows nested ANDs and ORs although it may not be useful)
+      //              MAX(EnP[pi+1]) --> (((EnP[pi+])>=(EnP1))&&
+      //                                  ((EnP[pi+])>=(EnP2))&&
+      //                                  ((EnP[pi+])>=(EnP3)))
+      //               MIN(EnP[pi+]) --> (((EnP[pi+])<=(EnP1))&&
+      //                                  ((EnP[pi+])<=(EnP2))&&
+      //                                  ((EnP[pi+])<=(EnP3)))
+      //              LIST(EnP[pi+]) --> EnP1,EnP2,EnP3
+      //   (also allows nested functions although it may not be useful)
+      //   NOTE:  this method is called by the modeVariable method
       // *************************************************************
 
     TString modeCuts(TString varString);

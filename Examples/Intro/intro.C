@@ -1,3 +1,6 @@
+TString FN("test_ntMODECODE.root");
+TString NT("ntMODECODE");
+
 double mJpsi = 3.096916;
 double mpi0 = 0.134977;
 double mpi = 0.13957;
@@ -6,6 +9,7 @@ double mK = 0.493677;
 void makeTree(double mParent, double mChild1, double mChild2, 
               double mChild3, double mChild4, TString treeName);
 
+double addOne(double x){ return x+1; }
 
 void step0_MakeTrees(){
   makeTree(mJpsi,mpi,mpi,mpi,mpi,"nt0_220");
@@ -40,6 +44,26 @@ void step3_SetUpModes(){
   FSModeCollection::display();
 }
 
+void step4_LookAtTrees1(){
+  TString FN1("test_nt0_220.root");    TString NT1("nt0_220");
+  TString FN2("test_nt0_112.root");    TString NT2("nt0_112");
+  TString FN3("test_nt0_110002.root"); TString NT3("nt0_110002");
+  FSHistogram::getTH1F(FN1,NT1,"addOne(Chi2DOF)","(60,0.0,6.0)","")->Draw();
+  FSHistogram::getTH1F(FN2,NT2,"addOne(Chi2DOF)","(60,0.0,6.0)",
+                               "addOne(Chi2DOF)<4.0")->Draw("hist,same");
+  FSHistogram::getTH1F(FN3,NT3,"addOne(Chi2DOF)","(60,0.0,6.0)",
+                               "addOne(Chi2DOF)<3.0")->Draw("hist,same");
+}
+
+void step5_LookAtTrees2(){
+  TString FN1("test_nt0_220.root");    TString NT1("nt0_220");
+  TString FN2("test_nt0_112.root");    TString NT2("nt0_112");
+  TString FN3("test_nt0_110002.root"); TString NT3("nt0_110002");
+  FSHistogram::getTH1F(FN1,NT1,"MASS(1,2)","(100,0.0,3.0)","")->Draw();
+  FSHistogram::getTH1F(FN1,NT1,"MASS(1,3)","(100,0.0,3.0)","")->Draw("hist,same");
+  FSHistogram::getTH1F(FN1,NT1,"FSMath::max(MASS(1,2),MASS(1,3))","(100,0.0,3.0)","")->Draw("hist,same");
+  FSHistogram::getTH1F(FN1,NT1,"FSMath::min(MASS(1,2),MASS(1,3))","(100,0.0,3.0)","")->Draw("hist,same");
+}
 
 
 
@@ -103,9 +127,11 @@ void makeTree(double mParent, double mChild1, double mChild2,
     // *********************************************
 
   for (int i = 0; i < 1000000; i++){
+  //for (int i = 0; i < 50; i++){
     if (generator.Generate() < drand48() * maxWt) continue;
     run = 10;
     event = i;
+    //event = (int)(drand48()*2.0);
     chi2dof = 5*gRandom->Rndm(); 
     PxPn[0] = pParent.Px();
     PyPn[0] = pParent.Py();

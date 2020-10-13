@@ -212,7 +212,7 @@ class FSString{
 
 
       // ********************************************************
-      // PARSE HISTOGRAM BOUNDS
+      // PARSE HISTOGRAM INPUTS
       // ********************************************************
 
     static int    parseBoundsNBinsX(TString bounds);
@@ -226,6 +226,10 @@ class FSString{
                               int nbinsY = -1, double lowerY = -1, double upperY = -1);
     static TString makeBounds(int dimension);
     static bool checkBounds(int dimension, TString bounds);
+
+    static TString parseVariableX(TString variable);
+    static TString parseVariableY(TString variable);
+    static bool checkVariable(int dimension, TString variable);
 
 
       // ********************************************************

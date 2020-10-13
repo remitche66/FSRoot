@@ -1,7 +1,11 @@
 {
 
 cout << "--------------------------------------------------" << endl;
+<<<<<<< HEAD
 cout << "------   Loading the FSRoot Macros (v2.5)   ------" << endl;
+=======
+cout << "------   Loading the FSRoot Macros (v3.0)   ------" << endl;
+>>>>>>> RankingTree
 cout << "--------------------------------------------------" << endl;
 
 
@@ -34,6 +38,7 @@ TTreeFormula::SetMaxima(100000,10000,10000);
 TTree::SetMaxTreeSize(100e9);
 TH1::SetDefaultSumw2(true);
 TH2::SetDefaultSumw2(true);
+TGaxis::SetMaxDigits(4);
 
 
 // *****************
@@ -58,6 +63,9 @@ gROOT->LoadMacro("FSBasic/FSString.C+");
 
 cout << "Loading FSBasic/FSSystem.h..." << endl;
 gROOT->LoadMacro("FSBasic/FSSystem.C+");
+
+cout << "Loading FSBasic/FSMath.C..." << endl;
+gROOT->LoadMacro("FSBasic/FSMath.C+");
 
 cout << "Loading FSBasic/FSPhysics.C..." << endl;
 gROOT->LoadMacro("FSBasic/FSPhysics.C+");

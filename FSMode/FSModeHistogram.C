@@ -561,7 +561,6 @@ FSModeHistogram::expandHistogramIndexTree(TString inIndex){
     }
     for (unsigned int iM = 0; iM < modeVector.size(); iM++){
       TString indexM = modeVector[iM]->modeString(index);
-              indexM = modeVector[iM]->modeCuts(indexM);
       vector<TString> combos = modeVector[iM]->modeCombinatorics(indexM);
       for (unsigned int iC = 0; iC < combos.size(); iC++){
          // checking for duplicates (but this should also be in modeCombinatorics)
