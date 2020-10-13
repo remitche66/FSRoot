@@ -1,11 +1,7 @@
 {
 
 cout << "--------------------------------------------------" << endl;
-<<<<<<< HEAD
-cout << "------   Loading the FSRoot Macros (v2.5)   ------" << endl;
-=======
 cout << "------   Loading the FSRoot Macros (v3.0)   ------" << endl;
->>>>>>> RankingTree
 cout << "--------------------------------------------------" << endl;
 
 
