@@ -157,6 +157,10 @@ FSModeTree::createRankingTree(TString fileName, TString ntName, TString category
   cuts        = FSString::removeWhiteSpace(cuts);  if (cuts == "") cuts = "1==1";
   groupVar1   = FSString::removeWhiteSpace(groupVar1);
   groupVar2   = FSString::removeWhiteSpace(groupVar2);
+  vector< pair<TString,double> > fsCuts = FSCut::expandCuts(cuts);
+  if (fsCuts.size() == 1){ cuts = fsCuts[0].first; }
+  else{ cout << "FSModeTree::createRankingTree Error: "
+                "multidimensional sidebands not allowed" << endl; exit(1); }
 
   cout << "******************************************\n"
           "  BEGIN FSModeTree::createRankingTree\n"
@@ -228,10 +232,20 @@ FSModeTree::createRankingTree(TString fileName, TString ntName, TString category
            << "-----" << endl;
       cout << "  fileName  = " << fileName_i << endl;
       cout << "  ntName    = " << ntName_i << endl;
-      cout << "  cuts      = " << cuts_i << endl;
-      cout << "  rankVar   = " << rankVar_i << endl;
-      cout << "  groupVar1 = " << groupVar1_i << endl;
-      cout << "  groupVar2 = " << groupVar2_i << endl << endl;
+      cout << "  variables before expanding:" << endl;
+      cout << "    cuts      = " << cuts_i << endl;
+      cout << "    rankVar   = " << rankVar_i << endl;
+      cout << "    groupVar1 = " << groupVar1_i << endl;
+      cout << "    groupVar2 = " << groupVar2_i << endl;
+      cuts_i      = FSTree::expandVariable(cuts_i);
+      rankVar_i   = FSTree::expandVariable(rankVar_i);
+      groupVar1_i = FSTree::expandVariable(groupVar1_i);
+      groupVar2_i = FSTree::expandVariable(groupVar2_i);
+      cout << "  variables after expanding:" << endl;
+      cout << "    cuts      = " << cuts_i << endl;
+      cout << "    rankVar   = " << rankVar_i << endl;
+      cout << "    groupVar1 = " << groupVar1_i << endl;
+      cout << "    groupVar2 = " << groupVar2_i << endl << endl;
 
         // BOTH LOOPS: prepare to read from the original tree for this mode
 
@@ -243,6 +257,7 @@ FSModeTree::createRankingTree(TString fileName, TString ntName, TString category
         continue;
       }
       Double_t GROUPVAR1, GROUPVAR2, RANKVAR;
+      int NSKIPPED = 0;
       if (cuts_i == "") cuts_i = "(1==1)";
       TObjArray* formulas = new TObjArray();
       TTreeFormula* cutsF = new TTreeFormula("cutsF", cuts_i,      nt); formulas->Add(cutsF);
@@ -320,6 +335,7 @@ FSModeTree::createRankingTree(TString fileName, TString ntName, TString category
           // SECOND LOOP: fill the friend tree
 
         if (iLoop == 2){
+          if (SKIPENTRY) NSKIPPED++;
           if (DEBUGRUN == pRunEvent.first && DEBUGEVT == pRunEvent.second){
             cout << "DEBUG INFO FOR THE EVENT WITH THE MOST COMBINATIONS ("
                  << DEBUGRUN << "," << DEBUGEVT << ")" << endl;
@@ -385,9 +401,12 @@ FSModeTree::createRankingTree(TString fileName, TString ntName, TString category
         cout << "******************************************\n"
                 "  END FSModeTree::createRankingTree\n"
                 "******************************************" << endl;
-        cout << "  new fileName    = " << fileName_rank << endl;
-        cout << "  new ntName      = " << ntName_rank << endl;
-        cout << "  most combos     = " << DEBUGMAXCOMBO << endl;
+        cout << "  new fileName      = " << fileName_rank << endl;
+        cout << "  new ntName        = " << ntName_rank << endl;
+        cout << "  most combos       = " << DEBUGMAXCOMBO << endl;
+        cout << "  skipped events    = " << NSKIPPED << endl;
+        if (nEvents > 0)
+        cout << "  fraction skipped  = " << (100.0*NSKIPPED)/nEvents << " percent" << endl;
         cout << "******************************************" << endl;
       }
 
