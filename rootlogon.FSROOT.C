@@ -1,7 +1,7 @@
 {
 
 cout << "--------------------------------------------------" << endl;
-cout << "------   Loading the FSRoot Macros (v2.4+)  ------" << endl;
+cout << "------   Loading the FSRoot Macros (v3.0)   ------" << endl;
 cout << "--------------------------------------------------" << endl;
 
 
