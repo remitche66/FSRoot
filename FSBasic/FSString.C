@@ -726,10 +726,13 @@ FSString::evalBooleanTString(TString input){
   while (input.Contains("%%")) input.Replace(input.Index("%%"),2,"&&");
   while (input.Contains(","))  input.Replace(input.Index(","), 1,"||");
   TFormula fBool("fBool",input);
+#if ROOT_VERSION_CODE >= ROOT_VERSION(6,18,0)
   if (!fBool.IsValid()){
     cout << "FSString::evalBooleanTString WARNING: invalid formula, returning false" << endl;
     return false;
   }
+#else
+#endif
   if (fBool.Eval(0) < 0.1) return false;
   return true;
 }
