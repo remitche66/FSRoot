@@ -726,10 +726,10 @@ FSString::evalBooleanTString(TString input){
   while (input.Contains("%%")) input.Replace(input.Index("%%"),2,"&&");
   while (input.Contains(","))  input.Replace(input.Index(","), 1,"||");
   TFormula fBool("fBool",input);
-  //if (!fBool.IsValid()){
-  //  cout << "FSString::evalBooleanTString WARNING: invalid formula, returning false" << endl;
-  //  return false;
-  //}
+  if (!fBool.IsValid()){
+    cout << "FSString::evalBooleanTString WARNING: invalid formula, returning false" << endl;
+    return false;
+  }
   if (fBool.Eval(0) < 0.1) return false;
   return true;
 }
