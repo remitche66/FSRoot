@@ -590,7 +590,6 @@ FSModeInfo::modeCuts(TString varString){
          newString.Contains(MAXMARK) ||
          newString.Contains(MINMARK) ||
          newString.Contains(LISTMARK)){
-    int iDeepest = 0;
     TString markDeepest = "";
     TString encString = newString;
     while (encString.Contains(ANDMARK) || 
@@ -598,6 +597,7 @@ FSModeInfo::modeCuts(TString varString){
            encString.Contains(MAXMARK) ||
            encString.Contains(MINMARK) ||
            encString.Contains(LISTMARK)){
+      int iDeepest = 0;
       int indexA = encString.Index(ANDMARK);
       int indexO = encString.Index(ORMARK);
       int indexM = encString.Index(MAXMARK);
