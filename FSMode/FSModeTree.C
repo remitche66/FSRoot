@@ -336,13 +336,15 @@ FSModeTree::createRankingTree(TString fileName, TString ntName, TString category
 
         if (iLoop == 2){
           if (SKIPENTRY) NSKIPPED++;
-          if (DEBUGRUN == pRunEvent.first && DEBUGEVT == pRunEvent.second){
-            cout << "DEBUG INFO FOR THE EVENT WITH THE MOST COMBINATIONS ("
-                 << DEBUGRUN << "," << DEBUGEVT << ")" << endl;
-            cout << "IRANKVAR = " << IRANKVAR << endl;
-            cout << "channel list = ";
-            for (unsigned int vvv = 0; vvv < vVarI.size(); vvv++){ cout << vVarI[vvv] << " "; }
-            cout << endl;
+          if (FSControl::DEBUG){
+            if (DEBUGRUN == pRunEvent.first && DEBUGEVT == pRunEvent.second){
+              cout << "DEBUG INFO FOR THE EVENT WITH THE MOST COMBINATIONS ("
+                   << DEBUGRUN << "," << DEBUGEVT << ")" << endl;
+              cout << "IRANKVAR = " << IRANKVAR << endl;
+              cout << "channel list = ";
+              for (unsigned int vvv = 0; vvv < vVarI.size(); vvv++){ cout << vVarI[vvv] << " "; }
+              cout << endl;
+            }
           }
           NCOMBINATIONS = vVarI.size();
           VARRANK = -1;
