@@ -66,5 +66,5 @@ int main(int argc, char* argv[]){
 
 
 void printUsage(){
-  cout << "USAGE:  FSModeSkimTree -i InputFileName -o OutputFileName -mode FSCode2_FSCode1 -cuts CutString -nt TreeName" << endl;
+  cout << "USAGE:  FSModeSkimTree -i InputFileName -o OutputFileName [-mode FSCode2_FSCode1] [-cuts CutString] [-nt TreeName]" << endl;
 }

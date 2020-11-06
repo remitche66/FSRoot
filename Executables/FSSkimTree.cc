@@ -56,5 +56,5 @@ int main(int argc, char* argv[]){
 
 
 void printUsage(){
-  cout << "USAGE:  FSSkimTree -i InputFileName -o OutputFileName -cuts CutString -nt TreeName" << endl;
+  cout << "USAGE:  FSSkimTree -i InputFileName -o OutputFileName [-cuts CutString] [-nt TreeName]" << endl;
 }
