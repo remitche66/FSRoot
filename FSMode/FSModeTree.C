@@ -361,12 +361,14 @@ FSModeTree::createRankingTree(TString fileName, TString ntName, TString category
               }
             }
           }
-          if (DEBUGRUN == pRunEvent.first && DEBUGEVT == pRunEvent.second){
-            cout << sNCOMBINATIONS       << "       = "             << NCOMBINATIONS << endl;
-            cout << sVARRANK             << "                   = " << VARRANK << endl;
-            cout << "global list = ";
-            for (unsigned int vvv = 0; vvv < vVar0.size(); vvv++){ cout << vVar0[vvv] << " "; }
-            cout << endl;
+          if (FSControl::DEBUG){
+            if (DEBUGRUN == pRunEvent.first && DEBUGEVT == pRunEvent.second){
+              cout << sNCOMBINATIONS       << "       = "             << NCOMBINATIONS << endl;
+              cout << sVARRANK             << "                   = " << VARRANK << endl;
+              cout << "global list = ";
+              for (unsigned int vvv = 0; vvv < vVar0.size(); vvv++){ cout << vVar0[vvv] << " "; }
+              cout << endl;
+            }
           }
           NCOMBINATIONSGLOBAL = vVar0.size();
           VARRANKGLOBAL = -1;
@@ -383,9 +385,11 @@ FSModeTree::createRankingTree(TString fileName, TString ntName, TString category
               }
             }
           }
-          if (DEBUGRUN == pRunEvent.first && DEBUGEVT == pRunEvent.second){
-            cout << sNCOMBINATIONSGLOBAL << " = "                   << NCOMBINATIONSGLOBAL << endl;
-            cout << sVARRANKGLOBAL       << "             = "       << VARRANKGLOBAL << endl;
+          if (FSControl::DEBUG){
+            if (DEBUGRUN == pRunEvent.first && DEBUGEVT == pRunEvent.second){
+              cout << sNCOMBINATIONSGLOBAL << " = "                   << NCOMBINATIONSGLOBAL << endl;
+              cout << sVARRANKGLOBAL       << "             = "       << VARRANKGLOBAL << endl;
+            }
           }
           rankTTree->Fill();
         }
