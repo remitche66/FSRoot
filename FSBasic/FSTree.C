@@ -21,7 +21,7 @@
 
 
 map< TString, TChain*> FSTree::m_chainCache;
-vector<TString> FSTree::m_friendTrees;
+vector< pair<TString,bool> > FSTree::m_friendTrees;
 
 map< TString, TString > FSTree::m_mapDefinedPx;
 map< TString, TString > FSTree::m_mapDefinedPy;
@@ -31,6 +31,7 @@ map< TString, TString > FSTree::m_mapDefined1VMacros;
 map< TString, TString > FSTree::m_mapDefined2VMacros;
 vector< TString > FSTree::m_vectorDefinedMacroKeywords;
 bool FSTree::m_madeStandardDefinitions = false;
+bool FSTree::m_useFriendTrees = true;
 
 
   // ********************************************************
@@ -102,30 +103,36 @@ FSTree::getTChain(TString fileName, TString ntName, TString& STATUS){
 
     // add friends to the tree
 
-  if ((nt) && (m_friendTrees.size() > 0)){
-      // get the list of files for this chain (order matters)
-    vector<TString> fileList;
-    TIter next(nt->GetListOfFiles());
-    while ( TChainElement* el = (TChainElement*) next()){
-      fileList.push_back(el->GetTitle());
-    }
-      // loop over files individually and add the friend tree
-    for (unsigned int i = 0; i < fileList.size(); i++){
-      for (unsigned int j = 0; j < m_friendTrees.size(); j++){
-        TString friendFileName(fileList[i]);
+  if (m_useFriendTrees){
+    bool saveCHAINCACHING = FSControl::CHAINCACHING;
+    FSControl::CHAINCACHING = true;
+    useFriendTrees(false);
+    for (unsigned int i = 0; i < m_friendTrees.size(); i++){
+      if (m_friendTrees[i].second){
+        TString friendFileName(fileName);
         friendFileName += ".";
-        friendFileName += m_friendTrees[j];
+        friendFileName += m_friendTrees[i].first;
         TString friendNTName(ntName);
         friendNTName += "_";
-        friendNTName += m_friendTrees[j];
+        friendNTName += m_friendTrees[i].first;
+        TChain* ntFriend = getTChain(friendFileName,friendNTName);
+        if (nt->GetEntries() != ntFriend->GetEntries()){
+          cout << "FSTree::getTChain ERROR:  problem with friend tree " 
+               << m_friendTrees[i].first << endl;
+          cout << "  entries in original tree = " << nt->GetEntries() << endl;
+          cout << "  entries in friend tree   = " << ntFriend->GetEntries() << endl;
+          exit(0);
+        }
         if (FSControl::DEBUG){
           cout << "FSTree: adding friend tree... " << endl;
           cout << "            friend tree name = " << friendNTName << endl;
           cout << "            friend tree file = " << friendFileName << endl;
         }
-        nt->AddFriend(friendNTName,friendFileName);
+        nt->AddFriend(ntFriend);
       }
     }
+    FSControl::CHAINCACHING = saveCHAINCACHING;
+    useFriendTrees(true);
   }
 
   return nt;
@@ -140,20 +147,26 @@ FSTree::getTChain(TString fileName, TString ntName, TString& STATUS){
 
 
 void
-FSTree::addFriendTree(TString friendName){
+FSTree::addFriendTree(TString friendName, bool use){
   friendName = FSString::removeWhiteSpace(friendName);
   if (friendName == "") return;
-  for (unsigned int i = 0; i < m_friendTrees.size(); i++){ if (m_friendTrees[i] == friendName) return; }
-  m_friendTrees.push_back(friendName);
+  for (unsigned int i = 0; i < m_friendTrees.size(); i++){ 
+    if (m_friendTrees[i].first == friendName){
+      m_friendTrees[i].second = use;
+      return;
+    }
+  }
+  m_friendTrees.push_back(pair<TString,bool>(friendName,use));
 }
 
 void
 FSTree::removeFriendTree(TString friendName){
   friendName = FSString::removeWhiteSpace(friendName);
   if (friendName == "") return;
-  vector<TString> newFriendTrees;
+  vector< pair<TString,bool> > newFriendTrees;
   for (unsigned int i = 0; i < m_friendTrees.size(); i++){
-    if (m_friendTrees[i] != friendName) newFriendTrees.push_back(m_friendTrees[i]);
+    if (!FSString::compareTStrings(m_friendTrees[i].first,friendName))
+      newFriendTrees.push_back(m_friendTrees[i]);
   }
   if (m_friendTrees.size() != newFriendTrees.size()){ 
     m_friendTrees.clear(); 
@@ -162,12 +175,27 @@ FSTree::removeFriendTree(TString friendName){
 }
 
 void
+FSTree::useFriendTree(TString friendName, bool use){
+  friendName = FSString::removeWhiteSpace(friendName);
+  if (friendName == "") return;
+  for (unsigned int i = 0; i < m_friendTrees.size(); i++){
+    if (FSString::compareTStrings(m_friendTrees[i].first,friendName))
+      m_friendTrees[i].second = use;
+  }
+}
+
+
+void
 FSTree::showFriendTrees(){
   cout << "FRIEND TREES:" << endl;
   for (unsigned int i = 0; i < m_friendTrees.size(); i++){
-    cout << "  (" << (i+1) << ")  " << m_friendTrees[i] << endl;
-    cout << "          treeName = treeName_" << m_friendTrees[i] << endl;
-    cout << "          fileName = fileName." << m_friendTrees[i] << endl;
+    cout << "  (" << (i+1) << ")  " << m_friendTrees[i].first << endl;
+    if (m_friendTrees[i].second)
+    cout << "        USED" << endl;
+    if (!m_friendTrees[i].second)
+    cout << "        NOT USED" << endl;
+    cout << "          treeName = treeName_" << m_friendTrees[i].first << endl;
+    cout << "          fileName = fileName." << m_friendTrees[i].first << endl;
   }
 }
 

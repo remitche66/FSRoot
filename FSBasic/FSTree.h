@@ -34,8 +34,10 @@ class FSTree{
       //     * the corresponding file is named fileName.friendName
       // *********************************************************
 
-    static void addFriendTree(TString friendName);
-    static void removeFriendTree(TString friendName);
+    static void addFriendTree(TString friendName, bool use = true);
+    static void removeFriendTree(TString friendName = "*");
+    static void useFriendTree(TString friendName = "*", bool use = true);
+    static void useFriendTrees(bool use = true){ m_useFriendTrees = use; }
     static void showFriendTrees();
 
 
@@ -116,7 +118,8 @@ class FSTree{
       // global caches
 
     static map< TString, TChain*> m_chainCache;
-    static vector<TString> m_friendTrees;
+    static vector< pair<TString,bool> > m_friendTrees;
+    static bool m_useFriendTrees;
 
       // defined four-vectors
 
