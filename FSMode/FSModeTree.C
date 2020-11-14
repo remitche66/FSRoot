@@ -19,6 +19,7 @@
 #include "FSBasic/FSString.h"
 #include "FSBasic/FSPhysics.h"
 #include "FSBasic/FSCut.h"
+#include "FSBasic/FSSystem.h"
 #include "FSMode/FSModeString.h"
 #include "FSMode/FSModeTree.h"
 
@@ -162,18 +163,20 @@ FSModeTree::createRankingTree(TString fileName, TString ntName, TString category
   else{ cout << "FSModeTree::createRankingTree Error: "
                 "multidimensional sidebands not allowed" << endl; exit(1); }
 
-  cout << "******************************************\n"
-          "  BEGIN FSModeTree::createRankingTree\n"
-          "******************************************" << endl;
-  cout << "  fileName    = " << fileName << endl;
-  cout << "  ntName      = " << ntName << endl;
-  cout << "  category    = " << category << endl;
-  cout << "  rankVarName = " << rankVarName << endl;
-  cout << "  rankVar     = " << rankVar << endl;
-  cout << "  cuts        = " << cuts << endl;
-  cout << "  groupVar1   = " << groupVar1 << endl;
-  cout << "  groupVar2   = " << groupVar2 << endl;
-  cout << "******************************************" << endl;
+  if (!FSControl::QUIET){
+    cout << "******************************************\n"
+            "  BEGIN FSModeTree::createRankingTree\n"
+            "******************************************" << endl;
+    cout << "  fileName    = " << fileName << endl;
+    cout << "  ntName      = " << ntName << endl;
+    cout << "  category    = " << category << endl;
+    cout << "  rankVarName = " << rankVarName << endl;
+    cout << "  rankVar     = " << rankVar << endl;
+    cout << "  cuts        = " << cuts << endl;
+    cout << "  groupVar1   = " << groupVar1 << endl;
+    cout << "  groupVar2   = " << groupVar2 << endl;
+    cout << "******************************************" << endl;
+  }
 
 
     // get a list of modes associated with this category
@@ -198,7 +201,7 @@ FSModeTree::createRankingTree(TString fileName, TString ntName, TString category
 
   for (unsigned int iLoop = 1; iLoop <= 2; iLoop++){
     TString sLoop = "FIRST"; if (iLoop == 2) sLoop = "SECOND";
-    cout << "\n----- STARTING " << sLoop << " LOOP -----\n" << endl;
+    if (!FSControl::QUIET) cout << "\n----- STARTING " << sLoop << " LOOP -----\n" << endl;
 
       // SECOND LOOP: (FOR DEBUGGING ONLY) find the event with the most combinations
 
@@ -218,34 +221,42 @@ FSModeTree::createRankingTree(TString fileName, TString ntName, TString category
       }
     }
 
-      // BOTH LOOPS: loop over all modes in this category 
+      // BOTH LOOPS: loop over all modes and files in this category 
 
     for (unsigned int i = 0; i < modeVector.size(); i++){
+     vector<TString> fileNames_i = FSSystem::getAbsolutePaths(modeVector[i]->modeString(fileName));
+     for (unsigned int ifile = 0; ifile < fileNames_i.size(); ifile++){
       int IMODE = i + 1;
-      TString fileName_i  = modeVector[i]->modeString(fileName);
+      TString fileName_i  = fileNames_i[ifile];
       TString ntName_i    = modeVector[i]->modeString(ntName);
       TString cuts_i      = modeVector[i]->modeString(cuts);
       TString rankVar_i   = modeVector[i]->modeString(rankVar);
       TString groupVar1_i = modeVector[i]->modeString(groupVar1);
       TString groupVar2_i = modeVector[i]->modeString(groupVar2);
-      cout << "\n----- " << sLoop << " LOOP OVER " << modeVector[i]->modeString() 
-           << "-----" << endl;
-      cout << "  fileName  = " << fileName_i << endl;
-      cout << "  ntName    = " << ntName_i << endl;
-      cout << "  variables before expanding:" << endl;
-      cout << "    cuts      = " << cuts_i << endl;
-      cout << "    rankVar   = " << rankVar_i << endl;
-      cout << "    groupVar1 = " << groupVar1_i << endl;
-      cout << "    groupVar2 = " << groupVar2_i << endl;
+      if (ifile == 0 && !FSControl::QUIET){
+        cout << "\n---------- " << sLoop << " LOOP OVER " << modeVector[i]->modeString() 
+             << "----------" << endl;
+        cout << "  NUMBER OF FILES = " << fileNames_i.size() << endl;
+        cout << "  INFO FOR THE FIRST FILE: " << endl;
+        cout << "        fileName  = " << fileName_i << endl;
+        cout << "        ntName    = " << ntName_i << endl;
+        cout << "        variables before expanding:" << endl;
+        cout << "          cuts      = " << cuts_i << endl;
+        cout << "          rankVar   = " << rankVar_i << endl;
+        cout << "          groupVar1 = " << groupVar1_i << endl;
+        cout << "          groupVar2 = " << groupVar2_i << endl;
+      }
       cuts_i      = FSTree::expandVariable(cuts_i);
       rankVar_i   = FSTree::expandVariable(rankVar_i);
       groupVar1_i = FSTree::expandVariable(groupVar1_i);
       groupVar2_i = FSTree::expandVariable(groupVar2_i);
-      cout << "  variables after expanding:" << endl;
-      cout << "    cuts      = " << cuts_i << endl;
-      cout << "    rankVar   = " << rankVar_i << endl;
-      cout << "    groupVar1 = " << groupVar1_i << endl;
-      cout << "    groupVar2 = " << groupVar2_i << endl << endl;
+      if (ifile == 0 && !FSControl::QUIET){
+        cout << "        variables after expanding:" << endl;
+        cout << "          cuts      = " << cuts_i << endl;
+        cout << "          rankVar   = " << rankVar_i << endl;
+        cout << "          groupVar1 = " << groupVar1_i << endl;
+        cout << "          groupVar2 = " << groupVar2_i << endl << endl;
+      }
 
         // BOTH LOOPS: prepare to read from the original tree for this mode
 
@@ -292,8 +303,11 @@ FSModeTree::createRankingTree(TString fileName, TString ntName, TString category
         // BOTH LOOPS: loop over events in the original tree
 
       unsigned int nEvents = nt->GetEntries();
-      cout << " LOOP OVER ORIGINAL TREE WITH " 
-           << FSString::int2TString(nEvents,0,true) << " ENTRIES" << endl;
+      if (!FSControl::QUIET){
+        cout << " LOOP OVER ORIGINAL TREE WITH " 
+             << FSString::int2TString(nEvents,0,true) << " ENTRIES" << endl;
+        cout << "  FILE = " << fileName_i << endl;
+      }
       for (unsigned int ientry = 0; ientry < nEvents; ientry++){
         if (ientry > 0 && ientry % 100000 == 0)
           cout << "\tentry = " << FSString::int2TString(ientry,0,true) << endl;
@@ -309,15 +323,17 @@ FSModeTree::createRankingTree(TString fileName, TString ntName, TString category
         vector<int> vVarI;  vector<int> vVar0;
         if (mModeVar.find(IMODE) != mModeVar.end()) vVarI = mModeVar[IMODE];
         if (mModeVar.find(0)     != mModeVar.end()) vVar0 = mModeVar[0];
-        if (ientry == 0)
-          cout << "  INFO FOR THE FIRST THREE ENTRIES " << endl;
-        if (ientry < 3){
-          cout << "    entry = " << ientry << endl;
-          cout << "      GROUPVAR1 = " << GROUPVAR1 << endl;
-          cout << "      GROUPVAR2 = " << GROUPVAR2 << endl;
-          cout << "      RANKVAR   = " << RANKVAR << endl;
-          cout << "      IRANKVAR  = " << IRANKVAR << endl;
-          cout << "      SKIPENTRY = " << SKIPENTRY << endl;
+        if (!FSControl::QUIET && ifile == 0 && ientry < 3){
+          if (ientry == 0)
+            cout << "  INFO FOR THE FIRST THREE ENTRIES " << endl;
+          if (ientry < 3){
+            cout << "    entry = " << ientry << endl;
+            cout << "      GROUPVAR1 = " << GROUPVAR1 << endl;
+            cout << "      GROUPVAR2 = " << GROUPVAR2 << endl;
+            cout << "      RANKVAR   = " << RANKVAR << endl;
+            cout << "      IRANKVAR  = " << IRANKVAR << endl;
+            cout << "      SKIPENTRY = " << SKIPENTRY << endl;
+          }
         }
 
           // FIRST LOOP: just record information
@@ -404,16 +420,18 @@ FSModeTree::createRankingTree(TString fileName, TString ntName, TString category
         //nt->AddFriend(rankTTree);
         //nt->Write();
         delete rankTFile;
-        cout << "******************************************\n"
-                "  END FSModeTree::createRankingTree\n"
-                "******************************************" << endl;
-        cout << "  new fileName      = " << fileName_rank << endl;
-        cout << "  new ntName        = " << ntName_rank << endl;
-        cout << "  most combos       = " << DEBUGMAXCOMBO << endl;
-        cout << "  skipped events    = " << NSKIPPED << endl;
-        if (nEvents > 0)
-        cout << "  fraction skipped  = " << (100.0*NSKIPPED)/nEvents << " percent" << endl;
-        cout << "******************************************" << endl;
+        if (!FSControl::QUIET && ifile == 0){
+          cout << "******************************************\n"
+                  "  END OF FILE FSModeTree::createRankingTree\n"
+                  "******************************************" << endl;
+          cout << "  new fileName      = " << fileName_rank << endl;
+          cout << "  new ntName        = " << ntName_rank << endl;
+          cout << "  most combos       = " << DEBUGMAXCOMBO << endl;
+          cout << "  skipped events    = " << NSKIPPED << endl;
+          if (nEvents > 0)
+          cout << "  fraction skipped  = " << (100.0*NSKIPPED)/nEvents << " percent" << endl;
+          cout << "******************************************" << endl;
+        }
       }
 
         // BOTH LOOPS: clean up the TTreeFormula objects
@@ -425,6 +443,7 @@ FSModeTree::createRankingTree(TString fileName, TString ntName, TString category
       nt->SetNotify(nullptr);
       delete formulas;
 
+     }
     }
   }
 }
