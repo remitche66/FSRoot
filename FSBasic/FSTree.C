@@ -119,6 +119,8 @@ FSTree::getTChain(TString fileName, TString ntName, TString& STATUS){
         if (nt->GetEntries() != ntFriend->GetEntries()){
           cout << "FSTree::getTChain ERROR:  problem with friend tree " 
                << m_friendTrees[i].first << endl;
+          cout << "  friend file name = \n     " << friendFileName << endl;  
+          cout << "  friend tree name = " << friendNTName << endl;  
           cout << "  entries in original tree = " << nt->GetEntries() << endl;
           cout << "  entries in friend tree   = " << ntFriend->GetEntries() << endl;
           exit(0);
