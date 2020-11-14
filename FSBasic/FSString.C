@@ -824,8 +824,14 @@ FSString::writeTStringToFile(TString filename, TString text, bool append){
   std::ios_base::openmode mode = ios::out;
   if (append) mode = ios::app;
   ofstream outfile(TString2string(filename).c_str(),mode);
-  outfile << text << endl;
-  outfile.close();
+  if (outfile){
+    outfile << text << endl;
+    outfile.close();
+  }
+  else{
+    cout << "FSString::writeTStringToFile ERROR:  "
+            "could not open file\n  " << filename << endl;
+  }
 }
 
 
