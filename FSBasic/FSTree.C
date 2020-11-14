@@ -287,6 +287,12 @@ FSTree::skimTree(TString fileNameInput, TString chainName,
   printCommandFile = FSString::removeWhiteSpace(printCommandFile);
   if (chainName == "") chainName = getTreeNameFromFile(fileNameInput);
 
+    // expand "cuts" using FSCut and check for multidimensional sidebands
+
+  vector< pair<TString,double> > fsCuts = FSCut::expandCuts(cuts);
+  if (fsCuts.size() == 1){ cuts = fsCuts[0].first; }
+  else{ cout << "FSTree::skimTree ERROR: multidimensional sidebands not allowed" << endl; return; }
+
   // just write the command to a file and return
 
   if (printCommandFile != ""){
@@ -307,12 +313,6 @@ FSTree::skimTree(TString fileNameInput, TString chainName,
   // retrieve tree 1
 
   TChain* nt = getTChain(fileNameInput,chainName);
-
-    // expand "cuts" using FSCut and check for multidimensional sidebands
-
-  vector< pair<TString,double> > fsCuts = FSCut::expandCuts(cuts);
-  if (fsCuts.size() == 1){ cuts = fsCuts[0].first; }
-  else{ cout << "FSTree::skimTree ERROR: multidimensional sidebands not allowed" << endl; return; }
 
   // expand variable macros
 
