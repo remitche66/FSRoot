@@ -89,7 +89,8 @@ class FSModeInfo{
       //      "MODECODE"
       //      "MODECODE1"
       //      "MODECODE2"
-      //      "MODEGLUEX"
+      //      "MODEGLUEXFORMAT"
+      //      "MODEGLUEXNAME"
       //      "MODELATEX"
       //      "MODECOMBO"
       //    if "counter" is also given and non-negative:
@@ -104,6 +105,7 @@ class FSModeInfo{
     TString        modeString(TString original = "MODESTRING", int counter = -1);
     TString        modeDescription();
     TString        modeGlueXFormat();
+    TString        modeGlueXName();
     TString        modeComboFormat(int minimumIndex = 1, TString extraTag = "");
 
     vector<TString> particles();

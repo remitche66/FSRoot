@@ -118,7 +118,8 @@ FSModeInfo::FSModeInfo(vector<int> pdgIDs){
       //      "MODECODE"
       //      "MODECODE1"
       //      "MODECODE2"
-      //      "MODEGLUEX"
+      //      "MODEGLUEXFORMAT"
+      //      "MODEGLUEXNAME"
       //      "MODELATEX"
       //      "MODECOMBO"
       //    if "counter" is also given and non-negative:
@@ -174,10 +175,15 @@ FSModeInfo::modeString(TString original, int counter){
   while (original.Contains("MODECODE")){
     original.Replace(original.Index("MODECODE"),8,mString);
   }
-  while (original.Contains("MODEGLUEX")){
+  while (original.Contains("MODEGLUEXFORMAT")){
     TString stmp("");  
     stmp += modeGlueXFormat();
-    original.Replace(original.Index("MODEGLUEX"),9,stmp);
+    original.Replace(original.Index("MODEGLUEXFORMAT"),15,stmp);
+  }
+  while (original.Contains("MODEGLUEXNAME")){
+    TString stmp("");  
+    stmp += modeGlueXName();
+    original.Replace(original.Index("MODEGLUEXNAME"),13,stmp);
   }
   while (original.Contains("MODECOMBO")){
     int minimumIndex = 0;
@@ -269,6 +275,21 @@ FSModeInfo::modeGlueXFormat(){
   np = modeNLambda    ();  for (int i = 0; i < np; i++){ gluexFormat += "_18"; }
   np = modeNALambda   ();  for (int i = 0; i < np; i++){ gluexFormat += "_26"; }
   return gluexFormat;
+}
+
+TString
+FSModeInfo::modeGlueXName(){
+  TString gluexName("");
+  int np;
+  np = modeNPi0       ();  for (int i = 0; i < np; i++){ gluexName += "pi0"; }
+  np = modeNPip       ();  for (int i = 0; i < np; i++){ gluexName += "pip"; }
+  np = modeNPim       ();  for (int i = 0; i < np; i++){ gluexName += "pim"; }
+  np = modeNKp        ();  for (int i = 0; i < np; i++){ gluexName += "kp"; }
+  np = modeNKm        ();  for (int i = 0; i < np; i++){ gluexName += "km"; }
+  np = modeNKs        ();  for (int i = 0; i < np; i++){ gluexName += "ks"; }
+  np = modeNEta       ();  for (int i = 0; i < np; i++){ gluexName += "eta"; }
+  np = modeNLambda    ();  for (int i = 0; i < np; i++){ gluexName += "lamb"; }
+  return gluexName;
 }
 
 TString
