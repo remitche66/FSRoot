@@ -81,6 +81,15 @@ FSSystem::getAbsolutePaths(TString path, bool useCache, bool show){
   else{
     paths = getAbsolutePathsWildcards(newPath);
   }
+  if (paths.size() > 1){
+  for (unsigned int i = 0; i < paths.size()-1; i++){
+  for (unsigned int j = i+1; j < paths.size(); j++){
+    if (paths[i] > paths[j]){
+      TString temp = paths[i];
+      paths[i] = paths[j];
+      paths[j] = temp;
+    }
+  }}}
   if (show){
     cout << "------ ABSOLUTE PATHS ---------" << endl;
     for (unsigned int i = 0; i < paths.size(); i++){
