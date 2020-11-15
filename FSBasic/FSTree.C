@@ -10,6 +10,7 @@
 #include "TH1F.h"
 #include "TH2F.h"
 #include "TFile.h"
+#include "TFriendElement.h"
 #include "FSBasic/FSControl.h"
 #include "FSBasic/FSString.h"
 #include "FSBasic/FSSystem.h"
@@ -394,12 +395,66 @@ FSTree::skimTree(TString fileNameInput, TString chainName,
 
   // write the tree to file2
 
-  //tree2->AutoSave();
+  if (tree2->GetListOfFriends()) tree2->GetListOfFriends()->Clear();
   file2->Write();
   file2->Close();
 
   clearChainCache();
   delete file2;
+
+
+  // ***** also skim friend trees *****
+
+  if (FSTree::getFriendNames(1).size() == 0) return;
+
+
+  // 1. find the friend trees
+
+  nt = getTChain(fileNameInput,chainName);
+  vector<TTree*> friendTrees;
+  TIter next(nt->GetListOfFriends());
+  while (TFriendElement *obj = (TFriendElement*) next()){
+    friendTrees.push_back(obj->GetTree());
+  }
+
+  // 2. add friends to each friend so they can be used separately
+  //     and still access all branches
+
+  for (unsigned int i = 0; i < friendTrees.size(); i++){
+    friendTrees[i]->AddFriend(nt);
+    for (unsigned int j = 0; j < friendTrees.size(); j++){
+      if (i==j) continue;
+      friendTrees[i]->AddFriend(friendTrees[j]);
+    }
+  }
+
+  // 3. get the friend names
+
+  vector<TString> friendNames;
+  for (unsigned int i = 0; i < friendTrees.size(); i++){
+    TString name = friendTrees[i]->GetName();
+    vector<TString> parts = FSString::parseTString(name,"_");
+    friendNames.push_back(parts[parts.size()-1]);
+  }
+
+  // 4. loop over friend trees and skim them
+
+  for (unsigned int i = 0; i < friendTrees.size(); i++){
+    TString fileNameFriend = fileNameOutput + "." + friendNames[i];
+    TString chainNameFriend = chainName + "_" + friendNames[i];
+    cout << "Copying Friend: \n\t" << chainNameFriend
+         << "\nTo File: \n\t" << fileNameFriend << endl;
+    TFile* fileFriend = new TFile(fileNameFriend,"recreate");
+    fileFriend->cd();
+    TTree* treeFriend = friendTrees[i]->CopyTree(newCuts);
+    cout << "\nNumber of entries kept:  \n\t"
+         << FSString::int2TString(treeFriend->GetEntries(),0,true) << endl << endl;
+    if (treeFriend->GetListOfFriends()) treeFriend->GetListOfFriends()->Clear();
+    fileFriend->Write();
+    fileFriend->Close();
+    delete fileFriend;
+  }
+  clearChainCache();
 
 }
 
