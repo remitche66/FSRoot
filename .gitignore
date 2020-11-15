@@ -8,9 +8,9 @@
 ExampleProgram
 FSSkimTree
 FSModeSkimTree
-*testing*
-*RootMacros*
-*BESUtilities*
+FSModeCreateRankingTree
+*NOTES*
+*TEST*
 
 # Prerequisites
 *.d
