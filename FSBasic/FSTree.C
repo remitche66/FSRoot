@@ -345,15 +345,15 @@ FSTree::skimTree(TString fileNameInput, TString chainName,
     cout << "To File:" << endl;
     cout << "\t" << fileNameOutput << endl;
     cout << endl;
-    cout << "\tOriginal selection criteria:" << endl;
-    cout << cuts << endl;
+    cout << "Original selection criteria:" << endl;
+    cout << "\t" << cuts << endl;
     cout << endl;
-    cout << "\tModified selection criteria:" << endl;
-    cout << newCuts << endl;
+    cout << "Modified selection criteria:" << endl;
+    cout << "\t" << newCuts << endl;
     cout << endl;
     if (nt){
-      cout << "\tNumber of entries to skim:" << endl;
-      cout << FSString::int2TString(nt->GetEntries(),0,true) << endl;
+      cout << "Number of entries to skim:" << endl;
+      cout << "\t" << FSString::int2TString(nt->GetEntries(),0,true) << endl;
       cout << endl;
     }
   }
@@ -383,11 +383,11 @@ FSTree::skimTree(TString fileNameInput, TString chainName,
   TTree* tree2 = nt->CopyTree(newCuts);
   if (newChainName != ""){ tree2->SetName(newChainName); tree2->SetTitle(newChainName); }
   if (!FSControl::QUIET){
-    cout << "\tNumber of entries kept:" << endl;
-    cout << FSString::int2TString(tree2->GetEntries(),0,true) << endl;
+    cout << "Number of entries kept:" << endl;
+    cout << "\t" << FSString::int2TString(tree2->GetEntries(),0,true) << endl;
     cout << endl;
-    cout << "\tSkim Ratio:" << endl;
-    cout << (float) tree2->GetEntries() / (float) nt->GetEntries() << endl;
+    cout << "Skim Ratio:" << endl;
+    cout << "\t" << (float) tree2->GetEntries() / (float) nt->GetEntries() << endl;
     cout << endl;
   }
 
