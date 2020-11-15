@@ -201,7 +201,7 @@ FSModeTree::createRankingTree(TString fileName, TString ntName, TString category
 
   for (unsigned int iLoop = 1; iLoop <= 2; iLoop++){
     TString sLoop = "FIRST"; if (iLoop == 2) sLoop = "SECOND";
-    if (!FSControl::QUIET) cout << "\n----- STARTING " << sLoop << " LOOP -----\n" << endl;
+    if (!FSControl::QUIET) cout << "\n---------- STARTING " << sLoop << " LOOP ----------\n" << endl;
 
       // SECOND LOOP: (FOR DEBUGGING ONLY) find the event with the most combinations
 
@@ -234,23 +234,24 @@ FSModeTree::createRankingTree(TString fileName, TString ntName, TString category
       TString groupVar1_i = modeVector[i]->modeString(groupVar1);
       TString groupVar2_i = modeVector[i]->modeString(groupVar2);
       if (ifile == 0 && !FSControl::QUIET){
-        cout << "\n---------- " << sLoop << " LOOP OVER " << modeVector[i]->modeString() 
-             << "----------" << endl;
-        cout << "  NUMBER OF FILES = " << fileNames_i.size() << endl;
-        cout << "  INFO FOR THE FIRST FILE: " << endl;
-        cout << "        fileName  = " << fileName_i << endl;
-        cout << "        ntName    = " << ntName_i << endl;
-        cout << "        variables before expanding:" << endl;
-        cout << "          cuts      = " << cuts_i << endl;
-        cout << "          rankVar   = " << rankVar_i << endl;
-        cout << "          groupVar1 = " << groupVar1_i << endl;
-        cout << "          groupVar2 = " << groupVar2_i << endl;
+        cout << "---------- " << sLoop << " LOOP OVER " << modeVector[i]->modeDescription() 
+             << " (" << fileNames_i.size() << " FILE(S)) ----------" << endl;
+        if (FSControl::DEBUG){
+          cout << "  INFO FOR THE FIRST FILE: " << endl;
+          cout << "        fileName  = " << fileName_i << endl;
+          cout << "        ntName    = " << ntName_i << endl;
+          cout << "        variables before expanding:" << endl;
+          cout << "          cuts      = " << cuts_i << endl;
+          cout << "          rankVar   = " << rankVar_i << endl;
+          cout << "          groupVar1 = " << groupVar1_i << endl;
+          cout << "          groupVar2 = " << groupVar2_i << endl;
+        }
       }
       cuts_i      = FSTree::expandVariable(cuts_i);
       rankVar_i   = FSTree::expandVariable(rankVar_i);
       groupVar1_i = FSTree::expandVariable(groupVar1_i);
       groupVar2_i = FSTree::expandVariable(groupVar2_i);
-      if (ifile == 0 && !FSControl::QUIET){
+      if (ifile == 0 && FSControl::DEBUG){
         cout << "        variables after expanding:" << endl;
         cout << "          cuts      = " << cuts_i << endl;
         cout << "          rankVar   = " << rankVar_i << endl;
@@ -306,7 +307,7 @@ FSModeTree::createRankingTree(TString fileName, TString ntName, TString category
       if (!FSControl::QUIET){
         cout << " LOOP OVER ORIGINAL TREE WITH " 
              << FSString::int2TString(nEvents,0,true) << " ENTRIES" << endl;
-        cout << "  FILE = " << fileName_i << endl;
+        cout << "  File = " << fileName_i << endl;
       }
       for (unsigned int ientry = 0; ientry < nEvents; ientry++){
         if (ientry > 0 && ientry % 100000 == 0)
@@ -323,7 +324,7 @@ FSModeTree::createRankingTree(TString fileName, TString ntName, TString category
         vector<int> vVarI;  vector<int> vVar0;
         if (mModeVar.find(IMODE) != mModeVar.end()) vVarI = mModeVar[IMODE];
         if (mModeVar.find(0)     != mModeVar.end()) vVar0 = mModeVar[0];
-        if (!FSControl::QUIET && ifile == 0 && ientry < 3){
+        if (FSControl::DEBUG && ifile == 0 && ientry < 3){
           if (ientry == 0)
             cout << "  INFO FOR THE FIRST THREE ENTRIES " << endl;
           if (ientry < 3){
@@ -420,7 +421,7 @@ FSModeTree::createRankingTree(TString fileName, TString ntName, TString category
         //nt->AddFriend(rankTTree);
         //nt->Write();
         delete rankTFile;
-        if (!FSControl::QUIET && ifile == 0){
+        if (!FSControl::QUIET && ifile == fileNames_i.size()-1){
           cout << "******************************************\n"
                   "  END OF FILE FSModeTree::createRankingTree\n"
                   "******************************************" << endl;
