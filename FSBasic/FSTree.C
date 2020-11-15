@@ -187,16 +187,30 @@ FSTree::useFriendTree(TString friendName, bool use){
   }
 }
 
+vector<TString>
+FSTree::getFriendNames(int used){ // (-1,0,1) = (unused,all,used)
+  vector<TString> names;
+  for (unsigned int i = 0; i < m_friendTrees.size(); i++){
+    if (used == 1 && m_friendTrees[i].second && m_useFriendTrees)
+      names.push_back(m_friendTrees[i].first);
+    if (used == -1 && (!m_friendTrees[i].second || !m_useFriendTrees))
+      names.push_back(m_friendTrees[i].first);
+    if (used == 0)
+      names.push_back(m_friendTrees[i].first);
+  }
+  return names;
+}
+
 
 void
 FSTree::showFriendTrees(){
   cout << "FRIEND TREES:" << endl;
   for (unsigned int i = 0; i < m_friendTrees.size(); i++){
     cout << "  (" << (i+1) << ")  " << m_friendTrees[i].first << endl;
-    if (m_friendTrees[i].second)
-    cout << "        USED" << endl;
-    if (!m_friendTrees[i].second)
-    cout << "        NOT USED" << endl;
+    if (m_friendTrees[i].second && m_useFriendTrees){
+    cout << "        USED" << endl; }
+    else{
+    cout << "        NOT USED" << endl; }
     cout << "          treeName = treeName_" << m_friendTrees[i].first << endl;
     cout << "          fileName = fileName." << m_friendTrees[i].first << endl;
   }

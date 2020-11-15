@@ -38,6 +38,7 @@ class FSTree{
     static void removeFriendTree(TString friendName = "*");
     static void useFriendTree(TString friendName = "*", bool use = true);
     static void useFriendTrees(bool use = true){ m_useFriendTrees = use; }
+    static vector<TString> getFriendNames(int used = 0); // (-1,0,1) = (unused,all,used)
     static void showFriendTrees();
 
 
