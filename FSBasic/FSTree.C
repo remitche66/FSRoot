@@ -355,13 +355,13 @@ FSTree::skimTree(TString fileNameInput, TString chainName,
   // set up the output file
 
   file2->cd();
-  while (chainName.Contains("/")){
-    TString dirName("");
-    for (int i = 0; i < chainName.Index("/"); i++) { dirName += chainName[i]; }
-    chainName.Replace(0,chainName.Index("/")+1,"");
-    file2->mkdir(dirName);
-    file2->cd(dirName);
-  }
+  //vector<TString> dirs = FSString::parseTString(chainName,"/");
+  //if (dirs.size() > 2){
+  //  for (unsigned int i = 0; i < dirs.size()-1; i++){
+  //    file2->mkdir(dirs[i]);
+  //    file2->cd(dirs[i]);
+  //  }
+  //}
 
 
   // copy the tree with selection criteria
