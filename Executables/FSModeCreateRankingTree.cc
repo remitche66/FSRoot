@@ -23,6 +23,7 @@ int main(int argc, char* argv[]){
   TString cuts = "";
   TString groupVar1 = "Run";
   TString groupVar2 = "Event";
+  vector<TString> friendNames;
   for (int i = 1; i < argc-1; i++){
     TString arg(argv[i]);
     if (arg == "-i")    fileNameInput = argv[i+1];
@@ -33,6 +34,7 @@ int main(int argc, char* argv[]){
     if (arg == "-cuts") cuts = argv[i+1];
     if (arg == "-gv1") groupVar1 = argv[i+1];
     if (arg == "-gv2") groupVar2 = argv[i+1];
+    if (arg == "-friend")  friendNames.push_back(argv[i+1]);
   }
 
   cout << "********************" << endl;
@@ -45,6 +47,11 @@ int main(int argc, char* argv[]){
   cout << "CutString:      " << cuts << endl;
   cout << "GroupVar1:      " << groupVar1 << endl;
   cout << "GroupVar2:      " << groupVar2 << endl;
+  cout << "Friends:  " << endl;
+  for (unsigned int i = 0; i < friendNames.size(); i++){
+    FSTree::addFriendTree(friendNames[i]);
+    cout << "   " << friendNames[i] << endl;
+  }
   cout << "Modes:          " << endl;
   for (unsigned int imode = 0; imode < modes.size(); imode++){
     FSModeInfo* mi = FSModeCollection::addModeInfo(modes[imode]);
@@ -85,6 +92,7 @@ void printUsage(){
      "          [-cuts    CutString]       (default = \"\") \n"
      "          [-gv1     GroupVar1]       (default = \"Run\") \n"
      "          [-gv2     GroupVar2]       (default = \"Event\") \n"
+     "          [-friend  FriendName]      (can use many of these) \n"
   << endl;
 
 }

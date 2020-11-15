@@ -148,7 +148,7 @@ FSModeTree::skimTree(TString fileNameInput, TString ntName, TString category,
 void
 FSModeTree::createRankingTree(TString fileName, TString ntName, TString category, 
                               TString rankVarName, TString rankVar, TString cuts,
-                              TString groupVar1, TString groupVar2){
+                              TString groupVar1, TString groupVar2, TString printCommandFile){
 
   fileName    = FSString::removeWhiteSpace(fileName);
   ntName      = FSString::removeWhiteSpace(ntName);
@@ -188,6 +188,34 @@ FSModeTree::createRankingTree(TString fileName, TString ntName, TString category
     endl << "                ... skipping createRankingTree" << endl;
     return;
   }
+
+
+  // just write the command to a file and return
+
+  if (printCommandFile != ""){
+    vector<TString> friendNames = FSTree::getFriendNames(1);
+    TString friends("");
+    for (unsigned int i = 0; i < friendNames.size(); i++){ 
+      friends += " -friend \"" + friendNames[i] + "\"";
+    }
+    TString modes("");
+    for (unsigned int i = 0; i < modeVector.size(); i++){ 
+      modes += " -mode \"" + modeVector[i]->modeString() + "\"";
+    }
+    FSString::writeTStringToFile(printCommandFile,
+          "$FSROOT/Executables/FSModeCreateRankingTree "
+          " -i \""      + fileName    + "\""
+          " -nt \""     + ntName      + "\""
+          " -rvname \"" + rankVarName + "\""
+          " -rv \""     + rankVar     + "\""
+          " -cuts \""   + cuts        + "\""
+          " -gv1 \""    + groupVar1   + "\""
+          " -gv2 \""    + groupVar2   + "\""
+          + friends + modes,
+          false);
+    return;
+  }
+
 
     // *** LOOP 1 *** 
     //           loop over all trees and record GROUPVAR1, GROUPVAR2, RANKVAR, IMODE in
