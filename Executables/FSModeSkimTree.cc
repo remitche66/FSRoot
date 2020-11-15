@@ -20,6 +20,7 @@ int main(int argc, char* argv[]){
   TString fileNameOutput = "";
   TString mode = "";
   TString cuts = "";
+  vector<TString> friendNames;
   for (int i = 1; i < argc-1; i++){
     TString arg(argv[i]);
     if (arg == "-i")    fileNameInput = argv[i+1];
@@ -27,6 +28,7 @@ int main(int argc, char* argv[]){
     if (arg == "-mode") mode = argv[i+1];
     if (arg == "-cuts") cuts = argv[i+1];
     if (arg == "-nt")   chainName = argv[i+1];
+    if (arg == "-friend")  friendNames.push_back(argv[i+1]);
   }
   if (chainName == "") chainName = FSTree::getTreeNameFromFile(fileNameInput);
   if (chainName == ""){
@@ -43,6 +45,11 @@ int main(int argc, char* argv[]){
   cout << "CutString:      " << cuts << endl;
   cout << "TreeName:       " << chainName << endl;
   cout << "Mode:           " << mode << endl;
+  cout << "Friends:  " << endl;
+  for (unsigned int i = 0; i < friendNames.size(); i++){
+    FSTree::addFriendTree(friendNames[i]);
+    cout << "   " << friendNames[i] << endl;
+  }
   cout << "********************" << endl << endl;
 
   if ((fileNameInput == "") || (fileNameOutput == "")){
@@ -66,5 +73,6 @@ int main(int argc, char* argv[]){
 
 
 void printUsage(){
-  cout << "USAGE:  FSModeSkimTree -i InputFileName -o OutputFileName [-mode FSCode2_FSCode1] [-cuts CutString] [-nt TreeName]" << endl;
+  cout << "USAGE:  FSModeSkimTree -i InputFileName -o OutputFileName [-mode FSCode2_FSCode1] [-cuts CutString] [-nt TreeName]" 
+          " [-friend FriendName1] [-friend FriendName2] ... " << endl;
 }

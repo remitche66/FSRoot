@@ -312,12 +312,18 @@ FSTree::skimTree(TString fileNameInput, TString chainName,
   // just write the command to a file and return
 
   if (printCommandFile != ""){
+    vector<TString> friendNames = FSTree::getFriendNames(1);
+    TString friends("");
+    for (unsigned int i = 0; i < friendNames.size(); i++){ 
+      friends += " -friend \"" + friendNames[i] + "\"";
+    }
     FSString::writeTStringToFile(printCommandFile,
           "$FSROOT/Executables/FSSkimTree "
           " -i \""    + fileNameInput  + "\""
           " -o \""    + fileNameOutput + "\""
           " -cuts \"" + cuts           + "\""
-          " -nt \""   + chainName      + "\"",
+          " -nt \""   + chainName      + "\""
+          + friends,
           false);
     return;
   }
