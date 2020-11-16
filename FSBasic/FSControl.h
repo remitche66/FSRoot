@@ -26,35 +26,36 @@ class FSControl{
                                     //   (execute this when making plots
                                     //    in executables, for example)
 
-      // *******************
-      // FORMATTING TWEAKS
-      // *******************
+// **********
+// FORMATTING
+// **********
 
-      gStyle->SetFillColor(10);
-      gStyle->SetCanvasColor(10);
-      gStyle->SetPadColor(10);
-      gStyle->SetFillStyle(1001);
-      gStyle->SetCanvasBorderMode(0);      
+gStyle->SetFillColor(10);
+gStyle->SetCanvasColor(10);
+gStyle->SetPadColor(10);
+gStyle->SetFillStyle(1001);
+gStyle->SetCanvasBorderMode(0);
 
-      gStyle->SetMarkerStyle(20);
-      gStyle->SetMarkerSize(0.5);      
+gStyle->SetMarkerStyle(20);
+gStyle->SetMarkerSize(0.5);
 
-      gStyle->SetPadLeftMargin(0.145);
-      gStyle->SetPadBottomMargin(0.15);
-      gStyle->SetCanvasDefH(600.0);
-      gStyle->SetCanvasDefW(600.0);      
+gStyle->SetPadLeftMargin(0.145);
+gStyle->SetPadBottomMargin(0.15);
+gStyle->SetCanvasDefH(600.0);
+gStyle->SetCanvasDefW(600.0);
 
-      gStyle->SetTitleOffset(1.5,"Y");      
-      
-      // *******************
-      // ROOT TWEAKS
-      // *******************
+gStyle->SetTitleOffset(1.5,"Y");
 
-      TTreeFormula::SetMaxima(100000,10000,10000);
-      TTree::SetMaxTreeSize(100e9);
-      TH1::SetDefaultSumw2(true);
-      TH2::SetDefaultSumw2(true);
-      TGaxis::SetMaxDigits(4);
+
+// ***********
+// ROOT TWEAKS
+// ***********
+
+TTreeFormula::SetMaxima(100000,10000,10000);
+TTree::SetMaxTreeSize(2e12);
+TH1::SetDefaultSumw2(true);
+TH2::SetDefaultSumw2(true);
+TGaxis::SetMaxDigits(4);
 
     }
 
