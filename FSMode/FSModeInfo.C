@@ -991,8 +991,14 @@ FSModeInfo::modeCombinatorics(TString varString, bool printCombinatorics, bool r
 
 
 vector<TString>
-FSModeInfo::categories(){
-  return m_categories;
+FSModeInfo::categories(TString category){
+  if (category == "") return m_categories;
+  vector<TString> cats;
+  for (unsigned int i = 0; i < m_categories.size(); i++){
+    if (FSString::compareTStrings(m_categories[i],category))
+      cats.push_back(m_categories[i]);
+  }
+  return cats;
 }
 
 
