@@ -1,4 +1,5 @@
 #include <iostream>
+#include "FSBasic/FSControl.h"
 #include "FSBasic/FSString.h"
 #include "FSMode/FSModeTree.h"
 #include "FSMode/FSModeInfo.h"
@@ -8,6 +9,7 @@ using namespace std;
 void printUsage();
 
 int main(int argc, char* argv[]){
+  FSControl::globalTweaks();
 
   if (argc < 5){ 
     cout << "FSModeCreateRankingTree ERROR: Wrong number of arguments." << endl;
