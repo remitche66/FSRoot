@@ -1037,22 +1037,11 @@ FSModeInfo::addStandardCategories(){
   if ((modeCode2()==0)&&((ng+nkp+nkm+nks)==0)&&((npip+npim+npi0)>0))  m_categories.push_back("AllPi");
   if ((modeCode2()==0)&&((ng+nkp+nkm+nks+npi0)==0)&&((npip+npim)>0))  m_categories.push_back("AllChargedPi");
 
-  TString sfs("");  
-  TString sl("L");
-  TString snee("E");    TString snmm("M");     TString sng("G");  
-  TString snp("P");     TString sneta("Eta");  TString snk("K");   
-  TString snks("Ks");   TString snpi("Pi");    TString snpi0("Pi0");  
-  if ((nl+nal) != 0)   { TString sn("");  sn += (nl+nal);    sfs += (sn + sl); }
-  if ((nep+nem) != 0)  { TString sn("");  sn += (nep+nem);   sfs += (sn + snee); }
-  if ((nmp+nmm) != 0)  { TString sn("");  sn += (nmp+nmm);   sfs += (sn + snmm); }
-  if (ng != 0)         { TString sn("");  sn += ng;          sfs += (sn + sng); }
-  if ((npp+npm) != 0)  { TString sn("");  sn += (npp+npm);   sfs += (sn + snp); }
-  if (ne != 0)         { TString sn("");  sn += ne;          sfs += (sn + sneta); }
-  if ((nkp+nkm) != 0)  { TString sn("");  sn += (nkp+nkm);   sfs += (sn + snk); }
-  if ((nks) != 0)      { TString sn("");  sn += (nks);       sfs += (sn + snks); }
-  if ((npip+npim) != 0){ TString sn("");  sn += (npip+npim); sfs += (sn + snpi); }
-  if ((npi0) != 0)     { TString sn("");  sn += (npi0);      sfs += (sn + snpi0); }
-  m_categories.push_back(sfs);
+  TString nTKnVnGGnG = FSString::int2TString(npim+npip+nkm+nkp+npm+npp+nmm+nmp+nem+nep) + "TK"
+                       + FSString::int2TString(nks+nal+nl) + "V"
+                       + FSString::int2TString(npi0+ne) + "GG"
+                       + FSString::int2TString(ng) + "G";
+  m_categories.push_back(nTKnVnGGnG);
 
   int nbody = npi0+npim+npip+nks+nkm+nkp+ne+npm+npp+ng+nmm+nmp+nem+nep+nal+nl;
   TString sbody("");  sbody += nbody;  sbody += "Body";
