@@ -446,9 +446,8 @@ FSModeTree::createRankingTree(TString fileName, TString ntName, TString category
       if (iLoop == 2){
         rankTFile->cd();
         rankTTree->Write();
-        //nt->AddFriend(rankTTree);
-        //nt->Write();
         delete rankTFile;
+        delete rankTTree;
         if (!FSControl::QUIET && ifile == fileNames_i.size()-1){
           cout << "******************************************\n"
                   "  END OF FILE FSModeTree::createRankingTree\n"
