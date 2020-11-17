@@ -53,7 +53,7 @@ class FSModeCollection{
       // *******************************************************
 
     static vector<FSModeInfo*> modeVector(TString category = "");
-    static int               modeVectorSize(TString category = "");
+    static int                 modeVectorSize(TString category = "");
     static FSModeInfo*         modeVectorElement(TString category = "", 
                                                unsigned int index = 0);
 
@@ -90,12 +90,18 @@ class FSModeCollection{
 
 
       // *******************************************************
-      // PRINT STRINGS WITH REPLACED KEYWORDS 
-      //   (see FSModeInfo::modeString) TO A FILE
+      // PRINT STRINGS WITH REPLACED KEYWORDS TO A FILE
+      //  Or print to the screen if outputfile == "".
+      //  Use modeStrings to return the same strings as a vector.
+      //   See FSModeInfo::modeString(...) for keywords.
       // *******************************************************
 
-    static void printStrings(TString category, TString inputLine, TString outputFile,
+    static void printStrings(TString category, TString inputLine, 
+                             TString outputFile = "",
                              int counterStart = 1, bool append = false);
+
+    static vector<TString> modeStrings(TString category, TString inputLine, 
+                                       int counterStart = 1, bool show = false);
 
 
       // *******************************************************

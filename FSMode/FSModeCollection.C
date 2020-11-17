@@ -278,14 +278,32 @@ FSModeCollection::printDescriptions(TString category, TString outputFile){
 void
 FSModeCollection::printStrings(TString category, TString inputLine, TString outputFile, 
                              int counterStart, bool append){
+  vector<TString> mStrings = modeStrings(category,inputLine,counterStart);
+  if (outputFile == ""){
+    for (unsigned int i = 0; i < mStrings.size(); i++){
+      cout << mStrings[i] << endl;
+    }
+  }
   std::ios_base::openmode mode = ios::out;
   if (append) mode = ios::app;
   ofstream fout(FSString::TString2string(outputFile).c_str(),mode);
-  vector<FSModeInfo*> mVector = modeVector(category);
-  for (unsigned int i = 0; i < mVector.size(); i++){
-    fout << mVector[i]->modeString(inputLine, i+counterStart) << endl;
+  for (unsigned int i = 0; i < mStrings.size(); i++){
+    fout << mStrings[i] << endl;
   }
   fout.close();
+}
+
+
+vector<TString>
+FSModeCollection::modeStrings(TString category, TString inputLine, 
+                             int counterStart, bool show){
+  vector<FSModeInfo*> mVector = modeVector(category);
+  vector<TString> mStrings;
+  for (unsigned int i = 0; i < mVector.size(); i++){
+    mStrings.push_back(mVector[i]->modeString(inputLine, i+counterStart));
+  }
+  if (show) printStrings(category,inputLine,"",counterStart);
+  return mStrings;
 }
 
 
