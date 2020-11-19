@@ -45,6 +45,7 @@ gStyle->SetCanvasDefH(600.0);
 gStyle->SetCanvasDefW(600.0);
 
 gStyle->SetTitleOffset(1.5,"Y");
+gStyle->SetStripDecimals(false);
 
 
 // ***********
