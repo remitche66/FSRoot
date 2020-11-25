@@ -141,6 +141,7 @@ class FSString{
     static TString subString(TString input, int startIndex, int endIndex);
     static TString captureParentheses(TString input, int startIndex, 
                                       TString opening = "(", TString closing = ")");
+    static TString captureMarker(TString input, TString templateString, TString marker);
 
 
       // ********************************************************

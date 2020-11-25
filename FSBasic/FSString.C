@@ -686,6 +686,58 @@ FSString::captureParentheses(TString input, int startIndex, TString opening, TSt
 }
 
 
+TString
+FSString::captureMarker(TString input, TString templateString, TString marker){
+  if ((input == "") || (templateString == "") || (marker == "") || (!templateString.Contains(marker)))
+    return TString("");
+  vector<TString> templateParts = FSString::parseTString(templateString,marker,true);
+  if (templateParts.size() == 0) return TString("");
+  if (templateParts.size() == 1 && templateParts[0] == marker) return input;
+  TString inputCopy(input);
+  TString templateStart("");
+  TString templateEnd("");
+  if ((templateParts.size() == 2) && (templateParts[1] == marker)){
+    templateStart = templateParts[0];
+  }
+  else if ((templateParts.size() == 2) && (templateParts[0] == marker)){
+    templateEnd = templateParts[1];
+  }
+  else if ((templateParts.size() == 3) && (templateParts[1] == marker)){
+    templateStart = templateParts[0];
+    templateEnd = templateParts[2];
+  }
+  else{
+    return TString("");
+  }
+  if (templateStart != ""){
+    bool found = false;
+    for (int i = 0; i <= inputCopy.Length(); i++){
+      TString inputTest = FSString::subString(inputCopy,0,i);
+      if (FSString::compareTStrings(inputTest,templateStart)){
+        inputCopy.Replace(inputCopy.Index(inputTest),inputTest.Length(),"");
+        found = true;
+        break;
+      }
+    }
+    if (!found) return TString("");
+  }
+  if (templateEnd != ""){
+    bool found = false;
+    for (int i = inputCopy.Length(); i >= 0; i--){
+      TString inputTest = FSString::subString(inputCopy,i,inputCopy.Length());
+      if (FSString::compareTStrings(inputTest,templateEnd)){
+        inputCopy.Replace(inputCopy.Index(inputTest),inputTest.Length(),"");
+        found = true;
+        break;
+      }
+    }
+    if (!found) return TString("");
+  }
+  return inputCopy;
+}
+
+
+
       // ********************************************************
       // PARSE LOGIC 
       // ********************************************************
