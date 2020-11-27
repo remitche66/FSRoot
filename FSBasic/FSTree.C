@@ -815,7 +815,21 @@ FSTree::expandVariable(TString variable, bool show){
       TString macroPz = "PzP"+IJ;  TString newPz = "(";
       TString commaList = expInfo[4+np];
       vector<TString> commaParts = FSString::parseTString(commaList,",");
+      int commaCount = 0;
       for (unsigned int ic = 0; ic < commaParts.size(); ic++){
+        if (commaParts[ic].Length() == 0) continue;
+        TString plusMinus("+");
+        TString firstDigit = FSString::subString(commaParts[ic],0,1);
+        if (firstDigit == "+" || firstDigit == "-"){
+          plusMinus = firstDigit;
+          commaParts[ic] = FSString::subString(commaParts[ic],1,commaParts[ic].Length());
+        }
+        if (commaParts[ic].Length() == 0) continue;
+        commaCount++;
+        if (commaCount > 0 && plusMinus == "-"){ 
+          newEn += "-"; newPx += "-"; newPy += "-"; newPz += "-"; }
+        if (commaCount > 1 && plusMinus == "+"){ 
+          newEn += "+"; newPx += "+"; newPy += "+"; newPz += "+"; }
         if (m_mapDefinedEn.find(commaParts[ic]) != m_mapDefinedEn.end()){
           newEn += m_mapDefinedEn[commaParts[ic]];
           newPx += m_mapDefinedPx[commaParts[ic]];
@@ -828,8 +842,6 @@ FSTree::expandVariable(TString variable, bool show){
           newPy += (prefix+"PyP"+commaParts[ic]);
           newPz += (prefix+"PzP"+commaParts[ic]);
         }
-        if (ic != commaParts.size()-1){ 
-          newEn += "+"; newPx += "+"; newPy += "+"; newPz += "+"; }
       }
       newEn += ")"; newPx += ")"; newPy += ")"; newPz += ")";
       while (newMacro.Contains(macroEn)){ 
