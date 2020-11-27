@@ -995,7 +995,8 @@ FSModeInfo::categories(TString category){
   if (category == "") return m_categories;
   vector<TString> cats;
   for (unsigned int i = 0; i < m_categories.size(); i++){
-    if (FSString::compareTStrings(m_categories[i],category))
+    vector<TString> tempCats; tempCats.push_back(m_categories[i]);
+    if (FSString::evalLogicalTString(category,tempCats))
       cats.push_back(m_categories[i]);
   }
   return cats;
@@ -1079,25 +1080,22 @@ FSModeInfo::addCategory(vector<TString> lcategories){
   }
 }
 
-
 bool
 FSModeInfo::hasCategory(TString category){
-  bool found = false;
-  for (unsigned int i = 0; i < m_categories.size(); i++){
-    if (m_categories[i] == category) found = true;
-  }
-  return found;
+  return FSString::evalLogicalTString(category,m_categories);
 }
 
 void
 FSModeInfo::removeCategory(TString category){
-  if (category == "") return;
+  if (!hasCategory(category)) return;
+  vector<TString> newCategories;
   for (unsigned int i = 0; i < m_categories.size(); i++){
-    if (m_categories[i] == category){
-      m_categories.erase(m_categories.begin()+i);
-      return;
-    }
+    vector<TString> tempCats; tempCats.push_back(m_categories[i]);
+    if (!FSString::evalLogicalTString(category,tempCats))
+      newCategories.push_back(category);
   }
+  m_categories.clear();
+  m_categories = newCategories;
 }
 
 
