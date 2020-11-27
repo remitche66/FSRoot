@@ -991,13 +991,18 @@ FSModeInfo::modeCombinatorics(TString varString, bool printCombinatorics, bool r
 
 
 vector<TString>
-FSModeInfo::categories(TString category){
-  if (category == "") return m_categories;
+FSModeInfo::categories(TString category, bool show){
   vector<TString> cats;
   for (unsigned int i = 0; i < m_categories.size(); i++){
     vector<TString> tempCats; tempCats.push_back(m_categories[i]);
     if (FSString::evalLogicalTString(category,tempCats))
       cats.push_back(m_categories[i]);
+  }
+  if (show){
+    cout << "output for FSModeInfo::categories(" << category << "):" << endl;
+    for (unsigned int i = 0; i < cats.size(); i++){
+      cout << "  (" << i+1 << ") " << cats[i] << endl;
+    }
   }
   return cats;
 }

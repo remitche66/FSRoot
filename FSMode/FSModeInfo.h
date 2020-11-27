@@ -116,7 +116,7 @@ class FSModeInfo{
       //   (in addition to standard categories added by default)
       // *******************************************************
 
-    vector<TString> categories(TString category = "");
+    vector<TString> categories(TString category = "", bool show = false);
     void addCategory(TString category);
     void addCategory(vector<TString> categories);
     bool hasCategory(TString category);
