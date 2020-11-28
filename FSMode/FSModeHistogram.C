@@ -540,38 +540,44 @@ FSModeHistogram::readHistogramCache(string cacheName){
 
 vector<TString>
 FSModeHistogram::expandHistogramIndexTree(TString inIndex){
-    // expand FSCuts using the same method as FSHistogram
-  vector<TString> expandedIndices = FSHistogram::expandHistogramIndexTree(inIndex);
-    // if there are no modes, return
-  if (!inIndex.Contains("{-CA-}")) return expandedIndices;
-    // if there are modes, expand them
-  vector<TString> expandedIndicesTemp = expandedIndices;
-  expandedIndices.clear();
-  for (unsigned int i = 0; i < expandedIndicesTemp.size(); i++){
-    TString index = expandedIndicesTemp[i];
-    map<TString,TString> indexMap = FSHistogram::parseHistogramIndex(index);
-    if (indexMap.find("{-CA-}") == indexMap.end()){ 
-      cout << "expandHistogramIndexTree ERROR (no category?)" << endl; exit(0); }
-    TString category = indexMap["{-CA-}"];
-    vector<FSModeInfo*> modeVector = FSModeCollection::modeVector(category);
-    if (modeVector.size() == 0){ 
-      indexMap["{-CA-}"] = "!!NO_MODES!!";
-      expandedIndices.push_back(FSHistogram::getHistogramIndex(indexMap));
-      continue;
-    }
-    for (unsigned int iM = 0; iM < modeVector.size(); iM++){
-      TString indexM = modeVector[iM]->modeString(index);
-      vector<TString> combos = modeVector[iM]->modeCombinatorics(indexM);
-      for (unsigned int iC = 0; iC < combos.size(); iC++){
-         // checking for duplicates (but this should also be in modeCombinatorics)
+  vector<TString> expandedIndices;
+    // if no category is specified, return the FSHistogram version
+  if (!inIndex.Contains("{-CA-}")) return FSHistogram::expandHistogramIndexTree(inIndex);
+    // if there is a category, find the category and the associated mode vector
+  map<TString,TString> inIndexMap = FSHistogram::parseHistogramIndex(inIndex);
+  TString category = inIndexMap["{-CA-}"];
+  vector<FSModeInfo*> modeVector = FSModeCollection::modeVector(category);
+    // if there are no modes for this category, return an index with an error message
+  if (modeVector.size() == 0){ 
+    inIndexMap["{-CA-}"] = "!!NO_MODES!!";
+    expandedIndices.push_back(FSHistogram::getHistogramIndex(inIndexMap));
+    return expandedIndices;
+  }
+    // loop over the mode vector
+  for (unsigned int iMode = 0; iMode < modeVector.size(); iMode++){
+      // (1) expand inIndex to index1 with modeString
+    TString index1 = modeVector[iMode]->modeString(inIndex);
+      // (2) expand index1 to index2 with FSCuts (or whatever is in the FSHistogram version)
+    vector<TString> indices2 = FSHistogram::expandHistogramIndexTree(index1);
+    for (unsigned int iCut = 0; iCut < indices2.size(); iCut++){
+      TString index2 = indices2[iCut];
+        // (3) expand index2 to index3 with modeString
+      TString index3 = modeVector[iMode]->modeString(index2);
+        // (4) expand index3 to index4 with modeCombinatorics
+      vector<TString> indices4 = modeVector[iMode]->modeCombinatorics(index3);
+      for (unsigned int iCombo = 0; iCombo < indices4.size(); iCombo++){
+        TString index4 = indices4[iCombo];
+          // fill in the category part of index4
+        map<TString,TString> index4Map = FSHistogram::parseHistogramIndex(index4);
+        index4Map["{-CA-}"] = modeVector[iMode]->modeString();
+        index4 = FSHistogram::getHistogramIndex(index4Map);
+          // check for duplicates (this should also be in modeCombinatorics)
         bool usedIndex = false;
         for (unsigned int iE = 0; iE < expandedIndices.size(); iE++){
-          if (expandedIndices[iE] == combos[iC]){ usedIndex = true; break; }
+          if (expandedIndices[iE] == index4){ usedIndex = true; break; }
         }
-        if (usedIndex) continue;
-        map<TString,TString> comboMap = FSHistogram::parseHistogramIndex(combos[iC]);
-        comboMap["{-CA-}"] = modeVector[iM]->modeString();
-        expandedIndices.push_back(FSHistogram::getHistogramIndex(comboMap));
+          // record the final index
+        if (!usedIndex) expandedIndices.push_back(index4);
       }
     }
   }
