@@ -6,6 +6,7 @@
 #include "TChain.h"
 #include "TString.h"
 #include "FSBasic/FSString.h"
+#include "FSBasic/FSCut.h"
 #include "FSMode/FSModeInfo.h"
 #include "FSMode/FSModeCollection.h"
 
@@ -206,6 +207,22 @@ FSModeCollection::modeVectorElement(TString category, unsigned int index){
   FSModeInfo* mElement = NULL;
   if (index < mVector.size()) mElement = mVector[index];
   return mElement;
+}
+
+
+  // *******************************************************
+  // DEFINE MODE-SPECIFIC CUTS USING FSCUT
+  // *******************************************************
+
+void 
+FSModeCollection::defineCuts(TString category, TString cutName, TString cut, 
+                           TString cutSideBand, double weight){
+  vector<FSModeInfo*> modes = modeVector(category);
+  for (unsigned int i = 0; i < modes.size(); i++){
+    FSModeInfo* mi = modes[i];
+    FSCut::defineCut(mi->modeString(cutName),mi->modeString(cut),
+                     mi->modeString(cutSideBand),weight);
+  }
 }
 
 

@@ -59,6 +59,16 @@ class FSModeCollection{
 
 
       // *******************************************************
+      // DEFINE MODE-SPECIFIC CUTS USING FSCUT
+      //   Note:  name cuts using keywords like MODESTRING
+      //     to distinguish modes (see FSModeInfo::modeString)
+      // *******************************************************
+
+    static void defineCuts(TString category, TString cutName, TString cut, 
+                           TString cutSideBand = "", double weight = 1.0);
+
+
+      // *******************************************************
       // PRINT COMBINATORICS TO THE SCREEN FOR TESTING
       // *******************************************************
 
