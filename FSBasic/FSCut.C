@@ -45,17 +45,20 @@ FSCut::findCut(TString cutName){
 
 void 
 FSCut::display(TString cutName){
-  if (cutName == ""){
-    cout << "FSCut: LIST OF DEFINED CUTS" << endl;
-    map< TString, pair< pair<TString,TString>, double > >::iterator it = m_cutCache.begin();
-    for (; it != m_cutCache.end(); it++){ display(it->first); }
-  }
-  else{
-    pair< pair<TString,TString>, double> cutInfo = getCut(cutName);
-    cout << "  FSCut " << cutName << ":" << endl;
-    cout << "    signal:   " << cutInfo.first.first << endl;
-    cout << "    sideband: " << cutInfo.first.second << endl;
-    cout << "    sideband scale: " << cutInfo.second << endl;
+  cout << "FSCut Information:" << endl;
+  map< TString, pair< pair<TString,TString>, double > >::iterator it = m_cutCache.begin();
+  int cutCount = 0;
+  for (; it != m_cutCache.end(); it++){
+    cutCount++;
+    TString locName = it->first;
+    pair< pair<TString,TString>, double> cutInfo = m_cutCache[locName];
+    if ((cutName == "") || FSString::compareTStrings(locName,cutName)){
+      cout << "  ********** FSCUT NUMBER " << cutCount << " **********" << endl;
+      cout << "              name: " << locName << endl;
+      cout << "            signal: " << cutInfo.first.first << endl;
+      cout << "          sideband: " << cutInfo.first.second << endl;
+      cout << "    sideband scale: " << cutInfo.second << endl;
+    }
   }
 }
 
