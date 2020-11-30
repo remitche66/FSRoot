@@ -853,17 +853,48 @@ FSHistogram::dumpHistogramCache(string cacheName){
 void 
 FSHistogram::readHistogramCache(string cacheName){
 
+  TString sCacheNameWithWildcards = FSString::string2TString(cacheName);
+  vector<TString> textCacheNames = FSSystem::getAbsolutePaths(sCacheNameWithWildcards+".cache.dat");
+  vector<TString> rootCacheNames = FSSystem::getAbsolutePaths(sCacheNameWithWildcards+".cache.root");
+  if ((textCacheNames.size() == 1) && (rootCacheNames.size() == 1)){
+    cout << "READING CACHE..." << endl;
+    cout << "    root file = " << rootCacheNames[0] << endl;
+    cout << "    data file = " << textCacheNames[0] << endl;
+  }
+  else{
+    cout << "PREPARING TO READ CACHE..." << endl;
+    cout << "    ROOT FILES: " << endl;
+    for (unsigned int i = 0; i < rootCacheNames.size(); i++){
+      cout << "      (" << i+1 << ") " << rootCacheNames[i] << endl;
+    }
+    cout << "    DATA FILES: " << endl;
+    for (unsigned int i = 0; i < textCacheNames.size(); i++){
+      cout << "      (" << i+1 << ") " << textCacheNames[i] << endl;
+    }
+    if ((rootCacheNames.size() == 0) && (textCacheNames.size() == 0)){
+      cout << "  No histogram cache found...  skipping" << endl;  return;
+    }
+    if (rootCacheNames.size() != textCacheNames.size()){
+      cout << "  Problem with cache files...  skipping" << endl;  return;
+    }
+    for (unsigned int i = 0; i < textCacheNames.size(); i++){
+      TString sCacheNameNoWildCards =
+         FSString::subString(textCacheNames[i],0,textCacheNames[i].Length()-10);
+      readHistogramCache(FSString::TString2string(sCacheNameNoWildCards));
+    }
+  }
+
     // open input files
 
-  string textCacheName(cacheName);  textCacheName += ".cache.dat";
-  string rootCacheName(cacheName);  rootCacheName += ".cache.root";
-  TFile* rootCache = new TFile(rootCacheName.c_str());
-  ifstream textCache(textCacheName.c_str());
+  TString textCacheName = textCacheNames[0];
+  TString rootCacheName = rootCacheNames[0];
+  TFile* rootCache = new TFile(rootCacheName);
+  ifstream textCache(FSString::TString2string(textCacheName).c_str());
 
     // read histograms
 
   TString histName;
-  TString fileName(FSString::string2TString(rootCacheName));
+  TString fileName(rootCacheName);
   TString index;
   while (textCache >> index){
     textCache >> histName;
