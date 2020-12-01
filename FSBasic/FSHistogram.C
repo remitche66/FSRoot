@@ -175,6 +175,7 @@ FSHistogram::getTHNFBasicTree(TString index, TString& STATUS){
   TString fileName  = mapIndex["{-FN-}"];
   TString ntName    = mapIndex["{-NT-}"];
   TString variable  = mapIndex["{-VA-}"];  variable = FSTree::expandVariable(variable);
+    if (variable == ""){ STATUS = "!!NO_VAR2!!"; return getTHNFBasicEmpty(index); }
   TString bounds    = mapIndex["{-BO-}"];
   TString cuts      = mapIndex["{-CU-}"];  cuts = FSTree::expandVariable(cuts);
   double  scale     = FSString::TString2double(mapIndex["{-SC-}"]);
