@@ -576,6 +576,25 @@ FSTree::makeStandardDefinitions(){
 
     defineMacro("HELCOSINE", 2,  helcosine );}
 
+    defineMacro("HELCOSTHETA", 2, "FSMath::helcostheta("
+                                  "PxP[I],PyP[I],PzP[I],EnP[I],"
+                                  "PxP[J],PyP[J],PzP[J],EnP[J])");
+
+    defineMacro("HELPHI", 3, "FSMath::helphi("
+                                  "PxP[I],PyP[I],PzP[I],EnP[I],"
+                                  "PxP[J],PyP[J],PzP[J],EnP[J],"
+                                  "PxP[M],PyP[M],PzP[M],EnP[M])");
+
+    defineMacro("GJCOSTHETA", 3, "FSMath::gjcostheta("
+                                  "PxP[I],PyP[I],PzP[I],EnP[I],"
+                                  "PxP[J],PyP[J],PzP[J],EnP[J],"
+                                  "PxP[M],PyP[M],PzP[M],EnP[M])");
+
+    defineMacro("PLANEPHI", 3, "FSMath::planephi("
+                                  "PxP[I],PyP[I],PzP[I],EnP[I],"
+                                  "PxP[J],PyP[J],PzP[J],EnP[J],"
+                                  "PxP[M],PyP[M],PzP[M],EnP[M])");
+
   }
 }
 
