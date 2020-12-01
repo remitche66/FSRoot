@@ -131,8 +131,7 @@ class FSTree{
 
       // defined macros
 
-    static map< TString, TString > m_mapDefined1VMacros;
-    static map< TString, TString > m_mapDefined2VMacros;
+    static map< pair<TString,int>, TString > m_mapDefinedMacros;
     static vector< TString > m_vectorDefinedMacroKeywords;
 
 };

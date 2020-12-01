@@ -28,8 +28,7 @@ map< TString, TString > FSTree::m_mapDefinedPx;
 map< TString, TString > FSTree::m_mapDefinedPy;
 map< TString, TString > FSTree::m_mapDefinedPz;
 map< TString, TString > FSTree::m_mapDefinedEn;
-map< TString, TString > FSTree::m_mapDefined1VMacros;
-map< TString, TString > FSTree::m_mapDefined2VMacros;
+map< pair<TString,int>, TString > FSTree::m_mapDefinedMacros;
 vector< TString > FSTree::m_vectorDefinedMacroKeywords;
 bool FSTree::m_madeStandardDefinitions = false;
 bool FSTree::m_useFriendTrees = true;
@@ -624,24 +623,31 @@ FSTree::defineMacro(TString macroName, int numFourVectors, TString macro){
   macro     = FSString::removeWhiteSpace(macro);
   makeStandardDefinitions();
   if ((macroName == "") || (macro == "")) return;
-  if ((numFourVectors < 1) || (numFourVectors > 2)){
-    cout << "FSTree::defineMacro WARNING: numFourVectors should be 1 or 2, nothing defined" << endl;
+  if ((numFourVectors < 1) || (numFourVectors > 4)){
+    cout << "FSTree::defineMacro WARNING: numFourVectors should be 1 to 4, nothing defined" << endl;
     return;
   }
-  if (((numFourVectors == 1) && (m_mapDefined1VMacros.find(macroName) != m_mapDefined1VMacros.end())) ||
-      ((numFourVectors == 2) && (m_mapDefined2VMacros.find(macroName) != m_mapDefined2VMacros.end()))){
+  pair<TString,int> macroNamePair(macroName,numFourVectors);
+  if (m_mapDefinedMacros.find(macroNamePair) != m_mapDefinedMacros.end()){
     cout << "FSTree::defineMacro WARNING: overwriting macro named " << macroName << endl;
   }
-  if ((numFourVectors == 1) && (!macro.Contains("[I]"))){
-    cout << "FSTree::defineMacro WARNING: for numFourVectors = 1, macro should contain [I]" << endl;
+  if ((numFourVectors >= 1) && (!macro.Contains("[I]"))){
+    cout << "FSTree::defineMacro WARNING: macro named " << macroName << " should contain [I]" << endl;
     return;
   }
-  if ((numFourVectors == 2) && (!macro.Contains("[I]") || !macro.Contains("[J]"))){
-    cout << "FSTree::defineMacro WARNING: for numFourVectors = 2, macro should contain [I] and [J]" << endl;
+  if ((numFourVectors >= 2) && (!macro.Contains("[J]"))){
+    cout << "FSTree::defineMacro WARNING: macro named " << macroName << " should contain [J]" << endl;
     return;
   }
-  if (numFourVectors == 1) m_mapDefined1VMacros[macroName] = macro;
-  if (numFourVectors == 2) m_mapDefined2VMacros[macroName] = macro;
+  if ((numFourVectors >= 3) && (!macro.Contains("[M]"))){
+    cout << "FSTree::defineMacro WARNING: macro named " << macroName << " should contain [M]" << endl;
+    return;
+  }
+  if ((numFourVectors >= 4) && (!macro.Contains("[N]"))){
+    cout << "FSTree::defineMacro WARNING: macro named " << macroName << " should contain [N]" << endl;
+    return;
+  }
+  m_mapDefinedMacros[macroNamePair] = macro;
   bool inVector = false;
   for (unsigned int i = 0; i < m_vectorDefinedMacroKeywords.size(); i++){
     if (m_vectorDefinedMacroKeywords[i] == macroName){ inVector = true; break; }
@@ -666,16 +672,16 @@ FSTree::showDefinedMacros(){
   cout << "----------------------------" << endl;
   cout << "       DEFINED MACROS " << endl;
   cout << "----------------------------" << endl << endl;
-  for (unsigned int i = 0; i < m_vectorDefinedMacroKeywords.size(); i++){
-    TString name = m_vectorDefinedMacroKeywords[i];
-    if (m_mapDefined1VMacros.find(name) != m_mapDefined1VMacros.end()){
-      cout << name << "([I])" << endl << endl; 
-      cout << "          " << m_mapDefined1VMacros[name] << endl << endl;
-    }
-    if (m_mapDefined2VMacros.find(name) != m_mapDefined2VMacros.end()){
-      cout << name << "([I];[J])" << endl << endl; 
-      cout << "          " << m_mapDefined2VMacros[name] << endl << endl;
-    }
+  for (map< pair<TString,int>, TString>::iterator it = m_mapDefinedMacros.begin();
+       it != m_mapDefinedMacros.end(); it++){
+    TString macroName = it->first.first;
+    int numFourVectors = it->first.second;
+    TString macro = it->second;
+    if (numFourVectors == 1) cout << macroName << "([I])" << endl << endl; 
+    if (numFourVectors == 2) cout << macroName << "([I];[J])" << endl << endl; 
+    if (numFourVectors == 3) cout << macroName << "([I];[J];[M])" << endl << endl; 
+    if (numFourVectors == 4) cout << macroName << "([I];[J];[M];[N])" << endl << endl; 
+    cout << "          " << macro << endl << endl;
   }
   cout << "----------------------------" << endl;
 }
@@ -787,7 +793,7 @@ FSTree::expandVariable(TString variable, bool show){
   for (unsigned int i = 0; i < expressions.size(); i++){
     vector<TString> expInfo = expressions[i];
     int numParts = expInfo.size()-6;
-    if ((numParts != 1) && (numParts != 2)){
+    if ((numParts < 1) || (numParts > 4)){
       cout << "FSTree::expandVariable ERROR: problem parsing variable..." << endl;
       parseVariable(variable,true);
       return TString("");
@@ -796,10 +802,9 @@ FSTree::expandVariable(TString variable, bool show){
     TString prefix = expInfo[1];
     TString keyword = expInfo[2];
     TString macro = "";
-    if (numParts == 1 && m_mapDefined1VMacros.find(keyword) != m_mapDefined1VMacros.end())
-      macro = m_mapDefined1VMacros[keyword];
-    if (numParts == 2 && m_mapDefined2VMacros.find(keyword) != m_mapDefined2VMacros.end())
-      macro = m_mapDefined2VMacros[keyword];
+    pair<TString,int> macroNamePair(keyword,numParts);
+    if (m_mapDefinedMacros.find(macroNamePair) != m_mapDefinedMacros.end())
+      macro = m_mapDefinedMacros[macroNamePair];
     if (macro == ""){
       cout << "FSTree::expandVariable ERROR: no macro named " << keyword 
            << " with number of parts = " << numParts << endl;
@@ -809,6 +814,8 @@ FSTree::expandVariable(TString variable, bool show){
     TString newMacro = macro;
     for (int np = 0; np < numParts; np++){
       TString IJ = "[I]"; if (np == 1) IJ = "[J]";
+                          if (np == 2) IJ = "[M]";
+                          if (np == 3) IJ = "[N]";
       TString macroEn = "EnP"+IJ;  TString newEn = "(";
       TString macroPx = "PxP"+IJ;  TString newPx = "(";
       TString macroPy = "PyP"+IJ;  TString newPy = "(";
