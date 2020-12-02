@@ -203,7 +203,11 @@ FSModeHistogram::getMCComponentsAndSizes(TString fileName, TString ntName,
       extraTreeContents.push_back(pair<TString,TString>("MCDecayParticle6","MCDecayParticle6"));
     }
       // first check to make sure the branches exist
-    vector<TString> branches = FSTree::getBranchNamesFromTree(fileName,ntName,"MC*");
+    TString fileName_i = fileName;  TString ntName_i = ntName;
+    vector<FSModeInfo*> modes = FSModeCollection::modeVector(category);
+    if (modes.size() > 0){
+      fileName_i = modes[0]->modeString(fileName); ntName_i = modes[0]->modeString(ntName); }
+    vector<TString> branches = FSTree::getBranchNamesFromTree(fileName_i,ntName_i,"MC*");
     for (unsigned int i = 0; i < extraTreeContents.size(); i++){
       bool found = false;
       for (unsigned int j = 0; j < branches.size(); j++){
