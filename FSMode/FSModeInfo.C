@@ -1106,14 +1106,26 @@ FSModeInfo::removeCategory(TString category){
 
 void
 FSModeInfo::display(int counter){
-  cout << counter;
-  TString mString = modeString();
-  for (int i = mString.Length(); i < 18; i++){ cout << " "; }
-  cout << modeString() << "   " << modeDescription();
+  if (counter < 10)  cout << " ";
+  if (counter < 100) cout << " ";
+  cout << "(" << counter << ")  " << modeDescription() << endl;
+  cout << "                    Categories:";
   for (unsigned int j = 0; j < m_categories.size(); j++){
-    if (j%4 == 0){  cout << endl;  cout << "\t\t\t\t\t";  }
+    if (j%4 == 0){  cout << endl;  cout << "                        ";  }
     cout << m_categories[j] << "  ";
   }
-  cout << endl << endl;
+  cout << endl;
+  cout << "                    Keyword Substitutions:" << endl;
+  cout << "                        MODESTRING      ->  " << modeString("MODESTRING     ") << endl;
+  cout << "                        MODEDESCRIPTION ->  " << modeString("MODEDESCRIPTION") << endl;
+  cout << "                        MODECODE        ->  " << modeString("MODECODE       ") << endl;
+  cout << "                        MODECODE1       ->  " << modeString("MODECODE1      ") << endl;
+  cout << "                        MODECODE2       ->  " << modeString("MODECODE2      ") << endl;
+  cout << "                        MODEGLUEXFORMAT ->  " << modeString("MODEGLUEXFORMAT") << endl;
+  cout << "                        MODEGLUEXNAME   ->  " << modeString("MODEGLUEXNAME  ") << endl;
+  cout << "                        MODELATEX       ->  " << modeString("MODELATEX      ") << endl;
+  cout << "                        MODECOMBO       ->  " << modeString("MODECOMBO      ") << endl;
+  cout << "                        MODECOUNTER     ->  " << modeString("MODECOUNTER    ", counter) << endl;
+  cout << endl;
 }
 
