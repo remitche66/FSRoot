@@ -155,13 +155,13 @@ FSModeCollection::defineCuts(TString category, TString cutName, TString cut,
   // *******************************************************
 
 void
-FSModeCollection::testCombinatorics(TString category, TString testString, bool expandString){
+FSModeCollection::testCombinatorics(TString category, TString testString, bool expandModeString){
   vector<FSModeInfo*> mVector = modeVector(category);
   if (mVector.size() == 0)
     cout << "FSModeCollection::testCombinatorics: no modes for this category" << endl;
   for (unsigned int i = 0; i < mVector.size(); i++){
     TString testString2 = testString;
-    if (expandString) testString2 = mVector[i]->modeString(testString2);
+    if (expandModeString) testString2 = mVector[i]->modeString(testString2);
     mVector[i]->modeCombinatorics(testString2,true);
   }
 }
