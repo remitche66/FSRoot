@@ -111,25 +111,14 @@ FSModeCollection::addModesFromFile(TString filename){
 
 vector<FSModeInfo*>
 FSModeCollection::modeVector(TString category){
-
-    // copy the map into a vector
-  vector<FSModeInfo*> mVectorOriginal;
+  vector<FSModeInfo*> mVector;
   for (map< pair<int,int>, FSModeInfo*>::iterator mapitr = m_modeInfoMap.begin();
        mapitr != m_modeInfoMap.end(); mapitr++){
-    mVectorOriginal.push_back((*mapitr).second);
+    if ((*mapitr).second->hasCategory(category))
+      mVector.push_back((*mapitr).second);
   }
-
-    // loop over modes and keep modes that pass the category logic
-  vector<FSModeInfo*> mVectorSelected;
-  for (unsigned int i = 0; i < mVectorOriginal.size(); i++){
-    FSModeInfo* mInfo = mVectorOriginal[i];
-    if (FSString::evalLogicalTString(category,mInfo->categories()))
-      mVectorSelected.push_back(mInfo);
-  }
-
-  return mVectorSelected;
+  return mVector;
 }
-
 
 int 
 FSModeCollection::modeVectorSize(TString category){
