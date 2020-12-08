@@ -22,7 +22,8 @@ map< pair<int,int>, FSModeInfo*> FSModeCollection::m_modeInfoMap;
 FSModeInfo*
 FSModeCollection::addModeInfo(pair<int,int> mCode){
   pair<int,int> mCode2(mCode.second,mCode.first);
-  if (modeInfo(mCode) == NULL) m_modeInfoMap[mCode2] = new FSModeInfo(mCode);
+  if (m_modeInfoMap.find(mCode2) == m_modeInfoMap.end())
+    m_modeInfoMap[mCode2] = new FSModeInfo(mCode);
   return m_modeInfoMap[mCode2];
 }
 
@@ -37,31 +38,6 @@ FSModeCollection::addModeInfo(TString mString){
   FSModeInfo* modeInfo = addModeInfo(modeInfoTemp.modeCode());
   modeInfo->addCategory(modeInfoTemp.categories());
   return modeInfo;
-}
-
-
-  // *******************************************************
-  // REMOVE MODES FROM THE COLLECTION
-  // *******************************************************
-
-void
-FSModeCollection::removeModeInfo(pair<int,int> mCode){
-  FSModeInfo* mi = modeInfo(mCode);
-  if (mi != NULL){
-    delete mi;
-    pair<int,int> mCode2(mCode.second,mCode.first);
-    m_modeInfoMap.erase(mCode2);
-  }
-}
-
-void
-FSModeCollection::removeModeInfo(int mCode1, int mCode2){
-  if (modeInfo(mCode1,mCode2) != NULL) removeModeInfo(FSModeInfo(mCode1,mCode2).modeCode());
-}
-
-void
-FSModeCollection::removeModeInfo(TString mString){
-  if (modeInfo(mString) != NULL) removeModeInfo(FSModeInfo(mString).modeCode());
 }
 
 
@@ -127,47 +103,6 @@ FSModeCollection::addModesFromFile(TString filename){
 
 }
 
-
-
-  // *******************************************************
-  // RETRIEVE MODES FROM THE COLLECTION
-  // *******************************************************
-
-FSModeInfo*
-FSModeCollection::modeInfo(pair<int,int> mCode){
-  pair<int,int> mCode2(mCode.second,mCode.first);
-  map< pair<int,int>, FSModeInfo*>::const_iterator mapitr = m_modeInfoMap.find(mCode2);
-  if (mapitr != m_modeInfoMap.end()) return m_modeInfoMap[mCode2];
-  return NULL;
-}
-
-FSModeInfo*
-FSModeCollection::modeInfo(int mCode1, int mCode2){
-  return modeInfo(FSModeInfo(mCode1,mCode2).modeCode());
-}
-
-FSModeInfo*
-FSModeCollection::modeInfo(TString mString){
-  return modeInfo(FSModeInfo(mString).modeCode());
-}
-
-FSModeInfo*
-FSModeCollection::modeInfoForCategory(TString category){
-  vector<FSModeInfo*> mvec = modeVector(category);
-  if (mvec.size() > 1){ 
-    cout << "FSModeCollection::modeInfoForCategory WARNING: " << endl;
-    cout << "   more than one mode for category = " << category << endl;
-    cout << "   only returning the first" << endl;
-    return mvec[0];
-  }
-  if (mvec.size() == 0){ 
-    cout << "FSModeCollection::modeInfoForCategory WARNING: " << endl;
-    cout << "   no modes for category = " << category << endl;
-    cout << "   returning NULL" << endl;
-    return NULL;
-  }
-  return mvec[0];
-}
 
 
   // *******************************************************
@@ -244,50 +179,6 @@ FSModeCollection::testCombinatorics(TString category, TString testString, bool e
 
 
   // *******************************************************
-  // TELL THE BES FSFILTER ALGORITHM WHICH MODES TO FIND
-  // *******************************************************
-
-void 
-FSModeCollection::printBESModes(TString category, TString outputFile, int nstart, TString tag){
-  TString line("FSFilter.FSMODECOUNTER = \""); line += tag; line += "MODESTRING\";";
-  printStrings(category,line,outputFile,nstart);
-}
-
-
-  // *******************************************************
-  // TELL THE CLEO STANDARDDECAYPROC WHICH MODES TO FIND
-  // *******************************************************
-
-void 
-FSModeCollection::printCLEOModes(TString category, TString outputFile){
-  TString line("param StandardDecayProc modeMODECOUNTER FSMODESTRING");
-  printStrings(category,line,outputFile);
-}
-
-
-  // *******************************************************
-  // TELL EVTGEN WHICH DECAYS TO GENERATE
-  // *******************************************************
-
-void
-FSModeCollection::printEvtGen(TString category, TString outputFile){
-  TString line("1.000  MODEDESCRIPTION  PHSP;");
-  printStrings(category,line,outputFile);
-}
-
-
-  // *******************************************************
-  // PRINT A LIST OF MODES TO A FILE
-  // *******************************************************
-
-void
-FSModeCollection::printDescriptions(TString category, TString outputFile){
-  TString line("(MODECOUNTER)  MODEDESCRIPTION");
-  printStrings(category,line,outputFile);
-}
-
-
-  // *******************************************************
   // PRINT STRINGS WITH REPLACED KEYWORDS 
   //   (see FSModeInfo::modeString) TO A FILE
   // *******************************************************
@@ -342,11 +233,18 @@ FSModeCollection::display(TString category){
   // *******************************************************
 
 void 
-FSModeCollection::clear(){
+FSModeCollection::clear(TString category){
+  vector< pair<int,int> > eraseModes;
   for (map< pair<int,int>, FSModeInfo*>::iterator mapitr = m_modeInfoMap.begin();
        mapitr != m_modeInfoMap.end(); mapitr++){
-    if ((*mapitr).second) delete (*mapitr).second;
+    pair<int,int> modeCode = (*mapitr).first;
+    FSModeInfo* modeInfo = (*mapitr).second;
+    if (modeInfo->hasCategory(category)) eraseModes.push_back(modeCode);
   }
-  m_modeInfoMap.clear();
+  for (unsigned int i = 0; i < eraseModes.size(); i++){
+    if (m_modeInfoMap[eraseModes[i]]) delete m_modeInfoMap[eraseModes[i]];
+    m_modeInfoMap.erase(eraseModes[i]);
+  }
+  if (category == "") m_modeInfoMap.clear();
 }
 
