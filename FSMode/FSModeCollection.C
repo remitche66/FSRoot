@@ -47,20 +47,15 @@ FSModeCollection::addModeInfo(TString mString){
 
 map<TString, vector<TString> >
 FSModeCollection::addModesFromFile(TString filename){
-
   vector<TString> lines = FSString::readLinesFromFile(filename);
-
   TString topparticle("");
   TString particle("");
   vector<TString> decays;
   map<TString, vector<TString> > decayMap;
-
   for (unsigned int iL = 0; iL < lines.size(); iL++){
     TString line = lines[iL];
     vector<TString> words = FSString::parseTString(line);
-
     if (words.size() > 0){
-
       if (words[0] == "Decay"){
         if (words.size() != 2){
           cout << "addModesFromFile: PROBLEM WITH DECAY LINE" << endl;
@@ -71,36 +66,28 @@ FSModeCollection::addModesFromFile(TString filename){
         particle = words[1];
         if (topparticle == "") topparticle = particle;
       }
-
       else if ((words[0] == "Enddecay") && (particle != "")){
         decayMap[particle] = decays;
         particle = "";
         decays.clear();
       }
-
       else if (words[0] == "End"){
         break;
       }
-
       else if (words[0][0] == '#'){
         continue;
       }
-
       else if ((particle != "") && (line != "")){
         decays.push_back(line);
       }
-
     }
-
   }
-
   vector<TString> defns = FSString::expandDefinitions(topparticle,decayMap);
   for (unsigned int i = 0; i < defns.size(); i++){
     FSModeInfo* modeInfo = FSModeCollection::addModeInfo(defns[i]);
     modeInfo->addCategory(topparticle);
   }
   return decayMap;
-
 }
 
 
@@ -112,12 +99,20 @@ FSModeCollection::addModesFromFile(TString filename){
 vector<FSModeInfo*>
 FSModeCollection::modeVector(TString category){
   vector<FSModeInfo*> mVector;
+  int component = -1;  vector<TString> mainParts = FSString::parseTString(category,";");
+  if (mainParts.size() == 2){ category = mainParts[0]; component = FSString::TString2int(mainParts[1]); }
   for (map< pair<int,int>, FSModeInfo*>::iterator mapitr = m_modeInfoMap.begin();
        mapitr != m_modeInfoMap.end(); mapitr++){
     if ((*mapitr).second->hasCategory(category))
       mVector.push_back((*mapitr).second);
   }
-  return mVector;
+  if (component < 0) return mVector;
+  if (component > 0 && component <= (int)mVector.size()){
+    vector<FSModeInfo*> mVector2;
+    mVector2.push_back(mVector[component-1]);
+    return mVector2;
+  }
+  return vector<FSModeInfo*>();
 }
 
 int 
@@ -223,16 +218,15 @@ FSModeCollection::display(TString category){
 
 void 
 FSModeCollection::clear(TString category){
-  vector< pair<int,int> > eraseModes;
-  for (map< pair<int,int>, FSModeInfo*>::iterator mapitr = m_modeInfoMap.begin();
-       mapitr != m_modeInfoMap.end(); mapitr++){
-    pair<int,int> modeCode = (*mapitr).first;
-    FSModeInfo* modeInfo = (*mapitr).second;
-    if (modeInfo->hasCategory(category)) eraseModes.push_back(modeCode);
-  }
-  for (unsigned int i = 0; i < eraseModes.size(); i++){
-    if (m_modeInfoMap[eraseModes[i]]) delete m_modeInfoMap[eraseModes[i]];
-    m_modeInfoMap.erase(eraseModes[i]);
+  vector<FSModeInfo*> eraseVector = modeVector(category);
+  for (unsigned int i = 0; i < eraseVector.size(); i++){
+    int code1 = eraseVector[i]->modeCode1();
+    int code2 = eraseVector[i]->modeCode2();
+    pair<int,int> mode2(code2,code1);
+    if (m_modeInfoMap.find(mode2) != m_modeInfoMap.end()){
+      if (m_modeInfoMap[mode2]) delete m_modeInfoMap[mode2];
+      m_modeInfoMap.erase(mode2);
+    }
   }
   if (category == "") m_modeInfoMap.clear();
 }
