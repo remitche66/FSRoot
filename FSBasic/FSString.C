@@ -1230,22 +1230,6 @@ FSString::containsWhiteSpace(TString input){
 }
 
 TString
-FSString::stripWhiteSpace(TString input){
-  TString output = input;
-  while ((output.Length() > 0) && (containsWhiteSpace(output[0]))){
-    TString tempstring("");
-    for (int i = 1; i < output.Length(); i++){ tempstring += output[i]; }
-    output = tempstring;
-  }
-  while ((output.Length() > 0) && (containsWhiteSpace(output[output.Length()-1]))){
-    TString tempstring("");
-    for (int i = 0; i < output.Length()-1; i++){ tempstring += output[i]; }
-    output = tempstring;
-  }
-  return output;
-}
-
-TString
 FSString::removeTabs(TString input){
   TString output("");
   for (int i = 0; i < input.Length(); i++){

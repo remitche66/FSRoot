@@ -238,7 +238,6 @@ class FSString{
       // ********************************************************
 
     static bool containsWhiteSpace(TString input);
-    static TString stripWhiteSpace(TString input);
     static TString removeTabs(TString input);
     static TString removeWhiteSpace(TString input);
 
