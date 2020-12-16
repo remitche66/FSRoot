@@ -387,9 +387,9 @@ FSModeHistogram::drawMCComponentsSame(TString fileName, TString ntName,
     // get vectors of the MC components and the histograms
 
   vector< pair<TString,float> > components = 
-    getMCComponentsAndSizes(fileName,ntName,category,variable,bounds,cuts,scale);
+    FSModeHistogram::getMCComponentsAndSizes(fileName,ntName,category,variable,bounds,cuts,scale);
   vector<TH1F*> histograms =
-    getMCComponentsTH1F(fileName,ntName,category,variable,bounds,cuts,scale);
+    FSModeHistogram::getMCComponentsTH1F(fileName,ntName,category,variable,bounds,cuts,scale);
 
     // make a stack of MC components and draw it
 
@@ -400,8 +400,8 @@ FSModeHistogram::drawMCComponentsSame(TString fileName, TString ntName,
     if (i != 0) hcomp->SetFillColor(i+1);
     hcomp->SetLineColor(i+1);
     stack->Add(hcomp,"hist");
-    TString legendString("");
-    legendString += FSModeString::rootSymbols(formatMCComponent(components[i].first,components[i].second));
+    TString legendString(FSModeHistogram::formatMCComponent(components[i].first,components[i].second));
+    legendString = FSModeString::rootSymbols(legendString);
     legend->AddEntry(hcomp,legendString,"F");
   }
   if (histograms.size() != 0){
