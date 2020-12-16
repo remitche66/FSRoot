@@ -1,151 +1,49 @@
-TString FN("test_ntMODECODE.root");
-TString NT("ntMODECODE");
 
-double mJpsi = 3.096916;
-double mpi0 = 0.134977;
-double mpi = 0.13957;
-double mK = 0.493677;
-
-void makeTree(double mParent, double mChild1, double mChild2, 
-              double mChild3, double mChild4, TString treeName);
-
-double addOne(double x){ return x+1; }
-
-void step0_MakeTrees(){
-  makeTree(mJpsi,mpi,mpi,mpi,mpi,"nt0_220");
-  makeTree(mJpsi,mpi,mpi,mpi0,mpi0,"nt0_112");
-  makeTree(mJpsi,mK,mK,mpi0,mpi0,"nt0_110002");
+void examples_sec22(){
+  TCanvas* c22 = new TCanvas("c22","c22",1000,1000);
+  c22->Divide(2,2);
+  TString fileName("ExampleTree_0_221.root");
+  TString treeName("ntExampleTree_0_221");
+  c22->cd(1);
+    FSHistogram::getTH1F(fileName,treeName,"Chi2DOF","(60,0.0,6.0)","")->Draw();
+  c22->cd(2);
+    FSHistogram::getTH2F(fileName,treeName,"Chi2DOF:Event",
+         "(100,0.0,100.0,100,0.0,6.0)","")->Draw("colz");
+  c22->cd(3);
+    FSHistogram::getTH1F(fileName,treeName,"Chi2DOF",
+        "(60,0.0,6.0)","Chi2DOF<2.0")->Draw();
+  c22->cd(4);
+    FSHistogram::getTH1F(fileName,treeName,"MASS(2,4,5)",
+        "(100,3.0,3.2)","Chi2DOF<2.0&&abs(MASS(2,4)-1.0)<0.2")->Draw();
 }
 
-void step1_LookAtTrees1(){
-  TString FN1("test_nt0_220.root");    TString NT1("nt0_220");
-  TString FN2("test_nt0_112.root");    TString NT2("nt0_112");
-  TString FN3("test_nt0_110002.root"); TString NT3("nt0_110002");
-  FSHistogram::getTH1F(FN1,NT1,"Chi2DOF","(60,0.0,6.0)","")->Draw();
-  FSHistogram::getTH1F(FN2,NT2,"Chi2DOF","(60,0.0,6.0)","Chi2DOF<4.0")->Draw("hist,same");
-  FSHistogram::getTH1F(FN3,NT3,"Chi2DOF","(60,0.0,6.0)","Chi2DOF<3.0")->Draw("hist,same");
-}
-
-void step2_LookAtTrees2(){
-  TString FN1("test_nt0_220.root");    TString NT1("nt0_220");
-  TString FN2("test_nt0_112.root");    TString NT2("nt0_112");
-  TString FN3("test_nt0_110002.root"); TString NT3("nt0_110002");
-  FSHistogram::getTH1F(FN1,NT1,"MASS(1,2)","(100,0.0,3.0)","")->Draw();
-  FSHistogram::getTH1F(FN2,NT2,"MASS(1,2)","(100,0.0,3.0)","Chi2DOF<4.0")->Draw("hist,same");
-  FSHistogram::getTH1F(FN3,NT3,"MASS(1,2)","(100,0.0,3.0)","Chi2DOF<3.0")->Draw("hist,same");
-}
-
-void step3_SetUpModes(){
-  if (FSModeCollection::modeVectorSize() == 0){
-    FSModeCollection::addModeInfo("pi+ pi- pi+ pi-  M1");
-    FSModeCollection::addModeInfo("pi+ pi- pi0 pi0  M2");
-    FSModeCollection::addModeInfo(" K+  K- pi0 pi0  M3");
-  }
-  FSModeCollection::display();
-}
-
-void step4_LookAtTrees1(){
-  TString FN1("test_nt0_220.root");    TString NT1("nt0_220");
-  TString FN2("test_nt0_112.root");    TString NT2("nt0_112");
-  TString FN3("test_nt0_110002.root"); TString NT3("nt0_110002");
-  FSHistogram::getTH1F(FN1,NT1,"addOne(Chi2DOF)","(60,0.0,6.0)","")->Draw();
-  FSHistogram::getTH1F(FN2,NT2,"addOne(Chi2DOF)","(60,0.0,6.0)",
-                               "addOne(Chi2DOF)<4.0")->Draw("hist,same");
-  FSHistogram::getTH1F(FN3,NT3,"addOne(Chi2DOF)","(60,0.0,6.0)",
-                               "addOne(Chi2DOF)<3.0")->Draw("hist,same");
-}
-
-void step5_LookAtTrees2(){
-  TString FN1("test_nt0_220.root");    TString NT1("nt0_220");
-  TString FN2("test_nt0_112.root");    TString NT2("nt0_112");
-  TString FN3("test_nt0_110002.root"); TString NT3("nt0_110002");
-  FSHistogram::getTH1F(FN1,NT1,"MASS(1,2)","(100,0.0,3.0)","")->Draw();
-  FSHistogram::getTH1F(FN1,NT1,"MASS(1,3)","(100,0.0,3.0)","")->Draw("hist,same");
-  FSHistogram::getTH1F(FN1,NT1,"FSMath::max(MASS(1,2),MASS(1,3))","(100,0.0,3.0)","")->Draw("hist,same");
-  FSHistogram::getTH1F(FN1,NT1,"FSMath::min(MASS(1,2),MASS(1,3))","(100,0.0,3.0)","")->Draw("hist,same");
+void examples_sec23(){
+  TCanvas* c23 = new TCanvas("c23","c23",1000,1000);
+  c23->Divide(2,2);
+  TString fileName("ExampleTree_0_221.root");
+  TString treeName("ntExampleTree_0_221");
+  c23->cd(1);
+    TString cutCHI2("Chi2DOF<2.0");
+    TString cutMASS("abs(MASS(2,4)-1.0)<0.2");
+    FSHistogram::getTH1F(fileName,treeName,"MASS(2,4,5)",
+        "(100,3.0,3.2)",cutCHI2+"&&"+cutMASS)->Draw();
+  c23->cd(2);
+    FSCut::defineCut("chi2",cutCHI2);
+    FSCut::defineCut("mass",cutMASS);
+    FSHistogram::getTH1F(fileName,treeName,"MASS(2,4,5)",
+        "(100,3.0,3.2)","CUT(chi2,mass)")->Draw();
+  c23->cd(3);
+    TString cutCHI2SB("Chi2DOF>3.0&&Chi2DOF<7.0");
+      // the relative size of signal to sideband is 0.5
+    FSCut::defineCut("chi2",cutCHI2,cutCHI2SB,0.5);
+    FSHistogram::getTH1F(fileName,treeName,"MASS(2,4,5)",
+        "(100,3.0,3.2)","CUT(mass)&&CUTSB(chi2)")->Draw();
+  c23->cd(4);
+    TString cutMASSSB("abs(MASS(2,4)-1.8)<0.6");
+      // the relative size of signal to sideband is 1.0/3.0
+    FSCut::defineCut("mass",cutMASS,cutMASSSB,1.0/3.0);
+    FSHistogram::getTH1F(fileName,treeName,"MASS(2,4,5)",
+        "(100,3.0,3.2)","CUTSB(chi2,mass)")->Draw();
 }
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-void makeTree(double mParent, double mChild1, double mChild2, 
-              double mChild3, double mChild4, TString treeName){
-
-    // ***************************
-    // SET UP A ROOT FILE AND TREE
-    // ***************************
-
-  TString fileName("test_"); fileName += treeName; fileName += ".root";
-  TFile file(fileName,"recreate");
-  TTree tree(treeName,treeName);
-
-  double run, event, chi2dof;
-  double PxPn[5];
-  double PyPn[5];
-  double PzPn[5];
-  double EnPn[5];
-
-  tree.Branch("Run",    &run,      "Run/D");
-  tree.Branch("Event",  &event,    "Event/D");
-  tree.Branch("Chi2DOF",&chi2dof,  "Chi2DOF/D");
-  tree.Branch("PxPCM",  &PxPn[0],  "PxPCM/D");
-  tree.Branch("PyPCM",  &PyPn[0],  "PyPCM/D");
-  tree.Branch("PzPCM",  &PzPn[0],  "PzPCM/D");
-  tree.Branch("EnPCM",  &EnPn[0],  "EnPCM/D");
-  for (int i = 1; i <= 4; i++){
-    TString si(""); si += i;
-    tree.Branch("PxP"+si,  &PxPn[i],  "PxP"+si+"/D");  
-    tree.Branch("PyP"+si,  &PyPn[i],  "PyP"+si+"/D");  
-    tree.Branch("PzP"+si,  &PzPn[i],  "PzP"+si+"/D");  
-    tree.Branch("EnP"+si,  &EnPn[i],  "EnP"+si+"/D");  
-  }
-
-    // ******************************
-    // SET UP A PHASE SPACE GENERATOR
-    // ******************************
-
-  TGenPhaseSpace generator;
-  TLorentzVector pParent(0.0, 0.0, 0.0, mParent);
-  double mChildren[4] = {mChild1, mChild2, mChild3, mChild4};
-  generator.SetDecay(pParent, 4, mChildren);
-  double maxWt = generator.GetWtMax();
-
-    // *********************************************
-    // GENERATE PHASE SPACE EVENTS AND FILL THE TREE
-    // *********************************************
-
-  for (int i = 0; i < 1000000; i++){
-  //for (int i = 0; i < 50; i++){
-    if (generator.Generate() < drand48() * maxWt) continue;
-    run = 10;
-    event = i;
-    //event = (int)(drand48()*2.0);
-    chi2dof = 5*gRandom->Rndm(); 
-    PxPn[0] = pParent.Px();
-    PyPn[0] = pParent.Py();
-    PzPn[0] = pParent.Pz();
-    EnPn[0] = pParent.E();
-    for (int ip = 1; ip <= 4; ip++){
-      PxPn[ip] = generator.GetDecay(ip-1)->Px();
-      PyPn[ip] = generator.GetDecay(ip-1)->Py();
-      PzPn[ip] = generator.GetDecay(ip-1)->Pz();
-      EnPn[ip] = generator.GetDecay(ip-1)->E();
-    }
-    tree.Fill();
-  }
-  tree.Write();
-  file.Close();
-
-}

@@ -25,7 +25,7 @@
 
 \title{Notes on the \FSR\ Package}
 \author{Ryan Mitchell}
-\date{\today~~~(v3.0)}
+\date{\today~~~(v3.0+)}
 \maketitle
 
 \abstract{
@@ -58,9 +58,9 @@ The \FSR\ source code is on {\tt GitHub}: \\ {\tt https://github.com/remitche66/
 \begin{verbatim}
     > git clone https://github.com/remitche66/FSRoot.git FSRoot
 \end{verbatim}
-Optionally, to switch to a specific tag ({\tt v2.5} for example):
+Optionally, to switch to a specific tag ({\tt v3.0} for example):
 \begin{verbatim}
-    > git checkout tags/v2.5
+    > git checkout tags/v3.0
 \end{verbatim}
 Alternatively, download and unpack ({\tt tar -xzf}) a released version from here:
 \begin{verbatim}
@@ -109,13 +109,14 @@ When \FSR\ is loaded and compiled, you should see a message saying ``Loading the
 
 Some \FSR\ operations on \ROOT\ {\tt TTree} variables assume a particular format for the {\tt TTree}.  \FSR\ generally expects a {\tt TTree} with branches holding numbers (usually {\tt double}).
 
-Four-vectors are assumed to take the form:
+Four-vectors are assumed to have the form:
 \begin{verbatim}
     [AB]EnP[CD], [AB]PxP[CD], [AB]PyP[CD], [AB]PzP[CD]
 \end{verbatim}
-where {\tt [CD]} is a particle label (often {\tt 1}, {\tt 2}, {\tt 3}, {\tt 2a}, etc., but also {\tt CM} or {\tt B} or other) and {\tt [AB]} labels the type of four-vector (for example, {\tt R} for raw or {\tt K} for kinematically fit or {\tt MC} for Monte Carlo, etc.).  The \FSR\ code does not assume anything about the conventions for {\tt [AB]} -- it can be anything up to two characters long~(or nothing).  For {\tt [CD]}, the final state utilities described in Sec.~\ref{sec:modes} require the final state particles appear in a given order, and thus assume a numbering convention for {\tt [CD]}, described in Sec.~\ref{sec:modeconv}.  The utilities described in this section do not assume a specific form for {\tt [CD]} -- they can be anything one or two characters long~(but not empty).
+where {\tt [CD]} is a particle label (often {\tt 1}, {\tt 2}, {\tt 3}, {\tt 2a}, etc., but it could also be {\tt CM} or {\tt BEAM} or anything else) and {\tt [AB]} labels the type of four-vector (for example, it could be {\tt R} for raw or {\tt K} for kinematically fit or {\tt MC} for Monte Carlo, etc.).  The \FSR\ code has no requirements on {\tt [AB]} -- it could be anything up to two characters long~(or nothing).  For {\tt [CD]}, the final state utilities described in Sec.~\ref{sec:modes} use the numbering convention described in Sec.~\ref{sec:modeconv}.  
+Otherwise, {\tt [CD]} could be anything and any length~(but not empty).
 
-It is convenient if variables associated with a given particle~(like the $\chi^2$ of a track) use the same particle labels {\tt [CD]} as above.  For example, for a pion with four-momentum {\tt EnP5}, {\tt PxP5}, {\tt PyP5}, {\tt PzP5}, the corresponding track $\chi^2$ could be {\tt TkChi2P5}.
+For convenience, variables associated with a given particle~(like the $\chi^2$ of a track) should use the same particle labels {\tt [CD]} as above.  For example, for a pion with four-momentum {\tt EnP5}, {\tt PxP5}, {\tt PyP5}, {\tt PzP5}, the corresponding track $\chi^2$ could be {\tt TkChi2P5}.
 
 To use MC tagging utilities, \FSR\ uses tree variables named {\tt MCDecayCode1}, {\tt MCDecayCode2}, and {\tt MCExtras} (see Sec.~\ref{sec:mccomponents}).
 
@@ -123,24 +124,24 @@ To use MC tagging utilities, \FSR\ uses tree variables named {\tt MCDecayCode1},
 \subsection{Basic Histogram Utilities: the {\tt FSHistogram} class}
 \label{sec:hist}
 
-Basic histogram functions are provided by the {\tt FSHistogram} class in the {\tt FSBasic} directory.  Like many other functions within \FSR, the functions within the {\tt FSHistogram} class are static member functions, so there is never a need to deal with instances of {\tt FSHistogram}.
+Basic histogram functions are provided by the {\tt FSHistogram} class in the {\tt FSBasic} directory.  Like most other functions within \FSR, the functions within the {\tt FSHistogram} class are static member functions, so there is never a need to deal with instances of {\tt FSHistogram}.
 
-The basic functionality is through the {\tt FSHistogram::getTH1F} and {\tt FSHistogram::getTH2F} classes.  Here are examples that can be run from either the \ROOT\ command line or from a macro~(see {\tt Examples/Intro/intro.C}).  The first draws a 1d histogram and the second draws a 2d histogram.  The third argument is the variable to plot; the fourth holds the number of bins and bounds.
+The basic functions are {\tt FSHistogram::getTH1F} and {\tt FSHistogram::getTH2F}.  Here are examples that can be run from either the \ROOT\ command line or from a macro~(see {\tt Examples/Intro/intro.C}).  The first draws a 1d histogram and the second draws a 2d histogram.  The third argument is the variable to plot; the fourth holds the number of bins and bounds.
 \begin{verbatim}
     > FSHistogram::getTH1F(fileName,treeName,"Chi2DOF","(60,0.0,6.0)","")->Draw();
     > FSHistogram::getTH2F(fileName,treeName,"Chi2DOF:Event",
-          "(100,0.0,1.0e6,60,0.0,6.0)","")->Draw("colz");
+         "(100,0.0,100.0,100,0.0,6.0)","")->Draw("colz");
 \end{verbatim}
 Cuts can be added in the fifth argument:
 \begin{verbatim}
     > FSHistogram::getTH1F(fileName,treeName,"Chi2DOF",
-        "(60,0.0,6.0)","Chi2DOF<5.0")->Draw();
+        "(60,0.0,6.0)","Chi2DOF<2.0")->Draw();
 \end{verbatim}
-The variable and cut arguments can contain shortcuts.  For example, {\tt MASS(I,J)} is expanded into the total invariant mass of particles {\tt I} and {\tt J}, where {\tt I} and {\tt J} are not necessarily numbers~(they are the {\tt [CD]} in Sec.~\ref{sec:conventions}).  Characters in front of {\tt MASS}~(for example) are prepended to the variable names (the {\tt [AB]} in Sec.~\ref{sec:conventions}).  This is all done in the function {\tt FSTree::expandVariable}, which can also be run independently for testing.  
+The variable and cut arguments can contain shortcuts.  For example, {\tt MASS(1,2)} is expanded into the total invariant mass of particles {\tt 1} and {\tt 2}, where {\tt 1} and {\tt 2} are not necessarily numbers~(they are the {\tt [CD]} in Sec.~\ref{sec:conventions}).  Characters in front of {\tt MASS}~(for example) are prepended to the variable names (the {\tt [AB]} in Sec.~\ref{sec:conventions}).  This is all done in the function {\tt FSTree::expandVariable}, which can also be run independently for testing.  
 A list of all macros can be seen using {\tt FSTree::showDefinedMacros}~(for example, {\tt RECOILMASS}, {\tt MOMENTUM}, {\tt COSINE}, etc.).  An example for {\tt FSHistogram::getTH1F}:
 \begin{verbatim}
-    > FSHistogram::getTH1F(fileName,treeName,"MASS(1,2)",
-        "(100,3.0,3.2)","Chi2DOF<5.0&&abs(RMASS(2,3)-1.0)<0.2")->Draw();
+    > FSHistogram::getTH1F(fileName,treeName,"MASS(2,4,5)",
+        "(100,3.0,3.2)","Chi2DOF<2.0&&abs(MASS(2,4)-1.0)<0.2")->Draw();
 \end{verbatim}
 Examples for {\tt FSTree::expandVariable}:
 \begin{verbatim}
@@ -180,33 +181,33 @@ To see the contents of the cache:
 
 Additional shortcuts for making plots are available through the {\tt FSCut} class in the {\tt FSBasic} directory.  The following example~(not using {\tt FSCut}) defines two cuts and then uses them to make a plot, as above:
 \begin{verbatim}
-    > TString cutCHI2("Chi2DOF<5.0");
-    > TString cutRMASS("abs(RMASS(2,3)-1.0)<0.2");
-    > FSHistogram::getTH1F(fileName,treeName,"MASS(1,2)",
-        "(100,3.0,3.2)",cutCHI2+"&&"+cutRMASS)->Draw();
+    > TString cutCHI2("Chi2DOF<2.0");
+    > TString cutMASS("abs(MASS(2,4)-1.0)<0.2");
+    > FSHistogram::getTH1F(fileName,treeName,"MASS(2,4,5)",
+        "(100,3.0,3.2)",cutCHI2+"&&"+cutMASS)->Draw();
 \end{verbatim}
 As a shortcut to do the exact same thing, give the cuts names and then implement them using the keyword {\tt CUT()}:
 \begin{verbatim}
     > FSCut::defineCut("chi2",cutCHI2);
-    > FSCut::defineCut("rmass",cutRMASS);
-    > FSHistogram::getTH1F(fileName,treeName,"MASS(1,2)",
-        "(100,3.0,3.2)","CUT(chi2,rmass)")->Draw();
+    > FSCut::defineCut("mass",cutMASS);
+    > FSHistogram::getTH1F(fileName,treeName,"MASS(2,4,5)",
+        "(100,3.0,3.2)","CUT(chi2,mass)")->Draw();
 \end{verbatim}
 The {\tt FSCut} class can also be used to define sidebands, which can then be implemented using the keyword {\tt CUTSB()}:
 \begin{verbatim}
-    > TString cutCHI2SB("Chi2DOF>10.0&&Chi2DOF<20.0");
+    > TString cutCHI2SB("Chi2DOF>3.0&&Chi2DOF<7.0");
     >   // the relative size of signal to sideband is 0.5
     > FSCut::defineCut("chi2",cutCHI2,cutCHI2SB,0.5);
-    > FSHistogram::getTH1F(fileName,treeName,"MASS(1,2)",
-        "(100,3.0,3.2)","CUT(rmass)&&CUTSB(chi2)")->Draw();
+    > FSHistogram::getTH1F(fileName,treeName,"MASS(2,4,5)",
+        "(100,3.0,3.2)","CUT(mass)&&CUTSB(chi2)")->Draw();
 \end{verbatim}
 If multiple sidebands are used simultaneously, then all combinations of sideband regions are considered and the resulting histogram is a sum of sideband regions with weights determined by the weights for individual regions:
 \begin{verbatim}
-    > TString cutRMASSSB("abs(RMASS(2,3)-2.0)<0.6");
+    > TString cutMASSSB("abs(MASS(2,4)-1.8)<0.6");
     >   // the relative size of signal to sideband is 1.0/3.0
-    > FSCut::defineCut("rmass",cutRMASS,cutRMASSSB,1.0/3.0);
-    > FSHistogram::getTH1F(fileName,treeName,"MASS(1,2)",
-        "(100,3.0,3.2)","CUTSB(chi2,rmass)")->Draw();
+    > FSCut::defineCut("mass",cutMASS,cutMASSSB,1.0/3.0);
+    > FSHistogram::getTH1F(fileName,treeName,"MASS(2,4,5)",
+        "(100,3.0,3.2)","CUTSB(chi2,mass)")->Draw();
 \end{verbatim}
 
 

@@ -1,6 +1,5 @@
 # FSRoot
 *.pcm
-*.root
 .DS*
 *.log
 *.toc
