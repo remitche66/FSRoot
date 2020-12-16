@@ -92,6 +92,10 @@ class FSModeHistogram{
                                 TString bounds, TString cuts,
                                 double scale = 1.0, TCanvas* c1 = NULL);
 
+    static void drawMCComponentsSame(TString fileName, TString ntName, 
+                                TString category, TString variable, 
+                                TString bounds, TString cuts, double scale = 1.0);
+
     static vector< pair<TString, float> > 
         getMCComponentsAndSizes(TString fileName, TString ntName, 
                                 TString category, TString variable, 

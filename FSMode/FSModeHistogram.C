@@ -369,6 +369,21 @@ FSModeHistogram::drawMCComponents(TString fileName, TString ntName,
 
   if (!c1) c1 = new TCanvas("cDrawMCComponents","cDrawMCComponents",600,600);
 
+    // draw everything
+
+  htot->Draw();
+  drawMCComponentsSame(fileName,ntName,category,variable,bounds,cuts,scale);
+  htot->Draw("same");
+  return htot;
+
+}
+
+
+void
+FSModeHistogram::drawMCComponentsSame(TString fileName, TString ntName, 
+                                TString category, TString variable, 
+                                TString bounds, TString cuts, double scale){
+
     // get vectors of the MC components and the histograms
 
   vector< pair<TString,float> > components = 
@@ -376,7 +391,7 @@ FSModeHistogram::drawMCComponents(TString fileName, TString ntName,
   vector<TH1F*> histograms =
     getMCComponentsTH1F(fileName,ntName,category,variable,bounds,cuts,scale);
 
-    // make a stack of MC components
+    // make a stack of MC components and draw it
 
   THStack* stack = new THStack("sDrawMCComponents","sDrawMCComponents");
   TLegend* legend = new TLegend(0.7,0.5,1.0,1.0);
@@ -389,14 +404,12 @@ FSModeHistogram::drawMCComponents(TString fileName, TString ntName,
     legendString += FSModeString::rootSymbols(formatMCComponent(components[i].first,components[i].second));
     legend->AddEntry(hcomp,legendString,"F");
   }
-  htot->Draw();
   if (histograms.size() != 0){
     stack->Draw("same");
-    htot->Draw("same");
     legend->Draw("same");
   }
-  return htot;
 }
+
 
 TString
 FSModeHistogram::getMCComponentCut(TString component){
