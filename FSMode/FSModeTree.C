@@ -43,13 +43,6 @@ FSModeTree::skimTree(TString fileNameInput, TString ntName, TString category,
   cuts           = FSString::removeWhiteSpace(cuts);  if (cuts == "") cuts = "1==1";
 
 
-    // expand "cuts" using FSCut and check for multidimensional sidebands
-
-  vector< pair<TString,double> > fsCuts = FSCut::expandCuts(cuts);
-  if (fsCuts.size() == 1){ cuts = fsCuts[0].first; }
-  else{ cout << "FSModeTree::skimTree Error: multidimensional sidebands not allowed" << endl; exit(1); }
-
-
     // make a list of modes
 
   vector<FSModeInfo*> modeVector  = FSModeCollection::modeVector(category);
@@ -74,6 +67,9 @@ FSModeTree::skimTree(TString fileNameInput, TString ntName, TString category,
       TString fileNameInput_i = modeVector[i]->modeString(fileNameInput);
       TString fileNameOutput_i = modeVector[i]->modeString(fileNameOutput);
       TString cuts_i = modeVector[i]->modeString(cuts);
+        vector< pair<TString,double> > fsCuts = FSCut::expandCuts(cuts_i);
+        if (fsCuts.size() == 1){ cuts_i = modeVector[i]->modeString(fsCuts[0].first); }
+        else{ cout << "FSModeTree::skimTree Error: multidimensional sidebands not allowed" << endl; exit(1); }
       TString printCommandFile_i = modeVector[i]->modeString(printCommandFile);
         if (printCommandFile == "") printCommandFile_i = "";
       FSTree::skimTree(fileNameInput_i,ntName_i,fileNameOutput_i,
@@ -158,10 +154,6 @@ FSModeTree::createRankingTree(TString fileName, TString ntName, TString category
   cuts        = FSString::removeWhiteSpace(cuts);  if (cuts == "") cuts = "1==1";
   groupVar1   = FSString::removeWhiteSpace(groupVar1);
   groupVar2   = FSString::removeWhiteSpace(groupVar2);
-  vector< pair<TString,double> > fsCuts = FSCut::expandCuts(cuts);
-  if (fsCuts.size() == 1){ cuts = fsCuts[0].first; }
-  else{ cout << "FSModeTree::createRankingTree Error: "
-                "multidimensional sidebands not allowed" << endl; exit(1); }
 
   if (!FSControl::QUIET){
     cout << "******************************************\n"
@@ -202,6 +194,10 @@ FSModeTree::createRankingTree(TString fileName, TString ntName, TString category
     for (unsigned int i = 0; i < modeVector.size(); i++){ 
       modes += " -mode \"" + modeVector[i]->modeString() + "\"";
     }
+    vector< pair<TString,double> > fsCuts = FSCut::expandCuts(cuts);
+    if (fsCuts.size() == 1){ cuts = fsCuts[0].first; }
+    else{ cout << "FSModeTree::createRankingTree Error: "
+                  "multidimensional sidebands not allowed" << endl; exit(1); }
     FSString::writeTStringToFile(printCommandFile,
           "$FSROOT/Executables/FSModeCreateRankingTree "
           " -i \""      + fileName    + "\""
@@ -258,6 +254,10 @@ FSModeTree::createRankingTree(TString fileName, TString ntName, TString category
       TString fileName_i  = fileNames_i[ifile];
       TString ntName_i    = modeVector[i]->modeString(ntName);
       TString cuts_i      = modeVector[i]->modeString(cuts);
+        vector< pair<TString,double> > fsCuts = FSCut::expandCuts(cuts_i);
+        if (fsCuts.size() == 1){ cuts_i = modeVector[i]->modeString(fsCuts[0].first); }
+        else{ cout << "FSModeTree::createRankingTree Error: "
+                      "multidimensional sidebands not allowed" << endl; exit(1); }
       TString rankVar_i   = modeVector[i]->modeString(rankVar);
       TString groupVar1_i = modeVector[i]->modeString(groupVar1);
       TString groupVar2_i = modeVector[i]->modeString(groupVar2);
