@@ -25,8 +25,7 @@ class FSModeCollection{
       // READ MODES FROM A FILE AND ADD TO THE COLLECTION
       // *******************************************************
 
-    static map<TString, vector<TString> > 
-      addModesFromFile(TString filename);
+    static void addModesFromFile(TString filename);
 
 
       // *******************************************************
@@ -91,6 +90,10 @@ class FSModeCollection{
       // the mode collection
       // [[store the pair as (code2,code1) for sorting]]
     static map< pair<int,int>, FSModeInfo*> m_modeInfoMap;
+
+      // helper function for addModesFromFile
+    static TString expandLine(TString line, TString word, TString definition, 
+                   map<TString, vector<TString> >& decayMap);
 
 
 };

@@ -45,7 +45,7 @@ FSModeCollection::addModeInfo(TString mString){
   // READ MODES FROM A FILE AND ADD TO THE COLLECTION
   // *******************************************************
 
-map<TString, vector<TString> >
+void
 FSModeCollection::addModesFromFile(TString filename){
   vector<TString> lines = FSString::readLinesFromFile(filename);
   TString topparticle("");
@@ -61,7 +61,7 @@ FSModeCollection::addModesFromFile(TString filename){
           cout << "addModesFromFile: PROBLEM WITH DECAY LINE" << endl;
           cout << line << endl;
           cout << "quitting" << endl;
-          return decayMap;
+          return;
         }
         particle = words[1];
         if (topparticle == "") topparticle = particle;
@@ -82,12 +82,64 @@ FSModeCollection::addModesFromFile(TString filename){
       }
     }
   }
-  vector<TString> defns = FSString::expandDefinitions(topparticle,decayMap);
-  for (unsigned int i = 0; i < defns.size(); i++){
-    FSModeInfo* modeInfo = FSModeCollection::addModeInfo(defns[i]);
+  if (decayMap.find(topparticle) == decayMap.end()) return;
+  vector<TString> modes = decayMap[topparticle];
+  if (modes.size() == 0) return;
+  bool done = false;
+  while (!done){
+    done = true;
+    vector<TString> modesCopy = modes;  modes.clear();
+    for (unsigned int i = 0; i < modesCopy.size(); i++){
+      bool madeSubs = false;
+      vector<TString> parts = FSString::parseTString(modesCopy[i]);
+      for (unsigned int j = 0; j < parts.size(); j++){
+        if (decayMap.find(parts[j]) != decayMap.end()){
+          done = false;
+          madeSubs = true;
+          vector<TString> subs = decayMap[parts[j]];
+          for (unsigned int k = 0; k < subs.size(); k++){
+            modes.push_back(expandLine(modesCopy[i],parts[j],subs[k],decayMap));
+          }
+          break;
+        }
+      }
+      if (!madeSubs) modes.push_back(modesCopy[i]);
+    }
+  }
+  for (unsigned int i = 0; i < modes.size(); i++){
+    FSModeInfo* modeInfo = FSModeCollection::addModeInfo(modes[i]);
     modeInfo->addCategory(topparticle);
   }
-  return decayMap;
+  return;
+}
+
+
+TString 
+FSModeCollection::expandLine(TString line, TString word, TString definition, 
+                   map<TString, vector<TString> >& decayMap){
+  FSModeInfo miLine(line,false);
+  FSModeInfo miDef(definition,false);
+  vector<TString> catsLine = miLine.categories();
+  vector<TString> catsDef  = miDef.categories();
+  vector<TString> catsExtra;
+  for (unsigned int i = 0; i < catsLine.size(); i++){
+  for (unsigned int j = 0; j < catsDef.size(); j++){
+    if (decayMap.find(catsLine[i]) == decayMap.end() && 
+        decayMap.find(catsDef[j]) == decayMap.end())
+      catsExtra.push_back(catsLine[i]+"__"+catsDef[j]);
+  }}
+  vector<TString> lineParts = FSString::parseTString(line);
+  for (unsigned int i = 0; i < lineParts.size(); i++){
+    if (lineParts[i] == word){ lineParts[i] = definition; break; }
+  }
+  for (unsigned int i = 0; i < catsExtra.size(); i++){
+    lineParts.push_back(catsExtra[i]);
+  }
+  TString newLine = "";
+  for (unsigned int i = 0; i < lineParts.size(); i++){
+    newLine += lineParts[i]; newLine += " ";
+  }
+  return newLine;
 }
 
 
