@@ -74,10 +74,10 @@ class FSModeInfo{
       //     or "modeDescription"
       // *******************************************************
 
-    FSModeInfo (pair < int,int > mCode);
-    FSModeInfo (int mCode1, int mCode2);
-    FSModeInfo (TString mString);
-    FSModeInfo (vector<int> pdgIDs);
+    FSModeInfo (pair < int,int > mCode, bool useStandardCategories = true);
+    FSModeInfo (int mCode1, int mCode2, bool useStandardCategories = true);
+    FSModeInfo (TString mString, bool useStandardCategories = true);
+    FSModeInfo (vector<int> pdgIDs, bool useStandardCategories = true);
 
 
       // *******************************************************

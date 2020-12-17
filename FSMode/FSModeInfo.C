@@ -21,19 +21,19 @@ map < TString, vector<TString> > FSModeInfo::m_submodeMap;
       // *******************************************************
 
 
-FSModeInfo::FSModeInfo(pair<int,int> mCode){
+FSModeInfo::FSModeInfo(pair<int,int> mCode, bool useStandardCategories){
   m_modeCode = mCode;
-  addStandardCategories();
+  if (useStandardCategories) addStandardCategories();
 }
 
 
-FSModeInfo::FSModeInfo(int mCode1, int mCode2){
+FSModeInfo::FSModeInfo(int mCode1, int mCode2, bool useStandardCategories){
   m_modeCode = pair<int,int>(mCode1,mCode2);
-  addStandardCategories();
+  if (useStandardCategories) addStandardCategories();
 }
 
 
-FSModeInfo::FSModeInfo(TString mString){
+FSModeInfo::FSModeInfo(TString mString, bool useStandardCategories){
   vector<TString> parts = FSString::parseTString(mString);
   vector<TString> extraCategories;
   int code1 = 0;
@@ -77,12 +77,12 @@ FSModeInfo::FSModeInfo(TString mString){
     }
   }
   m_modeCode = pair<int,int>(code1,code2);
-  addStandardCategories();
+  if (useStandardCategories) addStandardCategories();
   addCategory(extraCategories);
 }
 
 
-FSModeInfo::FSModeInfo(vector<int> pdgIDs){
+FSModeInfo::FSModeInfo(vector<int> pdgIDs, bool useStandardCategories){
   int code1 = 0;
   int code2 = 0;
   for (unsigned int i = 0; i < pdgIDs.size(); i++){
@@ -104,7 +104,7 @@ FSModeInfo::FSModeInfo(vector<int> pdgIDs){
     else if (pdgIDs[i] == FSPhysics::kpdgLambda ) code2 += 100000000;
   }
   m_modeCode = pair<int,int>(code1,code2);
-  addStandardCategories();
+  if (useStandardCategories) addStandardCategories();
 }
 
 
