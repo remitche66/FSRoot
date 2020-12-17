@@ -47,13 +47,16 @@ void
 FSCut::display(TString cutName){
   cout << "FSCut Information:" << endl;
   map< TString, pair< pair<TString,TString>, double > >::iterator it = m_cutCache.begin();
-  int cutCount = 0;
+  int cutCountAll = 0;
+  int cutCountShown = 0;
   for (; it != m_cutCache.end(); it++){
-    cutCount++;
+    cutCountAll++;
     TString locName = it->first;
     pair< pair<TString,TString>, double> cutInfo = m_cutCache[locName];
     if ((cutName == "") || FSString::compareTStrings(locName,cutName)){
-      cout << "  ********** FSCUT NUMBER " << cutCount << " **********" << endl;
+      cutCountShown++;
+      cout << "  (" << cutCountShown << ") "
+           << " ********** FSCUT NUMBER " << cutCountAll << " **********" << endl;
       cout << "              name: " << locName << endl;
       cout << "            signal: " << cutInfo.first.first << endl;
       cout << "          sideband: " << cutInfo.first.second << endl;
