@@ -12,7 +12,8 @@ class FSMath{
   public:
 
       // for the decay R --> A + B, helcostheta is the cosine of the polar angle 
-      //  of particle A, where the z-axis is defined by particle R, boosted to the R rest frame
+      //  of particle A in the R rest frame, where the z-axis is defined by the
+      //  boost vector to the R rest frame
       //    [equivalently, helcostheta is the cosine of the angle between 
       //      the momenta of particles A and R, boosted to the R rest frame]
 
@@ -23,6 +24,7 @@ class FSMath{
       // for the decay chain R0 --> R + C and R --> A + B, helphi is the azimuthal
       //  angle of particle A, where the z-axis is defined by particle R and the
       //   xz-plane is defined by particles C and R
+      //     [helphi is invariant to boosts along R]
 
     static double helphi(double PxPA, double PyPA, double PzPA, double EnPA,
                          double PxPB, double PyPB, double PzPB, double EnPB,
@@ -37,6 +39,15 @@ class FSMath{
                              double PxPB, double PyPB, double PzPB, double EnPB,
                              double PxPE, double PyPE, double PzPE, double EnPE);
 
+      // for the decay chain R0 --> R + C and R --> A + B and the z-axis defined by 
+      //  external particle E (like a beam), gjphi is the azimuthal angle of particle A 
+      //  in the R frame, where the z-axis is defined by E in the R frame
+      //  and the xz-plane is defined by C and E in the R frame
+
+    static double gjphi(double PxPA, double PyPA, double PzPA, double EnPA,
+                        double PxPB, double PyPB, double PzPB, double EnPB,
+                        double PxPC, double PyPC, double PzPC, double EnPC,
+                        double PxPE, double PyPE, double PzPE, double EnPE);
 
       // for three four-vectors P1, P2, and P3, planephi is the rotation of the P2-P3 plane
       //  with respect to the P1-P2 plane

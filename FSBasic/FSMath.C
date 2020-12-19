@@ -6,7 +6,8 @@
 
 
       // for the decay R --> A + B, helcostheta is the cosine of the polar angle 
-      //  of particle A, where the z-axis is defined by particle R, boosted to the R rest frame
+      //  of particle A in the R rest frame, where the z-axis is defined by the
+      //  boost vector to the R rest frame
       //    [equivalently, helcostheta is the cosine of the angle between 
       //      the momenta of particles A and R, boosted to the R rest frame]
 
@@ -30,6 +31,7 @@ FSMath::helcostheta(double PxPA, double PyPA, double PzPA, double EnPA,
       // for the decay chain R0 --> R + C and R --> A + B, helphi is the azimuthal
       //  angle of particle A, where the z-axis is defined by particle R and the
       //   xz-plane is defined by particles C and R
+      //     [helphi is invariant to boosts along R]
 
 double
 FSMath::helphi(double PxPA, double PyPA, double PzPA, double EnPA,
@@ -66,6 +68,54 @@ FSMath::gjcostheta(double PxPA, double PyPA, double PzPA, double EnPA,
   PA.RotateZ(-1.0*PE.Phi());
   PA.RotateY(-1.0*PE.Theta());
   return PA.CosTheta();
+/*
+    // sanity check, this gives the same thing
+  TLorentzVector PA2(PxPA,PyPA,PzPA,EnPA);
+  TLorentzVector PB2(PxPB,PyPB,PzPB,EnPB);
+  TLorentzVector PE2(PxPE,PyPE,PzPE,EnPE);
+  TLorentzVector PR2 = PA2 + PB2;
+    // rotate PA and PE and PR so PR is aligned along the z-axis
+  double thetaR2 = PR2.Theta();
+  double phiR2 = PR2.Phi();
+  PA2.RotateZ(-1.0*phiR2);    PE2.RotateZ(-1.0*phiR2);    PR2.RotateZ(-1.0*phiR2);    
+  PA2.RotateY(-1.0*thetaR2);  PE2.RotateY(-1.0*thetaR2);  PR2.RotateY(-1.0*thetaR2);  
+    // boost PA and PE to the PR rest frame
+  PA2.Boost(-1.0*PR2.BoostVector());
+  PE2.Boost(-1.0*PR2.BoostVector());
+    // rotate PA (and PE) so that PE is aligned along the z-axis
+  PA2.RotateZ(-1.0*PE2.Phi());
+  PA2.RotateY(-1.0*PE2.Theta());
+cout << PA.CosTheta() << "  " << PA2.CosTheta() << "  " << PA.CosTheta() - PA2.CosTheta() << endl;
+  return PA2.CosTheta();
+*/
+}
+
+
+      // for the decay chain R0 --> R + C and R --> A + B and the z-axis defined by 
+      //  external particle E (like a beam), gjphi is the azimuthal angle of particle A 
+      //  in the R frame, where the z-axis is defined by E in the R frame
+      //  and the xz-plane is defined by C and E in the R frame
+
+double
+FSMath::gjphi(double PxPA, double PyPA, double PzPA, double EnPA,
+              double PxPB, double PyPB, double PzPB, double EnPB,
+              double PxPC, double PyPC, double PzPC, double EnPC,
+              double PxPE, double PyPE, double PzPE, double EnPE){
+  TLorentzVector PA(PxPA,PyPA,PzPA,EnPA);
+  TLorentzVector PB(PxPB,PyPB,PzPB,EnPB);
+  TLorentzVector PC(PxPC,PyPC,PzPC,EnPC);
+  TLorentzVector PE(PxPE,PyPE,PzPE,EnPE);
+  TLorentzVector PR = PA + PB;
+    // boost PA and PC and PE to the PR rest frame
+  PA.Boost(-1.0*PR.BoostVector());
+  PC.Boost(-1.0*PR.BoostVector());
+  PE.Boost(-1.0*PR.BoostVector());
+    // rotate PA and PC (and PE) so PE is aligned along the z-axis
+  PA.RotateZ(-1.0*PE.Phi());    PC.RotateZ(-1.0*PE.Phi());  
+  PA.RotateY(-1.0*PE.Theta());  PC.RotateY(-1.0*PE.Theta());
+    // rotate PA (and PC and PE) so PC is in the xz-plane
+  PA.RotateZ(-1.0*PC.Phi());
+  return PA.Phi();
 }
 
 
