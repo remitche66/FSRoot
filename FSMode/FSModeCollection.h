@@ -75,7 +75,7 @@ class FSModeCollection{
       // DISPLAY MODES IN THE COLLECTION
       // *******************************************************
 
-    static void display(TString category = "");
+    static void display(TString category = "", bool showDetails = true);
 
 
       // *******************************************************

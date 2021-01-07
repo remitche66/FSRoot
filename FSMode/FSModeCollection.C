@@ -256,10 +256,10 @@ FSModeCollection::modeStrings(TString category, TString inputLine,
   // *******************************************************
 
 void 
-FSModeCollection::display(TString category){
+FSModeCollection::display(TString category, bool showDetails){
   vector<FSModeInfo*> mvec = modeVector(category);
   for (unsigned int i = 0; i < mvec.size(); i++){
-    mvec[i]->display(i+1);
+    mvec[i]->display(i+1, showDetails);
   }
 }
 

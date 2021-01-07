@@ -127,7 +127,7 @@ class FSModeInfo{
       // DISPLAY INFORMATION ABOUT THIS MODE
       // *******************************************************
 
-    void display(int counter = 0);
+    void display(int counter = 0, bool showDetails = true);
 
 
       // *******************************************************

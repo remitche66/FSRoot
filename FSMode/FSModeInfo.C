@@ -1105,10 +1105,11 @@ FSModeInfo::removeCategory(TString category){
 
 
 void
-FSModeInfo::display(int counter){
+FSModeInfo::display(int counter, bool showDetails){
   if (counter < 10)  cout << " ";
   if (counter < 100) cout << " ";
   cout << "(" << counter << ")  " << modeDescription() << endl;
+  if (!showDetails) return;
   cout << "                    Categories:";
   for (unsigned int j = 0; j < m_categories.size(); j++){
     if (j%4 == 0){  cout << endl;  cout << "                        ";  }
