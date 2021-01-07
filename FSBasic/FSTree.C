@@ -610,6 +610,11 @@ FSTree::makeStandardDefinitions(){
                                   "PxP[M],PyP[M],PzP[M],EnP[M],"
                                   "PxP[N],PyP[N],PzP[N],EnP[N])");
 
+    defineMacro("PRODCOSTHETA",3, "FSMath::prodcostheta("
+                                  "PxP[I],PyP[I],PzP[I],EnP[I],"
+                                  "PxP[J],PyP[J],PzP[J],EnP[J],"
+                                  "PxP[M],PyP[M],PzP[M],EnP[M])");
+
     defineMacro("PLANEPHI", 3,    "FSMath::planephi("
                                   "PxP[I],PyP[I],PzP[I],EnP[I],"
                                   "PxP[J],PyP[J],PzP[J],EnP[J],"

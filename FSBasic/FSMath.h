@@ -12,12 +12,11 @@ class FSMath{
   public:
 
 
-// ***************************************
-//  HELICITY AND GOTTFRIED-JACKSON ANGLES
-// ***************************************
+// ***************************************************
+//  HELICITY, GOTTFRIED-JACKSON, AND PRODUCTION ANGLES
+// ***************************************************
 //
-//  Calculate the helicity or Gottfried-Jackson angles for particle A produced in either of 
-//  these three-step processes:
+//  Starting with either of these processes:
 //    (1) D + Q --> S;  S --> R + C;  R --> A + B
 //          examples:
 //            e+(D) e-(Q) --> J/psi(S);  J/psi(S) --> rho0(R) pi0(C);  rho0(R) --> pi+(A) pi-(B)
@@ -25,7 +24,9 @@ class FSMath{
 //    (2) Q --> D + S;  S --> R + C;  R --> A + B
 //          example:
 //            chi_c1(Q) --> gamma(D) J/psi(S);  J/psi(S) --> rho0(R) pi0(C);  rho0(R) --> pi+(A) pi-(B)
-//  Procedure for helicity angles:
+//    calculate the helicity or Gottfried-Jackson angles for particle A or the
+//    production angle for particle R.
+//  Procedure for the helicity angles of A:
 //    * First boost all four-vectors to the S rest frame, where R and C are back-to-back [pR = -pC]
 //        and D and Q are either back-to-back (1) or parallel (2) [pD = +-pQ].
 //    * Rotate all four-vectors so pR and -pC are along the z-axis.  
@@ -34,7 +35,7 @@ class FSMath{
 //    * Boost all four-vectors along the z-axis to the R rest frame.
 //    * Return the cosine of the polar angle of pA (helcostheta) 
 //        or the azimuthal angle of pA (helphi).
-//  Procedure for Gottried-Jackson angles:
+//  Procedure for the Gottried-Jackson angles of A:
 //    * First boost all four-vectors to the R rest frame, where A and B are back-to-back [pA = -pB]
 //        and S and C are parallel [pS = pC].
 //    * Rotate all four-vectors so pD is along the z-axis.  
@@ -42,6 +43,11 @@ class FSMath{
 //    * Now the xz-plane is defined by D and CS.
 //    * Return the cosine of the polar angle of pA (gjcostheta) 
 //        or the azimuthal angle of pA (gjphi).
+//  Procecure for the production angle of R:
+//    * First boost all four-vectors to the S rest frame, where R and C are back-to-back [pR = -pC]
+//        and D and Q are either back-to-back (1) or parallel (2) [pD = +-pQ].
+//    * Rotate all four-vectors so pD is along the z-axis.  
+//    * Return the cosine of the polar angle of pR (prodcostheta). 
 //
 // ***************************************
 
@@ -63,6 +69,10 @@ class FSMath{
                         double PxPB, double PyPB, double PzPB, double EnPB,
                         double PxPC, double PyPC, double PzPC, double EnPC,
                         double PxPD, double PyPD, double PzPD, double EnPD);
+
+    static double prodcostheta(double PxPR, double PyPR, double PzPR, double EnPR,
+                               double PxPC, double PyPC, double PzPC, double EnPC,
+                               double PxPD, double PyPD, double PzPD, double EnPD);
 
 
 // ***************************************
