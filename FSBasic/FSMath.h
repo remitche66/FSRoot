@@ -11,58 +11,86 @@ class FSMath{
 
   public:
 
-      // for the decay R --> A + B, helcostheta is the cosine of the polar angle 
-      //  of particle A in the R rest frame, where the z-axis is defined by the
-      //  boost vector to the R rest frame
-      //    [equivalently, helcostheta is the cosine of the angle between 
-      //      the momenta of particles A and R, boosted to the R rest frame]
+
+// ***************************************
+//  HELICITY AND GOTTFRIED-JACKSON ANGLES
+// ***************************************
+//
+//  Calculate the helicity or Gottfried-Jackson angles for particle A produced in either of 
+//  these three-step processes:
+//    (1) D + Q --> S;  S --> R + C;  R --> A + B
+//          examples:
+//            e+(D) e-(Q) --> J/psi(S);  J/psi(S) --> rho0(R) pi0(C);  rho0(R) --> pi+(A) pi-(B)
+//            gamma(D) p(Q) --> CM(S);  CM(S) --> phi(R) p'(C);  phi(R) --> K+(A) K-(B)  
+//    (2) Q --> D + S;  S --> R + C;  R --> A + B
+//          example:
+//            chi_c1(Q) --> gamma(D) J/psi(S);  J/psi(S) --> rho0(R) pi0(C);  rho0(R) --> pi+(A) pi-(B)
+//  Procedure for helicity angles:
+//    * First boost all four-vectors to the S rest frame, where R and C are back-to-back [pR = -pC]
+//        and D and Q are either back-to-back (1) or parallel (2) [pD = +-pQ].
+//    * Rotate all four-vectors so pR and -pC are along the z-axis.  
+//    * Rotate all four-vectors around the z-axis so pD and +-pQ are in the xz-plane.
+//    * Now the xz-plane is defined by DQ and RC.
+//    * Boost all four-vectors along the z-axis to the R rest frame.
+//    * Return the cosine of the polar angle of pA (helcostheta) 
+//        or the azimuthal angle of pA (helphi).
+//  Procedure for Gottried-Jackson angles:
+//    * First boost all four-vectors to the R rest frame, where A and B are back-to-back [pA = -pB]
+//        and S and C are parallel [pS = pC].
+//    * Rotate all four-vectors so pD is along the z-axis.  
+//    * Rotate all four-vectors around the z-axis so pC and pS are in the xz-plane.
+//    * Now the xz-plane is defined by D and CS.
+//    * Return the cosine of the polar angle of pA (gjcostheta) 
+//        or the azimuthal angle of pA (gjphi).
+//
+// ***************************************
+
 
     static double helcostheta(double PxPA, double PyPA, double PzPA, double EnPA,
-                              double PxPB, double PyPB, double PzPB, double EnPB);
-
-
-      // for the decay chain R0 --> R + C and R --> A + B, helphi is the azimuthal
-      //  angle of particle A, where the z-axis is defined by particle R and the
-      //   xz-plane is defined by particles C and R
-      //     [helphi is invariant to boosts along R]
+                              double PxPB, double PyPB, double PzPB, double EnPB,
+                              double PxPC, double PyPC, double PzPC, double EnPC);
 
     static double helphi(double PxPA, double PyPA, double PzPA, double EnPA,
                          double PxPB, double PyPB, double PzPB, double EnPB,
-                         double PxPC, double PyPC, double PzPC, double EnPC);
-
-
-      // for the decay R --> A + B, with the z-axis defined by external particle E (like a beam),
-      //  gjcostheta is the cosine of the polar angle of particle A, where the z-axis is 
-      //  defined by particle E, all boosted to the R rest frame
+                         double PxPC, double PyPC, double PzPC, double EnPC,
+                         double PxPD, double PyPD, double PzPD, double EnPD);
 
     static double gjcostheta(double PxPA, double PyPA, double PzPA, double EnPA,
                              double PxPB, double PyPB, double PzPB, double EnPB,
-                             double PxPE, double PyPE, double PzPE, double EnPE);
-
-      // for the decay chain R0 --> R + C and R --> A + B and the z-axis defined by 
-      //  external particle E (like a beam), gjphi is the azimuthal angle of particle A 
-      //  in the R frame, where the z-axis is defined by E in the R frame
-      //  and the xz-plane is defined by C and E in the R frame
+                             double PxPD, double PyPD, double PzPD, double EnPD);
 
     static double gjphi(double PxPA, double PyPA, double PzPA, double EnPA,
                         double PxPB, double PyPB, double PzPB, double EnPB,
                         double PxPC, double PyPC, double PzPC, double EnPC,
-                        double PxPE, double PyPE, double PzPE, double EnPE);
+                        double PxPD, double PyPD, double PzPD, double EnPD);
 
-      // for three four-vectors P1, P2, and P3, planephi is the rotation of the P2-P3 plane
-      //  with respect to the P1-P2 plane
+
+// ***************************************
+//  PLANEPHI
+//    for three four-vectors P1, P2, and P3, planephi is the rotation of the P2-P3 plane
+//     with respect to the P1-P2 plane
+// ***************************************
 
     static double planephi(double PxP1, double PyP1, double PzP1, double EnP1,
                            double PxP2, double PyP2, double PzP2, double EnP2,
                            double PxP3, double PyP3, double PzP3, double EnP3);
 
-      // d function (from Perl 216)
 
+// ***************************************
+//  D-FUNCTIONS, ETC.
+// ***************************************
+
+      // d function (from Perl 216)
     static double dJM1M2(double theta, double J, double M1, double M2);
 
     static double ReYLM(double theta, double phi, int L, int M);
 
     static int factorial(int N);
+
+
+// ***************************************
+//  MIN AND MAX FUNCTIONS
+// ***************************************
 
     static double max();
     static double max(double x1);

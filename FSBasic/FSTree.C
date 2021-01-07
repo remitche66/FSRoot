@@ -576,27 +576,41 @@ FSTree::makeStandardDefinitions(){
 
     defineMacro("HELCOSINE", 2,  helcosine );}
 
-    defineMacro("HELCOSTHETA", 2, "FSMath::helcostheta("
-                                  "PxP[I],PyP[I],PzP[I],EnP[I],"
-                                  "PxP[J],PyP[J],PzP[J],EnP[J])");
-
-    defineMacro("HELPHI", 3, "FSMath::helphi("
+    defineMacro("HELCOSTHETA", 3, "FSMath::helcostheta("
                                   "PxP[I],PyP[I],PzP[I],EnP[I],"
                                   "PxP[J],PyP[J],PzP[J],EnP[J],"
                                   "PxP[M],PyP[M],PzP[M],EnP[M])");
+
+    defineMacro("HELCOSTHETA", 4, "FSMath::helcostheta("
+                                  "PxP[I],PyP[I],PzP[I],EnP[I],"
+                                  "PxP[J],PyP[J],PzP[J],EnP[J],"
+                                  "PxP[M],PyP[M],PzP[M],EnP[M])"
+                                  "+EnP[N]*0.0");
+
+    defineMacro("HELPHI", 4,      "FSMath::helphi("
+                                  "PxP[I],PyP[I],PzP[I],EnP[I],"
+                                  "PxP[J],PyP[J],PzP[J],EnP[J],"
+                                  "PxP[M],PyP[M],PzP[M],EnP[M],"
+                                  "PxP[N],PyP[N],PzP[N],EnP[N])");
 
     defineMacro("GJCOSTHETA", 3, "FSMath::gjcostheta("
                                   "PxP[I],PyP[I],PzP[I],EnP[I],"
                                   "PxP[J],PyP[J],PzP[J],EnP[J],"
                                   "PxP[M],PyP[M],PzP[M],EnP[M])");
 
-    defineMacro("GJPHI", 4, "FSMath::gjphi("
+    defineMacro("GJCOSTHETA", 4, "FSMath::gjcostheta("
+                                  "PxP[I],PyP[I],PzP[I],EnP[I],"
+                                  "PxP[J],PyP[J],PzP[J],EnP[J],"
+                                  "PxP[N],PyP[N],PzP[N],EnP[N])"
+                                  "+EnP[M]*0.0");
+
+    defineMacro("GJPHI", 4,       "FSMath::gjphi("
                                   "PxP[I],PyP[I],PzP[I],EnP[I],"
                                   "PxP[J],PyP[J],PzP[J],EnP[J],"
                                   "PxP[M],PyP[M],PzP[M],EnP[M],"
                                   "PxP[N],PyP[N],PzP[N],EnP[N])");
 
-    defineMacro("PLANEPHI", 3, "FSMath::planephi("
+    defineMacro("PLANEPHI", 3,    "FSMath::planephi("
                                   "PxP[I],PyP[I],PzP[I],EnP[I],"
                                   "PxP[J],PyP[J],PzP[J],EnP[J],"
                                   "PxP[M],PyP[M],PzP[M],EnP[M])");
