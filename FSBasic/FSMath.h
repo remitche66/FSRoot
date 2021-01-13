@@ -21,14 +21,14 @@ class FSMath{
 //          examples:
 //            e+(D) e-(Q) --> J/psi(S);  J/psi(S) --> rho0(R) pi0(C);  rho0(R) --> pi+(A) pi-(B)
 //            gamma(D) p(Q) --> CM(S);  CM(S) --> phi(R) p'(C);  phi(R) --> K+(A) K-(B)  
-//    (2) Q --> D + S;  S --> R + C;  R --> A + B
+//    (2) D --> Q + S;  S --> R + C;  R --> A + B
 //          example:
-//            chi_c1(Q) --> gamma(D) J/psi(S);  J/psi(S) --> rho0(R) pi0(C);  rho0(R) --> pi+(A) pi-(B)
+//            chi_c1(D) --> gamma(Q) J/psi(S);  J/psi(S) --> rho0(R) pi0(C);  rho0(R) --> pi+(A) pi-(B)
 //    calculate the helicity or Gottfried-Jackson angles for particle A or the
 //    production angle for particle R.
 //  Procedure for the helicity angles of A:
 //    * First boost all four-vectors to the S rest frame, where R and C are back-to-back [pR = -pC]
-//        and D and Q are either back-to-back (1) or parallel (2) [pD = +-pQ].
+//        and D and Q are either (1) back-to-back [pD = -pQ] or (2) parallel [pD = pQ].
 //    * Rotate all four-vectors so pR and -pC are along the z-axis.  
 //    * Rotate all four-vectors around the z-axis so pD and +-pQ are in the xz-plane.
 //    * Now the xz-plane is defined by DQ and RC.
@@ -45,7 +45,7 @@ class FSMath{
 //        or the azimuthal angle of pA (gjphi).
 //  Procecure for the production angle of R:
 //    * First boost all four-vectors to the S rest frame, where R and C are back-to-back [pR = -pC]
-//        and D and Q are either back-to-back (1) or parallel (2) [pD = +-pQ].
+//        and D and Q are either (1) back-to-back [pD = -pQ] or (2) parallel [pD = pQ].
 //    * Rotate all four-vectors so pD is along the z-axis.  
 //    * Return the cosine of the polar angle of pR (prodcostheta). 
 //
