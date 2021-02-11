@@ -350,7 +350,7 @@ TH1F*
 FSModeHistogram::drawMCComponents(TString fileName, TString ntName, 
                                 TString category, TString variable, 
                                 TString bounds, TString cuts,
-                                double scale, TCanvas* c1){
+                                double scale, TCanvas* c1, bool reverseOrder){
 
     // create the original histogram
 
@@ -372,7 +372,7 @@ FSModeHistogram::drawMCComponents(TString fileName, TString ntName,
     // draw everything
 
   htot->Draw();
-  drawMCComponentsSame(fileName,ntName,category,variable,bounds,cuts,scale);
+  drawMCComponentsSame(fileName,ntName,category,variable,bounds,cuts,scale,reverseOrder);
   htot->Draw("same");
   return htot;
 
@@ -382,7 +382,7 @@ FSModeHistogram::drawMCComponents(TString fileName, TString ntName,
 void
 FSModeHistogram::drawMCComponentsSame(TString fileName, TString ntName, 
                                 TString category, TString variable, 
-                                TString bounds, TString cuts, double scale){
+                                TString bounds, TString cuts, double scale, bool reverseOrder){
 
     // get vectors of the MC components and the histograms
 
@@ -395,7 +395,8 @@ FSModeHistogram::drawMCComponentsSame(TString fileName, TString ntName,
 
   THStack* stack = new THStack("sDrawMCComponents","sDrawMCComponents");
   TLegend* legend = new TLegend(0.7,0.5,1.0,1.0);
-  for (unsigned int i = 0; i < histograms.size(); i++){
+  for (unsigned int ihist = 0; ihist < histograms.size(); ihist++){
+    int i = ihist;  if (reverseOrder) i = histograms.size() - ihist - 1;
     TH1F* hcomp = histograms[i];
     if (i != 0) hcomp->SetFillColor(i+1);
     hcomp->SetLineColor(i+1);
