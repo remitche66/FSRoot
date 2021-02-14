@@ -1,9 +1,11 @@
 
 INC_DIR :=  -I.. -I$(shell root-config --incdir) \
-  -I$(AMPTOOLS) -I$(AMPPLOTTER) -I$(FSAMPTOOLS) -I$(FSROOT)
+  -I$(AMPTOOLS) -I$(FSAMPTOOLS)
+#  -I$(AMPTOOLS) -I$(AMPPLOTTER) -I$(FSAMPTOOLS)
 
 LIB_DIR := -L$(shell root-config --libdir) \
-	-L$(AMPTOOLS)/lib -L$(AMPPLOTTER)/lib -L$(FSAMPTOOLS)/lib -L$(FSROOT)/lib
+	-L$(AMPTOOLS)/lib -L$(FSAMPTOOLS)/lib
+#	-L$(AMPTOOLS)/lib -L$(AMPPLOTTER)/lib -L$(FSAMPTOOLS)/lib
 
 ROOTLIBS := $(shell root-config --glibs)
 
@@ -44,12 +46,14 @@ ifdef GPU
 INC_DIR += -I$(CUDA_INSTALL_PATH)/include
 LIB_DIR += -L$(CUDA_INSTALL_PATH)/lib64
 
-LIBS :=  -lFSAmpTools_GPU -lAmpPlotter -lAmpTools_GPU $(ROOTLIBS) -lFSRoot -lcudart -lstdc++
+LIBS :=  -lFSAmpTools_GPU -lAmpTools_GPU $(ROOTLIBS) -lcudart -lstdc++
+#LIBS :=  -lFSAmpTools_GPU -lAmpPlotter -lAmpTools_GPU $(ROOTLIBS) -lcudart -lstdc++
 CXX_FLAGS += -DGPU_ACCELERATION
 
 else
 
-LIBS :=  -lFSAmpTools -lAmpPlotter -lAmpTools $(ROOTLIBS) -lFSRoot -lstdc++
+#LIBS :=  -lFSAmpTools -lAmpPlotter -lAmpTools $(ROOTLIBS) -lstdc++
+LIBS :=  -lFSAmpTools -lAmpTools $(ROOTLIBS) -lstdc++
 
 endif
 
@@ -65,7 +69,9 @@ default: $(TARGET_EXE)
 
 %_exe: %.o
 	$(vecho) "--> Linking $(subst _exe,,$@)"
-	$(Q)$(CXX)  $(CXX_FLAGS) -Wl,-rpath,$(ROOTSYS)/lib -o $(subst _exe,,$@) $< -O3 $(INC_DIR) $(LIB_DIR) $(LIBS)
+	$(Q)$(CXX)  $(CXX_FLAGS) \
+	-Wl,-rpath,$(ROOTSYS)/lib -Wl,-rpath,$(AMPTOOLS)/lib -Wl,-rpath,$(FSAMPTOOLS)/lib \
+	-o $(subst _exe,,$@) $< -O3 $(INC_DIR) $(LIB_DIR) $(LIBS)
 
 %.o : %.cc
 	$(vecho) "-> Compiling $<"

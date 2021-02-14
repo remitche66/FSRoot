@@ -57,6 +57,12 @@ default: lib $(DEFAULT)
 lib:
 	$(Q)mkdir lib
 
+
+libFSAmpTools.dylib: libFSAmpTools.a
+	$(Q)( cd lib && ar -x $< && $(CXX) -dynamiclib -flat_namespace -undefined suppress -o $@ *.o )
+	$(Q)(cd lib && rm -f *.o)
+	$(vecho) "=== Creation of $@ is complete. ==="
+
 libFSAmpTools.a: $(TARGET_LIBS)
 	$(foreach lib, $(TARGET_LIBS), $(shell cd lib; ar -x $(lib) ) )
 	$(Q)(cd lib && ar -rsc $@ *.o && ranlib $@)
