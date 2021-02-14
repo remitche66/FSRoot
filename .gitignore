@@ -11,6 +11,21 @@ FSModeSkimTree
 FSModeCreateRankingTree
 *NOTES*
 *TEST*
+FSAmpToolsReadAmplitudes
+fitAmplitudes
+generateBackground
+generatePhaseSpace
+generatePhysics
+parseConfigFile
+plotData
+plotResults
+printAmplitudes
+toyAcceptance
+*SYMDEF*
+*.fit
+*.ni
+*.root
+
 
 # Prerequisites
 *.d
