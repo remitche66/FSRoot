@@ -142,6 +142,15 @@ gROOT->LoadMacro("FSFit/FSFitUtilities.C+");
 cout << "Loading FSAnalysis/FSHistogramAnalysis.C..." << endl;
 gROOT->LoadMacro("FSAnalysis/FSHistogramAnalysis.C+");
 
+
+// *****************
+// AMPTOOLS UTILITIES
+// *****************
+
+cout << "Loading FSAmpTools/FSAmpTools.C..." << endl;
+gROOT->LoadMacro("FSAmpTools/FSAmpTools.C+");
+
+
 cout << "--------------------------------------------------" << endl;
 cout << "-----   Finished loading the FSRoot Macros   -----" << endl;
 cout << "--------------------------------------------------" << endl;
