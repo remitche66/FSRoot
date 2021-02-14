@@ -4,6 +4,7 @@
 #include <cmath>
 #include "TString.h"
 #include "IUAmpTools/ConfigFileParser.h"
+#include "FSAmpToolsDataIO/FSAmpToolsDataWriter.h"
 
 using namespace std;
 
@@ -13,6 +14,8 @@ class FSAmpTools{
   public:
 
     static void readAmplitudes(TString configFile);
+
+    static void generatePhaseSpace(TString outFile, int numEvents);
 
 };
 

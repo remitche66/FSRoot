@@ -150,6 +150,9 @@ gROOT->LoadMacro("FSAnalysis/FSHistogramAnalysis.C+");
 gSystem->Load("$AMPTOOLS/lib/libAmpTools.dylib");
 gROOT->ProcessLine(".include ${AMPTOOLS}");
 
+gSystem->Load("$FSAMPTOOLS/lib/libFSAmpTools.dylib");
+gROOT->ProcessLine(".include ${FSAMPTOOLS}");
+
 cout << "Loading FSAmpTools/FSAmpTools.C..." << endl;
 gROOT->LoadMacro("FSAmpTools/FSAmpTools.C+");
 
