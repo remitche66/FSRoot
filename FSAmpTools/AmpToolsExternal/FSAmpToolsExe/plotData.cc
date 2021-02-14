@@ -45,6 +45,7 @@ int main(int argc, char** argv){
   cout << "Creating a Data Reader..." << endl;
 
   vector<string> args;
+  args.push_back("3");
   args.push_back(infilename);
   FSAmpToolsDataReader dataReader(args);
 

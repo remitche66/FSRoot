@@ -6,6 +6,7 @@
 #include "TH1.h"
 #include "TFile.h"
 #include "TTree.h"
+#include "TString.h"
 #include "TLorentzVector.h"
 #include "IUAmpTools/Kinematics.h"
 #include "FSAmpToolsDataIO/FSAmpToolsDataReader.h"
@@ -17,12 +18,13 @@ FSAmpToolsDataReader::FSAmpToolsDataReader( const vector< string >& args ) :
 UserDataReader< FSAmpToolsDataReader >(args),
 m_eventCounter( 0 ){
   
-  assert(args.size() == 1);
-  string inFileName(args[0]);
+  assert(args.size() == 2);
+  m_numParticles = atoi(args[0].c_str());
+  assert (m_numParticles < 50);
+  string inFileName(args[1]);
   string inTreeName("nt");
 
   TH1::AddDirectory( kFALSE );
-
   gSystem->Load( "libTree" );
 
   ifstream fileexists( inFileName.c_str() );
@@ -37,23 +39,18 @@ m_eventCounter( 0 ){
   }
 
   if (m_inTree){
-
-    m_inTree->SetBranchAddress( "EnP1", &m_EnP1 );
-    m_inTree->SetBranchAddress( "PxP1", &m_PxP1 );
-    m_inTree->SetBranchAddress( "PyP1", &m_PyP1 );
-    m_inTree->SetBranchAddress( "PzP1", &m_PzP1 );
-
-    m_inTree->SetBranchAddress( "EnP2", &m_EnP2 );
-    m_inTree->SetBranchAddress( "PxP2", &m_PxP2 );
-    m_inTree->SetBranchAddress( "PyP2", &m_PyP2 );
-    m_inTree->SetBranchAddress( "PzP2", &m_PzP2 );
-
-    m_inTree->SetBranchAddress( "EnP3", &m_EnP3 );
-    m_inTree->SetBranchAddress( "PxP3", &m_PxP3 );
-    m_inTree->SetBranchAddress( "PyP3", &m_PyP3 );
-    m_inTree->SetBranchAddress( "PzP3", &m_PzP3 );
-
-    m_inTree->SetBranchAddress( "weight", &m_weight );
+    for (unsigned int i = 0; i < m_numParticles; i++){
+      TString sI("");  sI += (i+1);
+      TString sEnPi = "EnP"+sI;
+      TString sPxPi = "PxP"+sI;
+      TString sPyPi = "PyP"+sI;
+      TString sPzPi = "PzP"+sI;
+      m_inTree->SetBranchAddress( sEnPi, &m_EnP[i] );
+      m_inTree->SetBranchAddress( sPxPi, &m_PxP[i] );
+      m_inTree->SetBranchAddress( sPyPi, &m_PyP[i] );
+      m_inTree->SetBranchAddress( sPzPi, &m_PzP[i] );
+      m_inTree->SetBranchAddress( "weight", &m_weight );
+    }
   }
 
 }
@@ -61,32 +58,23 @@ m_eventCounter( 0 ){
 
 void
 FSAmpToolsDataReader::resetSource(){
-
   m_eventCounter = 0;
-
 }
 
 
 Kinematics*
 FSAmpToolsDataReader::getEvent(){
-
   if( m_eventCounter < numEvents() ){
-
     m_inTree->GetEntry( m_eventCounter++ );
-
     vector< TLorentzVector > particleList;
-    particleList.push_back( TLorentzVector( m_PxP1, m_PyP1, m_PzP1, m_EnP1 ) );
-    particleList.push_back( TLorentzVector( m_PxP2, m_PyP2, m_PzP2, m_EnP2 ) );
-    particleList.push_back( TLorentzVector( m_PxP3, m_PyP3, m_PzP3, m_EnP3 ) );
-
+    for (unsigned int i = 0; i < m_numParticles; i++){
+      particleList.push_back( TLorentzVector( m_PxP[i], m_PyP[i], m_PzP[i], m_EnP[i] ) );
+    }
     return new Kinematics( particleList, m_weight );
-
   }
-
   else{
     return NULL;
   }
-
 }
 
 

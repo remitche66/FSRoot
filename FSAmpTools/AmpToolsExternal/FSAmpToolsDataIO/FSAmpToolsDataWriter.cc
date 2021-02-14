@@ -10,7 +10,8 @@
 #include "TH1.h"
 #include "TSystem.h"
 
-FSAmpToolsDataWriter::FSAmpToolsDataWriter( const string& outFile ){
+FSAmpToolsDataWriter::FSAmpToolsDataWriter( unsigned int numParticles, const string& outFile ){
+  assert(numParticles < 50);
 
   TH1::AddDirectory( kFALSE );
   gSystem->Load( "libTree" );
@@ -18,20 +19,19 @@ FSAmpToolsDataWriter::FSAmpToolsDataWriter( const string& outFile ){
   m_outFile = new TFile( outFile.c_str(), "recreate" );
   m_outTree = new TTree( "nt", "nt" );
 
-  m_outTree->Branch( "EnP1", &m_EnP1, "EnP1/D" );
-  m_outTree->Branch( "PxP1", &m_PxP1, "PxP1/D" );
-  m_outTree->Branch( "PyP1", &m_PyP1, "PyP1/D" );
-  m_outTree->Branch( "PzP1", &m_PzP1, "PzP1/D" );
+  m_numParticles = numParticles;
 
-  m_outTree->Branch( "EnP2", &m_EnP2, "EnP2/D" );
-  m_outTree->Branch( "PxP2", &m_PxP2, "PxP2/D" );
-  m_outTree->Branch( "PyP2", &m_PyP2, "PyP2/D" );
-  m_outTree->Branch( "PzP2", &m_PzP2, "PzP2/D" );
-
-  m_outTree->Branch( "EnP3", &m_EnP3, "EnP3/D" );
-  m_outTree->Branch( "PxP3", &m_PxP3, "PxP3/D" );
-  m_outTree->Branch( "PyP3", &m_PyP3, "PyP3/D" );
-  m_outTree->Branch( "PzP3", &m_PzP3, "PzP3/D" );
+  for (unsigned int i = 0; i < m_numParticles; i++){
+    TString sI("");  sI += (i+1);
+    TString sEnPi = "EnP"+sI;
+    TString sPxPi = "PxP"+sI;
+    TString sPyPi = "PyP"+sI;
+    TString sPzPi = "PzP"+sI;
+    m_outTree->Branch( sEnPi, &m_EnP[i], sEnPi+"/D" );
+    m_outTree->Branch( sPxPi, &m_PxP[i], sPxPi+"/D" );
+    m_outTree->Branch( sPyPi, &m_PyP[i], sPyPi+"/D" );
+    m_outTree->Branch( sPzPi, &m_PzP[i], sPzPi+"/D" );
+  }
   
   m_outTree->Branch( "s12", &m_s12, "s12/D" );
   m_outTree->Branch( "s23", &m_s23, "s23/D" );
@@ -57,20 +57,12 @@ FSAmpToolsDataWriter::writeEvent( const Kinematics& kin ){
 
   vector< TLorentzVector > particleList = kin.particleList();
 
-  m_EnP1 = particleList[0].E();
-  m_PxP1 = particleList[0].Px();
-  m_PyP1 = particleList[0].Py();
-  m_PzP1 = particleList[0].Pz();
-
-  m_EnP2 = particleList[1].E();
-  m_PxP2 = particleList[1].Px();
-  m_PyP2 = particleList[1].Py();
-  m_PzP2 = particleList[1].Pz();
-
-  m_EnP3 = particleList[2].E();
-  m_PxP3 = particleList[2].Px();
-  m_PyP3 = particleList[2].Py();
-  m_PzP3 = particleList[2].Pz();
+  for (unsigned int i = 0; i < m_numParticles; i++){
+    m_EnP[i] = particleList[i].E();
+    m_PxP[i] = particleList[i].Px();
+    m_PyP[i] = particleList[i].Py();
+    m_PzP[i] = particleList[i].Pz();
+  }
 
   m_s12 = (particleList[0]+particleList[1]).M2();
   m_s23 = (particleList[1]+particleList[2]).M2();

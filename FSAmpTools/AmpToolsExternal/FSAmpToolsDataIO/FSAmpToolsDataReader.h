@@ -34,21 +34,12 @@ private:
   TFile* m_inFile;
   TTree* m_inTree;
   int m_eventCounter;
+  unsigned int m_numParticles;
 
-  double m_EnP1;
-  double m_PxP1;
-  double m_PyP1;
-  double m_PzP1;
-
-  double m_EnP2;
-  double m_PxP2;
-  double m_PyP2;
-  double m_PzP2;
-
-  double m_EnP3;
-  double m_PxP3;
-  double m_PyP3;
-  double m_PzP3;
+  double m_EnP[50];
+  double m_PxP[50];
+  double m_PyP[50];
+  double m_PzP[50];
   
   double m_weight;
 

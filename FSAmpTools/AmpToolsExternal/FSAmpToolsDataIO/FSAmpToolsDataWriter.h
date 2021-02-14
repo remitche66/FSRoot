@@ -10,7 +10,7 @@ class FSAmpToolsDataWriter{
 
 public:
 		
-  FSAmpToolsDataWriter( const string& outFile );
+  FSAmpToolsDataWriter( unsigned int numParticles, const string& outFile );
   ~FSAmpToolsDataWriter();
 
   void writeEvent( const Kinematics& kin );
@@ -22,21 +22,12 @@ private:
   TFile* m_outFile;
   TTree* m_outTree;
   int m_eventCounter;
+  unsigned int m_numParticles;
 
-  double m_EnP1;
-  double m_PxP1;
-  double m_PyP1;
-  double m_PzP1;
-
-  double m_EnP2;
-  double m_PxP2;
-  double m_PyP2;
-  double m_PzP2;
-
-  double m_EnP3;
-  double m_PxP3;
-  double m_PyP3;
-  double m_PzP3;
+  double m_EnP[50];
+  double m_PxP[50];
+  double m_PyP[50];
+  double m_PzP[50];
 
   double m_weight;
   

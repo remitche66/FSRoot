@@ -74,7 +74,7 @@ int main(int argc, char** argv){
     // ************************
 
   cout << "Creating a Data Writer..." << endl;
-  FSAmpToolsDataWriter dataWriter(outfilename);
+  FSAmpToolsDataWriter dataWriter(3, outfilename);
   cout << "... Finished creating a Data Writer" << endl << endl;
 
 
