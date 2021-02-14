@@ -1,0 +1,291 @@
+#      echo
+#      echo --------------------------------
+#      echo
+#      echo COMPILE AMPTOOLS
+#      echo
+#      echo --------------------------------
+#      echo
+#      #sleep 3
+# 
+#  cd $AMPTOOLS
+#  #make clean
+#  make libAmpTools.dylib
+ 
+
+#      echo
+#      echo --------------------------------
+#      echo
+#      echo COMPILE AMPPLOTTER
+#      echo
+#      echo --------------------------------
+#      echo
+#      #sleep 3
+# 
+#  cd $AMPPLOTTER
+#  #make clean
+#  make
+
+
+#    #sleep 1
+#    echo
+#    echo --------------------------------
+#    echo
+#    echo COMPILE FSAMPTOOLS
+#    echo
+#    echo --------------------------------
+#    echo
+#    #sleep 3
+#   
+# cd $FSAMPTOOLS
+# #make clean
+# make libFSAmpTools.dylib
+    
+    
+#      #sleep 1
+#      echo
+#      echo --------------------------------
+#      echo
+#      echo COMPILE FSAMPTOOLSEXE
+#      echo
+#      echo --------------------------------
+#      echo
+#      #sleep 3
+#      
+#  cd $FSAMPTOOLS/FSAmpToolsExe
+#  #make clean
+#  make
+ 
+ 
+      #sleep 1
+      echo
+      echo --------------------------------
+      echo
+      echo GENERATE PHASE SPACE
+      echo
+      echo --------------------------------
+      echo
+      #sleep 3
+ 
+cd $FSAMPTOOLS/run
+$FSAMPTOOLS/FSAmpToolsExe/generatePhaseSpace phasespace.gen.root 100000
+ 
+ 
+      #sleep 1
+      echo
+      echo --------------------------------
+      echo
+      echo MAKE PHASE SPACE PLOTS
+      echo
+      echo --------------------------------
+      echo
+      #sleep 3
+ 
+cd $FSAMPTOOLS/run
+$FSAMPTOOLS/FSAmpToolsExe/plotData phasespace.gen.root plots.phasespace.gen.root
+ 
+ 
+#       #sleep 1
+#       echo
+#       echo --------------------------------
+#       echo
+#       echo SHOW PHASE SPACE PLOTS
+#       echo  quit root to continue
+#       echo
+#       echo --------------------------------
+#       echo
+#       #sleep 3
+#  
+# cd $FSAMPTOOLS/run
+# root -l plots.phasespace.gen.root plotData.C
+ 
+ 
+        #sleep 1
+        echo
+        echo --------------------------------
+        echo
+        echo GENERATE PHYSICS
+        echo
+        echo --------------------------------
+        echo
+        #sleep 3
+   
+  cd $FSAMPTOOLS/run
+  $FSAMPTOOLS/FSAmpToolsExe/generatePhysics fsamptools1.cfg physics.gen.root 100000
+ 
+ 
+        #sleep 1
+        echo
+        echo --------------------------------
+        echo
+        echo MAKE PHYSICS PLOTS
+        echo
+        echo --------------------------------
+        echo
+        #sleep 3
+   
+  cd $FSAMPTOOLS/run
+  $FSAMPTOOLS/FSAmpToolsExe/plotData physics.gen.root plots.physics.gen.root
+ 
+ 
+#        #sleep 1
+#        echo
+#        echo --------------------------------
+#        echo
+#        echo SHOW PHYSICS PLOTS
+#        echo  quit root to continue
+#        echo
+#        echo --------------------------------
+#        echo
+#        #sleep 3
+#   
+#  cd $FSAMPTOOLS/run
+#  root -l plots.physics.gen.root plotData.C
+ 
+ 
+        #sleep 1
+        echo
+        echo --------------------------------
+        echo
+        echo SEND PHASE SPACE THROUGH TOY DETECTOR
+        echo
+        echo --------------------------------
+        echo
+        #sleep 3
+   
+  cd $FSAMPTOOLS/run
+  $FSAMPTOOLS/FSAmpToolsExe/toyAcceptance phasespace.gen.root phasespace.acc.root
+ 
+ 
+        #sleep 1
+        echo
+        echo --------------------------------
+        echo
+        echo MAKE PHASE SPACE PLOTS -- POST-DETECTOR
+        echo
+        echo --------------------------------
+        echo
+        #sleep 3
+  
+  cd $FSAMPTOOLS/run
+   $FSAMPTOOLS/FSAmpToolsExe/plotData phasespace.acc.root plots.phasespace.acc.root
+ 
+ 
+#        #sleep 1
+#        echo
+#        echo --------------------------------
+#        echo
+#        echo SHOW PHASE SPACE PLOTS -- POST-DETECTOR
+#        echo  quit root to continue
+#        echo
+#        echo --------------------------------
+#        echo
+#        #sleep 3
+#   
+#  cd $FSAMPTOOLS/run
+#  root -l plots.phasespace.acc.root plotData.C
+ 
+ 
+        #sleep 1
+        echo
+        echo --------------------------------
+        echo
+        echo SEND PHYSICS THROUGH TOY DETECTOR
+        echo
+        echo --------------------------------
+        echo
+        #sleep 3
+  
+  cd $FSAMPTOOLS/run
+  $FSAMPTOOLS/FSAmpToolsExe/toyAcceptance physics.gen.root physics.acc.root
+ 
+ 
+        #sleep 1
+        echo
+        echo --------------------------------
+        echo
+        echo MAKE PHYSICS PLOTS -- POST-DETECTOR
+        echo
+        echo --------------------------------
+        echo
+        #sleep 3
+   
+  cd $FSAMPTOOLS/run
+  $FSAMPTOOLS/FSAmpToolsExe/plotData physics.acc.root plots.physics.acc.root
+ 
+ 
+#        #sleep 1
+#        echo
+#        echo --------------------------------
+#        echo
+#        echo SHOW PHYSICS PLOTS -- POST-DETECTOR
+#        echo  quit root to continue
+#        echo
+#        echo --------------------------------
+#        echo
+#        #sleep 3
+#   
+#  cd $FSAMPTOOLS/run
+#  root -l plots.physics.acc.root plotData.C
+ 
+ 
+        #sleep 1
+        echo
+        echo --------------------------------
+        echo
+        echo DO A FIT
+        echo
+        echo --------------------------------
+        echo
+        #sleep 3
+   
+  cd $FSAMPTOOLS/run
+  $FSAMPTOOLS/FSAmpToolsExe/fitAmplitudes fsamptools1.cfg
+ 
+ 
+        #sleep 1
+        echo
+        echo --------------------------------
+        echo
+        echo MAKE PLOTS OF RESULTS
+        echo
+        echo --------------------------------
+        echo
+        #sleep 3
+   
+  cd $FSAMPTOOLS/run
+  $FSAMPTOOLS/FSAmpToolsExe/plotResults fsamptools1.fit fsamptools1.root
+ 
+ 
+        #sleep 1
+        echo
+        echo --------------------------------
+        echo
+        echo SHOW PLOTS IN ROOT
+        echo
+        echo --------------------------------
+        echo
+        #sleep 3
+    
+  cd $FSAMPTOOLS/run
+  root -l plots.physics.acc.root fsamptools1.root plotResult.C
+# 
+# 
+##        #sleep 1
+##        echo
+##        echo --------------------------------
+##        echo
+##        echo VIEW FIT RESULTS IN THE AMPPLOTTER GUI
+##        echo
+##        echo --------------------------------
+##        echo
+##        #sleep 3
+##    
+##  cd $FSAMPTOOLS/run
+##  $FSAMPTOOLS/FSAmpToolsExe/ampPlotter fsamptools1.fit
+
+
+
+
+
+
+
