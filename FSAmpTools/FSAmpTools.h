@@ -3,9 +3,7 @@
 
 #include <cmath>
 #include "TString.h"
-//#include "$AMPTOOLS/IUAmpTools/ConfigFileParser.h"
-//R__ADD_LIBRARY_PATH($AMPTOOLS/lib) // if needed
-//R__LOAD_LIBRARY($AMPTOOLS/lib/libIUAmpTools.a)
+#include "IUAmpTools/ConfigFileParser.h"
 
 using namespace std;
 

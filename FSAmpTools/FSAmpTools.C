@@ -8,11 +8,10 @@
 
 void
 FSAmpTools::readAmplitudes(TString configFile){
-  cout << configFile << endl;
-  system("ls");
-  system("mkdir temptemp");
-  system("$FSROOT/FSAmpTools/AmpToolsExternalTemp/FSAmpTools/FSAmpToolsExe/FSAmpToolsReadAmplitudes "+configFile+" tempAmplitudes.txt");
+  cout << "looking at config file: " << configFile << endl;
+  //system("$FSROOT/FSAmpTools/AmpToolsExternalTemp/FSAmpTools/FSAmpToolsExe/FSAmpToolsReadAmplitudes "+configFile+" tempAmplitudes.txt");
+  ConfigFileParser parser(FSString::TString2string(configFile));
+  ConfigurationInfo* cfg = parser.getConfigurationInfo();
+  cfg->display();
 }
 
-
-//setenv DYLD_LIBRARY_PATH $DYLD_LIBRARY_PATH\:$ROOTSYS/lib
