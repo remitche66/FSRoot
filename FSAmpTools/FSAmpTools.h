@@ -18,6 +18,11 @@ class FSAmpTools{
     static void showAmplitudeNames(TString amplitudeNameLogic = "*");
     static void clearAmplitudeNames(TString amplitudeNameLogic = "*", bool show = false);
 
+    static void defineAmplitudeSet(TString setName, TString amplitudeNameLogic = "*", bool show = false);
+    static vector<TString> getAmplitudeSets(TString setNameLogic = "*", bool show = false);
+    static vector<TString> getAmplitudeNamesBySet(TString setNameLogic = "*", bool show = false);
+    static void showAmplitudeSets(TString setNameLogic = "*");
+    static void clearAmplitudeSets(TString setNameLogic = "*", bool show = false);
 
     static void testSystem(TString configFile);
     static void generatePhaseSpace(TString outFile, int numEvents);
@@ -25,6 +30,8 @@ class FSAmpTools{
   private:
 
     static vector<TString> m_ampNames;
+    static vector<TString> m_setNames;
+    static map<TString, TString> m_ampSetMap;
 
 };
 

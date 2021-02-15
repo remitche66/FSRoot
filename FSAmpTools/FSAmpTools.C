@@ -10,6 +10,8 @@
 
   // static member data
 vector<TString> FSAmpTools::m_ampNames;
+vector<TString> FSAmpTools::m_setNames;
+map<TString, TString> FSAmpTools::m_ampSetMap;
 
 
 
@@ -29,15 +31,16 @@ FSAmpTools::readAmplitudeNames(TString configFile, bool show){
     }
     if (!found) m_ampNames.push_back(amps[i]->fullName());
   }
-  if (m_ampNames.size() <= 1) return;
-  for (unsigned int i = 0; i < m_ampNames.size()-1; i++){
-  for (unsigned int j = i+1; j < m_ampNames.size(); j++){
-    if (m_ampNames[j] < m_ampNames[i]){
-      TString tempName = m_ampNames[j];
-      m_ampNames[j] = m_ampNames[i];
-      m_ampNames[i] = tempName;
-    }
-  }}
+  if (m_ampNames.size() > 1){
+    for (unsigned int i = 0; i < m_ampNames.size()-1; i++){
+    for (unsigned int j = i+1; j < m_ampNames.size(); j++){
+      if (m_ampNames[j] < m_ampNames[i]){
+        TString tempName = m_ampNames[j];
+        m_ampNames[j] = m_ampNames[i];
+        m_ampNames[i] = tempName;
+      }
+    }}
+  }
   if (show) showAmplitudeNames();
 }
 
@@ -49,21 +52,22 @@ FSAmpTools::getAmplitudeNames(TString amplitudeNameLogic, bool show){
     vector<TString> categories;  categories.push_back(m_ampNames[i]);
     if (FSString::evalLogicalTString(amplitudeNameLogic,categories)) ampNames.push_back(m_ampNames[i]);
   }
-  if (show) showAmplitudeNames();
+  if (show) showAmplitudeNames(amplitudeNameLogic);
   return ampNames;
 }
 
 void
 FSAmpTools::showAmplitudeNames(TString amplitudeNameLogic){
   vector<TString> ampNames = getAmplitudeNames(amplitudeNameLogic);
-  cout << "AMPLITUDES:" << endl;
+  cout << "    AMPLITUDES:" << endl;
   for (unsigned int i = 0; i < ampNames.size(); i++){
-    cout << "(" << i+1 << ")  " << ampNames[i] << endl;
+    cout << "      (AMP " << i+1 << ")  " << ampNames[i] << endl;
   }
 }
 
 void
 FSAmpTools::clearAmplitudeNames(TString amplitudeNameLogic, bool show){
+  if (amplitudeNameLogic == "") amplitudeNameLogic = "*";
   amplitudeNameLogic = "!("+amplitudeNameLogic+")";
   m_ampNames = getAmplitudeNames(amplitudeNameLogic);
   if (show) showAmplitudeNames();
@@ -71,8 +75,84 @@ FSAmpTools::clearAmplitudeNames(TString amplitudeNameLogic, bool show){
 
 
 void
-FSAmpTools::testSystem(TString configFile){
-  system("$FSAMPTOOLS/FSAmpToolsExe/FSAmpToolsReadAmplitudes "+configFile+" tempAmplitudes.txt");
+FSAmpTools::defineAmplitudeSet(TString setName, TString amplitudeNameLogic, bool show){
+  if (setName == "") return;
+  if (amplitudeNameLogic == "") amplitudeNameLogic = "*";
+  bool found = false;
+  for (unsigned int j = 0; j < m_setNames.size(); j++){
+    if (setName == m_setNames[j]){
+      m_ampSetMap[setName] = amplitudeNameLogic;
+      found = true; break;
+    }
+  }
+  if (!found){
+    m_setNames.push_back(setName);
+    m_ampSetMap[setName] = amplitudeNameLogic;
+  }
+  if (m_setNames.size() > 1){
+    for (unsigned int i = 0; i < m_setNames.size()-1; i++){
+    for (unsigned int j = i+1; j < m_setNames.size(); j++){
+      if (m_setNames[j] < m_setNames[i]){
+        TString tempName = m_setNames[j];
+        m_setNames[j] = m_setNames[i];
+        m_setNames[i] = tempName;
+      }
+    }}
+  }
+  if (show) showAmplitudeSets();
+}
+
+
+vector<TString> 
+FSAmpTools::getAmplitudeSets(TString setNameLogic, bool show){
+  if (setNameLogic == "") setNameLogic = "*";
+  vector<TString> setNames;
+  for (unsigned int i = 0; i < m_setNames.size(); i++){
+    vector<TString> categories;  categories.push_back(m_setNames[i]);
+    if (FSString::evalLogicalTString(setNameLogic,categories)) setNames.push_back(m_setNames[i]);
+  }
+  if (show) showAmplitudeSets(setNameLogic);
+  return setNames;
+}
+
+
+ 
+vector<TString>
+FSAmpTools::getAmplitudeNamesBySet(TString setNameLogic, bool show){
+  if (setNameLogic == "") setNameLogic = "*";
+  vector<TString> setNames = getAmplitudeSets(setNameLogic);
+  if (setNames.size() == 0){
+    return getAmplitudeNames("!*",show);
+  }
+  TString ampNameLogic = "";
+  for (unsigned int i = 0; i < setNames.size(); i++){
+    TString ampLogicI = m_ampSetMap[setNames[i]];
+    if (ampLogicI == "") ampLogicI = "*";
+    ampLogicI = "("+ampLogicI+")";
+    if (ampNameLogic != "") ampNameLogic += "||";
+    ampNameLogic += ampLogicI;
+  }
+  return getAmplitudeNames(ampNameLogic,show);
+}
+
+
+void
+FSAmpTools::showAmplitudeSets(TString setNameLogic){
+  vector<TString> setNames = getAmplitudeSets(setNameLogic);
+  cout << "AMPLITUDE SETS:" << endl;
+  for (unsigned int i = 0; i < setNames.size(); i++){
+    cout << "  (SET " << i+1 << ")  " << setNames[i] << "  " << m_ampSetMap[setNames[i]] << endl;
+    showAmplitudeNames(m_ampSetMap[setNames[i]]);
+  }
+}
+
+void
+FSAmpTools::clearAmplitudeSets(TString setNameLogic, bool show){
+  if (setNameLogic == "") setNameLogic = "*";
+  setNameLogic = "!("+setNameLogic+")";
+  m_setNames = getAmplitudeSets(setNameLogic);
+  if (m_setNames.size() == 0) m_ampSetMap.clear();
+  if (show) showAmplitudeSets();
 }
 
 
@@ -81,6 +161,14 @@ FSAmpTools::testSystem(TString configFile){
 
 
 
+
+
+
+
+void
+FSAmpTools::testSystem(TString configFile){
+  system("$FSAMPTOOLS/FSAmpToolsExe/FSAmpToolsReadAmplitudes "+configFile+" tempAmplitudes.txt");
+}
 
 void
 FSAmpTools::generatePhaseSpace(TString outFile, int numEvents){
