@@ -18,11 +18,11 @@ FSAmpToolsDataReader::FSAmpToolsDataReader( const vector< string >& args ) :
 UserDataReader< FSAmpToolsDataReader >(args),
 m_eventCounter( 0 ){
   
-  assert(args.size() == 2);
-  m_numParticles = atoi(args[0].c_str());
+  assert(args.size() == 3);
+  string inFileName(args[0]);
+  string inTreeName(args[1]);
+  m_numParticles = atoi(args[2].c_str());
   assert (m_numParticles < 50);
-  string inFileName(args[1]);
-  string inTreeName("nt");
 
   TH1::AddDirectory( kFALSE );
   gSystem->Load( "libTree" );
