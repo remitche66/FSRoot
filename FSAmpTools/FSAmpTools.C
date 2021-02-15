@@ -8,16 +8,79 @@
 #include "TGenPhaseSpace.h"
 #include "TLorentzVector.h"
 
+  // static member data
+vector<TString> FSAmpTools::m_ampNames;
+
+
 
 void
-FSAmpTools::readAmplitudes(TString configFile){
-  cout << "looking at config file: " << configFile << endl;
-  //system("$FSROOT/FSAmpTools/AmpToolsExternalTemp/FSAmpTools/FSAmpToolsExe/FSAmpToolsReadAmplitudes "+configFile+" tempAmplitudes.txt");
+FSAmpTools::readAmplitudeNames(TString configFile, bool show){
   configFile = FSSystem::makeAbsolutePathName(configFile);
+  ConfigFileParser::setVerboseParsing(false);
   ConfigFileParser parser(FSString::TString2string(configFile));
   ConfigurationInfo* cfg = parser.getConfigurationInfo();
-  cfg->display();
+  //cfg->display();
+  vector<AmplitudeInfo*> amps = cfg->amplitudeList(); 
+  for (unsigned int i = 0; i < amps.size(); i++){
+    //cout << "FSAMP:  " << amps[i]->fullName() << "  "  << real(amps[i]->value()) << "  " << imag(amps[i]->value()) << endl;
+    bool found = false;
+    for (unsigned int j = 0; j < m_ampNames.size(); j++){
+      if (amps[i]->fullName() == m_ampNames[j]){ found = true; break; }
+    }
+    if (!found) m_ampNames.push_back(amps[i]->fullName());
+  }
+  if (m_ampNames.size() <= 1) return;
+  for (unsigned int i = 0; i < m_ampNames.size()-1; i++){
+  for (unsigned int j = i+1; j < m_ampNames.size(); j++){
+    if (m_ampNames[j] < m_ampNames[i]){
+      TString tempName = m_ampNames[j];
+      m_ampNames[j] = m_ampNames[i];
+      m_ampNames[i] = tempName;
+    }
+  }}
+  if (show) showAmplitudeNames();
 }
+
+vector<TString> 
+FSAmpTools::getAmplitudeNames(TString amplitudeNameLogic, bool show){
+  if (amplitudeNameLogic == "") amplitudeNameLogic = "*";
+  vector<TString> ampNames;
+  for (unsigned int i = 0; i < m_ampNames.size(); i++){
+    vector<TString> categories;  categories.push_back(m_ampNames[i]);
+    if (FSString::evalLogicalTString(amplitudeNameLogic,categories)) ampNames.push_back(m_ampNames[i]);
+  }
+  if (show) showAmplitudeNames();
+  return ampNames;
+}
+
+void
+FSAmpTools::showAmplitudeNames(TString amplitudeNameLogic){
+  vector<TString> ampNames = getAmplitudeNames(amplitudeNameLogic);
+  cout << "AMPLITUDES:" << endl;
+  for (unsigned int i = 0; i < ampNames.size(); i++){
+    cout << "(" << i+1 << ")  " << ampNames[i] << endl;
+  }
+}
+
+void
+FSAmpTools::clearAmplitudeNames(TString amplitudeNameLogic, bool show){
+  amplitudeNameLogic = "!("+amplitudeNameLogic+")";
+  m_ampNames = getAmplitudeNames(amplitudeNameLogic);
+  if (show) showAmplitudeNames();
+}
+
+
+void
+FSAmpTools::testSystem(TString configFile){
+  system("$FSAMPTOOLS/FSAmpToolsExe/FSAmpToolsReadAmplitudes "+configFile+" tempAmplitudes.txt");
+}
+
+
+
+
+
+
+
 
 void
 FSAmpTools::generatePhaseSpace(TString outFile, int numEvents){
