@@ -262,6 +262,7 @@ FSAmpTools::makeAmpWts(TString fileName, TString treeName, TString reactionName,
       if (vpairsWts[i].first == "IN") WTS[i] = calcINFromATI(iEvent, vpairsWts[i].second);
       if (vpairsWts[i].first == "RE") WTS[i] = calcREFromATI(iEvent, vpairsWts[i].second[0]);
       if (vpairsWts[i].first == "IM") WTS[i] = calcIMFromATI(iEvent, vpairsWts[i].second[0]);
+      if (vpairsWts[i].first == "PH") WTS[i] = calcPHFromATI(iEvent, vpairsWts[i].second[0]);
       WTS[i] *= wtScale;
     }
     wtTTree->Fill();
@@ -319,7 +320,8 @@ double
 FSAmpTools::calcREFromATI(int iEvent, const vector<string>& ampNames){
   complex<double> AMP(0.0,0.0);
   for (unsigned int i = 0; i < ampNames.size(); i++){
-    AMP += m_ATI->decayAmplitude(iEvent,ampNames[i]);
+    AMP += m_ATI->scaledProductionAmplitude(ampNames[i]) *
+           m_ATI->decayAmplitude(iEvent,ampNames[i]);
   }
   return real(AMP);
 }
@@ -328,9 +330,20 @@ double
 FSAmpTools::calcIMFromATI(int iEvent, const vector<string>& ampNames){
   complex<double> AMP(0.0,0.0);
   for (unsigned int i = 0; i < ampNames.size(); i++){
-    AMP += m_ATI->decayAmplitude(iEvent,ampNames[i]);
+    AMP += m_ATI->scaledProductionAmplitude(ampNames[i]) *
+           m_ATI->decayAmplitude(iEvent,ampNames[i]);
   }
   return imag(AMP);
+}
+
+double
+FSAmpTools::calcPHFromATI(int iEvent, const vector<string>& ampNames){
+  complex<double> AMP(0.0,0.0);
+  for (unsigned int i = 0; i < ampNames.size(); i++){
+    AMP += m_ATI->scaledProductionAmplitude(ampNames[i]) *
+           m_ATI->decayAmplitude(iEvent,ampNames[i]);
+  }
+  return arg(AMP);
 }
 
 vector<string>
