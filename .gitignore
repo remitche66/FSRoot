@@ -25,6 +25,7 @@ toyAcceptance
 *.fit
 *.ni
 *.root
+*.root.*
 
 
 # Prerequisites
