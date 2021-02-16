@@ -196,9 +196,14 @@ FSHistogram::getTHNFBasicTree(TString index, TString& STATUS){
   TString treeSTATUS;
   TChain* chain = FSTree::getTChain(fileName,ntName,treeSTATUS);
   if (treeSTATUS.Contains("!!")){ STATUS = treeSTATUS; return getTHNFBasicEmpty(index); } 
+  TH1::AddDirectory(true); TH2::AddDirectory(true);
   chain->Project(hbounds, variable, scaleTimesCuts);
   if (dimension == 1) hist1d = (TH1F*) gDirectory->FindObject(hname); 
   if (dimension == 2) hist2d = (TH2F*) gDirectory->FindObject(hname); 
+  if ((dimension == 1 && !hist1d) || (dimension == 2 && !hist2d)){
+    cout << "FSHistogram::getTHNFBasicTree ERROR: problem finding histogram named: " << hname << endl;
+    return getTHNFBasicEmpty(index);
+  }
 
     // return the created histogram
   if (hist1d){ getTH1F(hist1d)->SetName(hname); }
