@@ -29,7 +29,8 @@ class FSAmpTools{
 
     static void clearAmpWts(TString ampWtNameLogic = "*", bool show = false);
 
-    static void makeAmpWts(TString fileName, TString treeName, TString reactionName, int numParticles);
+    static void makeAmpWts(TString fileName, TString treeName, TString reactionName, 
+                           int numParticles, double dataEvents = -1);
 
 
     //static void testSystem(TString configFile);

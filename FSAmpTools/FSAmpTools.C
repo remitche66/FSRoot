@@ -192,7 +192,10 @@ FSAmpTools::clearAmpWts(TString ampWtNameLogic, bool show){
 
 
 void
-FSAmpTools::makeAmpWts(TString fileName, TString treeName, TString reactionName, int numParticles){
+FSAmpTools::makeAmpWts(TString fileName, TString treeName, TString reactionName, 
+                       int numParticles, double dataEvents){
+
+    // (1) set up a DataReader
   fileName = FSSystem::makeAbsolutePathName(fileName);
     // FIX: loop over filenames
   vector<string> args;
@@ -201,6 +204,8 @@ FSAmpTools::makeAmpWts(TString fileName, TString treeName, TString reactionName,
   args.push_back(FSString::TString2string(FSString::int2TString(numParticles)));
     // FIX: search for an existing one before making a new one
   FSAmpToolsDataReader* dataReader = new FSAmpToolsDataReader(args);
+
+    // (2) set up the AmpToolsInterface
   m_ATI->clearEvents();
   m_ATI->loadEvents(dataReader);
   double maxIntensity = m_ATI->processEvents(FSString::TString2string(reactionName));
@@ -209,35 +214,38 @@ FSAmpTools::makeAmpWts(TString fileName, TString treeName, TString reactionName,
   for (int i = 0; i < numEvents; i++){
     totIntensity += m_ATI->intensity(i);
   }
-  int dataEvents = dataReader->numEvents();
-  double wtScale = 1.0;  if (totIntensity > 0) wtScale = dataEvents/totIntensity;
+  if (dataEvents < 0) dataEvents = dataReader->numEvents();
+  double wtScale = 0.0;  if (totIntensity > 0) wtScale = dataEvents/totIntensity;
+  if (wtScale == 0.0){ cout << "Zero weights?  Skipping." << endl;  return; }
 
-// need to know wtType, wtName
-
+    // (3) set up the lists of amplitude names
   vector< pair< TString, vector< vector<string> > > > vpairsWts;
   vector<TString> ampWtNames;
   for (unsigned int i = 0; i < m_ampWtNames.size(); i++){
     TString wtType = FSString::subString(m_ampWtNames[i],0,2);
+      // only use amplitudes from this reaction
     TString reactionNameLogic = reactionName+"::*";
     vector<TString> ampNames = getAmpNames(m_ampWtMap[m_ampWtNames[i]]);
     ampNames = getAmpNames(ampNames,reactionNameLogic);
     if (ampNames.size() == 0) continue;
+      // sort the amplitudes into sums and do some checks
     vector< vector<TString> > sortedAmps = sortAmpsIntoSums(ampNames);
     if (((wtType == "RE") || (wtType == "IM") || (wtType == "PH")) && sortedAmps.size() != 1){
       cout << "Can't use RE/IM/PH with amps from different sums -- skipping " 
            << m_ampWtNames[i] << endl; continue; }
+      // pack everything up to use in the loop over events
     ampWtNames.push_back(m_ampWtNames[i]);
     vector< vector<string> > sortedAmpsStrings = vvTString2string(sortedAmps);
     vpairsWts.push_back(pair<TString, vector< vector<string> > >(wtType,sortedAmpsStrings));
   }
-
   if (ampWtNames.size() == 0){
     cout << "No weights to calculate -- skipping" << endl; return;
   }
   if (ampWtNames.size() > 100){
     cout << "Current limit is 100 weights -- skipping" << endl; return;
   }
-    // set up a friend tree
+
+    // (4) set up a friend tree
   FSTree::addFriendTree("AmpWts");
   TString fileName_wt(fileName);  fileName_wt += ".AmpWts";
   TString treeName_wt(treeName);  treeName_wt += "_AmpWts";
@@ -248,7 +256,7 @@ FSAmpTools::makeAmpWts(TString fileName, TString treeName, TString reactionName,
     wtTTree->Branch(ampWtNames[i], &WTS[i], ampWtNames[i]+"/D");
   }
 
-    // fill the friend tree
+    // (5) loop over events and fill the friend tree
   for (int iEvent = 0; iEvent < numEvents; iEvent++){
     for (unsigned int i = 0; i < ampWtNames.size(); i++){
       if (vpairsWts[i].first == "IN") WTS[i] = calcINFromATI(iEvent, vpairsWts[i].second);
@@ -259,7 +267,7 @@ FSAmpTools::makeAmpWts(TString fileName, TString treeName, TString reactionName,
     wtTTree->Fill();
   }
 
-    // write the friend tree
+    // (6) write the friend tree
   wtTFile->cd();
   wtTTree->Write();
   delete wtTFile;
@@ -267,8 +275,6 @@ FSAmpTools::makeAmpWts(TString fileName, TString treeName, TString reactionName,
 }
 
 
-
-//cout << "amplitudes for " << wtType << "  " << m_ampWtNames[i] << endl;
 
 vector< vector<TString> >
 FSAmpTools::sortAmpsIntoSums(vector<TString> ampNames){
