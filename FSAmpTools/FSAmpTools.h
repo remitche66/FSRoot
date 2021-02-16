@@ -5,6 +5,7 @@
 #include "TString.h"
 #include "IUAmpTools/ConfigFileParser.h"
 #include "IUAmpTools/AmpToolsInterface.h"
+#include "IUAmpTools/FitResults.h"
 #include "FSAmpToolsDataIO/FSAmpToolsDataWriter.h"
 
 using namespace std;
@@ -14,6 +15,8 @@ class FSAmpTools{
 
   public:
 
+
+    static void setupFromFitResults(TString fitResultsFile);
 
     static void setupFromConfigFile(TString configFile);
 
@@ -29,12 +32,8 @@ class FSAmpTools{
     static void makeAmpWts(TString fileName, TString treeName, TString reactionName, int numParticles);
 
 
-/*
+    //static void testSystem(TString configFile);
 
-    static void testSystem(TString configFile);
-    static void generatePhaseSpace(TString outFile, int numEvents);
-
-*/
 
 
   private:
@@ -54,7 +53,6 @@ class FSAmpTools{
     static vector<string> vTString2string(vector<TString> vTStrings);
     static vector< vector<string> > vvTString2string(vector< vector<TString> > vvTStrings);
 
-    static TString m_configFile;
     static ConfigurationInfo* m_configInfo;
     static AmpToolsInterface* m_ATI;
     static vector<TString> m_ampNames;

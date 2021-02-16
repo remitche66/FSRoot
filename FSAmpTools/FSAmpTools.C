@@ -13,7 +13,6 @@
 
 
   // static member data
-TString FSAmpTools::m_configFile;
 ConfigurationInfo* FSAmpTools::m_configInfo;
 AmpToolsInterface* FSAmpTools::m_ATI;
 vector<TString> FSAmpTools::m_ampNames;
@@ -22,17 +21,52 @@ map<TString, TString> FSAmpTools::m_ampWtMap;
 
 
 void
-FSAmpTools::setupFromConfigFile(TString configFile){
+FSAmpTools::setupFromFitResults(TString fitResultsFile){
   AmpToolsInterface::registerAmplitude(BreitWigner());
   AmpToolsInterface::registerDataReader(FSAmpToolsDataReader());
-  m_configFile = FSSystem::makeAbsolutePathName(configFile);
-  ConfigFileParser::setVerboseParsing(false);
-  ConfigFileParser parser(FSString::TString2string(m_configFile));
+  fitResultsFile = FSSystem::makeAbsolutePathName(fitResultsFile);
+  FitResults* fitResults = new FitResults(FSString::TString2string(fitResultsFile));
+  if ((!fitResults) || (!fitResults->valid())){
+    cout << "Problem with the fit results file -- skipping" << endl;
+    return;
+  }
+    // FIX (for obvious reasons)
+  fitResults->configInfo()->write("xxxxxxxTempConfigFilexxxxxxx.cfg");
+  ConfigFileParser parser("xxxxxxxTempConfigFilexxxxxxx.cfg");
+  system("rm -f  xxxxxxxTempConfigFilexxxxxxx.cfg");
   m_configInfo = parser.getConfigurationInfo();
-  //m_configInfo->display();
+  cout << "INITIAL CONFIGURATION INFO:" << endl;  m_configInfo->display();
+    // set parameters
+  vector<ParameterInfo*> parameterList = m_configInfo->parameterList();
+  for (unsigned int i = 0; i < parameterList.size(); i++){
+    parameterList[i]->setValue(fitResults->parValue(parameterList[i]->parName()));
+  }
+    // set production amplitudes
+  vector<AmplitudeInfo*> ampList = m_configInfo->amplitudeList(); 
+  for (unsigned int i = 0; i < ampList.size(); i++){
+    ampList[i]->setValue(fitResults->productionParameter(ampList[i]->fullName()));
+  }
+  cout << "MODIFIED CONFIGURATION INFO:" << endl;  m_configInfo->display();
+  delete fitResults;
+    // FIX in case m_ATI already exists
   m_ATI = new AmpToolsInterface(m_configInfo);
   setAmpNamesFromConfigFile();
 }
+
+
+void
+FSAmpTools::setupFromConfigFile(TString configFile){
+  AmpToolsInterface::registerAmplitude(BreitWigner());
+  AmpToolsInterface::registerDataReader(FSAmpToolsDataReader());
+  configFile = FSSystem::makeAbsolutePathName(configFile);
+  ConfigFileParser::setVerboseParsing(false);
+  ConfigFileParser parser(FSString::TString2string(configFile));
+  m_configInfo = parser.getConfigurationInfo();
+    // FIX in case m_ATI already exists
+  m_ATI = new AmpToolsInterface(m_configInfo);
+  setAmpNamesFromConfigFile();
+}
+
 
 void
 FSAmpTools::setAmpNamesFromConfigFile(){
@@ -311,79 +345,12 @@ FSAmpTools::vvTString2string(vector< vector<TString> > vvTStrings){
   return vvStrings;
 }
 
-/*
-    complex<double> decayAmplitude (int iEvent, string ampName,
-                    unsigned int iDataSet = 0) const;
-    complex<double> scaledProductionAmplitude (string ampName,
-                                               unsigned int iDataSet = 0) const;
-*/
+
 
 /*
 void
 FSAmpTools::testSystem(TString configFile){
   system("$FSAMPTOOLS/FSAmpToolsExe/FSAmpToolsReadAmplitudes "+configFile+" tempAmplitudes.txt");
 }
-
-void
-FSAmpTools::generatePhaseSpace(TString outFile, int numEvents){
-
-
-
-    // ************************
-    // set up a FSAmpToolsDataWriter object
-    // ************************
-
-  cout << "Creating a Data Writer..." << endl;
-
-  FSAmpToolsDataWriter dataWriter(3, FSString::TString2string(outFile));
-
-  cout << "... Finished creating a Data Writer" << endl << endl;
-
-
-    // ************************
-    // use ROOT to generate phase space
-    // ************************
-
-  TGenPhaseSpace generator;
-  TLorentzVector parent(0.0, 0.0, 0.0, 3.0);
-  double daughterMasses[3] = {0.2, 0.2, 0.2};
-  generator.SetDecay(parent, 3, daughterMasses);
-  double maxWeight = generator.GetWtMax();
-
-
-    // ************************
-    // use the FSAmpToolsDataWriter object to write events to a file
-    // ************************
-
-  for (int i = 0; i < numEvents; ++i){
-
-
-      // generate the decay
-
-    double weight = generator.Generate();
-    if (weight < drand48() * maxWeight){
-      i--;  continue;
-    }
-
-
-      // pack the decay products into a Kinematics object
-
-    vector<TLorentzVector> fourvectors;
-    fourvectors.push_back( TLorentzVector( *generator.GetDecay(0) ) );
-    fourvectors.push_back( TLorentzVector( *generator.GetDecay(1) ) );
-    fourvectors.push_back( TLorentzVector( *generator.GetDecay(2) ) );
-    Kinematics kin(fourvectors);
-
-
-      // write to a file
-
-    dataWriter.writeEvent(kin);
-
-    if (dataWriter.eventCounter() % 1000 == 0)
-      cout << "Event counter = " << dataWriter.eventCounter() << endl;
-
-  }
-
-
-}
 */
+
