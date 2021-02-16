@@ -47,9 +47,12 @@ class FSAmpTools{
 
     static vector< vector<TString> > sortAmpsIntoSums(vector<TString> ampNames);
 
-    static double calcINFromATI(int iEvent, const vector< vector<TString> >& ampNames);
-    static double calcREFromATI(int iEvent, const vector<TString>& ampNames);
-    static double calcIMFromATI(int iEvent, const vector<TString>& ampNames);
+    static double calcINFromATI(int iEvent, const vector< vector<string> >& ampNames);
+    static double calcREFromATI(int iEvent, const vector<string>& ampNames);
+    static double calcIMFromATI(int iEvent, const vector<string>& ampNames);
+
+    static vector<string> vTString2string(vector<TString> vTStrings);
+    static vector< vector<string> > vvTString2string(vector< vector<TString> > vvTStrings);
 
     static TString m_configFile;
     static ConfigurationInfo* m_configInfo;

@@ -180,7 +180,7 @@ FSAmpTools::makeAmpWts(TString fileName, TString treeName, TString reactionName,
 
 // need to know wtType, wtName
 
-  vector< pair< TString, vector< vector<TString> > > > vpairsWts;
+  vector< pair< TString, vector< vector<string> > > > vpairsWts;
   vector<TString> ampWtNames;
   for (unsigned int i = 0; i < m_ampWtNames.size(); i++){
     TString wtType = FSString::subString(m_ampWtNames[i],0,2);
@@ -193,7 +193,8 @@ FSAmpTools::makeAmpWts(TString fileName, TString treeName, TString reactionName,
       cout << "Can't use RE/IM/PH with amps from different sums -- skipping " 
            << m_ampWtNames[i] << endl; continue; }
     ampWtNames.push_back(m_ampWtNames[i]);
-    vpairsWts.push_back(pair<TString, vector< vector<TString> > >(wtType,sortedAmps));
+    vector< vector<string> > sortedAmpsStrings = vvTString2string(sortedAmps);
+    vpairsWts.push_back(pair<TString, vector< vector<string> > >(wtType,sortedAmpsStrings));
   }
 
   if (ampWtNames.size() == 0){
@@ -259,15 +260,14 @@ FSAmpTools::sortAmpsIntoSums(vector<TString> ampNames){
 
 
 double
-FSAmpTools::calcINFromATI(int iEvent, const vector< vector<TString> >& ampNames){
+FSAmpTools::calcINFromATI(int iEvent, const vector< vector<string> >& ampNames){
   double IN = 0.0;
   complex<double> INPart(0.0,0.0);
   for (unsigned int i = 0; i < ampNames.size(); i++){
     INPart = complex<double>(0.0,0.0);
     for (unsigned int j = 0; j < ampNames[i].size(); j++){
-      string ampName = FSString::TString2string(ampNames[i][j]);
-      complex<double> P = m_ATI->scaledProductionAmplitude(ampName);
-      complex<double> D = m_ATI->decayAmplitude(iEvent,ampName);
+      complex<double> P = m_ATI->scaledProductionAmplitude(ampNames[i][j]);
+      complex<double> D = m_ATI->decayAmplitude(iEvent,ampNames[i][j]);
       INPart += (P*D);
     }
     IN += norm(INPart);
@@ -276,21 +276,39 @@ FSAmpTools::calcINFromATI(int iEvent, const vector< vector<TString> >& ampNames)
 }
 
 double
-FSAmpTools::calcREFromATI(int iEvent, const vector<TString>& ampNames){
+FSAmpTools::calcREFromATI(int iEvent, const vector<string>& ampNames){
   complex<double> AMP(0.0,0.0);
   for (unsigned int i = 0; i < ampNames.size(); i++){
-    AMP += m_ATI->decayAmplitude(iEvent,FSString::TString2string(ampNames[i]));
+    AMP += m_ATI->decayAmplitude(iEvent,ampNames[i]);
   }
   return real(AMP);
 }
 
 double
-FSAmpTools::calcIMFromATI(int iEvent, const vector<TString>& ampNames){
+FSAmpTools::calcIMFromATI(int iEvent, const vector<string>& ampNames){
   complex<double> AMP(0.0,0.0);
   for (unsigned int i = 0; i < ampNames.size(); i++){
-    AMP += m_ATI->decayAmplitude(iEvent,FSString::TString2string(ampNames[i]));
+    AMP += m_ATI->decayAmplitude(iEvent,ampNames[i]);
   }
   return imag(AMP);
+}
+
+vector<string>
+FSAmpTools::vTString2string(vector<TString> vTStrings){
+  vector<string> vStrings;
+  for (unsigned int i = 0; i < vTStrings.size(); i++){
+    vStrings.push_back(FSString::TString2string(vTStrings[i]));
+  }
+  return vStrings;
+}
+
+vector< vector<string> >
+FSAmpTools::vvTString2string(vector< vector<TString> > vvTStrings){
+  vector< vector<string> > vvStrings;
+  for (unsigned int i = 0; i < vvTStrings.size(); i++){
+    vvStrings.push_back(vTString2string(vvTStrings[i]));
+  }
+  return vvStrings;
 }
 
 /*
