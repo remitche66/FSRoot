@@ -14,6 +14,9 @@ void dalitz(){
   FSAmpTools::defineAmpWt("INR12","*R12");
   FSAmpTools::defineAmpWt("INR13","*R13");
   FSAmpTools::defineAmpWt("INTOT","*");
+  FSAmpTools::defineAmpWt("PHR12","*R12");
+  FSAmpTools::defineAmpWt("PHR13","*R13");
+  FSAmpTools::defineAmpWt("PHTOT","*");
   FSAmpTools::defineAmpWt("RER12","*R12");
   FSAmpTools::defineAmpWt("RER13","*R13");
   FSAmpTools::defineAmpWt("RETOT","*");

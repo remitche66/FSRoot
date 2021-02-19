@@ -30,7 +30,7 @@ class FSAmpTools{
     static void clearAmpWts(TString ampWtNameLogic = "*", bool show = false);
 
     static void makeAmpWts(TString fileName, TString treeName, TString reactionName, 
-                           int numParticles, double dataEvents = -1);
+                           int numParticles, double numGeneratedMCEvents = -1);
 
 
     //static void testSystem(TString configFile);
@@ -60,6 +60,7 @@ class FSAmpTools{
     static vector<TString> m_ampNames;
     static vector<TString> m_ampWtNames;
     static map<TString, TString> m_ampWtMap;
+    static bool m_parametersFromFit;
 
 };
 

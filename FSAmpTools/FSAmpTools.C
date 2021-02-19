@@ -18,18 +18,22 @@ AmpToolsInterface* FSAmpTools::m_ATI;
 vector<TString> FSAmpTools::m_ampNames;
 vector<TString> FSAmpTools::m_ampWtNames;
 map<TString, TString> FSAmpTools::m_ampWtMap;
+bool FSAmpTools::m_parametersFromFit;
 
 
 void
 FSAmpTools::setupFromFitResults(TString fitResultsFile){
   AmpToolsInterface::registerAmplitude(BreitWigner());
   AmpToolsInterface::registerDataReader(FSAmpToolsDataReader());
+  m_parametersFromFit = true;
   fitResultsFile = FSSystem::makeAbsolutePathName(fitResultsFile);
   FitResults* fitResults = new FitResults(FSString::TString2string(fitResultsFile));
   if ((!fitResults) || (!fitResults->valid())){
     cout << "Problem with the fit results file -- skipping" << endl;
     return;
   }
+    // (owned by FitResults -- so this won't work after "delete fitResults" below)
+  //ConfigurationInfo* m_configInfo = const_cast<ConfigurationInfo*>( fitResults->configInfo() );
     // FIX (for obvious reasons)
   fitResults->configInfo()->write("xxxxxxxTempConfigFilexxxxxxx.cfg");
   ConfigFileParser parser("xxxxxxxTempConfigFilexxxxxxx.cfg");
@@ -58,6 +62,7 @@ void
 FSAmpTools::setupFromConfigFile(TString configFile){
   AmpToolsInterface::registerAmplitude(BreitWigner());
   AmpToolsInterface::registerDataReader(FSAmpToolsDataReader());
+  m_parametersFromFit = false;
   configFile = FSSystem::makeAbsolutePathName(configFile);
   ConfigFileParser::setVerboseParsing(false);
   ConfigFileParser parser(FSString::TString2string(configFile));
@@ -193,7 +198,7 @@ FSAmpTools::clearAmpWts(TString ampWtNameLogic, bool show){
 
 void
 FSAmpTools::makeAmpWts(TString fileName, TString treeName, TString reactionName, 
-                       int numParticles, double dataEvents){
+                       int numParticles, double numGeneratedMCEvents){
 
     // (1) set up a DataReader
   fileName = FSSystem::makeAbsolutePathName(fileName);
@@ -209,14 +214,20 @@ FSAmpTools::makeAmpWts(TString fileName, TString treeName, TString reactionName,
   m_ATI->clearEvents();
   m_ATI->loadEvents(dataReader);
   double maxIntensity = m_ATI->processEvents(FSString::TString2string(reactionName));
-  double totIntensity = 0.0;
   int numEvents = m_ATI->numEvents();
-  for (int i = 0; i < numEvents; i++){
-    totIntensity += m_ATI->intensity(i);
+  double wtScale = 1.0;
+  if (!m_parametersFromFit){
+    double totIntensity = 0.0;
+    for (int i = 0; i < numEvents; i++){
+      totIntensity += m_ATI->intensity(i);
+    }
+    if (totIntensity <= 0.0){ cout << "Total intensity <= 0??  Skipping." << endl; return; }
+    if (numGeneratedMCEvents <= 0) numGeneratedMCEvents = numEvents;
+    wtScale = numGeneratedMCEvents/totIntensity;
   }
-  if (dataEvents < 0) dataEvents = dataReader->numEvents();
-  double wtScale = 0.0;  if (totIntensity > 0) wtScale = dataEvents/totIntensity;
-  if (wtScale == 0.0){ cout << "Zero weights?  Skipping." << endl;  return; }
+  if (m_parametersFromFit){
+    if (numGeneratedMCEvents > 0) wtScale = 1.0/numGeneratedMCEvents;
+  }
 
     // (3) set up the lists of amplitude names
   vector< pair< TString, vector< vector<string> > > > vpairsWts;
