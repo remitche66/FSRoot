@@ -178,6 +178,12 @@ FSHistogram::getTHNFBasicTree(TString index, TString& STATUS){
     if (variable == ""){ STATUS = "!!NO_VAR2!!"; return getTHNFBasicEmpty(index); }
   TString bounds    = mapIndex["{-BO-}"];
   TString cuts      = mapIndex["{-CU-}"];  cuts = FSTree::expandVariable(cuts);
+    int maxEntries = -1;
+    if (cuts.Contains("MAXENTRIES=")){
+      pair<int,TString> pairMaxEntries = FSTree::processMaxEntries(cuts);
+      maxEntries = pairMaxEntries.first;
+      cuts = pairMaxEntries.second;
+    }
   double  scale     = FSString::TString2double(mapIndex["{-SC-}"]);
   if (FSControl::DEBUG){
     cout << "FSHistogram::getTHNFBasicTree DEBUG: making histogram from tree" << endl;
@@ -197,7 +203,8 @@ FSHistogram::getTHNFBasicTree(TString index, TString& STATUS){
   TChain* chain = FSTree::getTChain(fileName,ntName,treeSTATUS);
   if (treeSTATUS.Contains("!!")){ STATUS = treeSTATUS; return getTHNFBasicEmpty(index); } 
   TH1::AddDirectory(true); TH2::AddDirectory(true);
-  chain->Project(hbounds, variable, scaleTimesCuts);
+  if (maxEntries < 0)  chain->Project(hbounds, variable, scaleTimesCuts);
+  if (maxEntries >= 0) chain->Project(hbounds, variable, scaleTimesCuts,"",maxEntries);
   if (dimension == 1) hist1d = (TH1F*) gDirectory->FindObject(hname); 
   if (dimension == 2) hist2d = (TH2F*) gDirectory->FindObject(hname); 
   if ((dimension == 1 && !hist1d) || (dimension == 2 && !hist2d)){

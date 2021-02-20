@@ -110,7 +110,11 @@ class FSTree{
     static void clearChainCache();
 
 
+    friend class FSHistogram;
+
   private:
+
+    static pair<int,TString> processMaxEntries(TString input);
 
     static vector< vector<TString> > parseVariable(TString variable, bool show = false);
     static void makeStandardDefinitions();
