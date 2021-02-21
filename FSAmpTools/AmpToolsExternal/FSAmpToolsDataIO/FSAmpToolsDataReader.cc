@@ -49,7 +49,7 @@ m_eventCounter( 0 ){
       m_inTree->SetBranchAddress( sPxPi, &m_PxP[i] );
       m_inTree->SetBranchAddress( sPyPi, &m_PyP[i] );
       m_inTree->SetBranchAddress( sPzPi, &m_PzP[i] );
-      m_inTree->SetBranchAddress( "weight", &m_weight );
+      //m_inTree->SetBranchAddress( "weight", &m_weight );
     }
   }
 
@@ -70,6 +70,7 @@ FSAmpToolsDataReader::getEvent(){
     for (unsigned int i = 0; i < m_numParticles; i++){
       particleList.push_back( TLorentzVector( m_PxP[i], m_PyP[i], m_PzP[i], m_EnP[i] ) );
     }
+    m_weight = 1.0;
     return new Kinematics( particleList, m_weight );
   }
   else{
