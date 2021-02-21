@@ -10,20 +10,25 @@
 #include "TLorentzVector.h"
 #include "FSAmpToolsDataIO/FSAmpToolsDataReader.h"
 #include "FSAmpToolsAmp/BreitWigner.h"
+#include "FSAmpToolsAmp/BreitWignerNils.h"
+#include "FSAmpToolsAmp/flexAmp.h"
 
 
   // static member data
-ConfigurationInfo* FSAmpTools::m_configInfo;
-AmpToolsInterface* FSAmpTools::m_ATI;
+ConfigurationInfo* FSAmpTools::m_configInfo = NULL;
+AmpToolsInterface* FSAmpTools::m_ATI = NULL;
 vector<TString> FSAmpTools::m_ampNames;
+vector<TString> FSAmpTools::m_rctNames;
 vector<TString> FSAmpTools::m_ampWtNames;
 map<TString, TString> FSAmpTools::m_ampWtMap;
-bool FSAmpTools::m_parametersFromFit;
-
+bool FSAmpTools::m_parametersFromFit = false;
+TString FSAmpTools::m_loadedATIReaction = "";
 
 void
 FSAmpTools::setupFromFitResults(TString fitResultsFile){
   AmpToolsInterface::registerAmplitude(BreitWigner());
+  AmpToolsInterface::registerAmplitude(BreitWignerNils());
+  AmpToolsInterface::registerAmplitude(flexAmp());
   AmpToolsInterface::registerDataReader(FSAmpToolsDataReader());
   m_parametersFromFit = true;
   fitResultsFile = FSSystem::makeAbsolutePathName(fitResultsFile);
@@ -52,24 +57,37 @@ FSAmpTools::setupFromFitResults(TString fitResultsFile){
   }
   cout << "MODIFIED CONFIGURATION INFO:" << endl;  m_configInfo->display();
   delete fitResults;
-    // FIX in case m_ATI already exists
-  m_ATI = new AmpToolsInterface(m_configInfo);
   setAmpNamesFromConfigFile();
+  setRctNamesFromConfigFile();
+  if (m_ATI) delete m_ATI;
+  m_loadedATIReaction = "";
 }
 
 
 void
 FSAmpTools::setupFromConfigFile(TString configFile){
   AmpToolsInterface::registerAmplitude(BreitWigner());
+  AmpToolsInterface::registerAmplitude(BreitWignerNils());
+  AmpToolsInterface::registerAmplitude(flexAmp());
   AmpToolsInterface::registerDataReader(FSAmpToolsDataReader());
   m_parametersFromFit = false;
   configFile = FSSystem::makeAbsolutePathName(configFile);
   ConfigFileParser::setVerboseParsing(false);
   ConfigFileParser parser(FSString::TString2string(configFile));
   m_configInfo = parser.getConfigurationInfo();
-    // FIX in case m_ATI already exists
-  m_ATI = new AmpToolsInterface(m_configInfo);
   setAmpNamesFromConfigFile();
+  setRctNamesFromConfigFile();
+  if (m_ATI) delete m_ATI;
+  m_loadedATIReaction = "";
+}
+
+void
+FSAmpTools::showConfigInfo(){
+  if (!m_configInfo){
+    cout << "FSAmpTools::showConfigInfo:  ConfigurationInfo object not found" << endl;
+    return;
+  }
+  m_configInfo->display();
 }
 
 
@@ -98,33 +116,80 @@ FSAmpTools::setAmpNamesFromConfigFile(){
   }
 }
 
-vector<TString>
-FSAmpTools::getAmpNames(vector<TString> ampNames, TString ampNameLogic, bool show){
-  if (ampNameLogic == "") ampNameLogic = "*";
-  vector<TString> ampNamesSubset;
-  for (unsigned int i = 0; i < ampNames.size(); i++){
-    vector<TString> categories;  categories.push_back(ampNames[i]);
-    if (FSString::evalLogicalTString(ampNameLogic,categories)) ampNamesSubset.push_back(ampNames[i]);
-  }
-  if (show){
-    cout << "    AMPLITUDES:" << endl;
-    for (unsigned int i = 0; i < ampNamesSubset.size(); i++){
-      cout << "      (AMP " << i+1 << ")  " << ampNamesSubset[i] << endl;
+
+void
+FSAmpTools::setRctNamesFromConfigFile(){
+  m_rctNames.clear();
+  vector<ReactionInfo*> rcts = m_configInfo->reactionList(); 
+  for (unsigned int i = 0; i < rcts.size(); i++){
+    bool found = false;
+    for (unsigned int j = 0; j < m_rctNames.size(); j++){
+      if (rcts[i]->reactionName() == m_rctNames[j]){ found = true; break; }
     }
+    if (!found) m_rctNames.push_back(rcts[i]->reactionName());
   }
-  return ampNamesSubset;
+  if (m_rctNames.size() > 1){
+    for (unsigned int i = 0; i < m_rctNames.size()-1; i++){
+    for (unsigned int j = i+1; j < m_rctNames.size(); j++){
+      if (m_rctNames[j] < m_rctNames[i]){
+        TString tempName = m_rctNames[j];
+        m_rctNames[j] = m_rctNames[i];
+        m_rctNames[i] = tempName;
+      }
+    }}
+  }
 }
 
 
-vector<TString> 
-FSAmpTools::getAmpNames(TString ampNameLogic, bool show){
-  return getAmpNames(m_ampNames,ampNameLogic,show);
+vector<TString>
+FSAmpTools::getAmpNames(TString ampNameLogic, TString rctNameLogic, bool show){
+  if (ampNameLogic == "") ampNameLogic = "*";
+  if (rctNameLogic == "") rctNameLogic = "*";
+  TString bothNameLogic = "("+ampNameLogic+")&&("+rctNameLogic+"::*)";
+  vector<TString> ampNames;
+  for (unsigned int i = 0; i < m_ampNames.size(); i++){
+    vector<TString> categories;  categories.push_back(m_ampNames[i]);
+    if (FSString::evalLogicalTString(bothNameLogic,categories))
+      ampNames.push_back(m_ampNames[i]);
+  }
+  if (show){
+    cout << "    AMPLITUDES:" << endl;
+    for (unsigned int i = 0; i < ampNames.size(); i++){
+      cout << "      (AMP " << i+1 << ")  " << ampNames[i] << endl;
+    }
+  }
+  return ampNames;
 }
 
 
 void
-FSAmpTools::showAmpNames(TString ampNameLogic){
-  getAmpNames(ampNameLogic, true);
+FSAmpTools::showAmpNames(TString ampNameLogic, TString rctNameLogic){
+  getAmpNames(ampNameLogic, rctNameLogic, true);
+}
+
+
+vector<TString>
+FSAmpTools::getRctNames(TString rctNameLogic, bool show){
+  if (rctNameLogic == "") rctNameLogic = "*";
+  vector<TString> rctNames;
+  for (unsigned int i = 0; i < m_rctNames.size(); i++){
+    vector<TString> categories;  categories.push_back(m_rctNames[i]);
+    if (FSString::evalLogicalTString(rctNameLogic,categories))
+      rctNames.push_back(m_rctNames[i]);
+  }
+  if (show){
+    cout << "    REACTIONS:" << endl;
+    for (unsigned int i = 0; i < rctNames.size(); i++){
+      cout << "      (RCT " << i+1 << ")  " << rctNames[i] << endl;
+    }
+  }
+  return rctNames;
+}
+
+
+void
+FSAmpTools::showRctNames(TString rctNameLogic){
+  getRctNames(rctNameLogic, true);
 }
 
 
@@ -157,34 +222,43 @@ FSAmpTools::defineAmpWt(TString ampWtName, TString ampNameLogic, bool show){
       }
     }}
   }
-  if (show) getAmpWtNames("*",true);
+  if (show) getAmpWtNames("*","*",-1,true);
 }
 
 
 vector<TString> 
-FSAmpTools::getAmpWtNames(TString ampWtNameLogic, bool show){
+FSAmpTools::getAmpWtNames(TString ampWtNameLogic, TString rctNameLogic, int iEvent, bool show){
   if (ampWtNameLogic == "") ampWtNameLogic = "*";
-  vector<TString> ampWtNames;
+  if (rctNameLogic == "") rctNameLogic = "*";
+  vector<TString> ampWtNames1;
   for (unsigned int i = 0; i < m_ampWtNames.size(); i++){
     vector<TString> categories;  categories.push_back(m_ampWtNames[i]);
     if (FSString::evalLogicalTString(ampWtNameLogic,categories)) 
-      ampWtNames.push_back(m_ampWtNames[i]);
+      ampWtNames1.push_back(m_ampWtNames[i]);
+  }
+  vector<TString> ampWtNames2;
+  for (unsigned int i = 0; i < ampWtNames1.size(); i++){
+    TString ampNameLogic = m_ampWtMap[ampWtNames1[i]];
+    vector<TString> ampNames = getAmpNames(ampNameLogic, rctNameLogic);
+    if (ampNames.size() != 0) ampWtNames2.push_back(ampWtNames1[i]);
   }
   if (show){
     cout << "SETS OF AMPLITUDES FOR WEIGHTS:" << endl;
-    for (unsigned int i = 0; i < ampWtNames.size(); i++){
-      cout << "  (SET " << i+1 << ")  " << ampWtNames[i] << "  " << m_ampWtMap[ampWtNames[i]] << endl;
-      showAmpNames(m_ampWtMap[ampWtNames[i]]);
+    for (unsigned int i = 0; i < ampWtNames2.size(); i++){
+      cout << "  (SET " << i+1 << ")  " << ampWtNames2[i] << "  " << m_ampWtMap[ampWtNames2[i]] << endl;
+      showAmpNames(m_ampWtMap[ampWtNames2[i]],rctNameLogic);
+      if (iEvent >= 0) cout << "      VALUE = " << getAmpWt(ampWtNames2[i],iEvent) << endl;
     }
   }
-  return ampWtNames;
+  return ampWtNames2;
 }
 
 
 void
-FSAmpTools::showAmpWts(TString ampWtNameLogic){
-  getAmpWtNames(ampWtNameLogic,true);
+FSAmpTools::showAmpWts(TString ampWtNameLogic, TString rctNameLogic, int iEvent){
+  getAmpWtNames(ampWtNameLogic,rctNameLogic,iEvent,true);
 }
+
 
 void
 FSAmpTools::clearAmpWts(TString ampWtNameLogic, bool show){
@@ -200,6 +274,15 @@ void
 FSAmpTools::makeAmpWts(TString fileName, TString treeName, TString reactionName, 
                        int numParticles, double numGeneratedMCEvents){
 
+    // (0) set up an AmpToolsInterface
+  if (!m_configInfo){
+    cout << "no ConfigurationInfo object:  use setupFromConfigFile or setupFromFitResults" << endl;
+    return;
+  }
+  if (m_ATI) delete m_ATI;
+  m_ATI = new AmpToolsInterface(m_configInfo);
+  m_loadedATIReaction = "";
+
     // (1) set up a DataReader
   fileName = FSSystem::makeAbsolutePathName(fileName);
     // FIX: loop over filenames
@@ -208,12 +291,19 @@ FSAmpTools::makeAmpWts(TString fileName, TString treeName, TString reactionName,
   args.push_back(FSString::TString2string(treeName));
   args.push_back(FSString::TString2string(FSString::int2TString(numParticles)));
     // FIX: search for an existing one before making a new one
+  cout << "makeAmpWts: setting up data reader" << endl;
   FSAmpToolsDataReader* dataReader = new FSAmpToolsDataReader(args);
+  cout << "makeAmpWts: data reader events = " << dataReader->numEvents() << endl;
 
     // (2) set up the AmpToolsInterface
+  cout << "makeAmpWts: clearEvents in AmpToolsInterface" << endl;
   m_ATI->clearEvents();
+  cout << "makeAmpWts: loadEvents in AmpToolsInterface" << endl;
   m_ATI->loadEvents(dataReader);
+  cout << "makeAmpWts: AmpToolsInterface events = " << m_ATI->numEvents() << endl;
+  cout << "makeAmpWts: processEvents in AmpToolsInterface" << endl;
   double maxIntensity = m_ATI->processEvents(FSString::TString2string(reactionName));
+  cout << "makeAmpWts: maxIntensity = " << maxIntensity << endl;
   int numEvents = m_ATI->numEvents();
   double wtScale = 1.0;
   if (!m_parametersFromFit){
@@ -230,31 +320,10 @@ FSAmpTools::makeAmpWts(TString fileName, TString treeName, TString reactionName,
   }
 
     // (3) set up the lists of amplitude names
-  vector< pair< TString, vector< vector<string> > > > vpairsWts;
-  vector<TString> ampWtNames;
-  for (unsigned int i = 0; i < m_ampWtNames.size(); i++){
-    TString wtType = FSString::subString(m_ampWtNames[i],0,2);
-      // only use amplitudes from this reaction
-    TString reactionNameLogic = reactionName+"::*";
-    vector<TString> ampNames = getAmpNames(m_ampWtMap[m_ampWtNames[i]]);
-    ampNames = getAmpNames(ampNames,reactionNameLogic);
-    if (ampNames.size() == 0) continue;
-      // sort the amplitudes into sums and do some checks
-    vector< vector<TString> > sortedAmps = sortAmpsIntoSums(ampNames);
-    if (((wtType == "RE") || (wtType == "IM") || (wtType == "PH")) && sortedAmps.size() != 1){
-      cout << "Can't use RE/IM/PH with amps from different sums -- skipping " 
-           << m_ampWtNames[i] << endl; continue; }
-      // pack everything up to use in the loop over events
-    ampWtNames.push_back(m_ampWtNames[i]);
-    vector< vector<string> > sortedAmpsStrings = vvTString2string(sortedAmps);
-    vpairsWts.push_back(pair<TString, vector< vector<string> > >(wtType,sortedAmpsStrings));
-  }
-  if (ampWtNames.size() == 0){
-    cout << "No weights to calculate -- skipping" << endl; return;
-  }
-  if (ampWtNames.size() > 100){
-    cout << "Current limit is 100 weights -- skipping" << endl; return;
-  }
+  vector< pair< pair<TString,TString>, vector< vector<string> > > > 
+    vpairsWts = groupAmpsForWts(reactionName,"*");
+  cout << "makeAmpWts: calculate these weights..." << endl;
+  showAmpWts("*", reactionName);
 
     // (4) set up a friend tree
   FSTree::addFriendTree("AmpWts");
@@ -263,29 +332,86 @@ FSAmpTools::makeAmpWts(TString fileName, TString treeName, TString reactionName,
   TFile* wtTFile = new TFile(fileName_wt,"recreate");  wtTFile->cd();
   TTree* wtTTree = new TTree(treeName_wt, treeName_wt);
   Double_t WTS[100];
-  for (unsigned int i = 0; i < ampWtNames.size(); i++){
-    wtTTree->Branch(ampWtNames[i], &WTS[i], ampWtNames[i]+"/D");
+  for (unsigned int i = 0; i < vpairsWts.size(); i++){
+    TString ampWtName = vpairsWts[i].first.first;
+    wtTTree->Branch(ampWtName, &WTS[i], ampWtName+"/D");
   }
 
     // (5) loop over events and fill the friend tree
+  cout << "makeAmpWts: filling the AmpWts friend tree" << endl;
   for (int iEvent = 0; iEvent < numEvents; iEvent++){
-    for (unsigned int i = 0; i < ampWtNames.size(); i++){
-      if (vpairsWts[i].first == "IN") WTS[i] = calcINFromATI(iEvent, vpairsWts[i].second);
-      if (vpairsWts[i].first == "RE") WTS[i] = calcREFromATI(iEvent, vpairsWts[i].second[0]);
-      if (vpairsWts[i].first == "IM") WTS[i] = calcIMFromATI(iEvent, vpairsWts[i].second[0]);
-      if (vpairsWts[i].first == "PH") WTS[i] = calcPHFromATI(iEvent, vpairsWts[i].second[0]);
+    if (iEvent%10000 == 0) cout << "makeAmpWts: event " << iEvent << endl;
+    for (unsigned int i = 0; i < vpairsWts.size(); i++){
+      if (vpairsWts[i].first.second == "IN") WTS[i] = calcINFromATI(iEvent, vpairsWts[i].second);
+      if (vpairsWts[i].first.second == "RE") WTS[i] = calcREFromATI(iEvent, vpairsWts[i].second[0]);
+      if (vpairsWts[i].first.second == "IM") WTS[i] = calcIMFromATI(iEvent, vpairsWts[i].second[0]);
+      if (vpairsWts[i].first.second == "PH") WTS[i] = calcPHFromATI(iEvent, vpairsWts[i].second[0]);
       WTS[i] *= wtScale;
     }
     wtTTree->Fill();
   }
 
     // (6) write the friend tree
+  cout << "makeAmpWts: writing the friend tree" << endl;
   wtTFile->cd();
   wtTTree->Write();
   delete wtTFile;
   gDirectory->cd();
+  m_loadedATIReaction = reactionName;
+  cout << "makeAmpWts: finished" << endl;
 }
 
+
+
+double
+FSAmpTools::getAmpWt(TString ampWtName, int iEvent){
+  if (!m_ATI){ cout << "getAmpWt: No ATI" << endl; return 0.0; }
+  if (m_loadedATIReaction == ""){ cout << "getAmpWt: No loaded reaction" << endl; return 0.0; }
+  vector< pair< pair<TString,TString>, vector< vector<string> > > > 
+    vpairsWts = groupAmpsForWts(m_loadedATIReaction, ampWtName);
+  if (vpairsWts.size() != 1){
+    cout << "Can't find ampWt with name: " << ampWtName << " ... skipping ..." << endl;
+    return 0.0;
+  }
+  if (vpairsWts[0].first.second == "IN") return calcINFromATI(iEvent, vpairsWts[0].second);
+  if (vpairsWts[0].first.second == "RE") return calcREFromATI(iEvent, vpairsWts[0].second[0]);
+  if (vpairsWts[0].first.second == "IM") return calcIMFromATI(iEvent, vpairsWts[0].second[0]);
+  if (vpairsWts[0].first.second == "PH") return calcPHFromATI(iEvent, vpairsWts[0].second[0]);
+  return 0.0;
+}
+
+
+
+  // vector< pair< pair<ampWtName,ampWtType>, vector< vector<ampName> > > > 
+vector< pair< pair<TString,TString>, vector< vector<string> > > > 
+FSAmpTools::groupAmpsForWts(TString reactionName, TString ampWtNameLogic){
+  vector< pair< pair<TString,TString>, vector< vector<string> > > > vpairsWts;
+  vector<TString> usedAmpWtNames;
+  vector<TString> allAmpWtNames = getAmpWtNames(ampWtNameLogic, reactionName);
+  for (unsigned int i = 0; i < allAmpWtNames.size(); i++){
+    TString wtType = FSString::subString(allAmpWtNames[i],0,2);
+      // only use amplitudes from this reaction
+    vector<TString> ampNames = getAmpNames(m_ampWtMap[allAmpWtNames[i]],reactionName);
+    if (ampNames.size() == 0) continue;
+      // sort the amplitudes into sums and do some checks
+    vector< vector<TString> > sortedAmps = sortAmpsIntoSums(ampNames);
+    if (((wtType == "RE") || (wtType == "IM") || (wtType == "PH")) && sortedAmps.size() != 1){
+      cout << "Can't use RE/IM/PH with amps from different sums -- skipping " 
+           << allAmpWtNames[i] << endl; continue; }
+      // pack everything up to use in the loop over events
+    usedAmpWtNames.push_back(allAmpWtNames[i]);
+    vector< vector<string> > sortedAmpsStrings = vvTString2string(sortedAmps);
+    vpairsWts.push_back(pair< pair<TString,TString>, vector< vector<string> > >
+      (pair<TString,TString>(allAmpWtNames[i],wtType),sortedAmpsStrings));
+  }
+  if (usedAmpWtNames.size() == 0){
+    cout << "No weights to calculate -- skipping" << endl; vpairsWts.clear(); return vpairsWts;
+  }
+  if (usedAmpWtNames.size() > 100){
+    cout << "Current limit is 100 weights -- skipping" << endl; vpairsWts.clear(); return vpairsWts;
+  }
+  return vpairsWts;
+}
 
 
 vector< vector<TString> >
