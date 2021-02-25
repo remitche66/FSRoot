@@ -12,6 +12,7 @@
 #include "FSAmpToolsAmp/BreitWigner.h"
 #include "FSAmpToolsAmp/BreitWignerNils.h"
 #include "FSAmpToolsAmp/flexAmp.h"
+#include "FSAmpToolsAmp/Zlm.h"
 
 
   // static member data
@@ -29,6 +30,7 @@ FSAmpTools::setupFromFitResults(TString fitResultsFile){
   AmpToolsInterface::registerAmplitude(BreitWigner());
   AmpToolsInterface::registerAmplitude(BreitWignerNils());
   AmpToolsInterface::registerAmplitude(flexAmp());
+  AmpToolsInterface::registerAmplitude(Zlm());
   AmpToolsInterface::registerDataReader(FSAmpToolsDataReader());
   m_parametersFromFit = true;
   fitResultsFile = FSSystem::makeAbsolutePathName(fitResultsFile);
@@ -69,6 +71,7 @@ FSAmpTools::setupFromConfigFile(TString configFile){
   AmpToolsInterface::registerAmplitude(BreitWigner());
   AmpToolsInterface::registerAmplitude(BreitWignerNils());
   AmpToolsInterface::registerAmplitude(flexAmp());
+  AmpToolsInterface::registerAmplitude(Zlm());
   AmpToolsInterface::registerDataReader(FSAmpToolsDataReader());
   m_parametersFromFit = false;
   configFile = FSSystem::makeAbsolutePathName(configFile);
@@ -331,7 +334,7 @@ FSAmpTools::makeAmpWts(TString fileName, TString treeName, TString reactionName,
   TString treeName_wt(treeName);  treeName_wt += "_AmpWts";
   TFile* wtTFile = new TFile(fileName_wt,"recreate");  wtTFile->cd();
   TTree* wtTTree = new TTree(treeName_wt, treeName_wt);
-  Double_t WTS[100];
+  Double_t WTS[1000];
   for (unsigned int i = 0; i < vpairsWts.size(); i++){
     TString ampWtName = vpairsWts[i].first.first;
     wtTTree->Branch(ampWtName, &WTS[i], ampWtName+"/D");
@@ -407,8 +410,8 @@ FSAmpTools::groupAmpsForWts(TString reactionName, TString ampWtNameLogic){
   if (usedAmpWtNames.size() == 0){
     cout << "No weights to calculate -- skipping" << endl; vpairsWts.clear(); return vpairsWts;
   }
-  if (usedAmpWtNames.size() > 100){
-    cout << "Current limit is 100 weights -- skipping" << endl; vpairsWts.clear(); return vpairsWts;
+  if (usedAmpWtNames.size() > 1000){
+    cout << "Current limit is 1000 weights -- skipping" << endl; vpairsWts.clear(); return vpairsWts;
   }
   return vpairsWts;
 }
