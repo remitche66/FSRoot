@@ -18,10 +18,12 @@ FSAmpToolsDataReader::FSAmpToolsDataReader( const vector< string >& args ) :
 UserDataReader< FSAmpToolsDataReader >(args),
 m_eventCounter( 0 ){
   
-  assert(args.size() == 3);
+  assert(args.size() >= 3 && args.size() <= 4);
   string inFileName(args[0]);
   string inTreeName(args[1]);
   m_numParticles = atoi(args[2].c_str());
+  TString fourMomentumPrefix = "";
+  if (args.size() == 4) fourMomentumPrefix = args[3];
   assert (m_numParticles < 50);
 
   TH1::AddDirectory( kFALSE );
@@ -41,10 +43,10 @@ m_eventCounter( 0 ){
   if (m_inTree){
     for (unsigned int i = 0; i < m_numParticles; i++){
       TString sI("");  sI += (i+1);
-      TString sEnPi = "EnP"+sI;
-      TString sPxPi = "PxP"+sI;
-      TString sPyPi = "PyP"+sI;
-      TString sPzPi = "PzP"+sI;
+      TString sEnPi = fourMomentumPrefix+"EnP"+sI;
+      TString sPxPi = fourMomentumPrefix+"PxP"+sI;
+      TString sPyPi = fourMomentumPrefix+"PyP"+sI;
+      TString sPzPi = fourMomentumPrefix+"PzP"+sI;
       m_inTree->SetBranchAddress( sEnPi, &m_EnP[i] );
       m_inTree->SetBranchAddress( sPxPi, &m_PxP[i] );
       m_inTree->SetBranchAddress( sPyPi, &m_PyP[i] );
