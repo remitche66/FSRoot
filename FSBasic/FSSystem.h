@@ -46,6 +46,11 @@ class FSSystem{
 
     static bool checkRootFormat(TString path, bool useCache = false);
 
+      // **********************************
+      //   RETURN THE HOST NAME
+      // **********************************
+
+    static TString getHostName();
 
 
   private:

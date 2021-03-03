@@ -301,6 +301,12 @@ FSTree::skimTree(TString fileNameInput, TString chainName,
   newChainName = FSString::removeWhiteSpace(newChainName);
   printCommandFile = FSString::removeWhiteSpace(printCommandFile);
   if (chainName == "") chainName = getTreeNameFromFile(fileNameInput);
+  int maxEntries = -1;
+  if (cuts.Contains("MAXENTRIES=")){
+    pair<int,TString> pairMaxEntries = FSTree::processMaxEntries(cuts);
+    maxEntries = pairMaxEntries.first;
+    cuts = pairMaxEntries.second;
+  }
 
     // expand "cuts" using FSCut and check for multidimensional sidebands
 
@@ -386,7 +392,13 @@ FSTree::skimTree(TString fileNameInput, TString chainName,
 
   // copy the tree with selection criteria
 
-  TTree* tree2 = nt->CopyTree(newCuts);
+  TTree* tree2 = NULL;
+  if (maxEntries < 0)  tree2 = nt->CopyTree(newCuts);
+  if (maxEntries >= 0) tree2 = nt->CopyTree(newCuts,"",maxEntries);
+  if (!tree2){
+    cout << "Could not copy the tree....  skipping..." << endl;
+    return;
+  }
   if (newChainName != ""){ tree2->SetName(newChainName); tree2->SetTitle(newChainName); }
   if (!FSControl::QUIET){
     cout << "Number of entries kept:" << endl;
@@ -451,7 +463,13 @@ FSTree::skimTree(TString fileNameInput, TString chainName,
          << "\nTo File: \n\t" << fileNameFriend << endl;
     TFile* fileFriend = new TFile(fileNameFriend,"recreate");
     fileFriend->cd();
-    TTree* treeFriend = friendTrees[i]->CopyTree(newCuts);
+    TTree* treeFriend = NULL;
+    if (maxEntries < 0)  treeFriend = friendTrees[i]->CopyTree(newCuts);
+    if (maxEntries >= 0) treeFriend = friendTrees[i]->CopyTree(newCuts,"",maxEntries);
+    if (!treeFriend){
+      cout << "Could not copy the friend tree....  skipping..." << endl;
+      return;
+    }
     cout << "\nNumber of entries kept:  \n\t"
          << FSString::int2TString(treeFriend->GetEntries(),0,true) << endl << endl;
     if (treeFriend->GetListOfFriends()) treeFriend->GetListOfFriends()->Clear();
@@ -926,5 +944,23 @@ FSTree::clearChainCache(){
   m_chainCache.clear();
   if (FSControl::DEBUG) 
     cout << "FSTree: done clearing chain cache" << endl;
+}
+
+
+  // ********************************************************
+  // HELPER FUNCTION FOR MAXENTRIES
+  // ********************************************************
+
+pair<int,TString> 
+FSTree::processMaxEntries(TString input){
+  if (!input.Contains("MAXENTRIES=")) return pair<int,TString>(-1,input);
+  TString subInput = FSString::subString(input,input.Index("MAXENTRIES="),input.Length());
+  int nMaxEntries = FSString::TString2int(subInput);
+  TString modifiedInput = input;
+  if (modifiedInput.Contains("MAXENTRIES=="))
+    modifiedInput.Replace(modifiedInput.Index("MAXENTRIES=="),12,"0!=");
+  if (modifiedInput.Contains("MAXENTRIES="))
+    modifiedInput.Replace(modifiedInput.Index("MAXENTRIES="),11,"0!=");
+  return pair<int,TString> (nMaxEntries,modifiedInput);
 }
 

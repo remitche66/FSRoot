@@ -241,3 +241,10 @@ FSSystem::getAbsolutePathsWildcards(TString path, bool show){
   return paths;
 }
 
+
+TString
+FSSystem::getHostName(){
+  TString hostName = gSystem->HostName();
+  return hostName;
+}
+
