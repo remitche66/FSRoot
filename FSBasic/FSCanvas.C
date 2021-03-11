@@ -4,6 +4,8 @@
 #include "TStyle.h"
 #include "TH2F.h"
 #include "TRandom.h"
+#include "TLine.h"
+#include "TArrow.h"
 #include "FSBasic/FSCanvas.h"
 
 
@@ -89,3 +91,25 @@ FSCanvas::testColorScheme(int i){
   hist->Draw("colz");
 }
 
+
+
+  // ********************************************************
+  //  DRAW AN ARROW (size and length are in percent of canvas width)
+  // ********************************************************
+
+void
+FSCanvas::drawCutArrow(double x, int color, TString type, double size, double length){
+  if (!gPad) return;
+  if (type.Contains("<")) length = -1.0*length;
+  double xmin = gPad->GetX1();
+  double xmax = gPad->GetX2();
+  double ymax = gPad->GetY2();
+  double xline = x;
+  double xarr1 = x;
+  double xarr2 = xline + (xmax-xmin)*length;
+  if (type.Contains("<")){ double xtemp = xarr2; xarr2 = xarr1; xarr1 = xtemp; }
+  TLine* tline1 = new TLine(xline,0.0,xline,ymax*0.5);
+  tline1->SetLineColor(color); tline1->Draw();
+  TArrow* tarr1 = new TArrow(xarr1,ymax*0.25,xarr2,ymax*0.25,size,type);
+  tarr1->SetFillColor(color); tarr1->SetLineColor(color); tarr1->Draw();
+}
