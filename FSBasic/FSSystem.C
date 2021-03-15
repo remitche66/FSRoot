@@ -248,3 +248,20 @@ FSSystem::getHostName(){
   return hostName;
 }
 
+
+TString 
+FSSystem::replaceBaseName(TString newBaseName, TString oldPath, bool useCache){
+  newBaseName = makeAbsolutePathName(newBaseName);
+  oldPath = makeAbsolutePathName(oldPath);
+  vector<TString> oldPathParts = FSString::parseTString(oldPath,"/");
+  for (unsigned int i = 0; i < oldPathParts.size(); i++){
+    TString checkPath = newBaseName;
+    for (unsigned int j = i; j < oldPathParts.size(); j++){
+      checkPath += "/";  checkPath += oldPathParts[j];
+    }
+    checkPath = getAbsolutePath(checkPath,useCache);
+    if (checkPath != "") return checkPath;
+  }
+  return TString("");
+}
+
