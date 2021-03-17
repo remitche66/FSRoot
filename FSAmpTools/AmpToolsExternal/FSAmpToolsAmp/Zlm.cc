@@ -87,7 +87,10 @@ Zlm::calcAmplitude( GDouble** pKin ) const {
   GDouble Pgamma;  
   TVector3 eps(cos(polAngle*TMath::DegToRad()), sin(polAngle*TMath::DegToRad()), 0.0); // beam polarization vector
   GDouble Phi = atan2(y.Dot(eps), beam.Vect().Unit().Dot(eps.Cross(y)));
-  
+
+  return zlmAmplitude(cosTheta, phi, Phi, m_j, m_m, m_r, m_s, polAngle, polFraction);
+
+/*  
   if(polFraction > 0.) { // for fitting with constant polarization 
     Pgamma = polFraction;
   }
@@ -98,15 +101,23 @@ Zlm::calcAmplitude( GDouble** pKin ) const {
     }
     else Pgamma = polFrac_vs_E->GetBinContent(bin);
   }
-  
-  GDouble Factor = sqrt(1 + m_s * Pgamma);
-  GDouble zlm = 0;
-  complex< GDouble > rotateY = polar(1., -1.*Phi);
-  if (m_r == 1)
-    zlm = real(Y( m_j, m_m, cosTheta, phi ) * rotateY);
-  if (m_r == -1)
-    zlm = imag(Y( m_j, m_m, cosTheta, phi ) * rotateY);
+*/
 
-  return complex< GDouble >( static_cast< GDouble>( Factor ) * zlm );
 }
 
+complex< GDouble >
+Zlm::zlmAmplitude(double cosTheta, double phi, double Phi, int J, int M, int R, int S, double lpolAngle, double lpolFraction){
+
+  GDouble Pgamma = lpolFraction;
+  
+  GDouble Factor = sqrt(1 + S * Pgamma);
+  GDouble zlm = 0;
+  complex< GDouble > rotateY = polar(1., -1.*Phi);
+  if (R == 1)
+    zlm = real(Y( J, M, cosTheta, phi ) * rotateY);
+  if (R == -1)
+    zlm = imag(Y( J, M, cosTheta, phi ) * rotateY);
+
+  return complex< GDouble >( static_cast< GDouble>( Factor ) * zlm );
+
+}

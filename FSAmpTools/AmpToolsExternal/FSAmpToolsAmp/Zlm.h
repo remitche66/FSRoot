@@ -35,6 +35,9 @@ public:
 	string name() const { return "Zlm"; }
     
 	complex< GDouble > calcAmplitude( GDouble** pKin ) const;
+
+        static complex< GDouble > zlmAmplitude(double cosTheta, double phi, double Phi, int J, int M, int R, int S, double lpolAngle, double lpolFraction);
+
 	
 private:
         
