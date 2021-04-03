@@ -4,13 +4,29 @@
 *.log
 *.toc
 *.aux
+*.dep
 ExampleProgram
 FSSkimTree
 FSModeSkimTree
 FSModeCreateRankingTree
 *NOTES*
 *TEST*
-FSAmpTools*
+FSAmpToolsReadAmplitudes
+fitAmplitudes
+generateBackground
+generatePhaseSpace
+generatePhysics
+parseConfigFile
+plotData
+plotResults
+printAmplitudes
+toyAcceptance
+*SYMDEF*
+*.fit
+*.ni
+*.root
+*.root.*
+
 
 # Prerequisites
 *.d
