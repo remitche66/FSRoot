@@ -52,6 +52,16 @@ class FSSystem{
 
     static TString getHostName();
 
+      // **********************************
+      //   REPLACE THE BASE OF A PATH WITH A NEW BASE
+      //    -- make a new path called newBaseName/oldPath
+      //    -- if that points to an existing file or directory, return it
+      //    -- if not, remove the lowest directory from oldPath and repeat
+      //    -- keep shortening oldPath until an existing path is found, or return empty
+      // **********************************
+
+    static TString replaceBaseName(TString newBaseName, TString oldPath, bool useCache = false);
+
 
   private:
 
