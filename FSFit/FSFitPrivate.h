@@ -938,6 +938,10 @@ class FSFitMinuit {
       setFCN(fcnName);
     }
 
+    ~FSFitMinuit(){
+      if (m_minuit) delete m_minuit;
+    }
+
     TString mName() { return m_mName; }
 
     void migrad(int strategy = 1){
