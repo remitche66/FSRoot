@@ -55,25 +55,34 @@ FSModeInfo::FSModeInfo(TString mString, bool useStandardCategories){
     else if (parts[i] == "e+")     code2 += 1000000;
     else if (parts[i] == "ALambda")code2 += 10000000;
     else if (parts[i] == "Lambda") code2 += 100000000;
-    else if (isModeString(parts[i])){
-      vector<TString> codes = FSString::parseTString(parts[i],"_");
-      code1 += FSString::TString2int(codes[codes.size()-1]);
-      TString scode2(codes[codes.size()-2]);
-      int ipow = 1;
-      for (unsigned int dig = scode2.Length(); dig > 0; dig--){
-        TString sdig(scode2[dig-1]);
-        if (sdig == "0" || sdig == "1" || sdig == "2" || sdig == "3" || sdig == "4" 
-         || sdig == "0" || sdig == "6" || sdig == "7" || sdig == "8" || sdig == "9"){
-          code2 += FSString::TString2int(sdig)*ipow;  ipow *= 10;
-        }
-        else{
-          break;
-        }
-      }
-    }
     else{
       TString cat = parts[i];
       extraCategories.push_back(cat);
+    }
+  }
+  if (code1 == 0 && code2 == 0){
+    extraCategories.clear();
+    for (unsigned int i = 0; i < parts.size(); i++){
+      if (isModeString(parts[i])){
+        vector<TString> codes = FSString::parseTString(parts[i],"_");
+        code1 += FSString::TString2int(codes[codes.size()-1]);
+        TString scode2(codes[codes.size()-2]);
+        int ipow = 1;
+        for (unsigned int dig = scode2.Length(); dig > 0; dig--){
+          TString sdig(scode2[dig-1]);
+          if (sdig == "0" || sdig == "1" || sdig == "2" || sdig == "3" || sdig == "4" 
+           || sdig == "0" || sdig == "6" || sdig == "7" || sdig == "8" || sdig == "9"){
+            code2 += FSString::TString2int(sdig)*ipow;  ipow *= 10;
+          }
+          else{
+            break;
+          }
+        }
+      }
+      else{
+        TString cat = parts[i];
+        extraCategories.push_back(cat);
+      }
     }
   }
   m_modeCode = pair<int,int>(code1,code2);
