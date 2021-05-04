@@ -215,6 +215,11 @@ FSXYPoint::checkMap(map<TString, vector<TString> > mValues){
 }
 
 
+// input is a string like
+//   "key1: value1a value2a  key2  :value2a value2b"
+//     (using ":" to separate keys from values
+//       and " " to separate everything else)
+// returns map< KEY, vector<value> >
 
 map<TString, vector<TString> >
 FSXYPoint::parseValuesFromString(TString sValues){
@@ -247,35 +252,19 @@ bool
 FSXYPoint::setXYV(TString XY, vector<TString> sVals){
   sVals = FSString::parseTString(sVals);
   if ((sVals.size() == 0) || (sVals[0].Length() == 0)) return false;
-  TString sSign = ""; TString d(sVals[0][0]); if (d == "-"){ sSign = "-"; sVals[0].Replace(0,1,""); }
-  vector<TString> spacers; spacers.push_back("+"); spacers.push_back("-");
-  sVals = FSString::parseTString(sVals,spacers,true);
-  if (sVals.size() == 0) return false;
-  sVals[0] = sSign + sVals[0];
   if (XY == "X") setXV(FSString::TString2double(sVals[0])); 
   if (XY == "Y") setYV(FSString::TString2double(sVals[0])); 
   if (sVals.size() == 1) return true;
-  if ((sVals.size() == 4) && (sVals[1] == "+") && (sVals[2] == "-")){ setXYE(XY+"E",  sVals[3]); return true;}
-  if ((sVals.size() == 5) && (sVals[1] == "+") && (sVals[3] == "-")){ setXYE(XY+"EH", sVals[2]);
-                                                                      setXYE(XY+"EL", sVals[4]); return true;}
-  if ((sVals.size() == 7) && (sVals[1] == "+") && (sVals[2] == "-")
-                          && (sVals[4] == "+") && (sVals[5] == "-")){ setXYE(XY+"E",  sVals[3]);
-                                                                      setXYE(XY+"ES", sVals[6]); return true;}
-  if ((sVals.size() == 8) && (sVals[1] == "+") && (sVals[2] == "-")
-                          && (sVals[4] == "+") && (sVals[6] == "-")){ setXYE(XY+"E",  sVals[3]);
-                                                                      setXYE(XY+"ESH",sVals[5]);
-                                                                      setXYE(XY+"ESL",sVals[7]); return true;}
-  if ((sVals.size() == 8) && (sVals[1] == "+") && (sVals[3] == "-")
-                          && (sVals[5] == "+") && (sVals[6] == "-")){ setXYE(XY+"EH", sVals[2]);
-                                                                      setXYE(XY+"EL", sVals[4]);
-                                                                      setXYE(XY+"ES", sVals[7]); return true;}
-  if ((sVals.size() == 9) && (sVals[1] == "+") && (sVals[3] == "-")
-                          && (sVals[5] == "+") && (sVals[7] == "-")){ setXYE(XY+"EH", sVals[2]);
-                                                                      setXYE(XY+"EL", sVals[4]);
-                                                                      setXYE(XY+"ESH",sVals[6]);
-                                                                      setXYE(XY+"ESL",sVals[8]); return true;}
-  cout << "FSXYPoint ERROR: problem setting values" << endl;
-  return false;
+  bool systp = false;  bool systm = false;
+  for (unsigned int i = 1; i < sVals.size()-1; i++){
+         if (sVals[i] == "+"  && !systp)          { setXYE(XY+"EH", sVals[i+1]);  systp = true; }
+    else if (sVals[i] == "-"  && !systm)          { setXYE(XY+"EL", sVals[i+1]);  systm = true; }
+    else if (sVals[i] == "+-" && !systm && !systp){ setXYE(XY+"E",  sVals[i+1]);  systm = true; systp = true; }
+    else if (sVals[i] == "+"  &&  systp)          { setXYE(XY+"ESH",sVals[i+1]);  systp = true; }
+    else if (sVals[i] == "-"  &&  systm)          { setXYE(XY+"ESL",sVals[i+1]);  systm = true; }
+    else if (sVals[i] == "+-" && (systm || systp)){ setXYE(XY+"ES", sVals[i+1]);  systm = true; systp = true; }
+  }
+  return true;
 }
 
 
