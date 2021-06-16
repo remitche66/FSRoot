@@ -76,6 +76,7 @@ FSHistogram::getTH2F(TH2F* hist){
     if (hist->GetMaximum() == 0.0) hist->SetMaximum(1.0);
     hist->SetTitleOffset(1.5,"X");
     hist->SetTitleOffset(1.8,"Y");
+    hist->GetZaxis()->SetLabelSize(0.03);
   }
   return hist;
 }

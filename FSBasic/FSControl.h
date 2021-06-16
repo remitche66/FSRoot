@@ -27,7 +27,7 @@ class FSControl{
                                     //    in executables, for example)
 
 // **********
-// FORMATTING
+// FORMATTING (also see FSHistogram::getTH1F and getTH2F)
 // **********
 
 gStyle->SetFillColor(10);
@@ -46,6 +46,8 @@ gStyle->SetCanvasDefW(600.0);
 
 gStyle->SetTitleOffset(1.5,"Y");
 gStyle->SetStripDecimals(false);
+
+gStyle->SetLabelSize(0.03, "Z");
 
 
 // ***********
