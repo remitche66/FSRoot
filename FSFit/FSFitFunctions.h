@@ -10,29 +10,68 @@ using namespace std;
 class FSFitPOLY : public FSFitFunction{
   public:
 
-    FSFitPOLY(TString n_fName, double n_xLow, double n_xHigh) :
+    FSFitPOLY(TString n_fName, double n_xLow, double n_xHigh, int n_order = 2, double n_central = 0.0) :
       FSFitFunction(n_fName,n_xLow,n_xHigh){ 
-      addParameter("a",10.0,"variable a");
-      addParameter("b", 0.0,"variable b");
-      addParameter("c", 0.0,"variable c");
+      m_order = n_order;
+      m_central = n_central;
+      if (m_order >= 0) addParameter("a",10.0,"variable a");
+      if (m_order >= 1) addParameter("b", 0.0,"variable b");
+      if (m_order >= 2) addParameter("c", 0.0,"variable c");
+      if (m_order >= 3) addParameter("d", 0.0,"variable d");
+      if (m_order >= 4) addParameter("e", 0.0,"variable e");
+      if (m_order >= 5) addParameter("f", 0.0,"variable f");
+      if (m_order >= 6) addParameter("g", 0.0,"variable g");
+      for (int i = 0; i < 7; i++){ m_pars[i] = 0.0; }
     }
 
     double fx (double x){
-      double a = getParameterValue("a");
-      double b = getParameterValue("b");
-      double c = getParameterValue("c");
-      return (a + b*x + c*x*x);
+      if (m_order >= 0) m_pars[0] = getParameterValue("a");
+      if (m_order >= 1) m_pars[1] = getParameterValue("b");
+      if (m_order >= 2) m_pars[2] = getParameterValue("c");
+      if (m_order >= 3) m_pars[3] = getParameterValue("d");
+      if (m_order >= 4) m_pars[4] = getParameterValue("e");
+      if (m_order >= 5) m_pars[5] = getParameterValue("f");
+      if (m_order >= 6) m_pars[6] = getParameterValue("g");
+      return  m_pars[0] +
+              m_pars[1]*pow((x-m_central),1) +
+              m_pars[2]*pow((x-m_central),2) +
+              m_pars[3]*pow((x-m_central),3) +
+              m_pars[4]*pow((x-m_central),4) +
+              m_pars[5]*pow((x-m_central),5) +
+              m_pars[6]*pow((x-m_central),6);
     }
 
     double integral(double x1, double x2){
-      double a = getParameterValue("a");
-      double b = getParameterValue("b");
-      double c = getParameterValue("c");
-      return (   a*x2 + 1.0/2.0*b*x2*x2 + 1.0/3.0*c*x2*x2*x2
-               - a*x1 - 1.0/2.0*b*x1*x1 - 1.0/3.0*c*x1*x1*x1 );
+      if (m_order >= 0) m_pars[0] = getParameterValue("a");
+      if (m_order >= 1) m_pars[1] = getParameterValue("b");
+      if (m_order >= 2) m_pars[2] = getParameterValue("c");
+      if (m_order >= 3) m_pars[3] = getParameterValue("d");
+      if (m_order >= 4) m_pars[4] = getParameterValue("e");
+      if (m_order >= 5) m_pars[5] = getParameterValue("f");
+      if (m_order >= 6) m_pars[6] = getParameterValue("g");
+      return (          m_pars[0]*x2 +
+              1.0/2.0 * m_pars[1]*pow((x2-m_central),2) +
+              1.0/3.0 * m_pars[2]*pow((x2-m_central),3) +
+              1.0/4.0 * m_pars[3]*pow((x2-m_central),4) +
+              1.0/5.0 * m_pars[4]*pow((x2-m_central),5) +
+              1.0/6.0 * m_pars[5]*pow((x2-m_central),6) +
+              1.0/7.0 * m_pars[6]*pow((x2-m_central),7) -
+                        m_pars[0]*x1 -
+              1.0/2.0 * m_pars[1]*pow((x1-m_central),2) -
+              1.0/3.0 * m_pars[2]*pow((x1-m_central),3) -
+              1.0/4.0 * m_pars[3]*pow((x1-m_central),4) -
+              1.0/5.0 * m_pars[4]*pow((x1-m_central),5) -
+              1.0/6.0 * m_pars[5]*pow((x1-m_central),6) -
+              1.0/7.0 * m_pars[6]*pow((x1-m_central),7) );
     }
 
-    FSFitPOLY* clone(){ return new FSFitPOLY("",m_xLow,m_xHigh); }
+    FSFitPOLY* clone(){ return new FSFitPOLY("",m_xLow,m_xHigh,m_order,m_central); }
+
+  private:
+
+    int m_order;
+    double m_central;
+    double m_pars[7];
 
 };
 
