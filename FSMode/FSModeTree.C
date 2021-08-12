@@ -257,6 +257,11 @@ FSModeTree::createRankingTree(TString fileName, TString ntName, TString category
         if (fsCuts.size() == 1){ cuts_i = modeVector[i]->modeString(fsCuts[0].first); }
         else{ cout << "FSModeTree::createRankingTree Error: "
                       "multidimensional sidebands not allowed" << endl; exit(1); }
+        vector<TString> modeCuts = modeVector[i]->modeCombinatorics(cuts_i);
+        if (modeCuts.size() == 1){ cuts_i = modeVector[i]->modeString(modeCuts[0]); }
+        else{ cout << "FSModeTree::createRankingTree Error: "
+                      "multiple combinations not allowed in cuts" << endl; 
+                       modeVector[i]->modeCombinatorics(cuts_i,true);  exit(1); }
       TString rankVar_i   = modeVector[i]->modeString(rankVar);
       TString groupVar1_i = modeVector[i]->modeString(groupVar1);
       TString groupVar2_i = modeVector[i]->modeString(groupVar2);
