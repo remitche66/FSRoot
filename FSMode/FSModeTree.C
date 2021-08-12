@@ -51,12 +51,7 @@ FSModeTree::skimTree(TString fileNameInput, TString ntName, TString category,
     // check if we need to loop over modes
 
   bool loopOverModes = false;
-  if (modeVector.size() > 0){
-    if (modeVector[0]->modeString(ntName)         != ntName)         loopOverModes = true;
-    if (modeVector[0]->modeString(fileNameInput)  != fileNameInput)  loopOverModes = true;
-    if (modeVector[0]->modeString(fileNameOutput) != fileNameOutput) loopOverModes = true;
-    if (modeVector[0]->modeString(cuts)           != cuts)           loopOverModes = true;
-  }
+  if (modeVector.size() > 0) loopOverModes = true;
 
 
     // loop over modes if we need to
@@ -70,6 +65,10 @@ FSModeTree::skimTree(TString fileNameInput, TString ntName, TString category,
         vector< pair<TString,double> > fsCuts = FSCut::expandCuts(cuts_i);
         if (fsCuts.size() == 1){ cuts_i = modeVector[i]->modeString(fsCuts[0].first); }
         else{ cout << "FSModeTree::skimTree Error: multidimensional sidebands not allowed" << endl; exit(1); }
+        vector<TString> modeCuts = modeVector[i]->modeCombinatorics(cuts_i);
+        if (modeCuts.size() == 1){ cuts_i = modeVector[i]->modeString(modeCuts[0]); }
+        else{ cout << "FSModeTree::skimTree Error: multiple combinations not allowed in cuts" << endl; 
+              modeVector[i]->modeCombinatorics(cuts_i,true);  exit(1); }
       TString printCommandFile_i = modeVector[i]->modeString(printCommandFile);
         if (printCommandFile == "") printCommandFile_i = "";
       FSTree::skimTree(fileNameInput_i,ntName_i,fileNameOutput_i,
