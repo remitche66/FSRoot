@@ -134,6 +134,7 @@ FSModeInfo::FSModeInfo(vector<int> pdgIDs, bool useStandardCategories){
       //    if "counter" is also given and non-negative:
       //      "MODECOUNTER"
       //        or "MODECOUNTERXXXX" to pad with zeros
+      //    modeString also calls the modeCuts method (see below)
       // *******************************************************
 
 
@@ -599,7 +600,7 @@ vector<int> FSModeInfo::modeLambdaIndices  (){return modeParticleIndices ("Lambd
 //                                  ((EnP[pi+])<=(EnP4)))
 //              LIST(EnP[pi+]) --> EnP2,EnP3,EnP4
 //   (also allows nested functions although it may not be useful)
-//   NOTE:  this method is called by the modeVariable method
+//   NOTE:  this method is called by the modeString method
 
 TString 
 FSModeInfo::modeCuts(TString varString){
