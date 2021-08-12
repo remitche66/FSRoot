@@ -265,6 +265,18 @@ FSModeTree::createRankingTree(TString fileName, TString ntName, TString category
       TString rankVar_i   = modeVector[i]->modeString(rankVar);
       TString groupVar1_i = modeVector[i]->modeString(groupVar1);
       TString groupVar2_i = modeVector[i]->modeString(groupVar2);
+        vector<TString> modeTmp0 = modeVector[i]->modeCombinatorics(rankVar_i);
+        vector<TString> modeTmp1 = modeVector[i]->modeCombinatorics(groupVar1_i);
+        vector<TString> modeTmp2 = modeVector[i]->modeCombinatorics(groupVar2_i);
+        if (modeTmp0.size() == 1 && modeTmp1.size() == 1 && modeTmp2.size() == 1){
+          rankVar_i   = modeVector[i]->modeString(modeTmp0[0]);
+          groupVar1_i = modeVector[i]->modeString(modeTmp1[0]);
+          groupVar2_i = modeVector[i]->modeString(modeTmp2[0]); }
+        else{ cout << "FSModeTree::createRankingTree Error: "
+                      "multiple combinations not allowed in rankVar and groupVars" << endl; 
+                       modeVector[i]->modeCombinatorics(rankVar_i,  true);
+                       modeVector[i]->modeCombinatorics(groupVar1_i,true);
+                       modeVector[i]->modeCombinatorics(groupVar2_i,true);  exit(1); }
       if (ifile == 0 && !FSControl::QUIET){
         cout << "---------- " << sLoop << " LOOP OVER " << modeVector[i]->modeDescription() 
              << " (" << fileNames_i.size() << " FILE(S)) ----------" << endl;
