@@ -330,10 +330,16 @@ FSModeTree::createRankingTree(TString fileName, TString ntName, TString category
       Int_t VARRANKGLOBAL;
       Int_t NCOMBINATIONS;
       Int_t NCOMBINATIONSGLOBAL;
+      Int_t VARRANKVAR;
+      Int_t RANKVARBEST = -1;
+      Int_t RANKVARBESTGLOBAL = -1;
       TString sVARRANK             = rankVarName + "";
       TString sVARRANKGLOBAL       = rankVarName + "Global";
       TString sNCOMBINATIONS       = rankVarName + "Combinations";
       TString sNCOMBINATIONSGLOBAL = rankVarName + "CombinationsGlobal";
+      TString sVARRANKVAR          = rankVarName + "Var";
+      TString sRANKVARBEST         = rankVarName + "VarBest";
+      TString sRANKVARBESTGLOBAL   = rankVarName + "VarBestGlobal";
       TString fileName_rank(fileName_i);  fileName_rank += ".";  fileName_rank += rankVarName;
       TString ntName_rank(ntName_i);  ntName_rank += "_";  ntName_rank += rankVarName;
       if (iLoop == 2){
@@ -343,6 +349,9 @@ FSModeTree::createRankingTree(TString fileName, TString ntName, TString category
         rankTTree->Branch(sVARRANKGLOBAL,      &VARRANKGLOBAL,      sVARRANKGLOBAL+"/I");
         rankTTree->Branch(sNCOMBINATIONS,      &NCOMBINATIONS,      sNCOMBINATIONS+"/I");
         rankTTree->Branch(sNCOMBINATIONSGLOBAL,&NCOMBINATIONSGLOBAL,sNCOMBINATIONSGLOBAL+"/I");
+        rankTTree->Branch(sVARRANKVAR,         &VARRANKVAR,         sVARRANKVAR+"/I");
+        rankTTree->Branch(sRANKVARBEST,        &RANKVARBEST,        sRANKVARBEST+"/I");
+        rankTTree->Branch(sRANKVARBESTGLOBAL,  &RANKVARBESTGLOBAL,  sRANKVARBESTGLOBAL+"/I");
       }
 
         // BOTH LOOPS: loop over events in the original tree
@@ -407,6 +416,9 @@ FSModeTree::createRankingTree(TString fileName, TString ntName, TString category
               cout << endl;
             }
           }
+          VARRANKVAR = IRANKVAR;
+          if (vVarI.size() == 0){ RANKVARBEST = -1; } 
+          else if (vVarI[0] != -10000000){ RANKVARBEST = vVarI[0]; }
           NCOMBINATIONS = vVarI.size();
           VARRANK = -1;
           if (SKIPENTRY || vVarI.size() == 0){ VARRANK = -1; }
@@ -431,6 +443,8 @@ FSModeTree::createRankingTree(TString fileName, TString ntName, TString category
               cout << endl;
             }
           }
+          if (vVar0.size() == 0){ RANKVARBESTGLOBAL = -1; } 
+          else if (vVar0[0] != -10000000){ RANKVARBESTGLOBAL = vVar0[0]; }
           NCOMBINATIONSGLOBAL = vVar0.size();
           VARRANKGLOBAL = -1;
           if (SKIPENTRY || vVar0.size() == 0){ VARRANKGLOBAL = -1; }
