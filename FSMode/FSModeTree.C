@@ -393,10 +393,14 @@ FSModeTree::createRankingTree(TString fileName, TString ntName, TString category
           // FIRST LOOP: just record information
 
         if (iLoop == 1 && !SKIPENTRY){
+          if (vVarI.size() == 0) vVarI.push_back(IRANKVAR);
+          if (vVar0.size() == 0) vVar0.push_back(IRANKVAR);
           vVarI.push_back(IRANKVAR);
           vVar0.push_back(IRANKVAR);
-          std::sort(vVarI.begin(), vVarI.end());
-          std::sort(vVar0.begin(), vVar0.end());
+          std::sort(vVarI.begin()+1, vVarI.end());
+          std::sort(vVar0.begin()+1, vVar0.end());
+          vVarI[0] = vVarI[1];
+          vVar0[0] = vVar0[1];
           mModeVar[IMODE] = vVarI;
           mModeVar[0]     = vVar0;
           rankMap[pRunEvent] = mModeVar;
@@ -417,16 +421,15 @@ FSModeTree::createRankingTree(TString fileName, TString ntName, TString category
             }
           }
           VARRANKVAR = IRANKVAR;
-          if (vVarI.size() == 0){ RANKVARBEST = -1; } 
-          else if (vVarI[0] != -10000000){ RANKVARBEST = vVarI[0]; }
-          NCOMBINATIONS = vVarI.size();
+          RANKVARBEST = -1;  if (vVarI.size() > 0) RANKVARBEST = vVarI[0];
+          NCOMBINATIONS = 0; if (vVarI.size() > 0) NCOMBINATIONS = vVarI.size()-1;
           VARRANK = -1;
-          if (SKIPENTRY || vVarI.size() == 0){ VARRANK = -1; }
-          else if (vVarI.size() == 1){ VARRANK = 1; }
-          else if (vVarI.size() > 1){
-            for (unsigned int ix = 0; ix < vVarI.size(); ix++){
+          if (SKIPENTRY || vVarI.size() <= 1){ VARRANK = -1; }
+          else if (vVarI.size() == 2){ VARRANK = 1; }
+          else if (vVarI.size() > 2){
+            for (unsigned int ix = 1; ix < vVarI.size(); ix++){
               if (IRANKVAR == vVarI[ix]){
-                VARRANK = ix+1;
+                VARRANK = ix;
                 vVarI[ix] = -10000000;
                 mModeVar[IMODE] = vVarI;
                 rankMap[pRunEvent] = mModeVar;
@@ -443,16 +446,15 @@ FSModeTree::createRankingTree(TString fileName, TString ntName, TString category
               cout << endl;
             }
           }
-          if (vVar0.size() == 0){ RANKVARBESTGLOBAL = -1; } 
-          else if (vVar0[0] != -10000000){ RANKVARBESTGLOBAL = vVar0[0]; }
-          NCOMBINATIONSGLOBAL = vVar0.size();
+          RANKVARBESTGLOBAL = -1;  if (vVar0.size() > 0) RANKVARBESTGLOBAL = vVar0[0];
+          NCOMBINATIONSGLOBAL = 0; if (vVar0.size() > 0) NCOMBINATIONSGLOBAL = vVar0.size()-1;
           VARRANKGLOBAL = -1;
-          if (SKIPENTRY || vVar0.size() == 0){ VARRANKGLOBAL = -1; }
-          else if (vVar0.size() == 1){ VARRANKGLOBAL = 1; }
-          else if (vVar0.size() > 1){
-            for (unsigned int ix = 0; ix < vVar0.size(); ix++){
+          if (SKIPENTRY || vVar0.size() <= 1){ VARRANKGLOBAL = -1; }
+          else if (vVar0.size() == 2){ VARRANKGLOBAL = 1; }
+          else if (vVar0.size() > 2){
+            for (unsigned int ix = 1; ix < vVar0.size(); ix++){
               if (IRANKVAR == vVar0[ix]){
-                VARRANKGLOBAL = ix+1;
+                VARRANKGLOBAL = ix;
                 vVar0[ix] = -10000000;
                 mModeVar[0] = vVar0;
                 rankMap[pRunEvent] = mModeVar;
