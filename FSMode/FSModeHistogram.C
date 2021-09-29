@@ -559,7 +559,7 @@ FSModeHistogram::readHistogramCache(string cacheName){
 vector<TString>
 FSModeHistogram::expandHistogramIndexTree(TString inIndex){
   vector<TString> expandedIndices;
-vector<TString> expandedIndicesReordered;
+  vector<TString> expandedIndicesReordered;
     // if no category is specified, return the FSHistogram version
   if (!inIndex.Contains("{-CA-}")) return FSHistogram::expandHistogramIndexTree(inIndex);
     // if there is a category, find the category and the associated mode vector
