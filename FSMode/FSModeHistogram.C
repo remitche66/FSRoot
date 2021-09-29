@@ -559,6 +559,7 @@ FSModeHistogram::readHistogramCache(string cacheName){
 vector<TString>
 FSModeHistogram::expandHistogramIndexTree(TString inIndex){
   vector<TString> expandedIndices;
+  vector<TString> expandedIndicesReordered;
     // if no category is specified, return the FSHistogram version
   if (!inIndex.Contains("{-CA-}")) return FSHistogram::expandHistogramIndexTree(inIndex);
     // if there is a category, find the category and the associated mode vector
@@ -589,13 +590,21 @@ FSModeHistogram::expandHistogramIndexTree(TString inIndex){
         map<TString,TString> index4Map = FSHistogram::parseHistogramIndex(index4);
         index4Map["{-CA-}"] = modeVector[iMode]->modeString();
         index4 = FSHistogram::getHistogramIndex(index4Map);
-          // check for duplicates (this should also be in modeCombinatorics)
+          // check for duplicates
         bool usedIndex = false;
-        for (unsigned int iE = 0; iE < expandedIndices.size(); iE++){
-          if (expandedIndices[iE] == index4){ usedIndex = true; break; }
+        TString index4Reordered = index4;
+        if (FSControl::REORDERMATH){
+          map<TString,TString> index4MapReordered = index4Map;
+          index4MapReordered["{-VA-}"] = FSString::reorderMath(index4Map["{-VA-}"]);
+          index4MapReordered["{-CU-}"] = FSString::reorderMath(index4Map["{-CU-}"]);
+          index4Reordered = FSHistogram::getHistogramIndex(index4MapReordered);
+        }
+        for (unsigned int iE = 0; iE < expandedIndicesReordered.size(); iE++){
+          if (expandedIndicesReordered[iE] == index4Reordered){ usedIndex = true; break; }
         }
           // record the final index
-        if (!usedIndex) expandedIndices.push_back(index4);
+        if (!usedIndex){ expandedIndices.push_back(index4); 
+                         expandedIndicesReordered.push_back(index4Reordered);}
       }
     }
   }

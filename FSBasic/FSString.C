@@ -570,9 +570,9 @@ FSString::parseTString(TString input, vector<TString> spacers, bool recordSpacer
       if (spacers.size() > 1){
         for (unsigned int i = 0; i < spacers.size()-1; i++){
           for (unsigned int j = i+1; j < spacers.size(); j++){
-            if (recordSpacers && (spacers[i].Contains(spacers[j]) ||
-                                  spacers[j].Contains(spacers[i])))
-              cout << "FSString::parseTString WARNING: spacers within spacers" << endl;
+            //if (recordSpacers && (spacers[i].Contains(spacers[j]) ||
+            //                      spacers[j].Contains(spacers[i])))
+            //  cout << "FSString::parseTString WARNING: spacers within spacers" << endl;
             if (spacers[i].Length() < spacers[j].Length()){
               TString temp = spacers[i];
               spacers[i] = spacers[j];
@@ -1373,4 +1373,224 @@ FSString::pushBackToEach(vector< vector<int> > originalList, vector<int> newPart
   }}
   return newList;
 }
+
+
+
+
+
+// ********************************************************
+// REORDER A MATH EXPRESSION
+// ********************************************************
+
+
+vector<TString> FSString::m_reorderMathSpacers{"(",")",":",",",";","||","&&","==","!=","<=","<",">=",">","+","*"};
+
+int 
+FSString::nMathSpacer(TString part){
+  for (unsigned int i = 0; i < m_reorderMathSpacers.size(); i++){
+    if (part == m_reorderMathSpacers[i]) return i+1;
+    if ((part.Length() > 1)  && (part[part.Length()-1] == m_reorderMathSpacers[0])) return 1;
+  }
+  return 0;
+}
+
+TString 
+FSString::reorderMathHelp(vector<TString> parts, bool sort){
+  if (parts.size() == 0) return TString("");
+  if (parts.size() == 1) return parts[0];
+  if (sort){
+    for (unsigned int i = 0; i < parts.size()-1; i++){
+      if (!nMathSpacer(parts[i])){
+        for (unsigned int j = i+1; j < parts.size(); j++){
+          if (!nMathSpacer(parts[j])){
+            if (parts[j] < parts[i]){
+              TString temp = parts[i];
+              parts[i] = parts[j];
+              parts[j] = temp;
+  }}}}}}
+  TString rearrangedParts("");
+  for (unsigned int i = 0; i < parts.size(); i++){
+    rearrangedParts += parts[i];
+  }
+  return rearrangedParts;
+}
+
+
+
+TString 
+FSString::reorderMath(TString original, bool show){
+  if (show){
+    cout << "BEGIN FSString::reorderMath" << endl;
+    cout << "  ORIGINAL EXPRESSION = " << endl << "    " << original << endl;
+  }
+  original =  FSString::removeWhiteSpace(original);
+  if (original == "") return TString("");
+  if (!FSString::checkParentheses(original)){ 
+    cout << "FSString::reorderMath WARNING: bad parentheses in input..." << endl; 
+    cout << "    " << original << endl;
+    return original;
+  }
+  original = "("+original+")";
+
+    // replace "-" and "/" with "+(-1)*" and "*1/"
+
+  TString pass1String("");
+  TString digit("");
+  TString digitPrev("");
+  TString digitNext("");
+  for (int i = 0; i < original.Length(); i++){
+    digit = original[i];
+    digitPrev = "";  if (i > 0) digitPrev = original[i-1];
+    //digitNext = "";  if (i < original.Length()-1) digitNext = original[i+1];
+    if ((digit == "-")
+        && (digitPrev.IsAlnum() || (digitPrev == ".") || (digitPrev == ")"))){
+      pass1String += "+(-1)*"; }
+    else if ((digit == "-")
+        && ((digitPrev == "")  || (digitPrev == "("))) {
+      pass1String += "(-1)*"; }
+    else if ((digit == "/")
+        && (digitPrev.IsAlnum() || (digitPrev == ".") || (digitPrev == ")"))){
+      pass1String += "*1/"; }
+    else{
+      pass1String += digit; }
+    digitPrev = digit;
+  }
+  if (show){
+    cout << "  PASS1 EXPRESSION = " << endl << "    " << pass1String << endl;
+  }
+
+    // divide the expression into parts
+
+  vector<TString> parts = FSString::parseTString(pass1String, m_reorderMathSpacers, true);
+  if (show){
+    cout << "  DIVIDED EXPRESSION (" << parts.size() << " parts)" << endl;
+    for (unsigned int i = 0; i < parts.size(); i++){
+      cout << "    (" << i+1 << ")" << "  " << parts[i] << endl; }
+  }
+
+    // regroup "string::string"
+
+  vector<TString> groupedParts;
+  for (unsigned int i = 0; i < parts.size(); i++){
+    if (i < parts.size()-3 && parts[i+1] == ":" && parts[i+2] == ":"){
+      groupedParts.push_back(parts[i]+parts[i+1]+parts[i+2]+parts[i+3]);
+      i += 3;
+    }
+    else{ groupedParts.push_back(parts[i]); }
+  }
+  parts = groupedParts;  groupedParts.clear();
+
+    // regroup "string("
+
+  for (unsigned int i = 0; i < parts.size(); i++){
+    if (i < parts.size()-1 && !nMathSpacer(parts[i]) && parts[i+1] == "("){
+      groupedParts.push_back(parts[i]+parts[i+1]);
+      i++;
+    }
+    else{ groupedParts.push_back(parts[i]); }
+  }
+  parts = groupedParts;  groupedParts.clear();
+
+    // regroup "<=" and ">="
+
+  for (unsigned int i = 0; i < parts.size(); i++){
+    if (i < parts.size()-1 && (parts[i] == ">" || parts[i] == "<") && parts[i+1] == "="){
+      groupedParts.push_back(parts[i]+parts[i+1]);
+      i++;
+    }
+    else{ groupedParts.push_back(parts[i]); }
+  }
+  parts = groupedParts;  groupedParts.clear();
+
+  if (show){
+    cout << "  REGROUPED EXPRESSION (" << parts.size() << " parts)" << endl;
+    for (unsigned int i = 0; i < parts.size(); i++){
+      cout << "    (" << i+1 << ")" << "  " << parts[i] << endl; }
+  }
+
+    // quick checks
+
+  if (parts.size() == 3) return original;
+  if (parts.size() < 5){ 
+    cout << "FSString::reorderMath WARNING: unable to reorder this expression..." << endl; 
+    cout << "    " << original << endl;
+    return original;
+  }
+
+    // loop over the parts until the expression is reduced to a single string
+
+  int itry = 0;
+  while (parts.size() != 1 && ++itry < 100){
+
+      // group parentheses
+
+    for (unsigned int i = 0; i < parts.size(); i++){
+      TString dig1(parts[i][parts[i].Length()-1]);
+      if ((i < parts.size()-2) && (dig1 == "(") && (parts[i+2] == ")")){
+        groupedParts.push_back(parts[i]+parts[i+1]+parts[i+2]);
+        i+=2;
+      }
+      else{ groupedParts.push_back(parts[i]); }
+    }
+    parts = groupedParts;  groupedParts.clear();
+
+      // group expressions
+      //  look for patterns like: 
+      //    opBegin abc opMiddle def (opMiddle ghi) opEnd
+
+    for (unsigned int i = 0; i < parts.size(); i++){
+      groupedParts.push_back(parts[i]);
+      if (i > parts.size()-5) continue;
+      vector<TString> groupedPartsTemp;
+      if (!nMathSpacer(parts[i])) continue;
+      TString opBegin = parts[i];
+      if (nMathSpacer(parts[i+1])) continue;
+      groupedPartsTemp.push_back(parts[i+1]);
+      if (!nMathSpacer(parts[i+2])) continue;
+      TString opMiddle = parts[i+2];
+      if (opMiddle == opBegin) continue;
+      groupedPartsTemp.push_back(parts[i+2]);
+      if (nMathSpacer(parts[i+3])) continue;
+      groupedPartsTemp.push_back(parts[i+3]);
+      if (!nMathSpacer(parts[i+4])) continue;
+      TString opEnd = parts[i+4];
+      if (opEnd == opMiddle) groupedPartsTemp.push_back(parts[i+4]);
+      unsigned int iOpEnd = i+4;
+      while (opEnd == opMiddle && iOpEnd < parts.size()-2){
+        if (nMathSpacer(parts[iOpEnd+1])) break;
+        groupedPartsTemp.push_back(parts[iOpEnd+1]);
+        if (!nMathSpacer(parts[iOpEnd+2])) break;
+        opEnd = parts[iOpEnd+2];
+        if (opEnd == opMiddle) groupedPartsTemp.push_back(parts[iOpEnd+2]);
+        iOpEnd += 2;
+      }
+      if (opEnd == opMiddle) continue;
+      if (opEnd == "(") continue; 
+      if ((nMathSpacer(opMiddle) > nMathSpacer(opBegin))
+         &&(nMathSpacer(opMiddle) > nMathSpacer(opEnd))){
+        if ((opMiddle == ":") || opMiddle.Contains(">") || opMiddle.Contains("<") || (opMiddle == ",")
+             || (opMiddle == ";")  || (opMiddle.Contains("{-"))){
+          groupedParts.push_back(reorderMathHelp(groupedPartsTemp,false)); }
+        else{
+          groupedParts.push_back(reorderMathHelp(groupedPartsTemp,true)); }
+        i = iOpEnd-1;
+      }
+    }
+    parts = groupedParts;  groupedParts.clear();
+
+    if (show){
+      cout << "  EXPRESSION AFTER ITERATION " << itry << " (" << parts.size() << " parts)" << endl;
+      for (unsigned int i = 0; i < parts.size(); i++){
+        cout << "    (" << i+1 << ")" << "  " << parts[i] << endl; }
+    }
+
+  }
+
+  if (parts.size() == 1) return parts[0];
+  cout << "FSString::reorderMath WARNING: unable to reorder this expression..." << endl; 
+  cout << "    " << original << endl;
+  return original;
+
+}
+
 

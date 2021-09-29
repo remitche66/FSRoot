@@ -22,6 +22,8 @@ class FSControl{
     static bool DEBUG;              // verbose prints for debugging
     static bool QUIET;              // turns off almost all printing
 
+    static bool REORDERMATH;        // reorder math in FSModeHistogram
+
     static void globalTweaks(){     // same as rootlogon.FSROOT.C
                                     //   (execute this when making plots
                                     //    in executables, for example)

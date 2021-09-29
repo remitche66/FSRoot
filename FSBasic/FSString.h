@@ -266,6 +266,13 @@ class FSString{
     static bool checkParentheses(TString input, TString opening = "(", TString closing = ")");
 
 
+      // ********************************************************
+      // REORDER A MATH EXPRESSION
+      //   known problem:  breaks for negatives in exponents like 1e-6
+      // ********************************************************
+
+    static TString reorderMath(TString input, bool show = false);
+
   private:
 
     static bool compareChars(const char* cNone, const char* cWith);
@@ -284,6 +291,12 @@ class FSString{
 
     static vector< vector<int> >
       pushBackToEach(vector< vector<int> > originalList, vector<int> newPart);
+
+      // helper functions for reorderMath
+
+    static vector<TString> m_reorderMathSpacers;
+    static int nMathSpacer(TString part);
+    static TString reorderMathHelp(vector<TString> parts, bool sort);
 
 };
 
