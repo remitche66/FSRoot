@@ -592,10 +592,13 @@ vector<TString> expandedIndicesReordered;
         index4 = FSHistogram::getHistogramIndex(index4Map);
           // check for duplicates
         bool usedIndex = false;
-        map<TString,TString> index4MapReordered = index4Map;
-        index4MapReordered["{-VA-}"] = FSString::reorderMath(index4Map["{-VA-}"]);
-        index4MapReordered["{-CU-}"] = FSString::reorderMath(index4Map["{-CU-}"]);
-        TString index4Reordered = FSHistogram::getHistogramIndex(index4MapReordered);
+        TString index4Reordered = index4;
+        if (FSControl::REORDERMATH){
+          map<TString,TString> index4MapReordered = index4Map;
+          index4MapReordered["{-VA-}"] = FSString::reorderMath(index4Map["{-VA-}"]);
+          index4MapReordered["{-CU-}"] = FSString::reorderMath(index4Map["{-CU-}"]);
+          index4Reordered = FSHistogram::getHistogramIndex(index4MapReordered);
+        }
         for (unsigned int iE = 0; iE < expandedIndicesReordered.size(); iE++){
           if (expandedIndicesReordered[iE] == index4Reordered){ usedIndex = true; break; }
         }
