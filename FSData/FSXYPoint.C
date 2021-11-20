@@ -252,6 +252,8 @@ FSXYPoint::setXYV(TString XY, TString sVal){
 bool
 FSXYPoint::setXYV(TString XY, vector<TString> sVals){
   sVals = FSString::parseTString(sVals);
+  vector<TString> spacers;  spacers.push_back("+"); spacers.push_back("-");
+  sVals = FSString::parseTString(sVals,spacers,true);
   if ((sVals.size() == 0) || (sVals[0].Length() == 0)) return false;
   if (XY == "X") setXV(FSString::TString2double(sVals[0])); 
   if (XY == "Y") setYV(FSString::TString2double(sVals[0])); 
