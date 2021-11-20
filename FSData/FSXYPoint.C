@@ -122,6 +122,7 @@ FSXYPoint::display(int counter){
 
 void
 FSXYPoint::setValuesFromString(TString sValues){
+cout << "START HERE: " << sValues << endl;
   if (!setValuesFromMap(parseValuesFromString(sValues))){
     cout << "FSXYPoint ERROR: problem setting values from string: " << endl << "  " << sValues << endl;
     exit(0);
@@ -255,14 +256,24 @@ FSXYPoint::setXYV(TString XY, vector<TString> sVals){
   if (XY == "X") setXV(FSString::TString2double(sVals[0])); 
   if (XY == "Y") setYV(FSString::TString2double(sVals[0])); 
   if (sVals.size() == 1) return true;
-  bool systp = false;  bool systm = false;
+  bool statp = false;  bool statm = false;
   for (unsigned int i = 1; i < sVals.size()-1; i++){
-         if (sVals[i] == "+"  && !systp)          { setXYE(XY+"EH", sVals[i+1]);  systp = true; }
-    else if (sVals[i] == "-"  && !systm)          { setXYE(XY+"EL", sVals[i+1]);  systm = true; }
-    else if (sVals[i] == "+-" && !systm && !systp){ setXYE(XY+"E",  sVals[i+1]);  systm = true; systp = true; }
-    else if (sVals[i] == "+"  &&  systp)          { setXYE(XY+"ESH",sVals[i+1]);  systp = true; }
-    else if (sVals[i] == "-"  &&  systm)          { setXYE(XY+"ESL",sVals[i+1]);  systm = true; }
-    else if (sVals[i] == "+-" && (systm || systp)){ setXYE(XY+"ES", sVals[i+1]);  systm = true; systp = true; }
+    if (i + 2 < sVals.size() && ((sVals[i] == "+" && sVals[i+1] == "-") || 
+                                 (sVals[i] == "-" && sVals[i+1] == "+"))){
+      if  (statp){ setXYE(XY+"ESH", sVals[i+2]); }
+      if  (statm){ setXYE(XY+"ESL", sVals[i+2]); }
+      if (!statp){ setXYE(XY+"EH",  sVals[i+2]);  statp = true; }
+      if (!statm){ setXYE(XY+"EL",  sVals[i+2]);  statm = true; }
+      i++;
+    }
+    else if (sVals[i] == "+"){
+      if  (statp){ setXYE(XY+"ESH", sVals[i+1]); }
+      if (!statp){ setXYE(XY+"EH",  sVals[i+1]);  statp = true; }
+    }
+    else if (sVals[i] == "-"){
+      if  (statm){ setXYE(XY+"ESL", sVals[i+1]); }
+      if (!statm){ setXYE(XY+"EL",  sVals[i+1]);  statm = true; }
+    }
   }
   return true;
 }
