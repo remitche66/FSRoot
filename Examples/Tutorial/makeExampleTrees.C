@@ -1,11 +1,35 @@
 
 // *********************************************************************
-// Dummy Example Tree for psi(2S) --> pi+ pi- J/psi with J/psi --> pi+ pi- pi0
+// Example Tree for psi(2S) --> pi+ pi- J/psi with J/psi --> pi+ pi- pi0
 // *********************************************************************
 
 void makeTree3PI(){
   TString fileName("ExampleTree_0_221.root");
   TString treeName("ntExampleTree_0_221");
+  cout << endl;
+  cout << "---------------------" << endl;
+  cout << "MAKING EXAMPLE TREE 1" << endl;
+  cout << "---------------------" << endl;
+  cout << "  REACTION: psi(2S) --> pi+ pi- J/psi with \n"
+          "              J/psi --> pi+ pi- pi0 and \n"
+          "                pi0 --> gamma gamma\n";
+  cout << " FILE NAME: " << fileName << endl;
+  cout << " TREE NAME: " << treeName << endl;
+  cout << "  BRANCHES: " << endl;
+  cout << "                               Run:  run number\n"
+          "                             Event:  event number\n"
+          "                           Chi2DOF:  chi2/dof of a kinematic fit\n"
+          "           PxPCM PyPCM PzPCM EnPCM:  four-vector of the CM system\n"
+          "   PxP[CD] PyP[CD] PzP[CD] EnP[CD]:  four-vector of particle [CD],\n"
+          "                                     where [CD] = 1 for a pi+\n"
+          "                                                  2 for the other pi+\n"
+          "                                                  3 for a pi-\n"
+          "                                                  4 for the other pi-\n"
+          "                                                  5 for the pi0\n"
+          "                                                  5a for a gamma from the pi0\n"
+          "                                                  5b for the other gamma from the pi0\n"
+          "                       TkChi2P[CD]:  track chi2 of particle [CD],\n"
+          "                                     where [CD] = 1,2,3,4, as above\n" << endl;
   TFile file(fileName,"recreate");
   TTree tree(treeName,treeName);
   double Run, Event, Chi2DOF;
@@ -63,7 +87,7 @@ void makeTree3PI(){
   while (nEvents < 10000){
       // psi(2S) --> pi+ pi- J/psi
     TLorentzVector pPsi2S(0.0, 0.0, 0.0, 3.686);
-    double mJPsi = gRandom->Gaus(FSPhysics::XMJpsi,0.015);
+    double mJPsi = gRandom->Gaus(FSPhysics::XMJpsi,0.02);
     double mChildren1[3] = {FSPhysics::XMpi, FSPhysics::XMpi, mJPsi};
     generator1.SetDecay(pPsi2S, 3, mChildren1);
     double maxWt1 = generator1.GetWtMax();
@@ -89,7 +113,8 @@ void makeTree3PI(){
       // fill variables
     Run   = (int)(gRandom->Uniform(10)+1200.0);
     Event = (int)(gRandom->Uniform(100)+1.0);
-    Chi2DOF  = pow(gRandom->Gaus(),2.0)*5;
+    Chi2DOF  = (pow(gRandom->Gaus(),2.0)+pow(gRandom->Gaus(),2.0)+pow(gRandom->Gaus(),2.0)
+               +pow(gRandom->Gaus(),2.0)+pow(gRandom->Gaus(),2.0)+pow(gRandom->Gaus(),2.0))/6.0*2.0;
     TkChi2P1 = pow(gRandom->Gaus(),2.0);
     TkChi2P2 = pow(gRandom->Gaus(),2.0);
     TkChi2P3 = pow(gRandom->Gaus(),2.0);
@@ -111,20 +136,44 @@ void makeTree3PI(){
 
 
 // *********************************************************************
-// Dummy Example Tree for psi(2S) --> pi+ pi- J/psi with J/psi --> K+ Ks pi-
+// Example Tree for psi(2S) --> pi+ pi- J/psi with J/psi --> K+ Ks pi-
 // *********************************************************************
 
 void makeTreeKKPI(){
   TString fileName("ExampleTree_0_101120.root");
   TString treeName("ntExampleTree_0_101120");
+  cout << endl;
+  cout << "---------------------" << endl;
+  cout << "MAKING EXAMPLE TREE 2" << endl;
+  cout << "---------------------" << endl;
+  cout << "  REACTION: psi(2S) --> pi+ pi- J/psi with \n"
+          "              J/psi --> K+ Ks pi- and \n"
+          "                 Ks --> pi+ pi-\n";
+  cout << " FILE NAME: " << fileName << endl;
+  cout << " TREE NAME: " << treeName << endl;
+  cout << "  BRANCHES: " << endl;
+  cout << "                               Run:  run number\n"
+          "                             Event:  event number\n"
+          "                           Chi2DOF:  chi2/dof of a kinematic fit\n"
+          "           PxPCM PyPCM PzPCM EnPCM:  four-vector of the CM system\n"
+          "   PxP[CD] PyP[CD] PzP[CD] EnP[CD]:  four-vector of particle [CD],\n"
+          "                                     where [CD] = 1 for the K+\n"
+          "                                                  2 for the Ks\n"
+          "                                                  2a for the pi+ from the Ks\n"
+          "                                                  2b for the pi- from the Ks\n"
+          "                                                  3 for the pi+\n"
+          "                                                  4 for a pi-\n"
+          "                                                  5 for the other pi-\n"
+          "                       TkChi2P[CD]:  track chi2 of particle [CD],\n"
+          "                                     where [CD] = 1,2a,2b,3,4,5, as above\n" << endl;
   TFile file(fileName,"recreate");
   TTree tree(treeName,treeName);
   double Run, Event, Chi2DOF;
   double PxPCM, PyPCM, PzPCM, EnPCM;
   double PxP1,  PyP1,  PzP1,  EnP1, TkChi2P1;
   double PxP2,  PyP2,  PzP2,  EnP2;
-  double PxP2a, PyP2a, PzP2a, EnP2a;
-  double PxP2b, PyP2b, PzP2b, EnP2b;
+  double PxP2a, PyP2a, PzP2a, EnP2a, TkChi2P2a;
+  double PxP2b, PyP2b, PzP2b, EnP2b, TkChi2P2b;
   double PxP3,  PyP3,  PzP3,  EnP3, TkChi2P3;
   double PxP4,  PyP4,  PzP4,  EnP4, TkChi2P4;
   double PxP5,  PyP5,  PzP5,  EnP5, TkChi2P5;
@@ -164,6 +213,8 @@ void makeTreeKKPI(){
   tree.Branch("PzP5",   &PzP5,     "PzP5/D");
   tree.Branch("EnP5",   &EnP5,     "EnP5/D");
   tree.Branch("TkChi2P1", &TkChi2P1, "TkChi2P1/D");
+  tree.Branch("TkChi2P2a", &TkChi2P2a, "TkChi2P2a/D");
+  tree.Branch("TkChi2P2b", &TkChi2P2b, "TkChi2P2b/D");
   tree.Branch("TkChi2P3", &TkChi2P3, "TkChi2P3/D");
   tree.Branch("TkChi2P4", &TkChi2P4, "TkChi2P4/D");
   tree.Branch("TkChi2P5", &TkChi2P5, "TkChi2P5/D");
@@ -174,7 +225,7 @@ void makeTreeKKPI(){
   while (nEvents < 10000){
       // psi(2S) --> pi+ pi- J/psi
     TLorentzVector pPsi2S(0.0, 0.0, 0.0, 3.686);
-    double mJPsi = gRandom->Gaus(FSPhysics::XMJpsi,0.015);
+    double mJPsi = gRandom->Gaus(FSPhysics::XMJpsi,0.02);
     double mChildren1[3] = {FSPhysics::XMpi, FSPhysics::XMpi, mJPsi};
     generator1.SetDecay(pPsi2S, 3, mChildren1);
     double maxWt1 = generator1.GetWtMax();
@@ -200,8 +251,11 @@ void makeTreeKKPI(){
       // fill variables
     Run   = (int)(gRandom->Uniform(10)+1200.0);
     Event = (int)(gRandom->Uniform(100)+1.0);
-    Chi2DOF  = pow(gRandom->Gaus(),2.0)*5;
+    Chi2DOF  = (pow(gRandom->Gaus(),2.0)+pow(gRandom->Gaus(),2.0)+pow(gRandom->Gaus(),2.0)
+               +pow(gRandom->Gaus(),2.0)+pow(gRandom->Gaus(),2.0)+pow(gRandom->Gaus(),2.0))/6.0*2.0;
     TkChi2P1 = pow(gRandom->Gaus(),2.0);
+    TkChi2P2a = pow(gRandom->Gaus(),2.0);
+    TkChi2P2b = pow(gRandom->Gaus(),2.0);
     TkChi2P3 = pow(gRandom->Gaus(),2.0);
     TkChi2P4 = pow(gRandom->Gaus(),2.0);
     TkChi2P5 = pow(gRandom->Gaus(),2.0);
@@ -220,4 +274,12 @@ void makeTreeKKPI(){
   file.Close();
 }
 
+// **********************
+// Make All Example Trees
+// **********************
+
+void makeExampleTrees(){
+  makeTree3PI();
+  makeTreeKKPI();
+}
 
