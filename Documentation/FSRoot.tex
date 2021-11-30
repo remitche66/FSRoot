@@ -498,6 +498,15 @@ The primary member function is {\tt FSModeHistogram::getTH1F}, which closely res
 
 Here is an example that makes plots using the \ROOT\ files constructed in Sec.~\ref{sec:tutorial}.  The two $J/\psi$ decay modes are specified in the file {\tt ExampleModes.modes} (also in the {\tt Examples/Tutorial} directory).  
 \begin{verbatim}
+        ---- file: ExampleModes.modes ----
+        Decay psi'
+          pi+ pi- JPSI     pipiJpsi
+        Enddecay
+        Decay JPSI
+          pi+ pi- pi0      3pi
+          K+  Ks  pi-      KKpi
+        Enddecay
+        ----------- end file -----------
     root> FSModeCollection::addModesFromFile("ExampleModes.modes");
     root> TString FN("ExampleTree_MODECODE.root");  
     root> TString NT("ntExampleTree_MODECODE");
@@ -510,6 +519,9 @@ Here is an example that makes plots using the \ROOT\ files constructed in Sec.~\
            // plot the same using a cut on track chi2
     root> TString cutTRACK("AND(TkChi2P[tk]<1)");
     root> FSModeHistogram::getTH1F(FN,NT,"","MASS(CM,-[pi+],-[pi-])",
+            "(100,3.0,3.2)","Chi2DOF<5.0&&"+cutTRACK)->Draw("hist,same");
+           // only plot the 3pi mode
+    root> FSModeHistogram::getTH1F(FN,NT,"3pi","MASS(CM,-[pi+],-[pi-])",
             "(100,3.0,3.2)","Chi2DOF<5.0&&"+cutTRACK)->Draw("hist,same");
 \end{verbatim}
 
