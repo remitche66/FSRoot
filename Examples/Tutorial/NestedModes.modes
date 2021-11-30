@@ -1,0 +1,10 @@
+Decay psi'
+  pi+ pi- JPSI     pipiJpsi
+  eta JPSI         etaJpsi
+Enddecay
+
+Decay JPSI
+  mu+ mu-      MM
+  e+ e-        EE
+Enddecay
+

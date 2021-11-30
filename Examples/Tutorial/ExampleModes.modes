@@ -1,0 +1,9 @@
+Decay psi'
+  pi+ pi- JPSI     pipiJpsi
+Enddecay
+
+Decay JPSI
+  pi+ pi- pi0      3pi
+  K+  Ks  pi-      KKpi
+Enddecay
+

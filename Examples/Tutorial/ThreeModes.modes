@@ -1,0 +1,9 @@
+
+# Example file defining three modes
+
+Decay ThreeModes
+  K+ K-          2K  phi   EXA
+  pi+ pi-        2pi rho   EXB
+  pi+ pi- pi0    3pi omega EXA
+Enddecay
+

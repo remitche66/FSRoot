@@ -108,6 +108,7 @@ When \FSR\ is loaded and compiled, you should see a message saying ``Loading the
 
 
 \section{Using this Document: the {\tt Examples/Tutorial} directory}
+\label{sec:tutorial}
 
 All examples shown in this document can be run within the {\tt Examples/Tutorial} directory.  They use two \ROOT\ files, each containing one {\tt TTree}, that can be created using:
 \begin{verbatim}
@@ -152,7 +153,7 @@ The basic functions are {\tt FSHistogram::getTH1F} and {\tt FSHistogram::getTH2F
 This example places a cut on {\tt Chi2DOF}:
 \begin{verbatim}
     root> FSHistogram::getTH1F("ExampleTree_0_221.root","ntExampleTree_0_221",
-           "Chi2DOF","(60,0.0,6.0)","Chi2DOF<2.0")->Draw();
+           "Chi2DOF","(60,0.0,6.0)","Chi2DOF<2.0")->Draw("hist");
 \end{verbatim}
 The variable and cut arguments can contain shortcuts.  For example, {\tt MASS(1,2)} is expanded into the total invariant mass of particles {\tt 1} and {\tt 2}, where {\tt 1} and {\tt 2} are not necessarily numbers~(they are the {\tt [CD]} in Sec.~\ref{sec:conventions}).  Characters in front of {\tt MASS}~(for example) are prepended to the variable names (the {\tt [AB]} in Sec.~\ref{sec:conventions}).  This is all done in the function {\tt FSTree::expandVariable}, which can also be run independently for testing.  
 A list of all macros can be seen using {\tt FSTree::showDefinedMacros}~(for example, {\tt RECOILMASS}, {\tt MOMENTUM}, {\tt COSINE}, etc.).  An example for {\tt FSHistogram::getTH1F}:
@@ -164,18 +165,18 @@ A list of all macros can be seen using {\tt FSTree::showDefinedMacros}~(for exam
 Examples for {\tt FSTree::expandVariable}:
 \begin{verbatim}
     root> cout << FSTree::expandVariable("MASS(1,2)+MASS(2,3)") << endl;
-      // ==> "(sqrt(pow(((EnP1+EnP2)),2)-pow(((PxP1+PxP2)),2)
-                   -pow(((PyP1+PyP2)),2)-pow(((PzP1+PzP2)),2)))
-             +(sqrt(pow(((EnP2+EnP3)),2)-pow(((PxP2+PxP3)),2)
-                   -pow(((PyP2+PyP3)),2)-pow(((PzP2+PzP3)),2)))"
+      ==>   (sqrt(pow(((EnP1+EnP2)),2)-pow(((PxP1+PxP2)),2)
+      ==>        -pow(((PyP1+PyP2)),2)-pow(((PzP1+PzP2)),2)))
+      ==>  +(sqrt(pow(((EnP2+EnP3)),2)-pow(((PxP2+PxP3)),2)
+      ==>        -pow(((PyP2+PyP3)),2)-pow(((PzP2+PzP3)),2)))
 
     root> cout << FSTree::expandVariable("ABMASS(1,C)") << endl;
-      // ==> "(sqrt(pow(((ABEnP1+ABEnPC)),2)-pow(((ABPxP1+ABPxPC)),2)
-                   -pow(((ABPyP1+ABPyPC)),2)-pow(((ABPzP1+ABPzPC)),2)))"
+      ==>   (sqrt(pow(((ABEnP1+ABEnPC)),2)-pow(((ABPxP1+ABPxPC)),2)
+      ==>        -pow(((ABPyP1+ABPyPC)),2)-pow(((ABPzP1+ABPzPC)),2)))
 
     root> cout << FSTree::expandVariable("RECOILMASS(CM;D,2)") << endl;
-      // ==> "(sqrt(pow(((EnPCM)-(EnP2+EnPD)),2)-pow(((PxPCM)-(PxP2+PxPD)),2)
-                   -pow(((PyPCM)-(PyP2+PyPD)),2)-pow(((PzPCM)-(PzP2+PzPD)),2)))"
+      ==>   (sqrt(pow(((EnPCM)-(EnP2+EnPD)),2)-pow(((PxPCM)-(PxP2+PxPD)),2)
+      ==>        -pow(((PyPCM)-(PyP2+PyPD)),2)-pow(((PzPCM)-(PzP2+PzPD)),2)))
 \end{verbatim}
 Histograms are automatically cached so they are made only once.  To save histograms at the end of a session, use the function:
 \begin{verbatim}
@@ -241,13 +242,17 @@ To see how the cuts are formed and what the scales are, use {\tt FSHistogram::sh
 The {\tt FSTree} class is also located in the {\tt FSBasic} directory and provides basic utilities to operate on trees.  
 Besides the static {\tt FSTree::expandVariable} member function mentioned in Sec.~\ref{sec:hist}, the most useful function is for skimming trees.  For example:
 \begin{verbatim}
-    root> FSTree::skimTree(inputFileName, inputTreeName, outputFileName,
-           "Chi2DOF<5.0"); 
+    root> FSTree::skimTree("ExampleTree_0_221.root","ntExampleTree_0_221",
+           "SKIM1_0_221.root","Chi2DOF<2.0"); 
+    root> FSHistogram::getTH1F("ExampleTree_0_221.root","ntExampleTree_0_221",
+           "Chi2DOF","(60,0.0,6.0)","")->Draw();
+    root> FSHistogram::getTH1F("SKIM1_0_221.root","ntExampleTree_0_221",
+           "Chi2DOF","(60,0.0,6.0)","")->Draw("hist,same");
 \end{verbatim}
-This will take the tree named {\tt inputTreeName} from the file {\tt inputFileName}, loop over all events and select only those that pass the cut on {\tt Chi2DOF}, then output the selected events to the file named {\tt outputFileName} in a tree with the same name as the input tree.  The shortcuts mentioned in Sec~\ref{sec:hist} can also be used here, for example:
+This will take the tree named {\tt ntExampleTree\_0\_221} from the file {\tt ExampleTree\_0\_221.root}, loop over all events and select only those that pass the cut on {\tt Chi2DOF}, then output the selected events to the file named {\tt SKIM1\_0\_221.root} in a tree with the same name as the input tree.  The shortcuts mentioned in Sec~\ref{sec:hist} can also be used here, for example:
 \begin{verbatim}
-    root> FSTree::skimTree(inputFileName, inputTreeName, outputFileName,
-           "abs(MASS(1,2)-0.5)<0.1"); 
+    root> FSTree::skimTree("ExampleTree_0_221.root","ntExampleTree_0_221",
+           "SKIM2_0_221.root","abs(MASS(1,2)-0.5)<0.1"); 
 \end{verbatim}
 
 
@@ -323,84 +328,100 @@ For example, the final state $\gamma K^+ K^0_S \pi^+ \pi^- \pi^- \pi^0$ has {\tt
 
 Information about an individual final state is carried by the {\tt FSModeInfo} class.  Here are examples of a few of its basic member functions:
 \begin{verbatim}
-    > FSModeInfo mi("K+ K- K+ K- pi+ pi- pi0 eta");
-    > mi.modeString();   // ==> "1_220111"
-    > mi.modeCode1();    // ==> 220111
-    > mi.modeCode2();    // ==> 1
-    > mi.modeString("this is the code: (MODECODE1,MODECODE2)");
-       // ==> "this is the code: (220111,1)" 
-    > mi.modeString("MODESTRING corresponds to MODEDESCRIPTION");
-       // ==> "1_220111 corresponds to  K+  K+  K-  K-  pi+  pi-  pi0  eta "
-    > mi.modeString("The K- mesons have indices LIST([K-]).");
-       // ==> "The K- mesons have indices 4,5."
+    root> FSModeInfo mi("K+ K- K+ K- pi+ pi- pi0 eta");
+    root> mi.modeString();   // ==> "1_220111"
+    root> mi.modeCode1();    // ==> 220111
+    root> mi.modeCode2();    // ==> 1
+    root> mi.modeString("this is the code: (MODECODE1,MODECODE2)");
+      ==>  "this is the code: (220111,1)" 
+    root> mi.modeString("MODESTRING corresponds to MODEDESCRIPTION");
+      ==>  "1_220111 corresponds to  K+  K+  K-  K-  pi+  pi-  pi0  eta "
+    root> mi.modeString("The K- mesons have indices LIST([K-]).");
+      ==>  "The K- mesons have indices 4,5."
 \end{verbatim}
 
 The {\tt FSModeInfo} class also handles particle combinatorics within a given final state through the {\tt modeCombinatorics} member function.  This is done using place holders like {\tt [pi+]}, {\tt [pi-]}, {\tt [K+]}, {\tt [K+3]}, {\tt [tk+]}, {\tt [pi0]}, etc., which are replaced by particle indices.  While the {\tt modeCombinatorics} function is rarely used explicitly by the user, it can be useful for cross-checking the behavior of the combinatorics. For example:
 \begin{verbatim}
-    > mi.modeCombinatorics("K+[K+], K-[K-], K+(again)[K+], K+(other one)[K+2]",true);
-      // ==>  *******************************
-      // ==>  *** MODE COMBINATORICS TEST ***
-      // ==>  *******************************
-      // ==>        mode =  K+  K+  K-  K-  pi+  pi-  pi0  eta 
-      // ==>       input = K+[K+], K-[K-], K+(again)[K+], K+(other one)[K+2]
-      // ==>    combinations:
-      // ==>           (1) K+2,K-4,K+(again)2,K+(otherone)3
-      // ==>           (2) K+2,K-5,K+(again)2,K+(otherone)3
-      // ==>           (3) K+3,K-4,K+(again)3,K+(otherone)2
-      // ==>           (4) K+3,K-5,K+(again)3,K+(otherone)2
-      // ==>  *******************************
+    root> mi.modeCombinatorics("iK+ = [K+], iK- = [K-], iK+ = [K+], iK+2 = [K+2]",true);
+      ==>   *******************************
+      ==>   *** MODE COMBINATORICS TEST ***
+      ==>   *******************************
+      ==>         mode =  K+  K+  K-  K-  pi+  pi-  pi0  eta 
+      ==>        input = iK+ = [K+], iK- = [K-], iK+ = [K+], iK+2 = [K+2]
+      ==>     combinations:
+      ==>            (1) iK+=2,iK-=4,iK+=2,iK+2=3
+      ==>            (2) iK+=2,iK-=5,iK+=2,iK+2=3
+      ==>            (3) iK+=3,iK-=4,iK+=3,iK+2=2
+      ==>            (4) iK+=3,iK-=5,iK+=3,iK+2=2
+      ==>   *******************************
 \end{verbatim}
 
 The {\tt modeCuts} member function uses the results of {\tt modeCombinatorics} to combine combinatorics into a single string using the keywords {\tt AND}, {\tt OR}, {\tt MAX}, {\tt MIN}, and {\tt LIST}.  It is also called by the {\tt modeString} member function.  Examples:
 \begin{verbatim}
-    > cout << mi.modeCuts("OR((ABC[K+]+DEF[K-])>0)") << endl;
-      // ==>  "(((ABC2+DEF4)>0)||((ABC2+DEF5)>0)||((ABC3+DEF4)>0)||((ABC3+DEF5)>0))"
-    > cout << mi.modeCuts("AND((ABC[K+]+DEF[K-])>0)") << endl;
-      // ==>  "(((ABC2+DEF4)>0)&&((ABC2+DEF5)>0)&&((ABC3+DEF4)>0)&&((ABC3+DEF5)>0))"
-    > cout << mi.modeCuts("MAX(ABC[K+])") << endl;
-      // ==>  "(((ABC[K+])>=(ABC2))&&((ABC[K+])>=(ABC3)))"
-    > cout << mi.modeCuts("MIN(ABC[K+])") << endl;
-      // ==>  "(((ABC[K+])<=(ABC2))&&((ABC[K+])<=(ABC3)))"
-    > cout << mi.modeCuts("LIST(ABC[K+])") << endl;
-      // ==>  "ABC2,ABC3"
+    root> mi.modeCuts("OR((ABC[K+]+DEF[K-])>0)")
+      ==>    (((ABC2+DEF4)>0)||((ABC2+DEF5)>0)||((ABC3+DEF4)>0)||((ABC3+DEF5)>0))
+    root> mi.modeCuts("AND((ABC[K+]+DEF[K-])>0)")
+      ==>    (((ABC2+DEF4)>0)&&((ABC2+DEF5)>0)&&((ABC3+DEF4)>0)&&((ABC3+DEF5)>0))
+    root> mi.modeCuts("MAX(ABC[K+])")
+      ==>    (((ABC[K+])>=(ABC2))&&((ABC[K+])>=(ABC3)))
+    root> mi.modeCuts("MIN(ABC[K+])")
+      ==>    (((ABC[K+])<=(ABC2))&&((ABC[K+])<=(ABC3)))
+    root> mi.modeCuts("LIST(ABC[K+])")
+      ==>    ABC2,ABC3
 \end{verbatim}
 
 Note that most of the functionality of the {\tt FSModeInfo} class is rarely used explicitly.  It is more often combined with other functions and used in higher-level classes~(like {\tt FSModeHistogram}), often producing large strings~(used only internally), like:
 \begin{verbatim}
-    > FSTree::expandVariable(mi.modeCuts("AND(MASS2([K+],[K-])>MASS2([pi+],[K-]))"))
-      // ==>  "(((pow(((EnP2+EnP4)),2)-pow(((PxP2+PxP4)),2)
-                                      -pow(((PyP2+PyP4)),2)-pow(((PzP2+PzP4)),2))>
-                 (pow(((EnP4+EnP6)),2)-pow(((PxP4+PxP6)),2)
-                                      -pow(((PyP4+PyP6)),2)-pow(((PzP4+PzP6)),2)))&&
-                ((pow(((EnP2+EnP5)),2)-pow(((PxP2+PxP5)),2)
-                                      -pow(((PyP2+PyP5)),2)-pow(((PzP2+PzP5)),2))>
-                 (pow(((EnP5+EnP6)),2)-pow(((PxP5+PxP6)),2)
-                                      -pow(((PyP5+PyP6)),2)-pow(((PzP5+PzP6)),2)))&&
-                ((pow(((EnP3+EnP4)),2)-pow(((PxP3+PxP4)),2)
-                                      -pow(((PyP3+PyP4)),2)-pow(((PzP3+PzP4)),2))>
-                 (pow(((EnP4+EnP6)),2)-pow(((PxP4+PxP6)),2)
-                                      -pow(((PyP4+PyP6)),2)-pow(((PzP4+PzP6)),2)))&&
-                ((pow(((EnP3+EnP5)),2)-pow(((PxP3+PxP5)),2)
-                                      -pow(((PyP3+PyP5)),2)-pow(((PzP3+PzP5)),2))>
-                 (pow(((EnP5+EnP6)),2)-pow(((PxP5+PxP6)),2)
-                                      -pow(((PyP5+PyP6)),2)-pow(((PzP5+PzP6)),2))))"
+    root> FSTree::expandVariable(mi.modeCuts("AND(MASS2([K+],[K-])>MASS2([pi+],[K-]))"))
+      ==>   (((pow(((EnP2+EnP4)),2)-pow(((PxP2+PxP4)),2)
+      ==>                          -pow(((PyP2+PyP4)),2)-pow(((PzP2+PzP4)),2))>
+      ==>     (pow(((EnP4+EnP6)),2)-pow(((PxP4+PxP6)),2)
+      ==>                          -pow(((PyP4+PyP6)),2)-pow(((PzP4+PzP6)),2)))&&
+      ==>    ((pow(((EnP2+EnP5)),2)-pow(((PxP2+PxP5)),2)
+      ==>                          -pow(((PyP2+PyP5)),2)-pow(((PzP2+PzP5)),2))>
+      ==>     (pow(((EnP5+EnP6)),2)-pow(((PxP5+PxP6)),2)
+      ==>                          -pow(((PyP5+PyP6)),2)-pow(((PzP5+PzP6)),2)))&&
+      ==>    ((pow(((EnP3+EnP4)),2)-pow(((PxP3+PxP4)),2)
+      ==>                          -pow(((PyP3+PyP4)),2)-pow(((PzP3+PzP4)),2))>
+      ==>     (pow(((EnP4+EnP6)),2)-pow(((PxP4+PxP6)),2)
+      ==>                          -pow(((PyP4+PyP6)),2)-pow(((PzP4+PzP6)),2)))&&
+      ==>    ((pow(((EnP3+EnP5)),2)-pow(((PxP3+PxP5)),2)
+      ==>                          -pow(((PyP3+PyP5)),2)-pow(((PzP3+PzP5)),2))>
+      ==>     (pow(((EnP5+EnP6)),2)-pow(((PxP5+PxP6)),2)
+      ==>                          -pow(((PyP5+PyP6)),2)-pow(((PzP5+PzP6)),2))))
 \end{verbatim} 
 
 The {\tt FSModeInfo} object also contains a list of ``categories'' that are used by the {\tt FSModeCollection} class~(next section) for organization.  The {\tt display} method shows information about a given mode, including a list of categories, some of which are added by default.  In the following, the first use of {\tt display} will show the default list of categories; the second will also show the added categories:
 \begin{verbatim}
-    > mi.display();
-      // ==>   0    1_220111    K+  K+  K-  K-  pi+  pi-  pi0  eta 
-      // ==>                      Hadronic  HasGammas  HasEtas  HasKaons  
-      // ==>                      HasPions  HasPi0s  1Eta4K2Pi1Pi0  8Body  
-      // ==>                      4Gamma  CODE=1_220111  CODE1=220111  CODE2=1
-    > mi.addCategory("TEST1");
-    > mi.addCategory("TEST2");
-    > mi.display();
-      // ==>   0    1_220111    K+  K+  K-  K-  pi+  pi-  pi0  eta 
-      // ==>                      Hadronic  HasGammas  HasEtas  HasKaons  
-      // ==>                      HasPions  HasPi0s  1Eta4K2Pi1Pi0  8Body  
-      // ==>                      4Gamma  CODE=1_220111  CODE1=220111  CODE2=1
-      // ==>                      TEST1  TEST2
+    root> mi.display();
+      ==> (0)   K+  K+  K-  K-  pi+  pi-  pi0  eta 
+      ==>                   Categories:
+      ==>                       Hadronic  HasGammas  HasEtas  HasKaons  
+      ==>                       HasPions  HasPi0s  6TK0V2GG0G  8Body  
+      ==>                       4Gamma  CODE=1_220111  CODE1=220111  CODE2=1  
+      ==>                   Keyword Substitutions:
+      ==>                       MODESTRING      ->  1_220111     
+      ==>                       MODEDESCRIPTION ->   K+  K+  K-  K-  pi+  pi-  pi0  eta 
+      ==>                       MODECODE        ->  1_220111       
+      ==>                       MODECODE1       ->  220111      
+      ==>                       MODECODE2       ->  1      
+      ==>                       MODEGLUEXFORMAT ->  _7_8_9_11_11_12_12_17
+      ==>                       MODEGLUEXNAME   ->  pi0pippimkpkpkmkmeta  
+      ==>                       MODELATEX       ->   K^{+}  K^{+}  K^{-}  K^{-}  \pi^{+}...        
+      ==>                       MODECOMBO       ->  [pi00],[pi+0],[pi-0],[K+0],[K+1],[K-0]...      
+      ==>                       MODECOUNTER     ->  0  
+    root> mi.addCategory("TEST1");
+    root> mi.addCategory("TEST2");
+    root> mi.display();
+      ==> (0)   K+  K+  K-  K-  pi+  pi-  pi0  eta 
+      ==>                   Categories:
+      ==>                       Hadronic  HasGammas  HasEtas  HasKaons  
+      ==>                       HasPions  HasPi0s  6TK0V2GG0G  8Body  
+      ==>                       4Gamma  CODE=1_220111  CODE1=220111  CODE2=1  
+      ==>                       TEST1  TEST2  
+      ==>                   Keyword Substitutions:
+      ==>                       MODESTRING      ->  1_220111 
+      ==>                       ...
 \end{verbatim}
 
 \subsection{Collections of Modes: the {\tt FSModeCollection} class}
@@ -408,22 +429,22 @@ The {\tt FSModeInfo} object also contains a list of ``categories'' that are used
 
 A list of final states~({\tt FSModeInfo} objects) is managed by the {\tt FSModeCollection} class through static member functions.  The {\tt FSModeCollection} class uses the categories associated with different final states to produce sublists.  The initial list of final states is empty.  There are a few methods to add final states to the list.  Here is one, where the optional additions to the end of the final state strings add categories:
 \begin{verbatim}
-    > FSModeCollection::addModeInfo("K+ K-         2K  phi   EXA");
-    > FSModeCollection::addModeInfo("pi+ pi-       2pi rho   EXB");
-    > FSModeCollection::addModeInfo("pi+ pi- pi0   3pi omega EXA");
+    root> FSModeCollection::addModeInfo("K+ K-         2K  phi   EXA");
+    root> FSModeCollection::addModeInfo("pi+ pi-       2pi rho   EXB");
+    root> FSModeCollection::addModeInfo("pi+ pi- pi0   3pi omega EXA");
 \end{verbatim}
 
 The {\tt display} method will show final states associated with different combinations of categories.  Boolean operators~(and = {\tt\&} or {\tt\&\&}; or = {\tt,} or {\tt||}; not = {\tt!}) and wildcards~({\tt*} and {\tt?}) are allowed:
 \begin{verbatim}
-    > FSModeCollection::display();                // shows all three
-    > FSModeCollection::display("2K");            // shows just the 2K mode
-    > FSModeCollection::display("2K,2pi");        // shows 2K and 2pi
-    > FSModeCollection::display("EXA");           // shows 2K and 3pi
-    > FSModeCollection::display("EX*");           // shows all three
-    > FSModeCollection::display("2K&2pi");        // shows none
-    > FSModeCollection::display("2K&!2pi");       // shows 2K
-    > FSModeCollection::display("HasPions");      // shows 2pi,3pi
-    > FSModeCollection::display("HasPions&!3pi"); // shows 2pi
+    root> FSModeCollection::display();                // shows all three
+    root> FSModeCollection::display("2K");            // shows just the 2K mode
+    root> FSModeCollection::display("2K,2pi");        // shows 2K and 2pi
+    root> FSModeCollection::display("EXA");           // shows 2K and 3pi
+    root> FSModeCollection::display("EX*");           // shows all three
+    root> FSModeCollection::display("2K&2pi");        // shows none
+    root> FSModeCollection::display("2K&!2pi");       // shows 2K
+    root> FSModeCollection::display("HasPions");      // shows 2pi,3pi
+    root> FSModeCollection::display("HasPions&!3pi"); // shows 2pi
 \end{verbatim}
 
 The same list could be created from a text file (the format resembles that for {\tt EvtGen}; blank lines are ignored; everything after a {\tt \#} is ignored):
@@ -435,7 +456,7 @@ The same list could be created from a text file (the format resembles that for {
       pi+ pi- pi0    3pi omega EXA
     Enddecay
         ----------- end file -----------
-    > FSModeCollection::addModesFromFile("ThreeModes.modes");
+    root> FSModeCollection::addModesFromFile("ThreeModes.modes");
 \end{verbatim}
 Nested lists can also be used:
 \begin{verbatim}
@@ -449,22 +470,22 @@ Nested lists can also be used:
       e+ e-        EE
     Enddecay
         ----------- end file -----------
-    > FSModeCollection::addModesFromFile("NestedModes.modes");
-    > FSModeCollection::display("");  // shows all four combinations 
-    > FSModeCollection::display("MM");  // shows two modes with mu+ mu- 
-    > FSModeCollection::display("etaJpsi");  // shows two modes with eta JPSI 
-    > FSModeCollection::display("etaJpsi&MM");  // shows one mode 
+    root> FSModeCollection::addModesFromFile("NestedModes.modes");
+    root> FSModeCollection::display("");  // shows all four combinations 
+    root> FSModeCollection::display("MM");  // shows two modes with mu+ mu- 
+    root> FSModeCollection::display("etaJpsi");  // shows two modes with eta JPSI 
+    root> FSModeCollection::display("etaJpsi&MM");  // shows one mode 
 \end{verbatim}
 
 Other methods also operate on combinations of categories:
 \begin{verbatim}
-    > FSModeCollection::addModesFromFile("NestedModes.modes");
-    > vector<FSModeInfo*> modes = FSModeCollection::modeVector("MM");
-    > TString FN("file.MODECODE.root");  TString NT("tree_MODECODE");
-    > for (unsigned int i = 0; i < modes.size(); i++){ 
-    >   cout << "a file name:  " << modes[i]->modeString(FN) << endl;
-    >   cout << "a tree name:  " << modes[i]->modeString(NT) << endl;
-    > }
+    root> FSModeCollection::addModesFromFile("NestedModes.modes");
+    root> vector<FSModeInfo*> modes = FSModeCollection::modeVector("MM");
+    root> TString FN("file.MODECODE.root");  TString NT("tree_MODECODE");
+    root> for (unsigned int i = 0; i < modes.size(); i++){ 
+    root>   cout << "a file name:  " << modes[i]->modeString(FN) << endl;
+    root>   cout << "a tree name:  " << modes[i]->modeString(NT) << endl;
+    root> }
 \end{verbatim}
 
 
@@ -475,28 +496,30 @@ The {\tt FSModeHistogram} class combines features from the classes described abo
 
 The primary member function is {\tt FSModeHistogram::getTH1F}, which closely resembles the {\tt FSHistogram::getTH1F} function described in Sec.~\ref{sec:hist}.  It takes an additional argument that specifies the modes to loop over.  In addition to {\tt FSTree::expandVariable}, it also incorporates methods like {\tt ModeInfo::modeString}, {\tt ModeInfo::modeCombinatorics}, {\tt ModeInfo::modeCuts}, and {\tt ModeCollection::modeVector}, all illustrated above. 
 
-Here is an example that would plot the mass of the $J/\psi$ given the decay modes specified by the {\tt NestedModes.modes} file shown in the previous section.  The first histogram is a sum of two histograms; the second and third histograms are a sum of four histograms.
+Here is an example that makes plots using the \ROOT\ files constructed in Sec.~\ref{sec:tutorial}.  The two $J/\psi$ decay modes are specified in the file {\tt ExampleModes.modes} (also in the {\tt Examples/Tutorial} directory).  
 \begin{verbatim}
-    > FSModeCollection::addModesFromFile("NestedModes.modes");
-    > TString FN("file.MODECODE.root");  TString NT("tree_MODECODE");
-    >     // plot the total mu+ mu- mass for modes containing muons  
-    > FSModeHistogram::getTH1F(FN,NT,"MM","MASS([mu+],[mu-])","(100,3.0,3.2)",
-        "Chi2DOF<5.0")->Draw();
-    >     // plot the total di-lepton mass for all four modes  
-    > FSModeHistogram::getTH1F(FN,NT,"","MASS([l+],[l-])","(100,3.0,3.2)",
-        "Chi2DOF<5.0")->Draw();
-    >     // plot the same using a cut on track quality
-    > TString cutTRACK("AND(TrackQualityParticle[tk]>10)");
-    > FSModeHistogram::getTH1F(FN,NT,"","MASS([l+],[l-])","(100,3.0,3.2)",
-        "Chi2DOF<5.0"+AND+cutTRACK)->Draw();
+    root> FSModeCollection::addModesFromFile("ExampleModes.modes");
+    root> TString FN("ExampleTree_MODECODE.root");  
+    root> TString NT("ntExampleTree_MODECODE");
+           // plot the pi+ pi- mass for all pi+ pi- combinations from both modes  
+    root> FSModeHistogram::getTH1F(FN,NT,"","MASS([pi+],[pi-])",
+            "(100,0.0,3.0)","Chi2DOF<5.0")->Draw();
+           // plot the J/psi mass from both modes  
+    root> FSModeHistogram::getTH1F(FN,NT,"","MASS(CM,-[pi+],-[pi-])",
+            "(100,3.0,3.2)","Chi2DOF<5.0")->Draw();
+           // plot the same using a cut on track chi2
+    root> TString cutTRACK("AND(TkChi2P[tk]<1)");
+    root> FSModeHistogram::getTH1F(FN,NT,"","MASS(CM,-[pi+],-[pi-])",
+            "(100,3.0,3.2)","Chi2DOF<5.0&&"+cutTRACK)->Draw("hist,same");
 \end{verbatim}
 
 To explicitly see how the histograms are constructed, use:
 \begin{verbatim}
-    > FSControl::DEBUG = true;
+    root> FSControl::DEBUG = true;
 \end{verbatim}
 
 The histogram caches also work here:  methods like {\tt FSHistogram::dumpHistogramCache} work as before.
+You can also use {\tt FSHistogram::showHistogramCache} to see information about any individual histogram.
 
 \subsection{Information about MC Components}
 \label{sec:mccomponents}
@@ -519,11 +542,11 @@ The {\tt FSModeTree} class contains static member functions that operate on mult
 
 The {\tt FSModeTree::skimTree} method is the same as the {\tt FSTree::skimTree} method~(Sec.~\ref{sec:tree}), except it takes an argument to specify a combination of categories.  To skim trees for the final states listed in {\tt NestedModes.modes}, and to make track quality cuts on tracks, for example:
 \begin{verbatim}
-    > FSModeCollection::addModesFromFile("NestedModes.modes");
-    > TString inFN("file.MODECODE.root");  TString NT("tree_MODECODE");
-    > TString outFN("skim.MODECODE.root");
-    > TString cutTRACK("AND(TrackQualityParticle[tk]>10)");
-    > FSModeTree::skimTree(inFN,NT,"EE,MM",outFN,cutTRACK);
+    root> FSModeCollection::addModesFromFile("ExampleModes.modes");
+    root> TString FN("ExampleTree_MODECODE.root");  
+    root> TString NT("ntExampleTree_MODECODE");
+    root> TString cutTRACK("AND(TkChi2P[tk]<1)");
+    root> FSModeTree::skimTree(FN,NT,"","SKIM.MODECODE.root",cutTRACK);
 \end{verbatim}
 
 It often happens in particle physics experiments that a given event can be reconstructed multiple times under different hypotheses.  This can happen within a single final state -- for example, an event from the final state $K^+K^-\pi^+\pi^-\pi^0$ could be reconstructed once correctly and again one or more times incorrectly by misidentifying pions as kaons and vice versa.  It can also happen across several final states -- for example, the same event from the $K^+K^-\pi^+\pi^-\pi^0$ final state could also be reconstructed as $K^+K^-\pi^+\pi^-$ by missing the $\pi^0$.  
@@ -537,7 +560,7 @@ The different hypotheses in the above scenarios would lead to different values o
 \end{verbatim}
 The friend tree is used automatically by {\tt FSModeHistogram} by setting:
 \begin{verbatim}
-    > FSTree::addFriendTree("Chi2Rank");
+    root> FSTree::addFriendTree("Chi2Rank");
 \end{verbatim}
 A generalized version of the {\tt createChi2RankingTree} method is called {\tt createRankingTree} and works in the same way.  In this version, the variable ranked, its name, and the variables used to group combinations (like {\tt Run} and {\tt Event}) can be customized.
 
