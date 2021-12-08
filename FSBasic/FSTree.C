@@ -14,6 +14,7 @@
 #include "FSBasic/FSControl.h"
 #include "FSBasic/FSString.h"
 #include "FSBasic/FSSystem.h"
+#include "FSBasic/FSPhysics.h"
 #include "FSBasic/FSCut.h"
 #include "FSBasic/FSTree.h"
 
@@ -887,6 +888,22 @@ FSTree::expandVariable(TString variable, bool show){
       int commaCount = 0;
       for (unsigned int ic = 0; ic < commaParts.size(); ic++){
         if (commaParts[ic].Length() == 0) continue;
+        TString subMass = "";
+        if (FSString::subString(commaParts[ic],commaParts[ic].Length()-2,commaParts[ic].Length()) == "pi"){
+          commaParts[ic] = FSString::subString(commaParts[ic],0,commaParts[ic].Length()-2);
+          subMass = FSString::double2TString(FSPhysics::XMpi,8); }
+        if (FSString::subString(commaParts[ic],commaParts[ic].Length()-1,commaParts[ic].Length()) == "K"){
+          commaParts[ic] = FSString::subString(commaParts[ic],0,commaParts[ic].Length()-1);
+          subMass = FSString::double2TString(FSPhysics::XMK,8); }
+        if (FSString::subString(commaParts[ic],commaParts[ic].Length()-1,commaParts[ic].Length()) == "p"){
+          commaParts[ic] = FSString::subString(commaParts[ic],0,commaParts[ic].Length()-1);
+          subMass = FSString::double2TString(FSPhysics::XMp,8); }
+        if (FSString::subString(commaParts[ic],commaParts[ic].Length()-1,commaParts[ic].Length()) == "e"){
+          commaParts[ic] = FSString::subString(commaParts[ic],0,commaParts[ic].Length()-1);
+          subMass = FSString::double2TString(FSPhysics::XMe,8); }
+        if (FSString::subString(commaParts[ic],commaParts[ic].Length()-2,commaParts[ic].Length()) == "mu"){
+          commaParts[ic] = FSString::subString(commaParts[ic],0,commaParts[ic].Length()-2);
+          subMass = FSString::double2TString(FSPhysics::XMmu,8); }
         TString plusMinus("+");
         TString firstDigit = FSString::subString(commaParts[ic],0,1);
         if (firstDigit == "+" || firstDigit == "-"){
@@ -906,7 +923,15 @@ FSTree::expandVariable(TString variable, bool show){
           newPz += m_mapDefinedPz[commaParts[ic]];
         }
         else{
-          newEn += (prefix+"EnP"+commaParts[ic]);
+          if (subMass != ""){
+            newEn += "sqrt("+prefix+"PxP"+commaParts[ic]+"*"+prefix+"PxP"+commaParts[ic]+"+"
+                            +prefix+"PyP"+commaParts[ic]+"*"+prefix+"PyP"+commaParts[ic]+"+"
+                            +prefix+"PzP"+commaParts[ic]+"*"+prefix+"PzP"+commaParts[ic]+"+"
+                            +subMass+"*"+subMass+")";
+          }
+          else{
+            newEn += (prefix+"EnP"+commaParts[ic]);
+          }
           newPx += (prefix+"PxP"+commaParts[ic]);
           newPy += (prefix+"PyP"+commaParts[ic]);
           newPz += (prefix+"PzP"+commaParts[ic]);
