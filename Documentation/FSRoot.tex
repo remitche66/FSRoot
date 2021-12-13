@@ -561,19 +561,20 @@ The {\tt FSModeTree::skimTree} method is the same as the {\tt FSTree::skimTree} 
     root> FSModeTree::skimTree(FN,NT,"","SKIM.MODECODE.root",cutTRACK);
 \end{verbatim}
 
-It often happens in particle physics experiments that a given event can be reconstructed multiple times under different hypotheses.  This can happen within a single final state -- for example, an event from the final state $K^+K^-\pi^+\pi^-\pi^0$ could be reconstructed once correctly and again one or more times incorrectly by misidentifying pions as kaons and vice versa.  It can also happen across several final states -- for example, the same event from the $K^+K^-\pi^+\pi^-\pi^0$ final state could also be reconstructed as $K^+K^-\pi^+\pi^-$ by missing the $\pi^0$.  
+It often happens in particle physics experiments that a given event can be reconstructed multiple times under different hypotheses.  This can happen within a single final state -- for example, an event from the final state $K^+K^-\pi^+\pi^-\pi^0$ could be reconstructed once correctly and one or more times incorrectly by misidentifying pions as kaons and vice versa.  It can also happen within multiple final states -- 
+for example, the same event from the $K^+K^-\pi^+\pi^-\pi^0$ final state could also be reconstructed as $K^+K^-\pi^+\pi^-$ by missing the $\pi^0$.  
 
 The different hypotheses in the above scenarios would lead to different values of the $\chi^2$ from kinematic fits.  The {\tt createChi2RankingTree} method uses the {\tt TTree} variables {\tt Run}, {\tt Event}, and {\tt Chi2} to rank hypotheses by $\chi^2$.  It does this by creating a friend tree in a new file -- the name of the new file name is the same as the old file name except with a ``{\tt .Chi2Rank}'' appended.  The friend tree contains the variables:
 \begin{verbatim}
-    // Chi2RankCombinations:  number of combinations within a final state
-    // Chi2Rank:  rank of this combination within a final state
+    // Chi2RankCombinations:  number of combinations within this final state
+    // Chi2Rank:  rank of this combination within this final state
     // Chi2RankCombinationsGlobal:  number of combinations in all final states
     // Chi2RankGlobal:  rank of this combination in all final states
     // Chi2RankVar:  the value of the variable used for ranking
-    // Chi2RankVarBest:  the best value of Chi2RankVar within a final state
-    // Chi2RankVarBestGlobal:  the best value of Chi2RankVar in all final states
+    // Chi2RankVarBest:  the best value of Chi2RankVar within this final state
+    // Chi2RankVarBestOther:  the best value of Chi2RankVar in all other final states
 \end{verbatim}
-The friend tree is used automatically by {\tt FSModeHistogram} by setting:
+The friend tree is used automatically by {\tt FSHistogram} by setting:
 \begin{verbatim}
     root> FSTree::addFriendTree("Chi2Rank");
 \end{verbatim}

@@ -332,14 +332,14 @@ FSModeTree::createRankingTree(TString fileName, TString ntName, TString category
       Int_t NCOMBINATIONSGLOBAL;
       Int_t VARRANKVAR;
       Int_t RANKVARBEST = -1;
-      Int_t RANKVARBESTGLOBAL = -1;
+      Int_t RANKVARBESTOTHER = -1;
       TString sVARRANK             = rankVarName + "";
       TString sVARRANKGLOBAL       = rankVarName + "Global";
       TString sNCOMBINATIONS       = rankVarName + "Combinations";
       TString sNCOMBINATIONSGLOBAL = rankVarName + "CombinationsGlobal";
       TString sVARRANKVAR          = rankVarName + "Var";
       TString sRANKVARBEST         = rankVarName + "VarBest";
-      TString sRANKVARBESTGLOBAL   = rankVarName + "VarBestGlobal";
+      TString sRANKVARBESTOTHER    = rankVarName + "VarBestOther";
       TString fileName_rank(fileName_i);  fileName_rank += ".";  fileName_rank += rankVarName;
       TString ntName_rank(ntName_i);  ntName_rank += "_";  ntName_rank += rankVarName;
       if (iLoop == 2){
@@ -351,7 +351,7 @@ FSModeTree::createRankingTree(TString fileName, TString ntName, TString category
         rankTTree->Branch(sNCOMBINATIONSGLOBAL,&NCOMBINATIONSGLOBAL,sNCOMBINATIONSGLOBAL+"/I");
         rankTTree->Branch(sVARRANKVAR,         &VARRANKVAR,         sVARRANKVAR+"/I");
         rankTTree->Branch(sRANKVARBEST,        &RANKVARBEST,        sRANKVARBEST+"/I");
-        rankTTree->Branch(sRANKVARBESTGLOBAL,  &RANKVARBESTGLOBAL,  sRANKVARBESTGLOBAL+"/I");
+        rankTTree->Branch(sRANKVARBESTOTHER,   &RANKVARBESTOTHER,   sRANKVARBESTOTHER+"/I");
       }
 
         // BOTH LOOPS: loop over events in the original tree
@@ -446,7 +446,6 @@ FSModeTree::createRankingTree(TString fileName, TString ntName, TString category
               cout << endl;
             }
           }
-          RANKVARBESTGLOBAL = -1;  if (vVar0.size() > 0) RANKVARBESTGLOBAL = vVar0[0];
           NCOMBINATIONSGLOBAL = 0; if (vVar0.size() > 0) NCOMBINATIONSGLOBAL = vVar0.size()-1;
           VARRANKGLOBAL = -1;
           if (SKIPENTRY || vVar0.size() <= 1){ VARRANKGLOBAL = -1; }
@@ -462,6 +461,12 @@ FSModeTree::createRankingTree(TString fileName, TString ntName, TString category
               }
             }
           }
+          RANKVARBESTOTHER = -1;
+          vector<int> vHelp;
+          for (int iHelp = 1; iHelp < 1+(int)modeVector.size(); iHelp++){
+            if (IMODE != iHelp && mModeVar.find(iHelp) != mModeVar.end() && mModeVar[iHelp].size() > 0) 
+              vHelp.push_back(mModeVar[iHelp][0]); }
+          if (vHelp.size() > 0){ std::sort(vHelp.begin(), vHelp.end()); RANKVARBESTOTHER = vHelp[0]; }
           if (FSControl::DEBUG){
             if (DEBUGRUN == pRunEvent.first && DEBUGEVT == pRunEvent.second){
               cout << sNCOMBINATIONSGLOBAL << " = "                   << NCOMBINATIONSGLOBAL << endl;
