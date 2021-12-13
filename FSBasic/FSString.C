@@ -1383,7 +1383,7 @@ FSString::pushBackToEach(vector< vector<int> > originalList, vector<int> newPart
 // ********************************************************
 
 
-vector<TString> FSString::m_reorderMathSpacers{"(",")",":",",",";","||","&&","==","!=","<=","<",">=",">","+","*"};
+vector<TString> FSString::m_reorderMathSpacers;
 
 int 
 FSString::nMathSpacer(TString part){
@@ -1419,6 +1419,23 @@ FSString::reorderMathHelp(vector<TString> parts, bool sort){
 
 TString 
 FSString::reorderMath(TString original, bool show){
+  if (m_reorderMathSpacers.size() == 0){
+    m_reorderMathSpacers.push_back("("); 
+    m_reorderMathSpacers.push_back(")"); 
+    m_reorderMathSpacers.push_back(":"); 
+    m_reorderMathSpacers.push_back(","); 
+    m_reorderMathSpacers.push_back(";"); 
+    m_reorderMathSpacers.push_back("||");
+    m_reorderMathSpacers.push_back("&&");
+    m_reorderMathSpacers.push_back("==");
+    m_reorderMathSpacers.push_back("!=");
+    m_reorderMathSpacers.push_back("<=");
+    m_reorderMathSpacers.push_back("<"); 
+    m_reorderMathSpacers.push_back(">=");
+    m_reorderMathSpacers.push_back(">"); 
+    m_reorderMathSpacers.push_back("+"); 
+    m_reorderMathSpacers.push_back("*"); 
+  }
   if (show){
     cout << "BEGIN FSString::reorderMath" << endl;
     cout << "  ORIGINAL EXPRESSION = " << endl << "    " << original << endl;
