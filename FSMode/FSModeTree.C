@@ -252,6 +252,7 @@ FSModeTree::createRankingTree(TString fileName, TString ntName, TString category
       int IMODE = i + 1;
       TString fileName_i  = fileNames_i[ifile];
       TString ntName_i    = modeVector[i]->modeString(ntName);
+        if (ntName_i == "") ntName_i = FSTree::getTreeNameFromFile(fileName_i);
       TString cuts_i      = modeVector[i]->modeString(cuts);
         vector< pair<TString,double> > fsCuts = FSCut::expandCuts(cuts_i);
         if (fsCuts.size() == 1){ cuts_i = modeVector[i]->modeString(fsCuts[0].first); }
