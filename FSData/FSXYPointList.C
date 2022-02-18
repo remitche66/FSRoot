@@ -185,7 +185,6 @@ FSXYPointList::getTH1F(TString category, TString histBounds, bool includeSystErr
     hist->SetBinError(ix,ey);
   }
   hist = FSHistogram::getTH1F(hist);
-  FSHistogram::setHistogramMaxima(hist);
   return hist;
 }
 

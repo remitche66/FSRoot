@@ -48,16 +48,10 @@ FSHistogram::getTH1F(TH1F* hist){
     if (hist->GetSumw2N() == 0) hist->Sumw2();
     hist->SetDirectory(0);
     hist->SetStats(0);
-    if (hist->GetMinimum() >= 0){
-      hist->SetMinimum(0.0);
-      double height =  hist->GetBinContent(hist->GetMaximumBin())
-                     + hist->GetBinError(hist->GetMaximumBin());
-      hist->SetMaximum(height*1.05);
-    }
-    if (hist->GetMaximum() == 0.0) hist->SetMaximum(1.0);
     hist->SetTitleOffset(1.5,"X");
     hist->SetTitleOffset(1.8,"Y");
     hist->SetLineColor(kBlack);
+    setHistogramMaxMin(hist);
   }
   return hist;
 }
@@ -68,15 +62,10 @@ FSHistogram::getTH2F(TH2F* hist){
     if (hist->GetSumw2N() == 0) hist->Sumw2();
     hist->SetDirectory(0);
     hist->SetStats(0);
-    if (hist->GetMinimum() >= 0){
-      hist->SetMinimum(0.0);
-      double height =  hist->GetBinContent(hist->GetMaximumBin());
-      hist->SetMaximum(height*1.05);
-    }
-    if (hist->GetMaximum() == 0.0) hist->SetMaximum(1.0);
     hist->SetTitleOffset(1.5,"X");
     hist->SetTitleOffset(1.8,"Y");
     hist->GetZaxis()->SetLabelSize(0.03);
+    setHistogramMaxMin(hist);
   }
   return hist;
 }
@@ -731,67 +720,83 @@ FSHistogram::integral(TH2F* hist, bool function, double x1, double x2, double y1
   // SET MAXIMA/MINIMA SO HISTOGRAMS CAN BE SHOWN TOGETHER
   // ********************************************************
 
-void 
-FSHistogram::setHistogramMaxima(TH1F* h1, TH1F* h2, TH1F* h3, TH1F* h4, 
-                                       TH1F* h5, TH1F* h6, TH1F* h7, TH1F* h8, 
-                                       TH1F* h9, TH1F* h10){
-  vector<TH1F*> histVector;
-  if (h1)  histVector.push_back(h1);
-  if (h2)  histVector.push_back(h2);
-  if (h3)  histVector.push_back(h3);
-  if (h4)  histVector.push_back(h4);
-  if (h5)  histVector.push_back(h5);
-  if (h6)  histVector.push_back(h6);
-  if (h7)  histVector.push_back(h7);
-  if (h8)  histVector.push_back(h8);
-  if (h9)  histVector.push_back(h9);
-  if (h10) histVector.push_back(h10);
-  float max = -1.0e99;
+void
+FSHistogram::setHistogramMaxMin(TH1F* hist, bool zeroSuppression, TString MAXMIN){
+  vector<TH1F*> histVector;  histVector.push_back(hist);
+  setHistogramMaxMin(histVector, zeroSuppression, MAXMIN);
+}
+
+void
+FSHistogram::setHistogramMaxMin(TH2F* hist, bool zeroSuppression, TString MAXMIN){
+  vector<TH2F*> histVector;  histVector.push_back(hist);
+  setHistogramMaxMin(histVector, zeroSuppression, MAXMIN);
+}
+
+void
+FSHistogram::setHistogramMaxMin(vector<TH1F*> histVector, bool zeroSuppression, TString MAXMIN){
+  vector<TH1F*> histVector2;
   for (unsigned int i = 0; i < histVector.size(); i++){
-    TH1F* hist = histVector[i];
+    if (histVector[i] && histVector[i]->GetNbinsX() > 0)
+      histVector2.push_back(histVector[i]); }
+  if (histVector2.size() == 0) return;
+  double min = histVector2[0]->GetBinContent(1);
+  double max = min;
+  for (unsigned int i = 0; i < histVector2.size(); i++){
+    TH1F* hist = histVector2[i];
     for (int j = 1; j <= hist->GetNbinsX(); j++){
       float max0 = hist->GetBinContent(j) + hist->GetBinError(j);
       if (max0 > max) max = max0;
-    }
-  }
-  for (unsigned int i = 0; i < histVector.size(); i++){
-    TH1F* hist = histVector[i];
-    if (max > 0) hist->SetMaximum(max*1.05);
-    if (max < 0) hist->SetMaximum(max*0.9);
-    //hist->SetMaximum(max);
-  }
-}
-
-
-void 
-FSHistogram::setHistogramMinima(TH1F* h1, TH1F* h2, TH1F* h3, TH1F* h4, 
-                                       TH1F* h5, TH1F* h6, TH1F* h7, TH1F* h8, 
-                                       TH1F* h9, TH1F* h10){
-  vector<TH1F*> histVector;
-  if (h1)  histVector.push_back(h1);
-  if (h2)  histVector.push_back(h2);
-  if (h3)  histVector.push_back(h3);
-  if (h4)  histVector.push_back(h4);
-  if (h5)  histVector.push_back(h5);
-  if (h6)  histVector.push_back(h6);
-  if (h7)  histVector.push_back(h7);
-  if (h8)  histVector.push_back(h8);
-  if (h9)  histVector.push_back(h9);
-  if (h10) histVector.push_back(h10);
-  float min = 1.0e99;
-  for (unsigned int i = 0; i < histVector.size(); i++){
-    TH1F* hist = histVector[i];
-    for (int j = 1; j <= hist->GetNbinsX(); j++){
       float min0 = hist->GetBinContent(j) - hist->GetBinError(j);
       if (min0 < min) min = min0;
     }
   }
-  for (unsigned int i = 0; i < histVector.size(); i++){
-    TH1F* hist = histVector[i];
-    if (min > 0) hist->SetMinimum(min*0.9);
-    if (min < 0) hist->SetMinimum(min*1.1);
+  if (min > 0 && !zeroSuppression) min = 0.0;
+  if (max < 0 && !zeroSuppression) max = 0.0;
+       if (min == 0.0 && max  > 0.0){ max = max*1.05; }
+  else if (min  < 0.0 && max == 0.0){ min = min*1.05; }
+  else if (min == 0.0 && max == 0.0){ max = 1.0; }
+  else { double h = max - min; if (max == min) h = max;
+         max = max + h*0.05;  min = min - h*0.05; }
+  for (unsigned int i = 0; i < histVector2.size(); i++){
+    TH1F* hist = histVector2[i];
+    if (MAXMIN.Contains("MAX")) hist->SetMaximum(max);
+    if (MAXMIN.Contains("MIN")) hist->SetMinimum(min);
   }
 }
+
+void
+FSHistogram::setHistogramMaxMin(vector<TH2F*> histVector, bool zeroSuppression, TString MAXMIN){
+  vector<TH2F*> histVector2;
+  for (unsigned int i = 0; i < histVector.size(); i++){
+    if (histVector[i] && histVector[i]->GetNbinsX() > 0 && histVector[i]->GetNbinsY() > 0)
+      histVector2.push_back(histVector[i]); }
+  if (histVector2.size() == 0) return;
+  double min = histVector2[0]->GetBinContent(1,1);
+  double max = min;
+  for (unsigned int i = 0; i < histVector2.size(); i++){
+    TH2F* hist = histVector2[i];
+    for (int j = 1; j <= hist->GetNbinsX(); j++){
+    for (int k = 1; k <= hist->GetNbinsY(); k++){
+      float max0 = hist->GetBinContent(j,k);
+      if (max0 > max) max = max0;
+      float min0 = hist->GetBinContent(j,k);
+      if (min0 < min) min = min0;
+    }}
+  }
+  if (min > 0 && !zeroSuppression) min = 0.0;
+  if (max < 0 && !zeroSuppression) max = 0.0;
+       if (min == 0.0 && max  > 0.0){ max = max*1.05; }
+  else if (min  < 0.0 && max == 0.0){ min = min*1.05; }
+  else if (min == 0.0 && max == 0.0){ max = 1.0; }
+  else { double h = max - min; if (max == min) h = max;
+         max = max + h*0.05;  min = min - h*0.05; }
+  for (unsigned int i = 0; i < histVector2.size(); i++){
+    TH2F* hist = histVector2[i];
+    if (MAXMIN.Contains("MAX")) hist->SetMaximum(max);
+    if (MAXMIN.Contains("MIN")) hist->SetMinimum(min);
+  }
+}
+
 
 
 

@@ -317,7 +317,6 @@ FSEEDataSetList::histLuminosity(TString dsCategory,
     hist->SetBinError(iecm,elum);
   }
   hist = FSHistogram::getTH1F(hist);
-  FSHistogram::setHistogramMaxima(hist);
   return hist;
 }
 
