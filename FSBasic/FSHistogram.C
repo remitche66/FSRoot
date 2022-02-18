@@ -756,7 +756,7 @@ FSHistogram::setHistogramMaxMin(vector<TH1F*> histVector, bool zeroSuppression, 
   else if (min  < 0.0 && max == 0.0){ min = min*1.05; }
   else if (min == 0.0 && max == 0.0){ max = 1.0; }
   else { double h = max - min; if (max == min) h = max;
-         max = max + h*0.05;  min = min - h*0.05; }
+         max = max + fabs(h)*0.05;  min = min - fabs(h)*0.05; }
   for (unsigned int i = 0; i < histVector2.size(); i++){
     TH1F* hist = histVector2[i];
     if (MAXMIN.Contains("MAX")) hist->SetMaximum(max);
@@ -789,7 +789,7 @@ FSHistogram::setHistogramMaxMin(vector<TH2F*> histVector, bool zeroSuppression, 
   else if (min  < 0.0 && max == 0.0){ min = min*1.05; }
   else if (min == 0.0 && max == 0.0){ max = 1.0; }
   else { double h = max - min; if (max == min) h = max;
-         max = max + h*0.05;  min = min - h*0.05; }
+         max = max + fabs(h)*0.05;  min = min - fabs(h)*0.05; }
   for (unsigned int i = 0; i < histVector2.size(); i++){
     TH2F* hist = histVector2[i];
     if (MAXMIN.Contains("MAX")) hist->SetMaximum(max);
