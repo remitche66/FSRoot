@@ -139,7 +139,6 @@ FSEEXSList::histXS(TString xsCat, TString dsCat, TString lumCat, TString histBou
     hist->SetBinError(iecm,exs);
   }
   hist = FSHistogram::getTH1F(hist);
-  FSHistogram::setHistogramMaxima(hist);
   return hist;
 }
 

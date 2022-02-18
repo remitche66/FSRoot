@@ -115,19 +115,22 @@ class FSHistogram{
 
       // ********************************************************
       // SET MAXIMA/MINIMA SO HISTOGRAMS CAN BE SHOWN TOGETHER
+      //    MAXMIN = "MAXMIN": set maxima and minima
+      //    MAXMIN = "MAX": set maxima
+      //    MAXMIN = "MIN": set minima
       // ********************************************************
 
-    static void setHistogramMaxima(TH1F* h1, TH1F* h2=NULL, 
-                                   TH1F* h3=NULL, TH1F* h4=NULL, 
-                                   TH1F* h5=NULL, TH1F* h6=NULL,
-                                   TH1F* h7=NULL, TH1F* h8=NULL,
-                                   TH1F* h9=NULL, TH1F* h10=NULL);
+    static void setHistogramMaxMin(TH1F* hist, 
+                                   bool zeroSuppression = false, TString MAXMIN = "MAXMIN");
 
-    static void setHistogramMinima(TH1F* h1, TH1F* h2=NULL, 
-                                   TH1F* h3=NULL, TH1F* h4=NULL, 
-                                   TH1F* h5=NULL, TH1F* h6=NULL,
-                                   TH1F* h7=NULL, TH1F* h8=NULL,
-                                   TH1F* h9=NULL, TH1F* h10=NULL);
+    static void setHistogramMaxMin(vector<TH1F*> histVector,
+                                   bool zeroSuppression = false, TString MAXMIN = "MAXMIN");
+
+    static void setHistogramMaxMin(TH2F* hist, 
+                                   bool zeroSuppression = false, TString MAXMIN = "MAXMIN");
+
+    static void setHistogramMaxMin(vector<TH2F*> histVector,
+                                   bool zeroSuppression = false, TString MAXMIN = "MAXMIN");
     
 
       // ********************************************************
