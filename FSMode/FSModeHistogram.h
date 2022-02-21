@@ -125,8 +125,8 @@ class FSModeHistogram{
       // DUMP OR READ A HISTOGRAM CACHE TO/FROM A FILE
       // ********************************************************
 
-    static void dumpHistogramCache(string cacheName = "");
-    static void readHistogramCache(string cacheName = "");
+    static void dumpHistogramCache(TString cacheName = "", TString selectIndex = "*");
+    static void readHistogramCache(TString cacheName = "", TString selectIndex = "*");
 
 
 
@@ -146,8 +146,8 @@ class FSModeHistogram{
       // MC components
 
     static map<TString, map<TString, float> > m_cacheComponentsMap;
-    static void dumpComponentsCache(string cacheName = "");
-    static void readComponentsCache(string cacheName = "");
+    static void dumpComponentsCache(TString cacheName = "");
+    static void readComponentsCache(TString cacheName = "");
 
 
       // helper functions for histograms

@@ -137,8 +137,8 @@ class FSHistogram{
       // DUMP OR READ A HISTOGRAM CACHE TO/FROM A FILE
       // ********************************************************
 
-    static void dumpHistogramCache(string cacheName = "");
-    static void readHistogramCache(string cacheName = "");
+    static void dumpHistogramCache(TString cacheName = "", TString selectIndex = "*");
+    static void readHistogramCache(TString cacheName = "", TString selectIndex = "*");
 
 
       // ********************************************************
@@ -150,13 +150,13 @@ class FSHistogram{
       //        part of the index (for example, "CU" is for cuts)
       // ********************************************************
 
-    static void clearHistogramCache(TString histName = "");
-    static void showHistogramCache(TString histName = "", bool showDetails = false);
-    static TString getHistogramInfo(TString histName = "", TString indexComponent = "");
+    static void clearHistogramCache(TString histName = "", TString selectIndex = "*");
+    static void showHistogramCache(TString histName = "", bool showDetails = false, TString selectIndex = "*");
+    static TString getHistogramInfo(TString histName = "", TString indexComponent = "", TString selectIndex = "*");
 
-    static void clearHistogramCache(int histNumber);
-    static void showHistogramCache(int histNumber, bool showDetails = false);
-    static TString getHistogramInfo(int histNumber, TString indexComponent = "");
+    static void clearHistogramCache(int histNumber, TString selectIndex = "*");
+    static void showHistogramCache(int histNumber, bool showDetails = false, TString selectIndex = "*");
+    static TString getHistogramInfo(int histNumber, TString indexComponent = "", TString selectIndex = "*");
 
 
       // ********************************************************
@@ -243,7 +243,8 @@ class FSHistogram{
     static map< TString, FSHistogramInfo* >  m_FSHistogramInfoCache;
     static unsigned int m_indexFSRootHistName;
     static unsigned int m_indexFSRootTempName;
-    static vector<TString> getFSHistogramInfoCacheIndices(TString histName = "", bool exactOnly = true);
+    static vector<TString> getFSHistogramInfoCacheIndices(TString histName = "", bool exactOnly = true,
+                                                          TString selectIndex = "*");
 
 
       // *******************************************

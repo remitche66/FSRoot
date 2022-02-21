@@ -473,11 +473,11 @@ FSModeHistogram::formatMCComponent(TString component, float fraction){
 
 
 void
-FSModeHistogram::dumpComponentsCache(string cacheName){
+FSModeHistogram::dumpComponentsCache(TString cacheName){
 
     // open output file
 
-  string compCacheName(cacheName);  compCacheName += ".cache.comp";
+  string compCacheName = FSString::TString2string(cacheName);  compCacheName += ".cache.comp";
   ofstream compCache(compCacheName.c_str());
 
     // write to file
@@ -503,11 +503,11 @@ FSModeHistogram::dumpComponentsCache(string cacheName){
 }
 
 void
-FSModeHistogram::readComponentsCache(string cacheName){
+FSModeHistogram::readComponentsCache(TString cacheName){
 
     // open output file
 
-  string compCacheName(cacheName);  compCacheName += ".cache.comp";
+  string compCacheName = FSString::TString2string(cacheName);  compCacheName += ".cache.comp";
   ifstream compCache(compCacheName.c_str());
 
     // read from file
@@ -539,14 +539,14 @@ FSModeHistogram::readComponentsCache(string cacheName){
   // ********************************************************
 
 void 
-FSModeHistogram::dumpHistogramCache(string cacheName){
-  FSHistogram::dumpHistogramCache(cacheName);
+FSModeHistogram::dumpHistogramCache(TString cacheName, TString selectIndex){
+  FSHistogram::dumpHistogramCache(cacheName,selectIndex);
   dumpComponentsCache(cacheName);
 }
 
 void 
-FSModeHistogram::readHistogramCache(string cacheName){
-  FSHistogram::readHistogramCache(cacheName);
+FSModeHistogram::readHistogramCache(TString cacheName, TString selectIndex){
+  FSHistogram::readHistogramCache(cacheName,selectIndex);
   readComponentsCache(cacheName);
 }
 
