@@ -1086,7 +1086,7 @@ FSHistogram::getFSHistogramInfoCacheIndices(TString histName, bool exactOnly, TS
     if (!FSString::compareTStrings(mapItr->first,selectIndex)) continue;
     FSHistogramInfo* histInfo = mapItr->second;
     if (!histInfo) continue;
-    if (histName == ""){ indices.push_back(mapItr->first); continue; }
+    if (histName == "" || histName == "*"){ indices.push_back(mapItr->first); continue; }
     if (histName == histInfo->getHistName()){ indices.push_back(mapItr->first); continue; }
     if (exactOnly) continue;
     for (unsigned int i = 0; i < histInfo->m_basicHistograms.size(); i++){
