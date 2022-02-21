@@ -57,6 +57,8 @@ FSString::compareTStrings(TString inputNoWildCards, TString inputWithWildCards, 
   if (!caseSensitive){ inputNoWildCards.ToUpper(); inputWithWildCards.ToUpper(); }
   if (!inputWithWildCards.Contains("*")&&!inputWithWildCards.Contains("?"))
     return (inputNoWildCards == inputWithWildCards);
+  while (inputNoWildCards.Contains("*")){
+    inputNoWildCards.Replace(inputNoWildCards.Index("*"),1,"?"); }
   while (inputWithWildCards.Contains("**")){
     inputWithWildCards.Replace(inputWithWildCards.Index("**"),2,"*"); }
   string sNone = FSString::TString2string(inputNoWildCards);
