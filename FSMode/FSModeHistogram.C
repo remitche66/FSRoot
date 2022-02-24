@@ -474,6 +474,7 @@ FSModeHistogram::formatMCComponent(TString component, float fraction){
 
 void
 FSModeHistogram::dumpComponentsCache(TString cacheName){
+  if (m_cacheComponentsMap.size() == 0) return;
 
     // open output file
 

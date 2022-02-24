@@ -877,12 +877,12 @@ FSHistogram::readHistogramCache(TString cacheName, TString selectIndex){
   vector<TString> textCacheNames = FSSystem::getAbsolutePaths(sCacheNameWithWildcards+".cache.dat");
   vector<TString> rootCacheNames = FSSystem::getAbsolutePaths(sCacheNameWithWildcards+".cache.root");
   if ((textCacheNames.size() == 1) && (rootCacheNames.size() == 1)){
-    cout << "READING CACHE..." << endl;
+    cout << "READING CACHE: " << cacheName << endl;
     cout << "    root file = " << rootCacheNames[0] << endl;
     cout << "    data file = " << textCacheNames[0] << endl;
   }
   else{
-    cout << "PREPARING TO READ CACHE..." << endl;
+    cout << "PREPARING TO READ CACHE: " << cacheName << endl;
     cout << "    ROOT FILES: " << endl;
     for (unsigned int i = 0; i < rootCacheNames.size(); i++){
       cout << "      (" << i+1 << ") " << rootCacheNames[i] << endl;
