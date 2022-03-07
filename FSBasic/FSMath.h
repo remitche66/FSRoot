@@ -87,6 +87,15 @@ class FSMath{
 
 
 // ***************************************
+//  boostEnergy
+//    return the energy of P1 in the P2 rest frame
+// ***************************************
+
+    static double boostEnergy(double PxP1, double PyP1, double PzP1, double EnP1,
+                              double PxP2, double PyP2, double PzP2, double EnP2);
+
+
+// ***************************************
 //  D-FUNCTIONS, ETC.
 // ***************************************
 

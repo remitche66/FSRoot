@@ -639,6 +639,10 @@ FSTree::makeStandardDefinitions(){
                                   "PxP[J],PyP[J],PzP[J],EnP[J],"
                                   "PxP[M],PyP[M],PzP[M],EnP[M])");
 
+    defineMacro("ENERGY",  2,    "FSMath::boostEnergy("
+                                  "PxP[I],PyP[I],PzP[I],EnP[I],"
+                                  "PxP[J],PyP[J],PzP[J],EnP[J])");
+
   }
 }
 

@@ -146,6 +146,21 @@ FSMath::planephi(double PxP1, double PyP1, double PzP1, double EnP1,
 
 
 // ***************************************
+//  boostEnergy
+//    return the energy of P1 in the P2 rest frame
+// ***************************************
+
+double
+FSMath::boostEnergy(double PxP1, double PyP1, double PzP1, double EnP1,
+                    double PxP2, double PyP2, double PzP2, double EnP2){
+  TLorentzVector P1(PxP1,PyP1,PzP1,EnP1);
+  TLorentzVector P2(PxP2,PyP2,PzP2,EnP2);
+  P1.Boost(-1.0*P2.BoostVector());
+  return P1.E();
+}
+
+
+// ***************************************
 //  D-FUNCTIONS, ETC.
 // ***************************************
 
