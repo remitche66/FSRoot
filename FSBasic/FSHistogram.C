@@ -93,7 +93,6 @@ pair<TH1F*,TH2F*>
 FSHistogram::getTHNFBasicFile(TString index, TString& STATUS){
 
     // initial checks
-  index = FSString::removeWhiteSpace(index);
   STATUS = checkIndex(index,"FILE");
   if (STATUS.Contains("!!")) return getTHNFBasicEmpty(index); 
 
@@ -132,7 +131,8 @@ FSHistogram::getTH1F(TString fileName, TString ntName,
                                    TString cuts, double scale, bool TESTONLY){
   pair<TString, vector<TString> > 
     indices = getHistogramIndexTree(1,fileName,ntName,variable,bounds,cuts,scale);
-  if (TESTONLY){ printIndexInfo(indices.first,indices.second); return NULL; }
+  if (TESTONLY){ printIndexInfo(indices.first,indices.second); 
+                 return getTHNFBasicEmpty(indices.first).first; }
   TH1F* hist = getFSHistogramInfo(indices.first,indices.second)->getTHNF().first;
   if (m_USEDATAFRAME && m_USEDATAFRAMENOW) executeRDataFrame();
   return getTH1F(hist);
@@ -144,7 +144,8 @@ FSHistogram::getTH2F(TString fileName, TString ntName,
                                    TString cuts, double scale, bool TESTONLY){
   pair<TString, vector<TString> > 
     indices = getHistogramIndexTree(2,fileName,ntName,variable,bounds,cuts,scale);
-  if (TESTONLY){ printIndexInfo(indices.first,indices.second); return NULL; }
+  if (TESTONLY){ printIndexInfo(indices.first,indices.second);
+                 return getTHNFBasicEmpty(indices.first).second; }
   TH2F* hist = getFSHistogramInfo(indices.first,indices.second)->getTHNF().second;
   if (m_USEDATAFRAME && m_USEDATAFRAMENOW) executeRDataFrame();
   return getTH2F(hist);
@@ -155,7 +156,6 @@ pair<TH1F*,TH2F*>
 FSHistogram::getTHNFBasicTree(TString index, TString& STATUS){
  
     // initial checks
-  index = FSString::removeWhiteSpace(index);
   STATUS = checkIndex(index,"TREE");
   if (STATUS.Contains("!!")) return getTHNFBasicEmpty(index); 
 
@@ -219,7 +219,6 @@ FSHistogram::getTHNFBasicTreeRDF(TString index, TString& STATUS){
   pair< ROOT::RDF::RResultPtr<TH1D>, ROOT::RDF::RResultPtr<TH2D> > histPairRDF;
 
     // initial checks
-  index = FSString::removeWhiteSpace(index);
   STATUS = checkIndex(index,"TREE");
   if (STATUS.Contains("!!")) return histPairRDF; 
 
@@ -314,7 +313,6 @@ pair<TH1F*,TH2F*>
 FSHistogram::getTHNFBasicEmpty(TString index){
 
     // adjust the input parameters
-  index = FSString::removeWhiteSpace(index);
   map<TString,TString> mapIndex = parseHistogramIndex(index);
   int     dimension = FSString::TString2int(mapIndex["{-ND-}"]);
   TString bounds    = mapIndex["{-BO-}"];
@@ -379,7 +377,6 @@ FSHistogram::getTHNFBasicContents(TTree* histTree, TString index,
                                 vector< pair<TString,TString> > extraTreeContents, TString& STATUS){
 
     // initial checks
-  index = FSString::removeWhiteSpace(index);
   STATUS = checkIndex(index,"TREE");
   if (STATUS.Contains("!!")) return histTree;
 
@@ -540,7 +537,6 @@ pair<TH1F*,TH2F*>
 FSHistogram::getTHNFBasicFormula(TString index, TString& STATUS){
 
     // initial checks
-  index = FSString::removeWhiteSpace(index);
   STATUS = checkIndex(index,"FORMULA");
   if (STATUS.Contains("!!")) return getTHNFBasicEmpty(index); 
 
@@ -1034,7 +1030,6 @@ FSHistogram::getHistogramInfo(int histNumber, TString indexComponent, TString se
 
 pair<TH1F*,TH2F*>
 FSHistogram::getTHNFBasicIndex(TString index, TString& STATUS){
-  index = FSString::removeWhiteSpace(index);
   if (index.Contains("{-TP-}FILE"))    return getTHNFBasicFile(index,STATUS);
   if (index.Contains("{-TP-}TREE"))    return getTHNFBasicTree(index,STATUS);
   if (index.Contains("{-TP-}EMPTY"))   return getTHNFBasicEmpty(index);
@@ -1123,38 +1118,33 @@ FSHistogram::getHistogramIndex(map<TString,TString> indexMap){
 TString
 FSHistogram::getHistogramIndexFile(int dimension, TString fileName, TString histName){
   TString index;
-  fileName = FSString::removeWhiteSpace(fileName);
-  histName = FSString::removeWhiteSpace(histName);
   index += "{-TP-}FILE";
   if (dimension == 1) index += "{-ND-}1D";
   if (dimension == 2) index += "{-ND-}2D";
   index += "{-FN-}";  index += fileName;
   index += "{-HN-}";  index += histName;
-  return index;
+  return FSString::removeWhiteSpace(index);
 }
 
 TString
 FSHistogram::getHistogramIndexFormula(int dimension, TString formula, TString bounds){
   TString index;
-  formula  = FSString::removeWhiteSpace(formula);
-  bounds   = FSString::removeWhiteSpace(bounds);
   index += "{-TP-}FORMULA";
   if (dimension == 1) index += "{-ND-}1D";
   if (dimension == 2) index += "{-ND-}2D";
   index += "{-FO-}";  index += formula;
   index += "{-BO-}";  index += bounds;
-  return index;
+  return FSString::removeWhiteSpace(index);
 }
 
 TString
 FSHistogram::getHistogramIndexEmpty(int dimension, TString bounds){
   TString index;
-  bounds   = FSString::removeWhiteSpace(bounds);
   index += "{-TP-}EMPTY";
   if (dimension == 1) index += "{-ND-}1D";
   if (dimension == 2) index += "{-ND-}2D";
   index += "{-BO-}";  index += bounds;
-  return index;
+  return FSString::removeWhiteSpace(index);
 }
 
 pair<TString, vector<TString> >
@@ -1223,6 +1213,7 @@ void
 FSHistogram::printIndexInfo(TString index){
   map<TString,TString> iMap = parseHistogramIndex(index);
   cout << "-------------- HISTOGRAM INDEX INFORMATION --------------" << endl;
+  cout << "\tINDEX       = " << index << endl;
   cout << "\tCACHE NAME  = ";
   if (m_FSHistogramInfoCache.find(index) != m_FSHistogramInfoCache.end()){
     cout << m_FSHistogramInfoCache[index]->infoString() << endl;
