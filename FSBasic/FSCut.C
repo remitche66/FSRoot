@@ -19,6 +19,9 @@ map< TString, pair< pair<TString,TString>, double > > FSCut::m_cutCache;
 void 
 FSCut::defineCut(TString cutName, TString cut, 
                TString cutSideBand, double weight){
+  cutName     = FSString::removeWhiteSpace(cutName);
+  cut         = FSString::removeWhiteSpace(cut);
+  cutSideBand = FSString::removeWhiteSpace(cutSideBand);
   pair<TString,TString> cutPair(cut,cutSideBand);
   pair< pair<TString,TString>, double > cutPairWt(cutPair,weight);
   m_cutCache[cutName] = cutPairWt;
@@ -35,6 +38,7 @@ FSCut::defineCut(TString cutName, TString cut,
 
 bool
 FSCut::findCut(TString cutName){
+  cutName = FSString::removeWhiteSpace(cutName);
   return (m_cutCache.find(cutName) != m_cutCache.end());
 }
 
@@ -45,6 +49,7 @@ FSCut::findCut(TString cutName){
 
 void 
 FSCut::display(TString cutName){
+  cutName = FSString::removeWhiteSpace(cutName);
   cout << "FSCut Information:" << endl;
   map< TString, pair< pair<TString,TString>, double > >::iterator it = m_cutCache.begin();
   int cutCountAll = 0;
