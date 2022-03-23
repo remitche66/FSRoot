@@ -1271,7 +1271,7 @@ class FSFitMinuitList {
   public:
 
 
-    static void addMinuit(TString mName, TString fcnName = "CHI2"){ 
+    static void addMinuit(TString mName = "m", TString fcnName = "CHI2"){ 
       map<TString,FSFitMinuit*>::iterator it = m_fitMinuitMap.find(mName);
       if (it != m_fitMinuitMap.end()){
         cout << "FSFitMinuitList WARNING:  overwriting fit " << mName << endl;
@@ -1281,9 +1281,10 @@ class FSFitMinuitList {
       m_fitComponentMap[mName] = vector< pair<TString,TString> >();
     }
 
-    static FSFitMinuit* getMinuit(TString mName){
+    static FSFitMinuit* getMinuit(TString mName = "m"){
       map<TString,FSFitMinuit*>::iterator it = m_fitMinuitMap.find(mName);
       if (it != m_fitMinuitMap.end()) return it->second;
+      if (mName == "m"){ addMinuit(mName); return m_fitMinuitMap.find(mName)->second; }
       cout << "FSFitMinuitList ERROR:  cannot find minuit fit named " << mName << endl;
       exit(0);
       return NULL;
@@ -1307,6 +1308,7 @@ class FSFitMinuitList {
     const static vector< pair<TString,TString> >& getFitComponents(TString mName){
       map<TString,vector< pair<TString,TString> > >::iterator it = m_fitComponentMap.find(mName);
       if (it != m_fitComponentMap.end()) return it->second;
+      if (mName == "m"){ addMinuit(mName); return m_fitComponentMap.find(mName)->second; }
       cout << "FSFitMinuitList ERROR:  cannot find fit components for minuit fit named " << mName << endl;
       exit(0);
       return it->second;

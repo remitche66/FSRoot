@@ -245,7 +245,7 @@ class FSFitUtilities{
       // Create a minuit object (optionally add a data set to fit and a function to fit it with).
       //  Options for fcnName are "CHI2", "LIKELIHOOD", or "UNBINNED".
 
-    static void createMinuit(TString mName, TString dName = "", TString fName = "", 
+    static void createMinuit(TString mName = "m", TString dName = "", TString fName = "", 
                                TString fcnName = "CHI2"){
       FSFitMinuitList::addMinuit(mName,fcnName);
       if (dName != "" && fName != "") FSFitMinuitList::addFitComponent(mName,dName,fName);
@@ -257,59 +257,67 @@ class FSFitUtilities{
     static void addFitComponent(TString mName, TString dName, TString fName){
       FSFitMinuitList::addFitComponent(mName,dName,fName);
     }
+    static void addFitComponent(TString dName, TString fName){
+      FSFitMinuitList::addFitComponent("m",dName,fName);
+    }
 
       // Do a migrad fit.
 
-    static void migrad(TString mName, int strategy = 1){
+    static void migrad(TString mName = "m", int strategy = 1){
       FSFitMinuitList::getMinuit(mName)->migrad(strategy);
+    }
+    static void migrad(TH1F* hist, TString fName, TString fcnName = "CHI2", int strategy = 1){
+      FSFitUtilities::createDataSet("d",hist);
+      FSFitUtilities::createMinuit("m","d",fName,fcnName);
+      FSFitUtilities::migrad("m",strategy);
     }
 
       // Do a minos fit.
 
-    static void minos(TString mName, int strategy = 1){
+    static void minos(TString mName = "m", int strategy = 1){
       FSFitMinuitList::getMinuit(mName)->minos(strategy);
     }
 
       // Get the value of the FCN (only works after a fit).
 
-    static double fcnValue(TString mName){
+    static double fcnValue(TString mName = "m"){
       return FSFitMinuitList::getMinuit(mName)->fcnValue();
     }
 
       // Get the likelihood.
 
-    static double likelihood(TString mName){
+    static double likelihood(TString mName = "m"){
       return FSFitMinuitList::getMinuit(mName)->likelihood();
     }
 
       // Get the chisquare.
 
-    static double chisquare(TString mName){
+    static double chisquare(TString mName = "m"){
       return FSFitMinuitList::getMinuit(mName)->chisquare();
     }
 
       // Get the number of points
 
-    static int nDataPoints(TString mName){
+    static int nDataPoints(TString mName = "m"){
       return FSFitMinuitList::getMinuit(mName)->nDataPoints();
     }
 
       // Get the number of free parameters.
 
-    static int nFreeParameters(TString mName){
+    static int nFreeParameters(TString mName = "m"){
       return FSFitMinuitList::getMinuit(mName)->nFreeParameters();
     }
 
       // Get the number of degrees of freedom.
 
-    static int nDOF(TString mName){
+    static int nDOF(TString mName = "m"){
       return FSFitMinuitList::getMinuit(mName)->nDataPoints()
               - FSFitMinuitList::getMinuit(mName)->nFreeParameters();
     }
 
       // Get the status of the covariance matrix.
 
-    static int fitStatus(TString mName){
+    static int fitStatus(TString mName = "m"){
       return FSFitMinuitList::getMinuit(mName)->fitStatus();
     }
 
