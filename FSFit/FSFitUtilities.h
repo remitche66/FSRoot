@@ -140,6 +140,13 @@ class FSFitUtilities{
       FSFitParameterList::getParameter(fpName)->setFixed(false);
     }
 
+    static void releaseParameters(TString fName){
+      vector<TString> fpNames = FSFitFunctionList::getFunction(fName)->fpNames();
+      for (unsigned int i = 0; i < fpNames.size(); i++){
+        FSFitParameterList::getParameter(fpNames[i])->setFixed(false);
+      }
+    }
+
 
       // Set step sizes. The defaults are either 0.1 x abs(initial value) 
       //   or 0.1 if the initial value is zero.
@@ -284,6 +291,11 @@ class FSFitUtilities{
 
     static void minos(TString mName = "m", int strategy = 1){
       FSFitMinuitList::getMinuit(mName)->minos(strategy);
+    }
+    static void minos(TH1F* hist, TString fName, TString fcnName = "CHI2", int strategy = 1){
+      FSFitUtilities::createDataSet("d",hist);
+      FSFitUtilities::createMinuit("m","d",fName,fcnName);
+      FSFitUtilities::migrad("m",strategy);
     }
 
       // Get the value of the FCN (only works after a fit).

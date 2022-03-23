@@ -307,7 +307,7 @@ class FSFitParameterList{
       FSFitParameter* fp = new FSFitParameter(fName,pName,initialValue,description);
       map<TString,FSFitParameter*>::iterator it = m_fitParameterMap.find(fp->fpName());
       if (it != m_fitParameterMap.end()){
-        cout << "FSFitParameterList WARNING:  overwriting parameter " << fp->fpName() << endl;
+        cout << "FSFitParameterList NOTICE:  overwriting parameter " << fp->fpName() << endl;
         FSFitParameter* oldPar = it->second;
         oldPar->resetDefaults();
         delete oldPar;
@@ -720,7 +720,7 @@ class FSFitFunctionList{
     static void addFunction(FSFitFunction* userFunction, TString fNameInitializer = ""){ 
       map<TString,FSFitFunction*>::iterator it = m_fitFunctionMap.find(userFunction->fName());
       if (it != m_fitFunctionMap.end()){
-        cout << "FSFitFunctionList WARNING:  overwriting function " << userFunction->fName() << endl;
+        cout << "FSFitFunctionList NOTICE:  overwriting function (resetting parameters) " << userFunction->fName() << endl;
         it->second->resetParameters();
         delete it->second;
       }
@@ -921,7 +921,7 @@ class FSFitDataSetList {
       TString dName = data->dName();
       map<TString,FSFitDataSet*>::iterator it = m_fitDataSetMap.find(dName);
       if (it != m_fitDataSetMap.end()){
-        cout << "FSFitDataSetList WARNING:  overwriting data set (keeping limits) " << dName << endl;
+        cout << "FSFitDataSetList NOTICE:  overwriting data set (keeping limits) " << dName << endl;
         vector< pair<double,double> > xlimits = it->second->xLimits();
         for (unsigned int i = 0; i < xlimits.size(); i++){
           data->addLimits(xlimits[i].first,xlimits[i].second); }
@@ -1280,7 +1280,7 @@ class FSFitMinuitList {
     static void addMinuit(TString mName = "m", TString fcnName = "CHI2"){ 
       map<TString,FSFitMinuit*>::iterator it = m_fitMinuitMap.find(mName);
       if (it != m_fitMinuitMap.end()){
-        cout << "FSFitMinuitList WARNING:  overwriting fit " << mName << endl;
+        cout << "FSFitMinuitList NOTICE:  overwriting fit " << mName << endl;
         delete it->second;
       }
       m_fitMinuitMap[mName] = new FSFitMinuit(mName,fcnName);
