@@ -17,6 +17,7 @@
 #include "TMinuit.h"
 #include "TMath.h"
 #include "FSBasic/FSString.h"
+#include "FSBasic/FSHistogram.h"
 #include "FSData/FSXYPoint.h"
 
 class FSFitParameterList;
@@ -449,6 +450,28 @@ class FSFitFunction{
       return ff;
     }
 
+      // interface to TH1F
+
+    TH1F* getTH1F(TString bounds){
+      int nbins = 100; double xLow = 0.0; double xHigh = 10.0;
+      if (FSString::checkBounds(1,bounds)){
+        nbins = FSString::parseBoundsNBinsX(bounds);
+        xLow  = FSString::parseBoundsLowerX(bounds);
+        xHigh = FSString::parseBoundsUpperX(bounds);
+      }
+      else{
+        cout << "FSFitFunction::getTH1F ERROR: problem with bounds" << endl;
+      }
+      TH1F* hist = FSHistogram::getTH1F(new TH1F(fName(),fName(),nbins,xLow,xHigh));
+      if (FSString::checkBounds(1,bounds)){
+        for (int i = 0; i < nbins; i++){
+          double x = xLow + (i+0.5)*(xHigh-xLow)/nbins;
+          hist->SetBinContent(i+1,fx(x));
+          hist->SetBinError(i+1,efx(x));
+        }
+      }
+      return FSHistogram::getTH1F(hist);
+    }
 
       // manage parameters
 

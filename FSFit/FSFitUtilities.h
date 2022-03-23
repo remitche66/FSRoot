@@ -53,6 +53,14 @@ class FSFitUtilities{
       return FSFitFunctionList::getFunction(fName)->getTF1();
     }
 
+      // Return a TH1F* associated with a given function.
+      //   This is more stable than the above TF1 -- once created it is
+      //    independent of the function and its parameters.
+
+    static TH1F* getTH1F(TString fName, TString bounds){
+      return FSFitFunctionList::getFunction(fName)->getTH1F(bounds);
+    }
+
 
       // Evaluate a function at a point (sometimes useful for setting 
       //  normalization parameter values)
