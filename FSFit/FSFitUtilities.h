@@ -211,7 +211,7 @@ class FSFitUtilities{
 
       // Create a data set from a histogram or a vector<FSXYPoint*>
 
-    static void createDataSet(TString dName, TH1F* hist){
+    static void createDataSet(TString dName = "d", TH1F* hist = NULL){
       FSFitDataSetList::addDataSet(dName,hist);
     }
 
@@ -227,16 +227,22 @@ class FSFitUtilities{
       // Manage fit ranges for different data sets.
       //   Multiple fit ranges can be added to each data set.
 
-    static void clearFitRange(TString dName){
+    static void clearFitRange(TString dName = "d"){
       FSFitDataSetList::getDataSet(dName)->clearLimits();
     }
 
     static void setFitRange(TString dName, double lowLimit, double highLimit){
       FSFitDataSetList::getDataSet(dName)->setLimits(lowLimit,highLimit);
     }
+    static void setFitRange(double lowLimit, double highLimit){
+      FSFitDataSetList::getDataSet("d")->setLimits(lowLimit,highLimit);
+    }
 
     static void addFitRange(TString dName, double lowLimit, double highLimit){
       FSFitDataSetList::getDataSet(dName)->addLimits(lowLimit,highLimit);
+    }
+    static void addFitRange(double lowLimit, double highLimit){
+      FSFitDataSetList::getDataSet("d")->addLimits(lowLimit,highLimit);
     }
 
 

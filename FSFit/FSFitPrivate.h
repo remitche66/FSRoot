@@ -790,13 +790,15 @@ class FSFitFunctionList{
 class FSFitDataSet {
   public:
 
-    FSFitDataSet(TString n_dName, TH1F* hist) : 
+    FSFitDataSet(TString n_dName = "d", TH1F* hist = NULL) : 
         m_dName(n_dName){
-      int nbins = hist->GetNbinsX();
-      for (int i = 1; i <= nbins; i++){
-        m_x.push_back(hist->GetBinCenter(i));
-        m_y.push_back(hist->GetBinContent(i));
-        m_ey.push_back(hist->GetBinError(i));
+      if (hist){
+        int nbins = hist->GetNbinsX();
+        for (int i = 1; i <= nbins; i++){
+          m_x.push_back(hist->GetBinCenter(i));
+          m_y.push_back(hist->GetBinContent(i));
+          m_ey.push_back(hist->GetBinError(i));
+        }
       }
       clearLimits();
       fillSelected();
@@ -896,7 +898,7 @@ class FSFitDataSetList {
   public:
 
 
-    static void addDataSet(TString dName, TH1F* hist){ 
+    static void addDataSet(TString dName = "d", TH1F* hist = NULL){ 
       FSFitDataSet* data = new FSFitDataSet(dName,hist);
       addDataSet(data);
     }
@@ -919,15 +921,19 @@ class FSFitDataSetList {
       TString dName = data->dName();
       map<TString,FSFitDataSet*>::iterator it = m_fitDataSetMap.find(dName);
       if (it != m_fitDataSetMap.end()){
-        cout << "FSFitDataSetList WARNING:  overwriting data set " << dName << endl;
+        cout << "FSFitDataSetList WARNING:  overwriting data set (keeping limits) " << dName << endl;
+        vector< pair<double,double> > xlimits = it->second->xLimits();
+        for (unsigned int i = 0; i < xlimits.size(); i++){
+          data->addLimits(xlimits[i].first,xlimits[i].second); }
         delete it->second;
       }
       m_fitDataSetMap[dName] = data;
     }
 
-    static FSFitDataSet* getDataSet(TString dName){
+    static FSFitDataSet* getDataSet(TString dName = "d"){
       map<TString,FSFitDataSet*>::iterator it = m_fitDataSetMap.find(dName);
       if (it != m_fitDataSetMap.end()) return it->second;
+      if (dName == "d"){ addDataSet(dName); return m_fitDataSetMap.find(dName)->second; }
       cout << "FSFitDataSetList ERROR:  cannot find data set named " << dName << endl;
       exit(0);
       return NULL;
