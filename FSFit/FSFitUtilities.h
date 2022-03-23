@@ -37,6 +37,18 @@ class FSFitUtilities{
     }
 
 
+      // Create a new function using a FSFitFunction object.
+      //  Initialize the parameters with values.
+
+    static void createFunction(FSFitFunction* userFunction, double value1, double value2 = 0,
+                                     double value3 = 0, double value4 = 0, double value5 = 0, 
+                                     double value6 = 0, double value7 = 0, double value8 = 0){
+      FSFitFunctionList::addFunction(userFunction);
+      FSFitFunctionList::getFunction(userFunction->fName())->setParameters(value1,value2,value3,
+                                                             value4,value5,value6,value7,value8);
+    }
+
+
       // Create a new composite function from preexisting functions combined using 
       //   a formula.  Recognizes "a+b", "a-b", "a*b", "a/b" for 
       //   functions named "a" and "b", where "a" and "b" have already
@@ -94,16 +106,11 @@ class FSFitUtilities{
       //   In the second, "fpName" is "fName:pName", and the "fName" is not for composites
       //     (like everywhere else).
 
-    static void setParameters(TString fName, double value1, double value2 = 0,
-                                                            double value3 = 0,
-                                                            double value4 = 0,
-                                                            double value5 = 0,
-                                                            double value6 = 0,
-                                                            double value7 = 0,
-                                                            double value8 = 0){
+    static void setParameters(TString fName, double value1, double value2 = 0, 
+                      double value3 = 0, double value4 = 0, double value5 = 0, 
+                      double value6 = 0, double value7 = 0, double value8 = 0){
       FSFitFunctionList::getFunction(fName)->setParameters(value1,value2,value3,
-                                                            value4,value5,value6,
-                                                            value7,value8);
+                                            value4,value5,value6,value7,value8);
     }
 
     static void setParameter(TString fpName, double value){
@@ -137,16 +144,11 @@ class FSFitUtilities{
       // Set step sizes. The defaults are either 0.1 x abs(initial value) 
       //   or 0.1 if the initial value is zero.
 
-    static void setParameterSteps(TString fName, double value1, double value2 = 0,
-                                                                double value3 = 0,
-                                                                double value4 = 0,
-                                                                double value5 = 0,
-                                                                double value6 = 0,
-                                                                double value7 = 0,
-                                                                double value8 = 0){
+    static void setParameterSteps(TString fName, double value1, double value2 = 0, 
+                          double value3 = 0, double value4 = 0, double value5 = 0,
+                          double value6 = 0, double value7 = 0, double value8 = 0){
       FSFitFunctionList::getFunction(fName)->setParSteps(value1,value2,value3,
-                                                            value4,value5,value6,
-                                                            value7,value8);
+                                           value4,value5,value6,value7,value8);
     }
 
     static void setParameterStep(TString fpName, double value){
