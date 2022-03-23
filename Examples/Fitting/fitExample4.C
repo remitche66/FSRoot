@@ -20,9 +20,8 @@
 
     // (3) fit the polynomial background in a limited range and draw it (GREEN)
 
-  FSFitUtilities::clearFitRange();
-  FSFitUtilities::addFitRange(0.0,3.0);
-  FSFitUtilities::addFitRange(7.0,10.0);
+  FSFitUtilities::addFitRange(0.0,4.0);
+  FSFitUtilities::addFitRange(6.0,10.0);
   FSFitUtilities::migrad(hist,"p");
   TF1* fp3 = FSFitUtilities::getTF1("p");
   fp3->SetLineColor(kGreen); fp3->SetLineStyle(kDotted);
@@ -44,7 +43,7 @@
   FSFitUtilities::releaseParameters("p");
   FSFitUtilities::migrad(hist,"pg");
   TF1* fpg5 = FSFitUtilities::getTF1("pg");
-  fpg5->SetLineColor(kRed); fpg4->SetLineStyle(kSolid);
+  fpg5->SetLineColor(kRed); fpg5->SetLineStyle(kSolid);
   fpg5->Draw("same");
 
 }
