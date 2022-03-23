@@ -442,10 +442,11 @@ class FSFitFunction{
 
     double operator() (double *x, double *p) { if (p == NULL) p = NULL; return fx(x[0]); }
 
-    TF1* getTF1(){
+    TF1* getTF1(double xLow = -99.0, double xHigh = -999.0){
       FSFitFunction* newff = cloneBASE();
       //TF1* ff = new TF1(newff->fName(), newff, &FSFitFunction::rootFunction, m_xLow, m_xHigh, 0);
-      TF1* ff = new TF1(newff->fName(), newff, m_xLow, m_xHigh, 0);
+      if (xHigh < xLow){ xLow = m_xLow; xHigh = m_xHigh; }
+      TF1* ff = new TF1(newff->fName(), newff, xLow, xHigh, 0);
       ff->SetNpx(2000);
       return ff;
     }
