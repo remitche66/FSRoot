@@ -4,24 +4,24 @@
 
     // (1) make a histogram and draw it (BLACK)
 
-  TH1F* hist = FSHistogram::getTH1FFormula("1+4.0*TMath::Gaus(x,5.0,0.5,true)","(100,0.0,10.0)",100000);
+  TH1F* hist = FSHistogram::getTH1FFormula("1+4.0*TMath::Gaus(x,5.0,0.5,true)","(100,0.0,10.0)",10000);
   hist->Draw();
 
 
-    // (2) create functions and draw them (YELLOW)
+    // (2) create functions and draw them (PURPLE)
 
-  FSFitUtilities::createFunction(new FSFitPOLY("p",0.0,10.0,1,3),500.0,0.0);
-  FSFitUtilities::createFunction(new FSFitGAUS("g",0.0,10.0),500.0,4.0,0.4);
+  FSFitUtilities::createFunction(new FSFitPOLY("p",0.0,10.0,1,3),50.0,0.0);
+  FSFitUtilities::createFunction(new FSFitGAUS("g",0.0,10.0),50.0,4.0,0.4);
   FSFitUtilities::createFunction("pg","p+g");
   TF1* fpg2 = FSFitUtilities::getTF1("pg");
-  fpg2->SetLineColor(kYellow); fpg2->SetLineStyle(kDotted);
+  fpg2->SetLineColor(6); fpg2->SetLineStyle(kDotted);
   fpg2->Draw("same");
 
 
     // (3) fit the polynomial background in a limited range and draw it (GREEN)
 
-  FSFitUtilities::addFitRange(0.0,4.0);
-  FSFitUtilities::addFitRange(6.0,10.0);
+  FSFitUtilities::addFitRange(0.0,4.5);
+  FSFitUtilities::addFitRange(5.5,10.0);
   FSFitUtilities::migrad(hist,"p");
   TF1* fp3 = FSFitUtilities::getTF1("p");
   fp3->SetLineColor(kGreen); fp3->SetLineStyle(kDotted);
