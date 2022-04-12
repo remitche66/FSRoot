@@ -1053,29 +1053,29 @@ class FSFitMinuit {
 
 
     TH1F* scanLikelihood(TString fpName, double xLow, double xHigh, unsigned int nSteps, double xScale=1.0){
+        // internal parameters for minuit
       Double_t calls[1]; calls[0]=10000;
-      Int_t err;
-      TH1F *likelihoodCurve = new TH1F("likelihoodCurve","",nSteps,xLow*xScale,xHigh*xScale);
-      // first do a regular fit by calling migrad
-      migrad(1); // maybe do check
-      // then loop over the allowed x values in nSteps steps by fixing just the fpName parameter and refitting.
-      double x = xLow;
-      double stepSize = (double)(xHigh-xLow)/nSteps;
-      int outflag;
+      Int_t err;  Int_t outflag;
+        // histogram of likelihood values
+      TH1F *hLikelihoodCurve = new TH1F("hLikelihoodCurve","",nSteps,xLow*xScale,xHigh*xScale);
+        // first call to migrad sets up internal parameters and finds the fcn minimum
+      migrad();
       double minimum = fcnValue();
+        // increment the value of parameter fpName in nSteps steps from xLow to xHigh
       for (unsigned int i = 0; i < nSteps; i++){
-        x+=stepSize;
-        //FSFitUtilities::fixParameter(fpName,x);
+        double x = xLow + (i+0.5)*(xHigh-xLow)/nSteps;
         FSFitParameter* par = FSFitParameterList::getParameter(fpName);
+          // fix the parameter value to x and refit (do this manually to increase speed)
         m_minuit->mnparm(par->parNumberAll()-1,par->fpName(),x,par->step(),  0.0,0.0, outflag);
-       // fix the parameter to the value
-              m_minuit->FixParameter(par->parNumberAll()-1);
-              // using migrad is 3x slower for some reason
-       m_minuit->mnexcm("MIGRAD",calls,1,err);
-       //migrad(0);
-       likelihoodCurve->SetBinContent(likelihoodCurve->FindBin(x*xScale),exp(-(fcnValue()-minimum)/2.0));
+        m_minuit->FixParameter(par->parNumberAll()-1);
+        m_minuit->mnexcm("MIGRAD",calls,1,err);
+          // save the likelihood value
+        hLikelihoodCurve->SetBinContent(hLikelihoodCurve->FindBin(x*xScale),exp(-(fcnValue()-minimum)/2.0));
       }
-      return likelihoodCurve;
+      hLikelihoodCurve->SetTitle("Likelihood scan for parameter "+fpName);
+      hLikelihoodCurve->SetYTitle("Likelihood");
+      hLikelihoodCurve->SetXTitle("Value of parameter "+fpName);
+      return FSHistogram::getTH1F(hLikelihoodCurve);
     }
 
 
