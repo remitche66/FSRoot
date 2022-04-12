@@ -596,7 +596,8 @@ FSHistogram::getTHNFBasicFormula(TString index, TString& STATUS){
 TH1F*
 FSHistogram::getTH1FRandom(TH1F* hist, int numRandomTrials){
   if (!hist) return NULL;
-  TH1F* rhist = getTH1F((TH1F*)hist->Clone(makeFSRootTempName()));  rhist->Reset();
+  TString rname(hist->GetName()); rname += "__"; rname += makeFSRootTempName();
+  TH1F* rhist = getTH1F((TH1F*)hist->Clone(rname));  rhist->Reset();
   TAxis* axisX = rhist->GetXaxis(); 
   int nbinsX = axisX->GetNbins(); 
   double fMax = hist->GetBinContent(hist->GetMaximumBin());
