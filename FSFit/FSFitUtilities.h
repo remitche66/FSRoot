@@ -224,7 +224,7 @@ class FSFitUtilities{
 
       // Create a data set from a histogram or a vector<FSXYPoint*>
 
-    static void createDataSet(TString dName = "d", TH1F* hist = NULL){
+    static void createDataSet(TString dName = "dDefault", TH1F* hist = NULL){
       FSFitDataSetList::addDataSet(dName,hist);
     }
 
@@ -240,7 +240,7 @@ class FSFitUtilities{
       // Manage fit ranges for different data sets.
       //   Multiple fit ranges can be added to each data set.
 
-    static void clearFitRange(TString dName = "d"){
+    static void clearFitRange(TString dName = "dDefault"){
       FSFitDataSetList::getDataSet(dName)->clearLimits();
     }
 
@@ -248,14 +248,14 @@ class FSFitUtilities{
       FSFitDataSetList::getDataSet(dName)->setLimits(lowLimit,highLimit);
     }
     static void setFitRange(double lowLimit, double highLimit){
-      FSFitDataSetList::getDataSet("d")->setLimits(lowLimit,highLimit);
+      FSFitDataSetList::getDataSet("dDefault")->setLimits(lowLimit,highLimit);
     }
 
     static void addFitRange(TString dName, double lowLimit, double highLimit){
       FSFitDataSetList::getDataSet(dName)->addLimits(lowLimit,highLimit);
     }
     static void addFitRange(double lowLimit, double highLimit){
-      FSFitDataSetList::getDataSet("d")->addLimits(lowLimit,highLimit);
+      FSFitDataSetList::getDataSet("dDefault")->addLimits(lowLimit,highLimit);
     }
 
       // Print a list of data sets to the screen.
@@ -271,7 +271,7 @@ class FSFitUtilities{
       // Create a minuit object (optionally add a data set to fit and a function to fit it with).
       //  Options for fcnName are "CHI2", "LIKELIHOOD", or "UNBINNED".
 
-    static void createMinuit(TString mName = "m", TString dName = "", TString fName = "", 
+    static void createMinuit(TString mName = "mDefault", TString dName = "", TString fName = "", 
                                TString fcnName = "CHI2"){
       FSFitMinuitList::addMinuit(mName,fcnName);
       if (dName != "" && fName != "") FSFitMinuitList::addFitComponent(mName,dName,fName);
@@ -284,71 +284,71 @@ class FSFitUtilities{
       FSFitMinuitList::addFitComponent(mName,dName,fName);
     }
     static void addFitComponent(TString dName, TString fName){
-      FSFitMinuitList::addFitComponent("m",dName,fName);
+      FSFitMinuitList::addFitComponent("mDefault",dName,fName);
     }
 
       // Do a migrad fit.
 
-    static void migrad(TString mName = "m", int strategy = 1){
+    static void migrad(TString mName = "mDefault", int strategy = 1){
       FSFitMinuitList::getMinuit(mName)->migrad(strategy);
     }
     static void migrad(TH1F* hist, TString fName, TString fcnName = "CHI2", int strategy = 1){
-      FSFitUtilities::createDataSet("d",hist);
-      FSFitUtilities::createMinuit("m","d",fName,fcnName);
-      FSFitUtilities::migrad("m",strategy);
+      FSFitUtilities::createDataSet("dDefault",hist);
+      FSFitUtilities::createMinuit("mDefault","dDefault",fName,fcnName);
+      FSFitUtilities::migrad("mDefault",strategy);
     }
 
       // Do a minos fit.
 
-    static void minos(TString mName = "m", int strategy = 1){
+    static void minos(TString mName = "mDefault", int strategy = 1){
       FSFitMinuitList::getMinuit(mName)->minos(strategy);
     }
     static void minos(TH1F* hist, TString fName, TString fcnName = "CHI2", int strategy = 1){
-      FSFitUtilities::createDataSet("d",hist);
-      FSFitUtilities::createMinuit("m","d",fName,fcnName);
-      FSFitUtilities::migrad("m",strategy);
+      FSFitUtilities::createDataSet("dDefault",hist);
+      FSFitUtilities::createMinuit("mDefault","dDefault",fName,fcnName);
+      FSFitUtilities::migrad("mDefault",strategy);
     }
 
       // Get the value of the FCN (only works after a fit).
 
-    static double fcnValue(TString mName = "m"){
+    static double fcnValue(TString mName = "mDefault"){
       return FSFitMinuitList::getMinuit(mName)->fcnValue();
     }
 
       // Get the likelihood.
 
-    static double likelihood(TString mName = "m"){
+    static double likelihood(TString mName = "mDefault"){
       return FSFitMinuitList::getMinuit(mName)->likelihood();
     }
 
       // Get the chisquare.
 
-    static double chisquare(TString mName = "m"){
+    static double chisquare(TString mName = "mDefault"){
       return FSFitMinuitList::getMinuit(mName)->chisquare();
     }
 
       // Get the number of points
 
-    static int nDataPoints(TString mName = "m"){
+    static int nDataPoints(TString mName = "mDefault"){
       return FSFitMinuitList::getMinuit(mName)->nDataPoints();
     }
 
       // Get the number of free parameters.
 
-    static int nFreeParameters(TString mName = "m"){
+    static int nFreeParameters(TString mName = "mDefault"){
       return FSFitMinuitList::getMinuit(mName)->nFreeParameters();
     }
 
       // Get the number of degrees of freedom.
 
-    static int nDOF(TString mName = "m"){
+    static int nDOF(TString mName = "mDefault"){
       return FSFitMinuitList::getMinuit(mName)->nDataPoints()
               - FSFitMinuitList::getMinuit(mName)->nFreeParameters();
     }
 
       // Get the status of the covariance matrix.
 
-    static int fitStatus(TString mName = "m"){
+    static int fitStatus(TString mName = "mDefault"){
       return FSFitMinuitList::getMinuit(mName)->fitStatus();
     }
 
@@ -370,9 +370,9 @@ class FSFitUtilities{
     //  RESET EVERYTHING
     // *************************
 
-    static void clear(){
-      FSFitParameterList::clearParameters();
-      FSFitFunctionList::clearFunctions();
+    static void clear(bool clearClones = false){
+      FSFitParameterList::clearParameters(clearClones);
+      FSFitFunctionList::clearFunctions(clearClones);
       FSFitDataSetList::clearDataSets();
       FSFitMinuitList::clearMinuit();
     }

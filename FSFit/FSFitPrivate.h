@@ -343,13 +343,17 @@ class FSFitParameterList{
       getParameter(fpName)->resetConstraints();
     }
 
-    static void clearParameters(){
+    static void clearParameters(bool clearClones = false){
       for (map<TString,FSFitParameter*>::iterator it = m_fitParameterMap.begin();
-           it != m_fitParameterMap.end(); it++){
-        it->second->resetDefaults();
-        delete it->second;
+           it != m_fitParameterMap.end();){
+        if ((!clearClones) && (it->second->fName().Contains("CLONE"))){ it++; }
+        else{
+          it->second->resetDefaults();
+          delete it->second;
+          m_fitParameterMap.erase(it++);
+        }
       }
-      m_fitParameterMap.clear();
+      if (clearClones) m_fitParameterMap.clear();
     }
 
 
@@ -778,19 +782,23 @@ class FSFitFunctionList{
       return NULL;
     }
 
-    static void clearFunctions(){
+    static void clearFunctions(bool clearClones = false){
       for (map<TString,FSFitFunction*>::iterator it = m_fitFunctionMap.begin();
-           it != m_fitFunctionMap.end(); it++){
-        delete it->second;
+           it != m_fitFunctionMap.end();){
+        if ((!clearClones) && (it->second->fName().Contains("CLONE"))){ it++; }
+        else{
+          delete it->second;
+          m_fitFunctionMap.erase(it++);
+        }
       }
-      FSFitParameterList::clearParameters();
-      m_fitFunctionMap.clear();
+      FSFitParameterList::clearParameters(clearClones);
+      if (clearClones) m_fitFunctionMap.clear();
     }
 
     static TString generateName(){
       m_NAMECOUNTER++;
-      TString newname("CLONEn");
-      newname += m_NAMECOUNTER;
+      TString newname("000CLONEn");
+      newname += FSString::int2TString(m_NAMECOUNTER,6);
       return newname;
     }
 
@@ -820,7 +828,7 @@ class FSFitFunctionList{
 class FSFitDataSet {
   public:
 
-    FSFitDataSet(TString n_dName = "d", TH1F* hist = NULL) : 
+    FSFitDataSet(TString n_dName = "dDefault", TH1F* hist = NULL) : 
         m_dName(n_dName){
       if (hist){
         int nbins = hist->GetNbinsX();
@@ -941,7 +949,7 @@ class FSFitDataSetList {
   public:
 
 
-    static void addDataSet(TString dName = "d", TH1F* hist = NULL){ 
+    static void addDataSet(TString dName = "dDefault", TH1F* hist = NULL){ 
       FSFitDataSet* data = new FSFitDataSet(dName,hist);
       addDataSet(data);
     }
@@ -964,19 +972,21 @@ class FSFitDataSetList {
       TString dName = data->dName();
       map<TString,FSFitDataSet*>::iterator it = m_fitDataSetMap.find(dName);
       if (it != m_fitDataSetMap.end()){
-        cout << "FSFitDataSetList NOTICE:  overwriting data set (keeping limits) " << dName << endl;
-        vector< pair<double,double> > xlimits = it->second->xLimits();
-        for (unsigned int i = 0; i < xlimits.size(); i++){
-          data->addLimits(xlimits[i].first,xlimits[i].second); }
+        if (dName != "dDefault"){
+          cout << "FSFitDataSetList NOTICE:  overwriting data set" << dName << endl;}
+        else{
+          vector< pair<double,double> > xlimits = it->second->xLimits();
+          for (unsigned int i = 0; i < xlimits.size(); i++){
+            data->addLimits(xlimits[i].first,xlimits[i].second); }}
         delete it->second;
       }
       m_fitDataSetMap[dName] = data;
     }
 
-    static FSFitDataSet* getDataSet(TString dName = "d"){
+    static FSFitDataSet* getDataSet(TString dName = "dDefault"){
       map<TString,FSFitDataSet*>::iterator it = m_fitDataSetMap.find(dName);
       if (it != m_fitDataSetMap.end()) return it->second;
-      if (dName == "d"){ addDataSet(dName); return m_fitDataSetMap.find(dName)->second; }
+      if (dName == "dDefault"){ addDataSet(dName); return m_fitDataSetMap.find(dName)->second; }
       cout << "FSFitDataSetList ERROR:  cannot find data set named " << dName << endl;
       exit(0);
       return NULL;
@@ -1346,20 +1356,20 @@ class FSFitMinuitList {
   public:
 
 
-    static void addMinuit(TString mName = "m", TString fcnName = "CHI2"){ 
+    static void addMinuit(TString mName = "mDefault", TString fcnName = "CHI2"){ 
       map<TString,FSFitMinuit*>::iterator it = m_fitMinuitMap.find(mName);
       if (it != m_fitMinuitMap.end()){
-        cout << "FSFitMinuitList NOTICE:  overwriting fit " << mName << endl;
+        if (mName != "mDefault") cout << "FSFitMinuitList NOTICE:  overwriting fit " << mName << endl;
         delete it->second;
       }
       m_fitMinuitMap[mName] = new FSFitMinuit(mName,fcnName);
       m_fitComponentMap[mName] = vector< pair<TString,TString> >();
     }
 
-    static FSFitMinuit* getMinuit(TString mName = "m"){
+    static FSFitMinuit* getMinuit(TString mName = "mDefault"){
       map<TString,FSFitMinuit*>::iterator it = m_fitMinuitMap.find(mName);
       if (it != m_fitMinuitMap.end()) return it->second;
-      if (mName == "m"){ addMinuit(mName); return m_fitMinuitMap.find(mName)->second; }
+      if (mName == "mDefault"){ addMinuit(mName); return m_fitMinuitMap.find(mName)->second; }
       cout << "FSFitMinuitList ERROR:  cannot find minuit fit named " << mName << endl;
       exit(0);
       return NULL;
@@ -1383,7 +1393,7 @@ class FSFitMinuitList {
     const static vector< pair<TString,TString> >& getFitComponents(TString mName){
       map<TString,vector< pair<TString,TString> > >::iterator it = m_fitComponentMap.find(mName);
       if (it != m_fitComponentMap.end()) return it->second;
-      if (mName == "m"){ addMinuit(mName); return m_fitComponentMap.find(mName)->second; }
+      if (mName == "mDefault"){ addMinuit(mName); return m_fitComponentMap.find(mName)->second; }
       cout << "FSFitMinuitList ERROR:  cannot find fit components for minuit fit named " << mName << endl;
       exit(0);
       return it->second;
