@@ -257,13 +257,13 @@ class FSFitParameter{
     }
 
 
-      // printing
+      // showing
 
-    void print(int parNumber = -1) { cout << parNumber << " (" << m_parNumberAll << "," << m_parNumberFree << "). ";
-                   printDescription();
+    void show(int parNumber = -1) { cout << parNumber << " (" << m_parNumberAll << "," << m_parNumberFree << "). ";
+                   showDescription();
                    if (m_constraints.size() > 0){
                      cout << "\t    constraints:" << endl;
-                     printConstraints();
+                     showConstraints();
                    }
                    cout << "\t    initial value = " << initialValue() << endl;
                    cout << "\t    current value = " << value() << endl; 
@@ -272,9 +272,9 @@ class FSFitParameter{
                    cout << "\t      step                          = " << step() << endl;
                    if (m_fixed) cout << "\t\t FIXED" << endl; }
 
-    void printDescription(){ cout << fpName() << "  (" << description() << ")" << endl; }
-    void printConstraints(){ for (unsigned int i = 0; i < m_constraints.size(); i++){
-                             cout << "\t\t";  otherParameter(m_constraints[i])->printDescription(); } }
+    void showDescription(){ cout << fpName() << "  (" << description() << ")" << endl; }
+    void showConstraints(){ for (unsigned int i = 0; i < m_constraints.size(); i++){
+                             cout << "\t\t";  otherParameter(m_constraints[i])->showDescription(); } }
 
   private:
     
@@ -547,11 +547,22 @@ class FSFitFunction{
       }
     }
 
-    void printParameters(){
+    void showParameters(){
       for (unsigned int i = 0; i < m_fpNames.size(); i++){
-         FSFitParameterList::getParameter(m_fpNames[i])->print(i+1);
+         FSFitParameterList::getParameter(m_fpNames[i])->show(i+1);
       }
     }
+
+    virtual void show(bool showDetails = false){
+      cout << "*******************" << endl;
+      cout << "FUNCTION: " << m_fName << endl;
+      cout << "   defined in (" << FSString::double2TString(m_xLow,8) << "," 
+                                << FSString::double2TString(m_xHigh,8) << ")" << endl;
+      cout << "*******************" << endl;
+      if (showDetails) cout << "PARAMETERS:" << endl;
+      if (showDetails) showParameters();
+    }
+
 
   protected:
 
@@ -700,6 +711,17 @@ class FSFitFunctionComposite : public FSFitFunction{
       return new FSFitFunctionComposite("",formula);
     }
 
+    void show(bool showDetails = false){
+      cout << "*******************" << endl;
+      cout << "COMPOSITE FUNCTION: " << m_fName << endl;
+      cout << "   defined in (" << FSString::double2TString(m_xLow,8) << "," 
+                                << FSString::double2TString(m_xHigh,8) << ")" << endl;
+      cout << "   formula: " << m_fName1 << " " << m_sign << " " << m_fName2 << endl;
+      cout << "*******************" << endl;
+      if (showDetails) cout << "PARAMETERS:" << endl;
+      if (showDetails) showParameters();
+    }
+
 
   private:
 
@@ -770,6 +792,14 @@ class FSFitFunctionList{
       TString newname("CLONEn");
       newname += m_NAMECOUNTER;
       return newname;
+    }
+
+    static void showFunctions(bool showDetails = false, bool showClones = false){
+      for (map<TString,FSFitFunction*>::iterator it = m_fitFunctionMap.begin();
+           it != m_fitFunctionMap.end(); it++){
+        if (!showClones && it->second->fName().Contains("CLONE")) continue;
+        it->second->show(showDetails);
+      }
     }
 
   private:
@@ -849,6 +879,19 @@ class FSFitDataSet {
     bool hasEY() { return m_ey.size(); }
 
     const vector< pair<double,double> >& xLimits() { return m_xLimits; }
+
+    void show(){
+      cout << "*******************" << endl;
+      cout << "DATA SET: " << m_dName << endl;
+      cout << "   number of points (total): " << m_x.size() << endl;
+      cout << "   number of points (selected): " << m_xSelected.size() << endl;
+      cout << "   ranges: " << endl;
+      for (unsigned int i = 0; i < m_xLimits.size(); i++){
+        cout << "        ( " << FSString::double2TString(m_xLimits[i].first,8) << ", "
+                             << FSString::double2TString(m_xLimits[i].second,8) << " )" << endl;
+      }
+      cout << "*******************" << endl;
+    }
 
   private:
 
@@ -947,6 +990,12 @@ class FSFitDataSetList {
       m_fitDataSetMap.clear();
     }
 
+    static void showDataSets(){
+      for (map<TString,FSFitDataSet*>::iterator it = m_fitDataSetMap.begin();
+           it != m_fitDataSetMap.end(); it++){
+        it->second->show();
+      }
+    }
 
   private:
 
@@ -962,7 +1011,7 @@ class FSFitMinuit {
   public:
 
     FSFitMinuit(TString n_mName, TString fcnName = "CHI2") :
-        m_mName(n_mName) {
+        m_mName(n_mName), m_fcnName(fcnName) {
       m_minuit = new TMinuit(1000);
       m_minuit->mncler();
       setFCN(fcnName);
@@ -1169,6 +1218,25 @@ class FSFitMinuit {
     }
 
 
+    void show(bool showDetails = false){
+      cout << "*******************" << endl;
+      cout << "MINUIT: " << m_mName << endl;
+      cout << "   fcn: " << m_fcnName << endl; 
+      cout << "    COMPONENTS: " << endl;
+      vector< pair<TString,TString> > comps = fitComponents();
+      for (unsigned int i = 0; i < comps.size(); i++){
+        TString dName = comps[i].first;
+        TString fName = comps[i].second;
+        cout << "      (" << i+1 << ")  Fit data set \"" << dName 
+                                 << "\" with function \"" << fName << "\"" << endl;
+        if (showDetails){
+          FSFitDataSetList::getDataSet(dName)->show();
+          FSFitFunctionList::getFunction(fName)->show(true);
+        }
+      }
+      cout << "*******************" << endl;
+    }
+
 
 //***************************************
 // SOME USEFUL TMINUIT FUNCTIONS
@@ -1209,6 +1277,7 @@ class FSFitMinuit {
   private:
 
     TString m_mName;
+    TString m_fcnName;
     TMinuit* m_minuit;
 
     void preFSFitSetup(){
@@ -1318,6 +1387,13 @@ class FSFitMinuitList {
       cout << "FSFitMinuitList ERROR:  cannot find fit components for minuit fit named " << mName << endl;
       exit(0);
       return it->second;
+    }
+
+    static void showMinuitList(bool showDetails = false){
+      for (map<TString,FSFitMinuit*>::iterator it = m_fitMinuitMap.begin();
+           it != m_fitMinuitMap.end(); it++){
+        it->second->show(showDetails);
+      }
     }
 
 

@@ -82,6 +82,12 @@ class FSFitUtilities{
       return FSFitFunctionList::getFunction(fName)->fx(x);
     }
 
+      // Print a list of functions to the screen.
+
+    static void showFunctions(bool showDetails = false, bool showClones = false){
+      FSFitFunctionList::showFunctions(showDetails,showClones);
+    }
+
     // *************************
     //  METHODS FOR PARAMETERS
     // *************************
@@ -207,8 +213,8 @@ class FSFitUtilities{
 
       // Print a list of parameters to the screen.
 
-    static void printParameters(TString fName){
-      FSFitFunctionList::getFunction(fName)->printParameters();
+    static void showParameters(TString fName){
+      FSFitFunctionList::getFunction(fName)->showParameters();
     }
 
 
@@ -252,6 +258,11 @@ class FSFitUtilities{
       FSFitDataSetList::getDataSet("d")->addLimits(lowLimit,highLimit);
     }
 
+      // Print a list of data sets to the screen.
+
+    static void showDataSets(){
+      FSFitDataSetList::showDataSets();
+    }
 
     // *************************
     //  METHODS FOR FITTING
@@ -349,6 +360,11 @@ class FSFitUtilities{
       return FSFitMinuitList::getMinuit(mName)->scanLikelihood(fpName, xLow, xHigh, nSteps, xScale);
     }
 
+      // Print a list of minuit objects to the screen.
+
+    static void showMinuitList(bool showDetails = false){
+      FSFitMinuitList::showMinuitList(showDetails);
+    }
 
     // *************************
     //  RESET EVERYTHING
