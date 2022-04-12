@@ -829,8 +829,9 @@ class FSFitDataSet {
   public:
 
     FSFitDataSet(TString n_dName = "dDefault", TH1F* hist = NULL) : 
-        m_dName(n_dName){
+        m_dName(n_dName), m_histName(""){
       if (hist){
+        m_histName = hist->GetName();
         int nbins = hist->GetNbinsX();
         for (int i = 1; i <= nbins; i++){
           m_x.push_back(hist->GetBinCenter(i));
@@ -843,7 +844,7 @@ class FSFitDataSet {
     }
 
     FSFitDataSet(TString n_dName, vector<FSXYPoint*> points, bool includeSystErrors) : 
-        m_dName(n_dName){
+        m_dName(n_dName), m_histName(""){
       for (unsigned int i = 0; i < points.size(); i++){
         m_x.push_back(points[i]->xValue());
         m_y.push_back(points[i]->yValue());
@@ -855,7 +856,7 @@ class FSFitDataSet {
     }
 
     FSFitDataSet(TString n_dName, vector<double> xUnbinnedData) : 
-        m_dName(n_dName), m_x(xUnbinnedData){
+        m_dName(n_dName), m_x(xUnbinnedData), m_histName(""){
       m_y.clear();
       m_ey.clear();
       clearLimits();
@@ -891,6 +892,7 @@ class FSFitDataSet {
     void show(){
       cout << "*******************" << endl;
       cout << "DATA SET: " << m_dName << endl;
+      if (m_histName != "") cout << "   histogram name: " << m_histName << endl;
       cout << "   number of points (total): " << m_x.size() << endl;
       cout << "   number of points (selected): " << m_xSelected.size() << endl;
       cout << "   ranges: " << endl;
@@ -904,6 +906,7 @@ class FSFitDataSet {
   private:
 
     TString m_dName;
+    TString m_histName;
 
     vector<double> m_x;
     vector<double> m_y;
