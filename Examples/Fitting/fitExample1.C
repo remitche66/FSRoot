@@ -14,7 +14,7 @@
   FSFitUtilities::createFunction(new FSFitPOLY("poly",0.0,20.0));
   FSFitUtilities::createFunction("pg","poly-gaus");
   FSFitUtilities::setParameters("pg",  9.0, 0.001, 0.001,   9.0, 9.0, 1.0);
-  FSFitUtilities::printParameters("pg");
+  FSFitUtilities::showParameters("pg");
 
     // draw all the components of the function (RED)
 
@@ -26,7 +26,7 @@
     // change the parameters and redraw (BLUE)
 
   FSFitUtilities::setParameters("pg",  4.5, 0.002, 0.002,   3.0, 16.0, 1.0);
-  FSFitUtilities::printParameters("pg");
+  FSFitUtilities::showParameters("pg");
   fpg = FSFitUtilities::getTF1("pg"); fpg->SetLineColor(kBlue); fpg->Draw("same");
   fg = FSFitUtilities::getTF1("gaus");  fg->SetLineColor(kBlue); fg->Draw("same");
   fp = FSFitUtilities::getTF1("poly");  fp->SetLineColor(kBlue); fp->SetLineStyle(kDashed); fp->Draw("same");
@@ -38,7 +38,7 @@
   FSFitUtilities::createFunction("pgg","pg+gaus2");
   FSFitUtilities::setParameters("gaus2", 4.0, 2.0, 0.5);
   FSFitUtilities::setParameter("poly:a",3.7);
-  FSFitUtilities::printParameters("pgg");
+  FSFitUtilities::showParameters("pgg");
   TF1* fpgg = FSFitUtilities::getTF1("pgg"); fpgg->SetLineColor(kGreen); fpgg->Draw("same");
 
 
