@@ -1045,8 +1045,14 @@ FSHistogram::getTHNFBasicIndex(TString index, TString& STATUS){
 vector<TString>
 FSHistogram::expandHistogramIndexTree(TString index){
   vector<TString> expandedIndices;
-    // expand "cuts" using FSCut and check for multidimensional sidebands
   map<TString,TString> indexMap = FSHistogram::parseHistogramIndex(index);
+    // expand "var" using FSCut
+  if (indexMap.find("{-VA-}") != indexMap.end()){
+    TString var = indexMap["{-VA-}"];
+    vector< pair<TString,double> > fsCuts = FSCut::expandCuts(var);
+    if (fsCuts.size() == 1) indexMap["{-VA-}"] = fsCuts[0].first;
+  }
+    // expand "cuts" using FSCut and check for multidimensional sidebands
   if (indexMap.find("{-CU-}") != indexMap.end()){
     TString cuts = indexMap["{-CU-}"];  double scale = 1.0;
     if (indexMap.find("{-SC-}") != indexMap.end()) 
@@ -1272,6 +1278,7 @@ FSHistogram::checkIndex(TString index, TString type){
   if (type == "TREE"){
     TString cuts = iMap["{-CU-}"];
     if (!FSString::checkParentheses(cuts)) return TString("!!BAD_CUTS!!");
+    if (cuts.Contains("!!BAD_FSCUT!!")) return TString("!!BAD_FSCUT!!");
   }
     // checks on formula (FO)
   if (type == "FORMULA"){

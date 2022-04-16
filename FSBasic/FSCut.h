@@ -22,12 +22,6 @@ class FSCut{
     static void defineCut(TString cutName, TString cut, 
                           TString cutSideBand = "", double weight = 1.0);
 
-      // ********************************************************
-      // FIND A CUT
-      // ********************************************************
-
-    static bool findCut(TString cutName);
-
 
       // ********************************************************
       // DISPLAY CUTS
@@ -62,6 +56,8 @@ class FSCut{
 
     static vector< pair<TString,double> > makeCut(vector<TString> cutList);
     static vector< pair<TString,double> > makeCutSB(vector<TString> cutList);
+    static vector< pair<TString,double> > makeCutWT(vector<TString> cutList);
+    static vector< pair<TString,double> > makeCutSBWT(vector<TString> cutList);
     static pair< pair<TString,TString>, double> getCut(TString cutName);
 
 

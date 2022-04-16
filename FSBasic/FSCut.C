@@ -22,6 +22,8 @@ FSCut::defineCut(TString cutName, TString cut,
   cutName     = FSString::removeWhiteSpace(cutName);
   cut         = FSString::removeWhiteSpace(cut);
   cutSideBand = FSString::removeWhiteSpace(cutSideBand);
+  if (cut == "") cut = "(1==1)";
+  if (cutSideBand == "") cutSideBand = "(1==1)";
   pair<TString,TString> cutPair(cut,cutSideBand);
   pair< pair<TString,TString>, double > cutPairWt(cutPair,weight);
   m_cutCache[cutName] = cutPairWt;
@@ -31,16 +33,6 @@ FSCut::defineCut(TString cutName, TString cut,
   }
 }
 
-
-      // ********************************************************
-      // FIND A CUT
-      // ********************************************************
-
-bool
-FSCut::findCut(TString cutName){
-  cutName = FSString::removeWhiteSpace(cutName);
-  return (m_cutCache.find(cutName) != m_cutCache.end());
-}
 
 
       // ********************************************************
@@ -86,15 +78,21 @@ FSCut::expandCuts(TString cuts, bool showDetails){
   }
 
     // loop over all CUT and CUTSB markers
-  TString CUTMARK   ("CUT(");
-  TString CUTSBMARK ("CUTSB(");
+  TString CUTMARK     ("CUT(");
+  TString CUTSBMARK   ("CUTSB(");
+  TString CUTWTMARK   ("CUTWT(");
+  TString CUTSBWTMARK ("CUTSBWT(");
   while (cuts.Contains(CUTMARK) ||
-         cuts.Contains(CUTSBMARK)){
+         cuts.Contains(CUTSBMARK) ||
+         cuts.Contains(CUTWTMARK) ||
+         cuts.Contains(CUTSBWTMARK)){
 
       // find a CUT(...) or a CUTSB(...)
     TString mark("");
-         if (cuts.Contains(CUTMARK))  { mark = CUTMARK; }
-    else if (cuts.Contains(CUTSBMARK)){ mark = CUTSBMARK; }
+         if (cuts.Contains(CUTMARK))    { mark = CUTMARK; }
+    else if (cuts.Contains(CUTSBMARK))  { mark = CUTSBMARK; }
+    else if (cuts.Contains(CUTWTMARK))  { mark = CUTWTMARK; }
+    else if (cuts.Contains(CUTSBWTMARK)){ mark = CUTSBWTMARK; }
     int index = cuts.Index(mark);
     int size = (mark).Length()+1;
 
@@ -122,8 +120,10 @@ FSCut::expandCuts(TString cuts, bool showDetails){
 
       // make the substitute cuts for this mark
     vector< pair<TString,double> > substitutes;
-         if (mark == CUTMARK)  { substitutes = makeCut(cutList); }
-    else if (mark == CUTSBMARK){ substitutes = makeCutSB(cutList); }
+         if (mark == CUTMARK)    { substitutes = makeCut(cutList); }
+    else if (mark == CUTSBMARK)  { substitutes = makeCutSB(cutList); }
+    else if (mark == CUTWTMARK)  { substitutes = makeCutWT(cutList); }
+    else if (mark == CUTSBWTMARK){ substitutes = makeCutSBWT(cutList); }
 
 
       // replace the old cuts with the new
@@ -227,12 +227,47 @@ FSCut::makeCutSB(vector<TString> cutList){
 }
 
 
+vector< pair<TString,double> > 
+FSCut::makeCutSBWT(vector<TString> cutList){
+  vector< pair<TString,double> > newCuts;
+  vector< pair<TString,double> > cutSb = makeCutSB(cutList);
+  TString combinedCuts = "";
+  for (unsigned int i = 0; i < cutSb.size(); i++){
+    if (i == 0) combinedCuts += "(";
+    if (i != 0) combinedCuts += "+";
+    combinedCuts += "("+FSString::double2TString(cutSb[i].second,8)+")";
+    combinedCuts += "*("+cutSb[i].first+")";
+    if (i == cutSb.size()-1) combinedCuts += ")";
+  }
+  newCuts.push_back(pair<TString,double>(combinedCuts,1.0));
+  return newCuts;
+}
+
+vector< pair<TString,double> > 
+FSCut::makeCutWT(vector<TString> cutList){
+  vector< pair<TString,double> > newCuts;
+  vector< pair<TString,double> > cutSig = makeCut(cutList);
+  vector< pair<TString,double> > cutSbWt = makeCutSBWT(cutList);
+  if ((cutSig.size() != 1) || (cutSbWt.size() != 1)){
+    cout << "FSCut ERROR:  internal problem" << endl; exit(0); }
+  TString combinedCuts = "((";
+  combinedCuts += cutSig[0].first;
+  combinedCuts += ")+(-1)*(";
+  combinedCuts += cutSbWt[0].first;
+  combinedCuts += "))";
+  newCuts.push_back(pair<TString,double>(combinedCuts,1.0));
+  return newCuts;
+}
+
+
 
 pair< pair<TString,TString>, double> 
 FSCut::getCut(TString cutName){
   if (m_cutCache.find(cutName) == m_cutCache.end()){
-    cout << "FSCut Error: can't find cut with name = " << cutName << endl;
-    exit(1);
+    TString badFSCut = "!!BAD_FSCUT!!";
+    pair<TString,TString> badPair = pair<TString,TString>(badFSCut,badFSCut);
+    cout << "FSCut ERROR: can't find cut with name = " << cutName << endl;
+    return pair< pair<TString,TString>, double> (badPair,1.0);
   }
   return m_cutCache[cutName];
 }
