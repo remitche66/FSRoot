@@ -64,6 +64,23 @@ class FSTree{
 
 
       // ********************************************************
+      // CREATE A FRIEND TREE
+      //    * The output file will be: fileNameInput+"."+friendName
+      //       and will include the output tree: treeNameInput+"_"+friendName
+      //    * The output tree will contain variables named: friendTreeContents[i].first
+      //       with values given by: friendTreeContents[i].second
+      //    * Use addFriendTree(friendName) to access the new tree.
+      // ********************************************************
+
+    static void createFriendTree(TString fileNameInput, TString treeNameInput,  TString friendName,
+                                  vector< pair<TString,TString> > friendTreeContents);
+
+      // same as above, except only for a single variable named "friendName"
+
+    static void createFriendTree(TString fileNameInput, TString treeNameInput,  TString friendName,
+                                  TString friendVariable);
+
+      // ********************************************************
       // EXPAND VARIABLE MACROS
       //   For example:
       //     FSTree::expandVariable("1+XXMASS(2,3)")

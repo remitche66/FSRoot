@@ -484,6 +484,107 @@ FSTree::skimTree(TString fileNameInput, TString chainName,
 
 
 
+  // ********************************************************
+  // CREATE A FRIEND TREE
+  // ********************************************************
+
+void
+FSTree::createFriendTree(TString fileNameInput, TString treeNameInput,  TString friendName,
+                                  TString friendVariable){
+  vector< pair<TString,TString> > friendTreeContents;
+  friendTreeContents.push_back(pair<TString,TString>(friendName,friendVariable));
+  createFriendTree(fileNameInput,treeNameInput,friendName,friendTreeContents);
+}
+
+
+void
+FSTree::createFriendTree(TString fileNameInput, TString treeNameInput,  TString friendName,
+                                vector< pair<TString,TString> > friendTreeContents){
+
+    // expand cuts and macros
+
+  fileNameInput = FSString::removeWhiteSpace(fileNameInput);
+  treeNameInput = FSString::removeWhiteSpace(treeNameInput);
+  friendName = FSString::removeWhiteSpace(friendName);
+  for (unsigned int i = 0; i < friendTreeContents.size(); i++){
+    friendTreeContents[i].first = FSString::removeWhiteSpace(friendTreeContents[i].first);
+    friendTreeContents[i].second = FSString::removeWhiteSpace(friendTreeContents[i].second);
+    vector< pair<TString,double> > fsCuts = FSCut::expandCuts(friendTreeContents[i].second);
+    if (fsCuts.size() == 1){ friendTreeContents[i].second = fsCuts[0].first; }
+    else{ cout << "FSTree::createFriendTree ERROR: multidimensional sidebands not allowed" << endl; return; }
+    friendTreeContents[i].second = expandVariable(friendTreeContents[i].second);
+  }
+
+    // loop over files
+
+  vector<TString> fileNames = FSSystem::getAbsolutePaths(fileNameInput);
+  for (unsigned int ifile = 0; ifile < fileNames.size(); ifile++){
+    TString fileNameInput_i = fileNames[ifile];
+    TString treeNameInput_i = treeNameInput;
+    if (treeNameInput_i == "") treeNameInput_i = FSTree::getTreeNameFromFile(fileNameInput_i);
+
+        // prepare to read from the input tree (set up formulas, etc.)
+
+    TString treeSTATUS;
+    TTree* ntInput = FSTree::getTChain(fileNameInput_i,treeNameInput_i,treeSTATUS);
+    if (!ntInput || treeSTATUS.Contains("!!")){
+      cout << "FSTree::createFriendTree WARNING:  " <<
+      endl << "trouble creating TChain  (status = " << treeSTATUS << ")" << endl;
+      continue;
+    }
+    TObjArray* objFormulas = new TObjArray();
+    vector<TTreeFormula*> vecFormulas;
+    for (unsigned int i = 0; i < friendTreeContents.size(); i++){
+      TString formulaName("formulaNum"); formulaName += i;
+      TTreeFormula* formula_i = new TTreeFormula(formulaName,friendTreeContents[i].second,ntInput);
+      objFormulas->Add(formula_i);
+      vecFormulas.push_back(formula_i);
+    }
+    ntInput->SetNotify(objFormulas);
+
+        // set up the friend tree
+
+    TString fileNameFriend(fileNameInput_i);  fileNameFriend += ".";  fileNameFriend += friendName;
+    TString treeNameFriend(treeNameInput_i);  treeNameFriend += "_";  treeNameFriend += friendName;
+    cout << "creating friend tree in file: " << "  " << fileNameFriend << endl;
+    TFile* friendTFile = new TFile(fileNameFriend,"recreate");  friendTFile->cd();
+    TTree* friendTTree = new TTree(treeNameFriend, treeNameFriend);
+    Double_t friendVariables[1000];
+    if (friendTreeContents.size() > 1000){ cout << "FSTree::createFriendTree ERROR: too many branches" << endl; exit(0); }
+    for (unsigned int i = 0; i < friendTreeContents.size(); i++){ 
+      friendVariables[i] = 0.0;
+      friendTTree->Branch(friendTreeContents[i].first, &(friendVariables[i]), friendTreeContents[i].first+"/D");
+    }
+
+      // read from the input tree and write to the friend tree
+
+    unsigned int nEvents = ntInput->GetEntries();
+    for (unsigned int ientry = 0; ientry < nEvents; ientry++){
+      ntInput->GetEntry(ientry);
+      for (unsigned int i = 0; i < vecFormulas.size(); i++){
+        friendVariables[i] = vecFormulas[i]->EvalInstance();
+      }
+      friendTTree->Fill();
+    }
+
+      // write out the friend tree and remove formulas
+
+    friendTFile->cd();
+    friendTTree->Write();
+    delete friendTFile;
+    //delete friendTTree; (seg fault)
+    for (unsigned int i = 0; i < vecFormulas.size(); i++){
+      if (vecFormulas[i]) delete vecFormulas[i];
+    }
+    ntInput->SetNotify(nullptr);
+    delete objFormulas;
+
+  }
+
+}
+
+
+
     // ********************************************************
     // DEFINE SPECIAL FOUR-VECTORS AND MACROS
     // ********************************************************
