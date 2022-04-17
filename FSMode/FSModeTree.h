@@ -40,6 +40,24 @@ class FSModeTree{
 
 
       // ********************************************************
+      // CREATE A FRIEND TREE
+      //    * The output file will be: fileNameInput+"."+friendName
+      //       and will include the output tree: treeNameInput+"_"+friendName
+      //    * The output tree will contain variables named: friendTreeContents[i].first
+      //       with values given by: friendTreeContents[i].second
+      //    * Use addFriendTree(friendName) to access the new tree.
+      // ********************************************************
+
+    static void createFriendTree(TString fileNameInput, TString treeNameInput, TString category, 
+                                 TString friendName, vector< pair<TString,TString> > friendTreeContents);
+
+      // same as above, except only for a single variable named "friendName"
+
+    static void createFriendTree(TString fileNameInput, TString treeNameInput, TString category, 
+                                 TString friendName, TString friendVariable);
+
+
+      // ********************************************************
       // RANK EVENTS ACCORDING TO A GIVEN VARIABLE
       //    1. Entries in the trees given by fileName and ntName are grouped using 
       //        groupVar1 and groupVar2.

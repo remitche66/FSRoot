@@ -134,6 +134,65 @@ FSModeTree::skimTree(TString fileNameInput, TString ntName, TString category,
 }
 
 
+  // ********************************************************
+  // CREATE A FRIEND TREE
+  // ********************************************************
+
+void
+FSModeTree::createFriendTree(TString fileNameInput, TString treeNameInput, TString category,
+                             TString friendName, TString friendVariable){
+  vector< pair<TString,TString> > friendTreeContents;
+  friendTreeContents.push_back(pair<TString,TString>(friendName,friendVariable));
+  createFriendTree(fileNameInput,treeNameInput,category,friendName,friendTreeContents);
+}
+
+
+void
+FSModeTree::createFriendTree(TString fileNameInput, TString treeNameInput, TString category,
+                             TString friendName, vector< pair<TString,TString> > friendTreeContents){
+  fileNameInput = FSString::removeWhiteSpace(fileNameInput);
+  treeNameInput = FSString::removeWhiteSpace(treeNameInput);
+  category      = FSString::removeWhiteSpace(category);
+  friendName    = FSString::removeWhiteSpace(friendName);
+  for (unsigned int i = 0; i < friendTreeContents.size(); i++){
+    friendTreeContents[i].first = FSString::removeWhiteSpace(friendTreeContents[i].first);
+    friendTreeContents[i].second = FSString::removeWhiteSpace(friendTreeContents[i].second);
+  }
+
+    // make a list of modes and check if a loop is necessary 
+  vector<FSModeInfo*> modeVector  = FSModeCollection::modeVector(category);
+  bool loopOverModes = false;
+  if (modeVector.size() > 0) loopOverModes = true;
+
+    // loop over modes
+  if (loopOverModes){
+    for (unsigned int i = 0; i < modeVector.size(); i++){
+      TString fileNameInput_i = modeVector[i]->modeString(fileNameInput);
+      TString treeNameInput_i = modeVector[i]->modeString(treeNameInput);
+      TString friendName_i    = modeVector[i]->modeString(friendName);
+      vector< pair<TString,TString> > friendTreeContents_i = friendTreeContents;
+      for (unsigned int j = 0; j < friendTreeContents_i.size(); j++){
+        friendTreeContents_i[j].first  = modeVector[i]->modeString(friendTreeContents_i[j].first);
+        friendTreeContents_i[j].second = modeVector[i]->modeString(friendTreeContents_i[j].second);
+        vector< pair<TString,double> > fsCuts = FSCut::expandCuts(friendTreeContents_i[j].second);
+        if (fsCuts.size() == 1){ friendTreeContents_i[j].second = modeVector[i]->modeString(fsCuts[0].first); }
+        else{ cout << "FSModeTree::createFriendTree ERROR: multidimensional sidebands not allowed" << endl; exit(1); }
+        vector<TString> modeCombos = modeVector[i]->modeCombinatorics(friendTreeContents_i[j].second);
+        if (modeCombos.size() == 1){ friendTreeContents_i[j].second = modeVector[i]->modeString(modeCombos[0]); }
+        else{ cout << "FSModeTree::createFriendTree ERROR: multiple combinations not allowed here" << endl; 
+              modeVector[i]->modeCombinatorics(friendTreeContents_i[j].second,true);  exit(1); }
+      }
+      FSTree::createFriendTree(fileNameInput_i,treeNameInput_i,friendName_i,friendTreeContents_i);
+    }
+  }
+
+    // don't loop over modes
+  if (!loopOverModes){
+    FSTree::createFriendTree(fileNameInput,treeNameInput,friendName,friendTreeContents);
+  }
+}
+
+
 
   // ********************************************************
   // RANK EVENTS ACCORDING TO A GIVEN VARIABLE
