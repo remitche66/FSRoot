@@ -2,6 +2,7 @@
 #define FSPHYSICS_H
 
 #include <cmath>
+#include "TMath.h"
 
 using namespace std;
 
@@ -132,6 +133,14 @@ class FSPhysics{
     static double radMass(double parentMass, double photonEnergy);
 
     static double radMassError(double parentMass, double photonEnergy, double photonEnergyError);
+
+
+      // ********************************************************
+      // FIT SIGNIFICANCE
+      // ********************************************************
+
+    static double fitSignificance(double chi2Difference, int ndfDifference);
+
 
 };
 

@@ -178,3 +178,14 @@ FSPhysics::radMassError(double parentMass, double photonEnergy, double photonEne
 }
 
 
+  // ********************************************************
+  // FIT SIGNIFICANCE
+  // ********************************************************
+
+double 
+FSPhysics::fitSignificance(double chi2Difference, int ndfDifference){
+  int sign = 1;  if (chi2Difference < 0.0) sign = -1;
+  chi2Difference = abs(chi2Difference);
+  return sign*abs(TMath::NormQuantile(0.5*TMath::Prob(chi2Difference,ndfDifference)));
+}
+
