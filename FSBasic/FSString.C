@@ -5,6 +5,8 @@
 #include "TString.h"
 #include "TFormula.h"
 #include "TSystem.h"
+#include "TCanvas.h"
+#include "TH1F.h"
 #include "FSBasic/FSControl.h"
 #include "FSBasic/FSString.h"
 
@@ -797,7 +799,7 @@ FSString::evalBooleanTString(TString input){
   // ********************************************************
 
 void
-FSString::latexHeader(TString filename, bool append){
+FSString::latexHeader(TString filename, bool append, TString title){
   filename = gSystem->ExpandPathName(TString2string(filename).c_str());
   std::ios_base::openmode mode = ios::out;
   if (append) mode = ios::app;
@@ -808,11 +810,11 @@ FSString::latexHeader(TString filename, bool append){
   outfile << "\\usepackage{color}" << endl;
   outfile << "\\usepackage[]{epsfig}" << endl;
   outfile << endl;
-  outfile << "\\textheight 8.0in" << endl;
+  outfile << "\\textheight 8.5in" << endl;
   outfile << "\\topmargin 0.0in" << endl;
-  outfile << "\\textwidth 6.0in" << endl;
-  outfile << "\\oddsidemargin 0.25in" << endl;
-  outfile << "\\evensidemargin 0.25in" << endl;
+  outfile << "\\textwidth 6.5in" << endl;
+  outfile << "\\oddsidemargin 0.0in" << endl;
+  outfile << "\\evensidemargin 0.0in" << endl;
   outfile << endl;
   outfile << "\\newcommand{\\gevc}{\\mathrm{GeV/c}}" << endl;
   outfile << endl;
@@ -821,9 +823,15 @@ FSString::latexHeader(TString filename, bool append){
   outfile << endl;
   outfile << "\\begin{document}" << endl;
   outfile << endl;
-  outfile << "\%\\title{}" << endl;
-  outfile << "\%\\author{}" << endl;
-  outfile << "\%\\maketitle" << endl;
+  if (title == ""){
+    outfile << "\%\\title{\\vspace{-3.0cm}TITLE}" << endl;
+    outfile << "\%\\author{}" << endl;
+    outfile << "\%\\maketitle" << endl;
+  } else{
+    outfile << "\\title{\\vspace{-3.0cm}" << title << "}" << endl;
+    outfile << "\\author{RM}" << endl;
+    outfile << "\\maketitle" << endl;
+  }
   outfile << endl;
   outfile << "\%\\abstract{}" << endl;
   outfile.close();
@@ -840,9 +848,11 @@ FSString::latexFigure(TString filename, TString figurename,
   outfile << endl;
   //outfile << "\\newpage" << endl;
   outfile << "\\begin{figure}[htb]" << endl;
+  outfile << "\\begin{center}" << endl;
   outfile << "\\includegraphics*[width= " << width <<"\\columnwidth]{"
                                           << figurename << "}" << endl;
   outfile << "\\caption{" << caption << "}" << endl;
+  outfile << "\\end{center}" << endl;
   outfile << "\\end{figure}" << endl;
   outfile << endl;
   outfile.close();
@@ -872,6 +882,22 @@ FSString::latexCloser(TString filename, bool append){
   outfile.close();
 }
 
+
+void
+FSString::latexTemplate(TString filename){
+  TCanvas* cLatexTemplate = new TCanvas("cLatexTemplate","cLatexTemplate",800,800);
+  TH1F* hist = new TH1F("hist","hist",100,0.0,10.0);  hist->SetTitle("Test Histogram");
+  hist->Fill(5.0); hist->SetXTitle("x title"); hist->SetStats(0);  hist->Draw();
+  cLatexTemplate->Print("tempFigure.pdf");
+  latexHeader(filename,false,"TITLE");
+  latexLine(filename, "This is a sample latex file.",true);
+  latexFigure(filename,"tempFigure.pdf","0.7","example figure",true);
+  TString table[9] = {"1","2","3","4","5","6","7","8","9"};
+  latexTable(3,3,table,filename,true,"table caption");
+  latexCloser(filename,true);  
+}
+
+
 void
 FSString::writeTStringToFile(TString filename, TString text, bool append){
   filename = gSystem->ExpandPathName(TString2string(filename).c_str());
@@ -898,11 +924,16 @@ FSString::writeTStringToFile(TString filename, TString text, bool append){
 
 void
 FSString::latexTable(int nrows, int ncols, TString* tableContents, 
-                            TString filename, bool append){
+                            TString filename, bool append, TString caption){
   filename = gSystem->ExpandPathName(TString2string(filename).c_str());
   std::ios_base::openmode mode = ios::out;
   if (append) mode = ios::app;
   ofstream outfile(TString2string(filename).c_str(),mode);
+  if (caption != ""){
+    outfile << "\\begin{table}[h]" << endl;
+    outfile << "\\caption{" << caption << "}" << endl;
+  }
+  outfile << "\\begin{center}" << endl;
   outfile << "\\begin{tabular}{|"; for (int k = 0; k < ncols; k++){ outfile << "c|"; } outfile << "}" << endl;
   outfile << "\\hline" << endl;
   int i = 0;
@@ -915,6 +946,8 @@ FSString::latexTable(int nrows, int ncols, TString* tableContents,
     outfile << "\\hline" << endl;
   }
   outfile << "\\end{tabular}" << endl;
+  outfile << "\\end{center}" << endl;
+  if (caption != "") outfile << "\\end{table}" << endl;
   outfile << endl;
   outfile.close();
 }  

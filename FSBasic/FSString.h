@@ -165,12 +165,13 @@ class FSString{
       // LATEX UTILITIES
       // ********************************************************
 
-    static void latexHeader(TString filename, bool append = false);
+    static void latexHeader(TString filename, bool append = false, TString title = "");
     static void latexFigure(TString filename, TString figurename, 
                             TString width = "1.0", TString caption = "", 
                             bool append = true);
     static void latexLine(TString filename, TString text, bool append = true);
     static void latexCloser(TString filename, bool append = true);
+    static void latexTemplate(TString filename);
 
 
       // ********************************************************
@@ -181,7 +182,7 @@ class FSString{
       // ********************************************************
 
     static void latexTable(int nrows, int ncols, TString* tableContents, 
-                           TString filename, bool append = false);
+                           TString filename, bool append = false, TString caption = "");
 
 
       // ********************************************************
