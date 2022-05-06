@@ -37,6 +37,18 @@ class FSFitUtilities{
     }
 
 
+      // Create a new function using a FSFitFunction object.
+      //  Initialize the parameters with values.
+
+    static void createFunction(FSFitFunction* userFunction, double value1, double value2 = 0,
+                                     double value3 = 0, double value4 = 0, double value5 = 0, 
+                                     double value6 = 0, double value7 = 0, double value8 = 0){
+      FSFitFunctionList::addFunction(userFunction);
+      FSFitFunctionList::getFunction(userFunction->fName())->setParameters(value1,value2,value3,
+                                                             value4,value5,value6,value7,value8);
+    }
+
+
       // Create a new composite function from preexisting functions combined using 
       //   a formula.  Recognizes "a+b", "a-b", "a*b", "a/b" for 
       //   functions named "a" and "b", where "a" and "b" have already
@@ -49,8 +61,17 @@ class FSFitUtilities{
 
       // Return a TF1* associated with a given function (for drawing).
 
-    static TF1* getTF1(TString fName){
-      return FSFitFunctionList::getFunction(fName)->getTF1();
+    static TF1* getTF1(TString fName, double xLow = -99.0, double xHigh = -999.0){
+      return FSFitFunctionList::getFunction(fName)->getTF1(xLow,xHigh);
+    }
+
+
+      // Return a TH1F* associated with a given function.
+      //   This is more stable than the above getTF1 -- once created it is
+      //    independent of the function and its parameters.
+
+    static TH1F* getTH1F(TString fName, TString bounds){
+      return FSFitFunctionList::getFunction(fName)->getTH1F(bounds);
     }
 
 
@@ -59,6 +80,12 @@ class FSFitUtilities{
 
     static double evaluateFunction(TString fName, double x){
       return FSFitFunctionList::getFunction(fName)->fx(x);
+    }
+
+      // Print a list of functions to the screen.
+
+    static void showFunctions(bool showDetails = false, bool showClones = false){
+      FSFitFunctionList::showFunctions(showDetails,showClones);
     }
 
     // *************************
@@ -85,16 +112,11 @@ class FSFitUtilities{
       //   In the second, "fpName" is "fName:pName", and the "fName" is not for composites
       //     (like everywhere else).
 
-    static void setParameters(TString fName, double value1, double value2 = 0,
-                                                            double value3 = 0,
-                                                            double value4 = 0,
-                                                            double value5 = 0,
-                                                            double value6 = 0,
-                                                            double value7 = 0,
-                                                            double value8 = 0){
+    static void setParameters(TString fName, double value1, double value2 = 0, 
+                      double value3 = 0, double value4 = 0, double value5 = 0, 
+                      double value6 = 0, double value7 = 0, double value8 = 0){
       FSFitFunctionList::getFunction(fName)->setParameters(value1,value2,value3,
-                                                            value4,value5,value6,
-                                                            value7,value8);
+                                            value4,value5,value6,value7,value8);
     }
 
     static void setParameter(TString fpName, double value){
@@ -124,20 +146,22 @@ class FSFitUtilities{
       FSFitParameterList::getParameter(fpName)->setFixed(false);
     }
 
+    static void releaseParameters(TString fName){
+      vector<TString> fpNames = FSFitFunctionList::getFunction(fName)->fpNames();
+      for (unsigned int i = 0; i < fpNames.size(); i++){
+        FSFitParameterList::getParameter(fpNames[i])->setFixed(false);
+      }
+    }
+
 
       // Set step sizes. The defaults are either 0.1 x abs(initial value) 
       //   or 0.1 if the initial value is zero.
 
-    static void setParameterSteps(TString fName, double value1, double value2 = 0,
-                                                                double value3 = 0,
-                                                                double value4 = 0,
-                                                                double value5 = 0,
-                                                                double value6 = 0,
-                                                                double value7 = 0,
-                                                                double value8 = 0){
+    static void setParameterSteps(TString fName, double value1, double value2 = 0, 
+                          double value3 = 0, double value4 = 0, double value5 = 0,
+                          double value6 = 0, double value7 = 0, double value8 = 0){
       FSFitFunctionList::getFunction(fName)->setParSteps(value1,value2,value3,
-                                                            value4,value5,value6,
-                                                            value7,value8);
+                                           value4,value5,value6,value7,value8);
     }
 
     static void setParameterStep(TString fpName, double value){
@@ -189,8 +213,8 @@ class FSFitUtilities{
 
       // Print a list of parameters to the screen.
 
-    static void printParameters(TString fName){
-      FSFitFunctionList::getFunction(fName)->printParameters();
+    static void showParameters(TString fName){
+      FSFitFunctionList::getFunction(fName)->showParameters();
     }
 
 
@@ -200,7 +224,7 @@ class FSFitUtilities{
 
       // Create a data set from a histogram or a vector<FSXYPoint*>
 
-    static void createDataSet(TString dName, TH1F* hist){
+    static void createDataSet(TString dName = "dDefault", TH1F* hist = NULL){
       FSFitDataSetList::addDataSet(dName,hist);
     }
 
@@ -216,18 +240,29 @@ class FSFitUtilities{
       // Manage fit ranges for different data sets.
       //   Multiple fit ranges can be added to each data set.
 
-    static void clearFitRange(TString dName){
+    static void clearFitRange(TString dName = "dDefault"){
       FSFitDataSetList::getDataSet(dName)->clearLimits();
     }
 
     static void setFitRange(TString dName, double lowLimit, double highLimit){
       FSFitDataSetList::getDataSet(dName)->setLimits(lowLimit,highLimit);
     }
+    static void setFitRange(double lowLimit, double highLimit){
+      FSFitDataSetList::getDataSet("dDefault")->setLimits(lowLimit,highLimit);
+    }
 
     static void addFitRange(TString dName, double lowLimit, double highLimit){
       FSFitDataSetList::getDataSet(dName)->addLimits(lowLimit,highLimit);
     }
+    static void addFitRange(double lowLimit, double highLimit){
+      FSFitDataSetList::getDataSet("dDefault")->addLimits(lowLimit,highLimit);
+    }
 
+      // Print a list of data sets to the screen.
+
+    static void showDataSets(){
+      FSFitDataSetList::showDataSets();
+    }
 
     // *************************
     //  METHODS FOR FITTING
@@ -236,7 +271,7 @@ class FSFitUtilities{
       // Create a minuit object (optionally add a data set to fit and a function to fit it with).
       //  Options for fcnName are "CHI2", "LIKELIHOOD", or "UNBINNED".
 
-    static void createMinuit(TString mName, TString dName = "", TString fName = "", 
+    static void createMinuit(TString mName = "mDefault", TString dName = "", TString fName = "", 
                                TString fcnName = "CHI2"){
       FSFitMinuitList::addMinuit(mName,fcnName);
       if (dName != "" && fName != "") FSFitMinuitList::addFitComponent(mName,dName,fName);
@@ -248,59 +283,72 @@ class FSFitUtilities{
     static void addFitComponent(TString mName, TString dName, TString fName){
       FSFitMinuitList::addFitComponent(mName,dName,fName);
     }
+    static void addFitComponent(TString dName, TString fName){
+      FSFitMinuitList::addFitComponent("mDefault",dName,fName);
+    }
 
       // Do a migrad fit.
 
-    static void migrad(TString mName, int strategy = 1){
+    static void migrad(TString mName = "mDefault", int strategy = 1){
       FSFitMinuitList::getMinuit(mName)->migrad(strategy);
+    }
+    static void migrad(TH1F* hist, TString fName, TString fcnName = "CHI2", int strategy = 1){
+      FSFitUtilities::createDataSet("dDefault",hist);
+      FSFitUtilities::createMinuit("mDefault","dDefault",fName,fcnName);
+      FSFitUtilities::migrad("mDefault",strategy);
     }
 
       // Do a minos fit.
 
-    static void minos(TString mName, int strategy = 1){
+    static void minos(TString mName = "mDefault", int strategy = 1){
       FSFitMinuitList::getMinuit(mName)->minos(strategy);
+    }
+    static void minos(TH1F* hist, TString fName, TString fcnName = "CHI2", int strategy = 1){
+      FSFitUtilities::createDataSet("dDefault",hist);
+      FSFitUtilities::createMinuit("mDefault","dDefault",fName,fcnName);
+      FSFitUtilities::migrad("mDefault",strategy);
     }
 
       // Get the value of the FCN (only works after a fit).
 
-    static double fcnValue(TString mName){
+    static double fcnValue(TString mName = "mDefault"){
       return FSFitMinuitList::getMinuit(mName)->fcnValue();
     }
 
       // Get the likelihood.
 
-    static double likelihood(TString mName){
+    static double likelihood(TString mName = "mDefault"){
       return FSFitMinuitList::getMinuit(mName)->likelihood();
     }
 
       // Get the chisquare.
 
-    static double chisquare(TString mName){
+    static double chisquare(TString mName = "mDefault"){
       return FSFitMinuitList::getMinuit(mName)->chisquare();
     }
 
       // Get the number of points
 
-    static int nDataPoints(TString mName){
+    static int nDataPoints(TString mName = "mDefault"){
       return FSFitMinuitList::getMinuit(mName)->nDataPoints();
     }
 
       // Get the number of free parameters.
 
-    static int nFreeParameters(TString mName){
+    static int nFreeParameters(TString mName = "mDefault"){
       return FSFitMinuitList::getMinuit(mName)->nFreeParameters();
     }
 
       // Get the number of degrees of freedom.
 
-    static int nDOF(TString mName){
+    static int nDOF(TString mName = "mDefault"){
       return FSFitMinuitList::getMinuit(mName)->nDataPoints()
               - FSFitMinuitList::getMinuit(mName)->nFreeParameters();
     }
 
       // Get the status of the covariance matrix.
 
-    static int fitStatus(TString mName){
+    static int fitStatus(TString mName = "mDefault"){
       return FSFitMinuitList::getMinuit(mName)->fitStatus();
     }
 
@@ -312,14 +360,19 @@ class FSFitUtilities{
       return FSFitMinuitList::getMinuit(mName)->scanLikelihood(fpName, xLow, xHigh, nSteps, xScale);
     }
 
+      // Print a list of minuit objects to the screen.
+
+    static void showMinuitList(bool showDetails = false){
+      FSFitMinuitList::showMinuitList(showDetails);
+    }
 
     // *************************
     //  RESET EVERYTHING
     // *************************
 
-    static void clear(){
-      FSFitParameterList::clearParameters();
-      FSFitFunctionList::clearFunctions();
+    static void clear(bool clearClones = false){
+      FSFitParameterList::clearParameters(clearClones);
+      FSFitFunctionList::clearFunctions(clearClones);
       FSFitDataSetList::clearDataSets();
       FSFitMinuitList::clearMinuit();
     }

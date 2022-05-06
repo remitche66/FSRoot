@@ -17,6 +17,7 @@
 #include "TMinuit.h"
 #include "TMath.h"
 #include "FSBasic/FSString.h"
+#include "FSBasic/FSHistogram.h"
 #include "FSData/FSXYPoint.h"
 
 class FSFitParameterList;
@@ -256,13 +257,13 @@ class FSFitParameter{
     }
 
 
-      // printing
+      // showing
 
-    void print(int parNumber = -1) { cout << parNumber << " (" << m_parNumberAll << "," << m_parNumberFree << "). ";
-                   printDescription();
+    void show(int parNumber = -1) { cout << parNumber << " (" << m_parNumberAll << "," << m_parNumberFree << "). ";
+                   showDescription();
                    if (m_constraints.size() > 0){
                      cout << "\t    constraints:" << endl;
-                     printConstraints();
+                     showConstraints();
                    }
                    cout << "\t    initial value = " << initialValue() << endl;
                    cout << "\t    current value = " << value() << endl; 
@@ -271,9 +272,9 @@ class FSFitParameter{
                    cout << "\t      step                          = " << step() << endl;
                    if (m_fixed) cout << "\t\t FIXED" << endl; }
 
-    void printDescription(){ cout << fpName() << "  (" << description() << ")" << endl; }
-    void printConstraints(){ for (unsigned int i = 0; i < m_constraints.size(); i++){
-                             cout << "\t\t";  otherParameter(m_constraints[i])->printDescription(); } }
+    void showDescription(){ cout << fpName() << "  (" << description() << ")" << endl; }
+    void showConstraints(){ for (unsigned int i = 0; i < m_constraints.size(); i++){
+                             cout << "\t\t";  otherParameter(m_constraints[i])->showDescription(); } }
 
   private:
     
@@ -306,7 +307,7 @@ class FSFitParameterList{
       FSFitParameter* fp = new FSFitParameter(fName,pName,initialValue,description);
       map<TString,FSFitParameter*>::iterator it = m_fitParameterMap.find(fp->fpName());
       if (it != m_fitParameterMap.end()){
-        cout << "FSFitParameterList WARNING:  overwriting parameter " << fp->fpName() << endl;
+        cout << "FSFitParameterList NOTICE:  overwriting parameter " << fp->fpName() << endl;
         FSFitParameter* oldPar = it->second;
         oldPar->resetDefaults();
         delete oldPar;
@@ -342,13 +343,17 @@ class FSFitParameterList{
       getParameter(fpName)->resetConstraints();
     }
 
-    static void clearParameters(){
+    static void clearParameters(bool clearClones = false){
       for (map<TString,FSFitParameter*>::iterator it = m_fitParameterMap.begin();
-           it != m_fitParameterMap.end(); it++){
-        it->second->resetDefaults();
-        delete it->second;
+           it != m_fitParameterMap.end();){
+        if ((!clearClones) && (it->second->fName().Contains("CLONE"))){ it++; }
+        else{
+          it->second->resetDefaults();
+          delete it->second;
+          m_fitParameterMap.erase(it++);
+        }
       }
-      m_fitParameterMap.clear();
+      if (clearClones) m_fitParameterMap.clear();
     }
 
 
@@ -441,14 +446,37 @@ class FSFitFunction{
 
     double operator() (double *x, double *p) { if (p == NULL) p = NULL; return fx(x[0]); }
 
-    TF1* getTF1(){
+    TF1* getTF1(double xLow = -99.0, double xHigh = -999.0){
       FSFitFunction* newff = cloneBASE();
       //TF1* ff = new TF1(newff->fName(), newff, &FSFitFunction::rootFunction, m_xLow, m_xHigh, 0);
-      TF1* ff = new TF1(newff->fName(), newff, m_xLow, m_xHigh, 0);
+      if (xHigh < xLow){ xLow = m_xLow; xHigh = m_xHigh; }
+      TF1* ff = new TF1(newff->fName(), newff, xLow, xHigh, 0);
       ff->SetNpx(2000);
       return ff;
     }
 
+      // interface to TH1F
+
+    TH1F* getTH1F(TString bounds){
+      int nbins = 100; double xLow = 0.0; double xHigh = 10.0;
+      if (FSString::checkBounds(1,bounds)){
+        nbins = FSString::parseBoundsNBinsX(bounds);
+        xLow  = FSString::parseBoundsLowerX(bounds);
+        xHigh = FSString::parseBoundsUpperX(bounds);
+      }
+      else{
+        cout << "FSFitFunction::getTH1F ERROR: problem with bounds" << endl;
+      }
+      TH1F* hist = FSHistogram::getTH1F(new TH1F(fName(),fName(),nbins,xLow,xHigh));
+      if (FSString::checkBounds(1,bounds)){
+        for (int i = 0; i < nbins; i++){
+          double x = xLow + (i+0.5)*(xHigh-xLow)/nbins;
+          hist->SetBinContent(i+1,fx(x));
+          hist->SetBinError(i+1,efx(x));
+        }
+      }
+      return FSHistogram::getTH1F(hist);
+    }
 
       // manage parameters
 
@@ -523,11 +551,22 @@ class FSFitFunction{
       }
     }
 
-    void printParameters(){
+    void showParameters(){
       for (unsigned int i = 0; i < m_fpNames.size(); i++){
-         FSFitParameterList::getParameter(m_fpNames[i])->print(i+1);
+         FSFitParameterList::getParameter(m_fpNames[i])->show(i+1);
       }
     }
+
+    virtual void show(bool showDetails = false){
+      cout << "*******************" << endl;
+      cout << "FUNCTION: " << m_fName << endl;
+      cout << "   defined in (" << FSString::double2TString(m_xLow,8) << "," 
+                                << FSString::double2TString(m_xHigh,8) << ")" << endl;
+      cout << "*******************" << endl;
+      if (showDetails) cout << "PARAMETERS:" << endl;
+      if (showDetails) showParameters();
+    }
+
 
   protected:
 
@@ -676,6 +715,17 @@ class FSFitFunctionComposite : public FSFitFunction{
       return new FSFitFunctionComposite("",formula);
     }
 
+    void show(bool showDetails = false){
+      cout << "*******************" << endl;
+      cout << "COMPOSITE FUNCTION: " << m_fName << endl;
+      cout << "   defined in (" << FSString::double2TString(m_xLow,8) << "," 
+                                << FSString::double2TString(m_xHigh,8) << ")" << endl;
+      cout << "   formula: " << m_fName1 << " " << m_sign << " " << m_fName2 << endl;
+      cout << "*******************" << endl;
+      if (showDetails) cout << "PARAMETERS:" << endl;
+      if (showDetails) showParameters();
+    }
+
 
   private:
 
@@ -696,7 +746,7 @@ class FSFitFunctionList{
     static void addFunction(FSFitFunction* userFunction, TString fNameInitializer = ""){ 
       map<TString,FSFitFunction*>::iterator it = m_fitFunctionMap.find(userFunction->fName());
       if (it != m_fitFunctionMap.end()){
-        cout << "FSFitFunctionList WARNING:  overwriting function " << userFunction->fName() << endl;
+        cout << "FSFitFunctionList NOTICE:  overwriting function (resetting parameters) " << userFunction->fName() << endl;
         it->second->resetParameters();
         delete it->second;
       }
@@ -732,20 +782,32 @@ class FSFitFunctionList{
       return NULL;
     }
 
-    static void clearFunctions(){
+    static void clearFunctions(bool clearClones = false){
       for (map<TString,FSFitFunction*>::iterator it = m_fitFunctionMap.begin();
-           it != m_fitFunctionMap.end(); it++){
-        delete it->second;
+           it != m_fitFunctionMap.end();){
+        if ((!clearClones) && (it->second->fName().Contains("CLONE"))){ it++; }
+        else{
+          delete it->second;
+          m_fitFunctionMap.erase(it++);
+        }
       }
-      FSFitParameterList::clearParameters();
-      m_fitFunctionMap.clear();
+      FSFitParameterList::clearParameters(clearClones);
+      if (clearClones) m_fitFunctionMap.clear();
     }
 
     static TString generateName(){
       m_NAMECOUNTER++;
-      TString newname("CLONEn");
-      newname += m_NAMECOUNTER;
+      TString newname("000CLONEn");
+      newname += FSString::int2TString(m_NAMECOUNTER,6);
       return newname;
+    }
+
+    static void showFunctions(bool showDetails = false, bool showClones = false){
+      for (map<TString,FSFitFunction*>::iterator it = m_fitFunctionMap.begin();
+           it != m_fitFunctionMap.end(); it++){
+        if (!showClones && it->second->fName().Contains("CLONE")) continue;
+        it->second->show(showDetails);
+      }
     }
 
   private:
@@ -766,20 +828,23 @@ class FSFitFunctionList{
 class FSFitDataSet {
   public:
 
-    FSFitDataSet(TString n_dName, TH1F* hist) : 
-        m_dName(n_dName){
-      int nbins = hist->GetNbinsX();
-      for (int i = 1; i <= nbins; i++){
-        m_x.push_back(hist->GetBinCenter(i));
-        m_y.push_back(hist->GetBinContent(i));
-        m_ey.push_back(hist->GetBinError(i));
+    FSFitDataSet(TString n_dName = "dDefault", TH1F* hist = NULL) : 
+        m_dName(n_dName), m_histName(""){
+      if (hist){
+        m_histName = hist->GetName();
+        int nbins = hist->GetNbinsX();
+        for (int i = 1; i <= nbins; i++){
+          m_x.push_back(hist->GetBinCenter(i));
+          m_y.push_back(hist->GetBinContent(i));
+          m_ey.push_back(hist->GetBinError(i));
+        }
       }
       clearLimits();
       fillSelected();
     }
 
     FSFitDataSet(TString n_dName, vector<FSXYPoint*> points, bool includeSystErrors) : 
-        m_dName(n_dName){
+        m_dName(n_dName), m_histName(""){
       for (unsigned int i = 0; i < points.size(); i++){
         m_x.push_back(points[i]->xValue());
         m_y.push_back(points[i]->yValue());
@@ -791,7 +856,7 @@ class FSFitDataSet {
     }
 
     FSFitDataSet(TString n_dName, vector<double> xUnbinnedData) : 
-        m_dName(n_dName), m_x(xUnbinnedData){
+        m_dName(n_dName), m_x(xUnbinnedData), m_histName(""){
       m_y.clear();
       m_ey.clear();
       clearLimits();
@@ -824,9 +889,24 @@ class FSFitDataSet {
 
     const vector< pair<double,double> >& xLimits() { return m_xLimits; }
 
+    void show(){
+      cout << "*******************" << endl;
+      cout << "DATA SET: " << m_dName << endl;
+      if (m_histName != "") cout << "   histogram name: " << m_histName << endl;
+      cout << "   number of points (total): " << m_x.size() << endl;
+      cout << "   number of points (selected): " << m_xSelected.size() << endl;
+      cout << "   ranges: " << endl;
+      for (unsigned int i = 0; i < m_xLimits.size(); i++){
+        cout << "        ( " << FSString::double2TString(m_xLimits[i].first,8) << ", "
+                             << FSString::double2TString(m_xLimits[i].second,8) << " )" << endl;
+      }
+      cout << "*******************" << endl;
+    }
+
   private:
 
     TString m_dName;
+    TString m_histName;
 
     vector<double> m_x;
     vector<double> m_y;
@@ -872,7 +952,7 @@ class FSFitDataSetList {
   public:
 
 
-    static void addDataSet(TString dName, TH1F* hist){ 
+    static void addDataSet(TString dName = "dDefault", TH1F* hist = NULL){ 
       FSFitDataSet* data = new FSFitDataSet(dName,hist);
       addDataSet(data);
     }
@@ -895,15 +975,21 @@ class FSFitDataSetList {
       TString dName = data->dName();
       map<TString,FSFitDataSet*>::iterator it = m_fitDataSetMap.find(dName);
       if (it != m_fitDataSetMap.end()){
-        cout << "FSFitDataSetList WARNING:  overwriting data set " << dName << endl;
+        if (dName != "dDefault"){
+          cout << "FSFitDataSetList NOTICE:  overwriting data set" << dName << endl;}
+        else{
+          vector< pair<double,double> > xlimits = it->second->xLimits();
+          for (unsigned int i = 0; i < xlimits.size(); i++){
+            data->addLimits(xlimits[i].first,xlimits[i].second); }}
         delete it->second;
       }
       m_fitDataSetMap[dName] = data;
     }
 
-    static FSFitDataSet* getDataSet(TString dName){
+    static FSFitDataSet* getDataSet(TString dName = "dDefault"){
       map<TString,FSFitDataSet*>::iterator it = m_fitDataSetMap.find(dName);
       if (it != m_fitDataSetMap.end()) return it->second;
+      if (dName == "dDefault"){ addDataSet(dName); return m_fitDataSetMap.find(dName)->second; }
       cout << "FSFitDataSetList ERROR:  cannot find data set named " << dName << endl;
       exit(0);
       return NULL;
@@ -917,6 +1003,12 @@ class FSFitDataSetList {
       m_fitDataSetMap.clear();
     }
 
+    static void showDataSets(){
+      for (map<TString,FSFitDataSet*>::iterator it = m_fitDataSetMap.begin();
+           it != m_fitDataSetMap.end(); it++){
+        it->second->show();
+      }
+    }
 
   private:
 
@@ -932,7 +1024,7 @@ class FSFitMinuit {
   public:
 
     FSFitMinuit(TString n_mName, TString fcnName = "CHI2") :
-        m_mName(n_mName) {
+        m_mName(n_mName), m_fcnName(fcnName) {
       m_minuit = new TMinuit(1000);
       m_minuit->mncler();
       setFCN(fcnName);
@@ -964,29 +1056,29 @@ class FSFitMinuit {
 
 
     TH1F* scanLikelihood(TString fpName, double xLow, double xHigh, unsigned int nSteps, double xScale=1.0){
+        // internal parameters for minuit
       Double_t calls[1]; calls[0]=10000;
-      Int_t err;
-      TH1F *likelihoodCurve = new TH1F("likelihoodCurve","",nSteps,xLow*xScale,xHigh*xScale);
-      // first do a regular fit by calling migrad
-      migrad(1); // maybe do check
-      // then loop over the allowed x values in nSteps steps by fixing just the fpName parameter and refitting.
-      double x = xLow;
-      double stepSize = (double)(xHigh-xLow)/nSteps;
-      int outflag;
+      Int_t err;  Int_t outflag;
+        // histogram of likelihood values
+      TH1F *hLikelihoodCurve = new TH1F("hLikelihoodCurve","",nSteps,xLow*xScale,xHigh*xScale);
+        // first call to migrad sets up internal parameters and finds the fcn minimum
+      migrad();
       double minimum = fcnValue();
+        // increment the value of parameter fpName in nSteps steps from xLow to xHigh
       for (unsigned int i = 0; i < nSteps; i++){
-        x+=stepSize;
-        //FSFitUtilities::fixParameter(fpName,x);
+        double x = xLow + (i+0.5)*(xHigh-xLow)/nSteps;
         FSFitParameter* par = FSFitParameterList::getParameter(fpName);
+          // fix the parameter value to x and refit (do this manually to increase speed)
         m_minuit->mnparm(par->parNumberAll()-1,par->fpName(),x,par->step(),  0.0,0.0, outflag);
-       // fix the parameter to the value
-              m_minuit->FixParameter(par->parNumberAll()-1);
-              // using migrad is 3x slower for some reason
-       m_minuit->mnexcm("MIGRAD",calls,1,err);
-       //migrad(0);
-       likelihoodCurve->SetBinContent(likelihoodCurve->FindBin(x*xScale),exp(-(fcnValue()-minimum)/2.0));
+        m_minuit->FixParameter(par->parNumberAll()-1);
+        m_minuit->mnexcm("MIGRAD",calls,1,err);
+          // save the likelihood value
+        hLikelihoodCurve->SetBinContent(hLikelihoodCurve->FindBin(x*xScale),exp(-(fcnValue()-minimum)/2.0));
       }
-      return likelihoodCurve;
+      hLikelihoodCurve->SetTitle("Likelihood scan for parameter "+fpName);
+      hLikelihoodCurve->SetYTitle("Likelihood");
+      hLikelihoodCurve->SetXTitle("Value of parameter "+fpName);
+      return FSHistogram::getTH1F(hLikelihoodCurve);
     }
 
 
@@ -1139,6 +1231,25 @@ class FSFitMinuit {
     }
 
 
+    void show(bool showDetails = false){
+      cout << "*******************" << endl;
+      cout << "MINUIT: " << m_mName << endl;
+      cout << "   fcn: " << m_fcnName << endl; 
+      cout << "    COMPONENTS: " << endl;
+      vector< pair<TString,TString> > comps = fitComponents();
+      for (unsigned int i = 0; i < comps.size(); i++){
+        TString dName = comps[i].first;
+        TString fName = comps[i].second;
+        cout << "      (" << i+1 << ")  Fit data set \"" << dName 
+                                 << "\" with function \"" << fName << "\"" << endl;
+        if (showDetails){
+          FSFitDataSetList::getDataSet(dName)->show();
+          FSFitFunctionList::getFunction(fName)->show(true);
+        }
+      }
+      cout << "*******************" << endl;
+    }
+
 
 //***************************************
 // SOME USEFUL TMINUIT FUNCTIONS
@@ -1179,6 +1290,7 @@ class FSFitMinuit {
   private:
 
     TString m_mName;
+    TString m_fcnName;
     TMinuit* m_minuit;
 
     void preFSFitSetup(){
@@ -1247,19 +1359,20 @@ class FSFitMinuitList {
   public:
 
 
-    static void addMinuit(TString mName, TString fcnName = "CHI2"){ 
+    static void addMinuit(TString mName = "mDefault", TString fcnName = "CHI2"){ 
       map<TString,FSFitMinuit*>::iterator it = m_fitMinuitMap.find(mName);
       if (it != m_fitMinuitMap.end()){
-        cout << "FSFitMinuitList WARNING:  overwriting fit " << mName << endl;
+        if (mName != "mDefault") cout << "FSFitMinuitList NOTICE:  overwriting fit " << mName << endl;
         delete it->second;
       }
       m_fitMinuitMap[mName] = new FSFitMinuit(mName,fcnName);
       m_fitComponentMap[mName] = vector< pair<TString,TString> >();
     }
 
-    static FSFitMinuit* getMinuit(TString mName){
+    static FSFitMinuit* getMinuit(TString mName = "mDefault"){
       map<TString,FSFitMinuit*>::iterator it = m_fitMinuitMap.find(mName);
       if (it != m_fitMinuitMap.end()) return it->second;
+      if (mName == "mDefault"){ addMinuit(mName); return m_fitMinuitMap.find(mName)->second; }
       cout << "FSFitMinuitList ERROR:  cannot find minuit fit named " << mName << endl;
       exit(0);
       return NULL;
@@ -1283,9 +1396,17 @@ class FSFitMinuitList {
     const static vector< pair<TString,TString> >& getFitComponents(TString mName){
       map<TString,vector< pair<TString,TString> > >::iterator it = m_fitComponentMap.find(mName);
       if (it != m_fitComponentMap.end()) return it->second;
+      if (mName == "mDefault"){ addMinuit(mName); return m_fitComponentMap.find(mName)->second; }
       cout << "FSFitMinuitList ERROR:  cannot find fit components for minuit fit named " << mName << endl;
       exit(0);
       return it->second;
+    }
+
+    static void showMinuitList(bool showDetails = false){
+      for (map<TString,FSFitMinuit*>::iterator it = m_fitMinuitMap.begin();
+           it != m_fitMinuitMap.end(); it++){
+        it->second->show(showDetails);
+      }
     }
 
 

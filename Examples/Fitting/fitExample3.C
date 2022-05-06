@@ -95,8 +95,8 @@
   c2->cd(2);
   TF1* ftot2minos = FSFitUtilities::getTF1("pg2");  ftot2minos->SetLineColor(kBlack); ftot2minos->Draw("same");
 
-  FSFitUtilities::printParameters("pg1");
-  FSFitUtilities::printParameters("pg2");
+  FSFitUtilities::showParameters("pg1");
+  FSFitUtilities::showParameters("pg2");
 
 
     // print out some information about the fit
