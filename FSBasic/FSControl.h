@@ -41,8 +41,12 @@ gStyle->SetCanvasBorderMode(0);
 gStyle->SetMarkerStyle(20);
 gStyle->SetMarkerSize(0.5);
 
+//gStyle->SetPadLeftMargin(0.145);
+//gStyle->SetPadBottomMargin(0.15);
+gStyle->SetPadTopMargin(0.100);
+gStyle->SetPadBottomMargin(0.160);
 gStyle->SetPadLeftMargin(0.145);
-gStyle->SetPadBottomMargin(0.15);
+gStyle->SetPadRightMargin(0.115);
 gStyle->SetCanvasDefH(600.0);
 gStyle->SetCanvasDefW(600.0);
 
