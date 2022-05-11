@@ -25,11 +25,13 @@
 
 \title{Notes on the \FSR\ Package}
 \author{Ryan Mitchell}
-\date{\today~~~(v3.0+)}
+\date{\today~~~(v4.0)}
 \maketitle
 
 \abstract{
-\FSR\ is a set of utilities to help manipulate information about different Final States~(FS) produced in particle physics experiments.  The utilities are built around the CERN \ROOT\ framework.  This document provides an introduction to \FSR.}
+\FSR\ is a set of utilities, built around the CERN \ROOT\ framework, that can be used
+to analyze a variety of final states~(FS) produced in particle physics experiments.
+This document provides a short introduction to \FSR.}
 
 \tableofcontents
 
@@ -46,7 +48,7 @@
 \section{Installation and Initial Setup}
 
 The \FSR\ utilities are built around the \ROOT\ framework, so a working version of \ROOT\ is a prerequisite.  Notes on \ROOT\ versions: \\
--- {\tt v6.18} and after: \FSR\ should work. \\
+-- {\tt v6.18} and after: \FSR\ should be fully functional. \\
 -- {\tt v5.34.09} up to {\tt v6.18}: \FSR\ should work, but without some functionality (e.g. {\tt RDataFrame}). \\
 -- {\tt v5.34.08} and before: \FSR\ may or may not work.
 
@@ -59,9 +61,9 @@ The \FSR\ source code is on {\tt GitHub}: \\ {\tt https://github.com/remitche66/
     > git clone https://github.com/remitche66/FSRoot.git FSRoot
 \end{verbatim}
 You can then switch to an older version ({\it not recommended unless necessary})
-using a specific tag ({\tt v3.0} for example):
+using a specific tag ({\tt v4.0} for example):
 \begin{verbatim}
-    > git checkout tags/v3.0
+    > git checkout tags/v4.0
 \end{verbatim}
 Alternatively, download and unpack ({\tt tar -xzf}) a released version ({\it not recommended unless necessary}) from here:
 \begin{verbatim}
@@ -122,19 +124,23 @@ $\psi(2S)\to\pi^+\pi^-J/\psi$ with $J/\psi \to K^+K_S\pi^-$ and $K_S \to \pi^+\p
 \section{Basic Conventions: the {\tt TTree} format}
 \label{sec:conventions}
 
-Some \FSR\ operations on \ROOT\ {\tt TTree} variables assume a particular format for the {\tt TTree}.  \FSR\ generally expects a {\tt TTree} with branches holding numbers (usually {\tt double}).
+Some \FSR\ operations on \ROOT\ {\tt TTree} variables assume a particular format for the {\tt TTree}:
+\begin{itemize}
 
-Four-vectors are assumed to have the form:
+\item \FSR\ uses ``flat'' {\tt TTree}'s with branches holding numbers (usually {\tt double}).
+
+\item Four-vectors are assumed to have the form:
 \begin{verbatim}
     [AB]EnP[CD], [AB]PxP[CD], [AB]PyP[CD], [AB]PzP[CD]
 \end{verbatim}
-where {\tt [CD]} is a particle label (often {\tt 1}, {\tt 2}, {\tt 3}, {\tt 2a}, etc., but it could also be {\tt CM} or {\tt BEAM} or anything else) and {\tt [AB]} labels the type of four-vector (for example, it could be {\tt R} for raw or {\tt K} for kinematically fit or {\tt MC} for Monte Carlo, etc.).  The \FSR\ code has no requirements on {\tt [AB]} -- it could be anything up to two characters long~(or nothing).  For {\tt [CD]}, the final state utilities described in Sec.~\ref{sec:modes} use the numbering convention described in Sec.~\ref{sec:modeconv}.  
+where {\tt [CD]} is a particle label (often {\tt 1}, {\tt 2}, {\tt 3}, {\tt 2a}, etc., but it could also be {\tt CM} or {\tt BEAM} or anything else) and {\tt [AB]} labels the type of four-vector (for example, it could be {\tt R} for raw or {\tt K} for kinematically fit or {\tt MC} for Monte Carlo, etc.).  The \FSR\ code has no requirements on {\tt [AB]}: it could be anything up to two characters long~(or nothing).  For {\tt [CD]}, the final state utilities described in Sec.~\ref{sec:modes} use the numbering convention described in Sec.~\ref{sec:modeconv}.  
 Otherwise, {\tt [CD]} could be anything and any length~(but not empty).
 
-Other variables associated with a given particle~(like the $\chi^2$ of a track) should use the same particle labels {\tt [CD]} as above.  For example, for a pion with four-momentum {\tt EnP5}, {\tt PxP5}, {\tt PyP5}, {\tt PzP5}, the corresponding track $\chi^2$ could be {\tt TkChi2P5}.
+\item Other variables associated with a given particle~(like the $\chi^2$ of a track fit) should use the same particle labels {\tt [CD]} as above.  For example, for a pion with four-momentum ({\tt EnP5}, {\tt PxP5}, {\tt PyP5}, {\tt PzP5}), the corresponding track $\chi^2$ should be something like {\tt TkChi2P5}.
 
-To use MC tagging utilities, \FSR\ uses tree variables named {\tt MCDecayCode1}, {\tt MCDecayCode2}, and {\tt MCExtras} (see Sec.~\ref{sec:mccomponents}).
+\item To use MC tagging utilities, \FSR\ uses tree variables named {\tt MCDecayCode1}, {\tt MCDecayCode2}, and {\tt MCExtras} (see Sec.~\ref{sec:mccomponents}).
 
+\end{itemize}
 
 \section{Basic Operations:  the {\tt FSBasic} directory}
 
