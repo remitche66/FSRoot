@@ -1,6 +1,7 @@
 # FSRoot
 
-FSRoot is a set of utilities to help manipulate information about different Final States (FS) produced in particle physics experiments.  The utilities are built around the CERN ROOT framework.  
+FSRoot is a set of utilities, built around the CERN ROOT framework, that can be used
+to analyze a variety of final states (FS) produced in particle physics experiments.
 
 See Documentation/FSRoot.pdf for documentation, including installation instructions.
 
