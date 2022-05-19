@@ -1166,6 +1166,7 @@ FSHistogram::getHistogramIndexTree(int dimension,
   variable = FSString::removeWhiteSpace(variable);
   bounds   = FSString::removeWhiteSpace(bounds);
   cuts     = FSString::removeWhiteSpace(cuts);
+  if (ntName == "") ntName = FSTree::getTreeNameFromFile(fileName);
   index += "{-TP-}TREE";
   if (dimension == 1) index += "{-ND-}1D";
   if (dimension == 2) index += "{-ND-}2D";
@@ -1262,6 +1263,11 @@ FSHistogram::checkIndex(TString index, TString type){
   if (type == "TREE" || type == "FILE"){
     TString fileName = iMap["{-FN-}"];
     if (FSSystem::getAbsolutePath(fileName) == "") return TString("!!NO_FILE!!");
+  }
+    // checks on tree (NT)
+  if (type == "TREE"){
+    TString treeName = iMap["{-NT-}"];
+    if (treeName == "") return TString("!!NO_TREE!!");
   }
     // checks on category (CA)
   if (type == "TREE"){
