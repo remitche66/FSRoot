@@ -14,6 +14,7 @@ gStyle->SetCanvasColor(10);
 gStyle->SetPadColor(10);
 gStyle->SetFillStyle(1001);
 gStyle->SetCanvasBorderMode(0);
+gStyle->SetLineColor(kBlack);
 
 gStyle->SetMarkerStyle(20);
 gStyle->SetMarkerSize(0.5);
@@ -27,11 +28,10 @@ gStyle->SetPadRightMargin(0.115);
 gStyle->SetCanvasDefH(600.0);
 gStyle->SetCanvasDefW(600.0);
 
-gStyle->SetTitleOffset(1.5,"Y");
 gStyle->SetStripDecimals(false);
-
 gStyle->SetLabelSize(0.03, "Z");
-
+gStyle->SetTitleOffset(1.5,"X");
+gStyle->SetTitleOffset(1.8,"Y");
 
 // ***********
 // ROOT TWEAKS

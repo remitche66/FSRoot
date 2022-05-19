@@ -48,8 +48,8 @@ FSHistogram::getTH1F(TH1F* hist){
     if (hist->GetSumw2N() == 0) hist->Sumw2();
     hist->SetDirectory(0);
     hist->SetStats(0);
-    hist->SetTitleOffset(1.5,"X");
-    hist->SetTitleOffset(1.8,"Y");
+    //hist->SetTitleOffset(1.5,"X");
+    //hist->SetTitleOffset(1.8,"Y");
     hist->SetLineColor(kBlack);
     setHistogramMaxMin(hist);
   }
@@ -62,9 +62,9 @@ FSHistogram::getTH2F(TH2F* hist){
     if (hist->GetSumw2N() == 0) hist->Sumw2();
     hist->SetDirectory(0);
     hist->SetStats(0);
-    hist->SetTitleOffset(1.5,"X");
-    hist->SetTitleOffset(1.8,"Y");
-    hist->GetZaxis()->SetLabelSize(0.03);
+    //hist->SetTitleOffset(1.5,"X");
+    //hist->SetTitleOffset(1.8,"Y");
+    //hist->GetZaxis()->SetLabelSize(0.03);
     setHistogramMaxMin(hist);
   }
   return hist;
