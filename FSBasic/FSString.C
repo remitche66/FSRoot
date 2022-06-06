@@ -885,9 +885,9 @@ FSString::latexCloser(TString filename, bool append){
 
 void
 FSString::latexTemplate(TString filename){
-  TCanvas* cLatexTemplate = new TCanvas("cLatexTemplate","cLatexTemplate",800,800);
-  TH1F* hist = new TH1F("hist","hist",100,0.0,10.0);  hist->SetTitle("Test Histogram");
-  hist->Fill(5.0); hist->SetXTitle("x title"); hist->SetStats(0);  hist->Draw();
+  TCanvas* cLatexTemplate = new TCanvas("cLatexTemplate","cLatexTemplate",1000,800);
+  TH1F* hist = new TH1F("hist","hist",3,0.0,9.0);  hist->SetTitle("Test Histogram");
+  hist->Fill(5.0); hist->SetXTitle("x title"); hist->SetStats(0);  hist->Draw("hist");
   cLatexTemplate->Print("tempFigure.pdf");
   latexHeader(filename,false,"TITLE");
   latexLine(filename, "This is a sample latex file.",true);
