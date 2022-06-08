@@ -291,6 +291,7 @@ TString
 FSModeInfo::modeGlueXName(){
   TString gluexName("");
   int np;
+  np = modeNGamma     ();  for (int i = 0; i < np; i++){ gluexName += "g"; }
   np = modeNPi0       ();  for (int i = 0; i < np; i++){ gluexName += "pi0"; }
   np = modeNPip       ();  for (int i = 0; i < np; i++){ gluexName += "pip"; }
   np = modeNPim       ();  for (int i = 0; i < np; i++){ gluexName += "pim"; }
