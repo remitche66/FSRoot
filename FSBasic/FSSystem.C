@@ -72,6 +72,17 @@ FSSystem::getAbsolutePath(TString path, bool useCache){
 vector<TString>
 FSSystem::getAbsolutePaths(TString path, bool useCache, bool show){
   if (useCache){ if (m_cachePaths.find(path) != m_cachePaths.end()) return m_cachePaths[path]; }
+  if (path.Contains(" ") || path.Contains(",")){
+    vector<TString> allPaths;
+    vector<TString> spacers; spacers.push_back(" "); spacers.push_back(",");
+    vector<TString> multiplePaths = FSString::parseTString(path,spacers);
+    if (show) cout << "----- FOUND " << multiplePaths.size() << " SETS OF PATHS ---" << endl;
+    for (unsigned int i = 0; i < multiplePaths.size(); i++){
+      vector<TString> paths = getAbsolutePaths(multiplePaths[i],useCache,show);
+      for (unsigned int j = 0; j < paths.size(); j++){ allPaths.push_back(paths[j]); }
+    }
+    return allPaths;
+  }
   TString newPath = path;
   vector<TString> paths;
   if (!(newPath.Contains("*") || newPath.Contains("?"))){

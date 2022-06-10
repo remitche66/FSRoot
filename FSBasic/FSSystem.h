@@ -35,6 +35,7 @@ class FSSystem{
       //   GET A VECTOR OF ABSOLUTE PATHS TO FILES OR DIRECTORIES
       //    -- expands environment variables
       //    -- expands wildcards (* and ?)
+      //    -- recognizes lists of files separated by " " or ","
       //    -- returns existing paths
       // **********************************
 
