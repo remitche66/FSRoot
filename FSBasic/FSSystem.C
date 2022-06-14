@@ -55,7 +55,7 @@ FSSystem::getAbsolutePath(TString path, bool useCache){
   TString newPath = path;
   newPath = makeAbsolutePathName(newPath);
   if (newPath == ""){}
-  else if (!(newPath.Contains("*")||newPath.Contains("?"))){
+  else if (!(newPath.Contains("*")||newPath.Contains("?")||newPath.Contains(",")||newPath.Contains(" "))){
     if (gSystem->AccessPathName(newPath)) newPath = "";
   }
   else{

@@ -111,6 +111,10 @@ FSTree::getTChain(TString fileName, TString ntName, TString& STATUS){
     for (unsigned int i = 0; i < m_friendTrees.size(); i++){
       if (m_friendTrees[i].second){
         TString friendFileName(fileName);
+        while (friendFileName.Contains(",")){
+          friendFileName.Replace(friendFileName.Index(","),1,"!!!"); }
+        while (friendFileName.Contains("!!!")){
+          friendFileName.Replace(friendFileName.Index("!!!"),3,"."+m_friendTrees[i].first+","); }
         friendFileName += ".";
         friendFileName += m_friendTrees[i].first;
         TString friendNTName(ntName);
