@@ -71,6 +71,7 @@ vector< pair<TString,double> >
 FSCut::expandCuts(TString cuts, bool showDetails){
   cuts = FSString::removeWhiteSpace(cuts);
   vector< pair<TString,double> > newCuts;
+  vector<TString> skipCuts;
 
   if (FSControl::DEBUG){
     cout << "FSCut: expanding cut... " << endl;
@@ -78,18 +79,21 @@ FSCut::expandCuts(TString cuts, bool showDetails){
   }
 
     // loop over all CUT and CUTSB markers
+  TString CUTSKIPMARK ("CUTSKIP(");
   TString CUTMARK     ("CUT(");
   TString CUTSBMARK   ("CUTSB(");
   TString CUTWTMARK   ("CUTWT(");
   TString CUTSBWTMARK ("CUTSBWT(");
-  while (cuts.Contains(CUTMARK) ||
+  while (cuts.Contains(CUTSKIPMARK) ||
+         cuts.Contains(CUTMARK) ||
          cuts.Contains(CUTSBMARK) ||
          cuts.Contains(CUTWTMARK) ||
          cuts.Contains(CUTSBWTMARK)){
 
       // find a CUT(...) or a CUTSB(...)
     TString mark("");
-         if (cuts.Contains(CUTMARK))    { mark = CUTMARK; }
+         if (cuts.Contains(CUTSKIPMARK)){ mark = CUTSKIPMARK; }
+    else if (cuts.Contains(CUTMARK))    { mark = CUTMARK; }
     else if (cuts.Contains(CUTSBMARK))  { mark = CUTSBMARK; }
     else if (cuts.Contains(CUTWTMARK))  { mark = CUTWTMARK; }
     else if (cuts.Contains(CUTSBWTMARK)){ mark = CUTSBWTMARK; }
@@ -120,13 +124,16 @@ FSCut::expandCuts(TString cuts, bool showDetails){
 
       // make the substitute cuts for this mark
     vector< pair<TString,double> > substitutes;
-         if (mark == CUTMARK)    { substitutes = makeCut(cutList); }
+    if (mark == CUTSKIPMARK){ 
+      for (unsigned int i = 0; i < cutList.size(); i++){ skipCuts.push_back(cutList[i]); } }
+    else if (mark == CUTMARK)    { substitutes = makeCut(cutList,skipCuts); }
     else if (mark == CUTSBMARK)  { substitutes = makeCutSB(cutList); }
-    else if (mark == CUTWTMARK)  { substitutes = makeCutWT(cutList); }
+    else if (mark == CUTWTMARK)  { substitutes = makeCutWT(cutList,skipCuts); }
     else if (mark == CUTSBWTMARK){ substitutes = makeCutSBWT(cutList); }
 
 
       // replace the old cuts with the new
+    if (substitutes.size() == 0) substitutes.push_back(pair<TString,double>("(1==1)",1));
     if (substitutes.size() > 0){
       double oldWT = 1.0;
       if (newCuts.size() > 1){
@@ -160,11 +167,12 @@ FSCut::expandCuts(TString cuts, bool showDetails){
 
 
 vector< pair<TString,double> > 
-FSCut::makeCut(vector<TString> cutList){
+FSCut::makeCut(vector<TString> cutList, vector<TString> skipCuts){
   vector< pair<TString,double> > newCuts;
   TString cut("");
   for (unsigned int i = 0; i < cutList.size(); i++){ 
     TString cutSig  = getCut(cutList[i]).first.first;
+    if (find(skipCuts.begin(),skipCuts.end(),cutList[i]) != skipCuts.end()) cutSig = "(1==1)";
     if (i == 0) cut += "(";
     if (i != 0) cut += "&&";
     cut += "(";
@@ -244,9 +252,9 @@ FSCut::makeCutSBWT(vector<TString> cutList){
 }
 
 vector< pair<TString,double> > 
-FSCut::makeCutWT(vector<TString> cutList){
+FSCut::makeCutWT(vector<TString> cutList, vector<TString> skipCuts){
   vector< pair<TString,double> > newCuts;
-  vector< pair<TString,double> > cutSig = makeCut(cutList);
+  vector< pair<TString,double> > cutSig = makeCut(cutList, skipCuts);
   vector< pair<TString,double> > cutSbWt = makeCutSBWT(cutList);
   if ((cutSig.size() != 1) || (cutSbWt.size() != 1)){
     cout << "FSCut ERROR:  internal problem" << endl; exit(0); }
