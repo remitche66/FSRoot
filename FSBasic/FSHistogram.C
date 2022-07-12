@@ -928,10 +928,13 @@ FSHistogram::readHistogramCache(TString cacheName, TString selectIndex){
       cout << "histogram already exists: " << getFSHistogramInfo(index)->getHistName() << endl;
       continue;
     }
-    TString cacheIndex(getHistogramIndexFile(dim,fileName,histName)); TString STATUS;
-    pair<TH1F*,TH2F*> histPair = getTHNFBasicFile(cacheIndex,STATUS);
-    if (histPair.first)  histPair.first->SetName(makeFSRootHistName());
-    if (histPair.second) histPair.second->SetName(makeFSRootHistName());
+    //TString cacheIndex(getHistogramIndexFile(dim,fileName,histName)); TString STATUS;
+    //pair<TH1F*,TH2F*> histPair = getTHNFBasicFile(cacheIndex,STATUS);
+    pair<TH1F*,TH2F*> histPair = pair<TH1F*,TH2F*>(NULL,NULL);
+    if (dim == 1) histPair.first  = (TH1F*) rootCache->FindObjectAny(histName);
+    if (dim == 2) histPair.second = (TH2F*) rootCache->FindObjectAny(histName);
+    if (histPair.first)  getTH1F(histPair.first)->SetName(makeFSRootHistName());
+    if (histPair.second) getTH2F(histPair.second)->SetName(makeFSRootHistName());
     getFSHistogramInfo(index)->m_histPair = histPair;
     cout << getFSHistogramInfo(index)->infoString() << endl;
   }
