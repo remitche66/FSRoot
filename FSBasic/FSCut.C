@@ -172,7 +172,8 @@ FSCut::makeCut(vector<TString> cutList, vector<TString> skipCuts){
   TString cut("");
   for (unsigned int i = 0; i < cutList.size(); i++){ 
     TString cutSig  = getCut(cutList[i]).first.first;
-    if (find(skipCuts.begin(),skipCuts.end(),cutList[i]) != skipCuts.end()) cutSig = "(1==1)";
+    for (unsigned int j = 0 ; j < skipCuts.size(); j++){ if (skipCuts[j] == cutList[i]) cutSig = "(1==1)"; }
+    //if (find(skipCuts.begin(),skipCuts.end(),cutList[i]) != skipCuts.end()) cutSig = "(1==1)";
     if (i == 0) cut += "(";
     if (i != 0) cut += "&&";
     cut += "(";
