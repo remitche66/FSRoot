@@ -169,7 +169,7 @@ FSHistogram::getTHNFBasicTree(TString index, TString& STATUS){
   TString bounds    = mapIndex["{-BO-}"];
   TString cuts      = mapIndex["{-CU-}"];  cuts = FSTree::expandVariable(cuts);
     int maxEntries = -1;
-    if (cuts.Contains("MAXENTRIES=")){
+    if (cuts.Contains("MAXENTRIES=") || cuts.Contains("MAXEVENTS=")){
       pair<int,TString> pairMaxEntries = FSTree::processMaxEntries(cuts);
       maxEntries = pairMaxEntries.first;
       cuts = pairMaxEntries.second;

@@ -307,7 +307,7 @@ FSTree::skimTree(TString fileNameInput, TString chainName,
   printCommandFile = FSString::removeWhiteSpace(printCommandFile);
   if (chainName == "") chainName = getTreeNameFromFile(fileNameInput);
   int maxEntries = -1;
-  if (cuts.Contains("MAXENTRIES=")){
+  if (cuts.Contains("MAXENTRIES=") || cuts.Contains("MAXEVENTS=")){
     pair<int,TString> pairMaxEntries = FSTree::processMaxEntries(cuts);
     maxEntries = pairMaxEntries.first;
     cuts = pairMaxEntries.second;
@@ -1087,14 +1087,23 @@ FSTree::clearChainCache(){
 
 pair<int,TString> 
 FSTree::processMaxEntries(TString input){
-  if (!input.Contains("MAXENTRIES=")) return pair<int,TString>(-1,input);
-  TString subInput = FSString::subString(input,input.Index("MAXENTRIES="),input.Length());
+  if (!input.Contains("MAXENTRIES=")&&!input.Contains("MAXEVENTS=")) 
+    return pair<int,TString>(-1,input);
+  TString subInput;
+  if (input.Contains("MAXENTRIES=")) 
+    subInput = FSString::subString(input,input.Index("MAXENTRIES="),input.Length());
+  if (input.Contains("MAXEVENTS="))
+    subInput = FSString::subString(input,input.Index("MAXEVENTS="),input.Length());
   int nMaxEntries = FSString::TString2int(subInput);
   TString modifiedInput = input;
   if (modifiedInput.Contains("MAXENTRIES=="))
     modifiedInput.Replace(modifiedInput.Index("MAXENTRIES=="),12,"0!=");
   if (modifiedInput.Contains("MAXENTRIES="))
     modifiedInput.Replace(modifiedInput.Index("MAXENTRIES="),11,"0!=");
+  if (modifiedInput.Contains("MAXEVENTS=="))
+    modifiedInput.Replace(modifiedInput.Index("MAXEVENTS=="),11,"0!=");
+  if (modifiedInput.Contains("MAXEVENTS="))
+    modifiedInput.Replace(modifiedInput.Index("MAXEVENTS="),10,"0!=");
   return pair<int,TString> (nMaxEntries,modifiedInput);
 }
 
