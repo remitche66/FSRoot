@@ -15,6 +15,9 @@
 #include "TFile.h"
 #include "THStack.h"
 #include "TLegend.h"
+#include "TLorentzVector.h"
+#include "TGenPhaseSpace.h"
+#include "TRandom.h"
 #include "FSBasic/FSCanvas.h"
 #include "FSBasic/FSString.h"
 #include "FSBasic/FSPhysics.h"
@@ -572,5 +575,103 @@ FSModeTree::createRankingTree(TString fileName, TString ntName, TString category
     }
   }
 }
+
+
+
+
+void
+FSModeTree::createPHSPTree(double EnPCM, double PxPCM, double PyPCM, double PzPCM, 
+                               TString modeString, int nEvents, 
+                               TString fileNameOutput,  TString ntName){
+  FSModeInfo modeInfo(modeString);
+  fileNameOutput = modeInfo.modeString(fileNameOutput);
+  ntName = modeInfo.modeString(ntName);
+  vector<TString> vParticles = modeInfo.particles();
+  vector<double> vMasses = modeInfo.modeMasses();
+  cout << endl;
+  cout << "----------------" << endl;
+  cout << "MAKING PHSP TREE" << endl;
+  cout << "----------------" << endl;
+  cout << "  FINAL STATE:   " << modeInfo.modeDescription() << endl;
+  cout << "    FILE NAME:   " << fileNameOutput << endl;
+  cout << "    TREE NAME:   " << ntName << endl;
+  cout << "     BRANCHES: " << endl;
+  cout << "           PxPCM PyPCM PzPCM EnPCM:  four-vector of the CM system" << endl;
+  for (unsigned int i = 0; i < vParticles.size(); i++){
+    TString si = FSString::int2TString(i+1);
+    cout << "           PxP"+si+"  PyP"+si+"  PzP"+si+"  EnP"+si+":   "
+            "four-vector of " << vParticles[i] << endl;
+    if ((vParticles[i] == "pi0") || (vParticles[i] == "eta") 
+       || (vParticles[i] == "Ks") || (vParticles[i].Contains("Lambda"))){
+      cout << "           PxP"+si+"a PyP"+si+"a PzP"+si+"a EnP"+si+"a:  "
+            "four-vector of 1st " << vParticles[i] << " daughter" << endl;
+      cout << "           PxP"+si+"b PyP"+si+"b PzP"+si+"b EnP"+si+"b:  "
+            "four-vector of 2nd " << vParticles[i] << " daughter" << endl; } }
+  cout << "----------------" << endl;
+  cout << "Creating " << nEvents << " events..." << endl;
+  TLorentzVector pParent(PxPCM, PyPCM, PzPCM, EnPCM);
+  double masses[100];
+  double PxPN[100]; double PxPNa[100]; double PxPNb[100];
+  double PyPN[100]; double PyPNa[100]; double PyPNb[100];
+  double PzPN[100]; double PzPNa[100]; double PzPNb[100];
+  double EnPN[100]; double EnPNa[100]; double EnPNb[100];
+  TLorentzVector* pPN[100]; TLorentzVector* pPNa[100]; TLorentzVector* pPNb[100];
+  TFile file(fileNameOutput,"recreate");
+  TTree tree(ntName,ntName);
+  tree.Branch("PxPCM",  &PxPCM,    "PxPCM/D");
+  tree.Branch("PyPCM",  &PyPCM,    "PyPCM/D");
+  tree.Branch("PzPCM",  &PzPCM,    "PzPCM/D");
+  tree.Branch("EnPCM",  &EnPCM,    "EnPCM/D");
+  for (unsigned int i = 0; i < vMasses.size(); i++){
+    masses[i] = vMasses[i];
+    TString si = FSString::int2TString(i+1);
+    tree.Branch("PxP"+si,   &PxPN[i],     "PxP"+si+"/D");
+    tree.Branch("PyP"+si,   &PyPN[i],     "PyP"+si+"/D");
+    tree.Branch("PzP"+si,   &PzPN[i],     "PzP"+si+"/D");
+    tree.Branch("EnP"+si,   &EnPN[i],     "EnP"+si+"/D");
+    if ((vParticles[i] == "pi0") || (vParticles[i] == "eta") 
+       || (vParticles[i] == "Ks") || (vParticles[i].Contains("Lambda"))){
+      tree.Branch("PxP"+si+"a",   &PxPNa[i],     "PxP"+si+"a/D");
+      tree.Branch("PyP"+si+"a",   &PyPNa[i],     "PyP"+si+"a/D");
+      tree.Branch("PzP"+si+"a",   &PzPNa[i],     "PzP"+si+"a/D");
+      tree.Branch("EnP"+si+"a",   &EnPNa[i],     "EnP"+si+"a/D");
+      tree.Branch("PxP"+si+"b",   &PxPNb[i],     "PxP"+si+"b/D");
+      tree.Branch("PyP"+si+"b",   &PyPNb[i],     "PyP"+si+"b/D");
+      tree.Branch("PzP"+si+"b",   &PzPNb[i],     "PzP"+si+"b/D");
+      tree.Branch("EnP"+si+"b",   &EnPNb[i],     "EnP"+si+"b/D");
+    }
+  }
+  TGenPhaseSpace generator;    TGenPhaseSpace generator2;
+  generator.SetDecay(pParent, vMasses.size(), masses);
+  double maxWt = generator.GetWtMax();
+  int count = 0;
+  while (count < nEvents){
+    while (generator.Generate() < gRandom->Uniform() * maxWt){}
+    for (unsigned int i = 0; i < vMasses.size(); i++){
+      pPN[i] = generator.GetDecay(i);
+      PxPN[i] = pPN[i]->Px();  PyPN[i] = pPN[i]->Py();  PzPN[i] = pPN[i]->Pz();  EnPN[i] = pPN[i]->E();
+      if ((vParticles[i] == "pi0") || (vParticles[i] == "eta") 
+         || (vParticles[i] == "Ks") || (vParticles[i].Contains("Lambda"))){
+        double tmpmass[2];
+        if (vParticles[i] == "pi0")           { tmpmass[0] = 0.0;             tmpmass[1] = 0.0; }
+        if (vParticles[i] == "eta")           { tmpmass[0] = 0.0;             tmpmass[1] = 0.0; }
+        if (vParticles[i] == "Ks")            { tmpmass[0] = FSPhysics::XMpi; tmpmass[1] = FSPhysics::XMpi; }
+        if (vParticles[i].Contains("Lambda")) { tmpmass[0] = FSPhysics::XMp;  tmpmass[1] = FSPhysics::XMpi; }
+        generator2.SetDecay(*pPN[i], 2, tmpmass);
+        double maxWt2 = generator2.GetWtMax(); while (generator2.Generate() < gRandom->Uniform() * maxWt2){}
+        pPNa[i] = generator2.GetDecay(0);
+        pPNb[i] = generator2.GetDecay(1);
+        PxPNa[i] = pPNa[i]->Px();  PyPNa[i] = pPNa[i]->Py();  PzPNa[i] = pPNa[i]->Pz();  EnPNa[i] = pPNa[i]->E();
+        PxPNb[i] = pPNb[i]->Px();  PyPNb[i] = pPNb[i]->Py();  PzPNb[i] = pPNb[i]->Pz();  EnPNb[i] = pPNb[i]->E();
+      }
+    }
+    count++;
+    tree.Fill();
+  }
+  tree.Write();
+  file.Close();
+}
+
+
 
 
