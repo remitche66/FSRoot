@@ -156,6 +156,7 @@ class FSModeInfo{
     int modeBaryonNumber ();
     int modeStrangeness  ();
     double modeMass      ();
+    vector<double> modeMasses ();
 
 
     FSModeInfo modeCC();

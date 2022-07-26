@@ -438,22 +438,34 @@ int FSModeInfo::modeStrangeness (){
   return S;
 }
 
-double FSModeInfo::modeMass   (){return ( 0.1350*modeNPi0       () +
-                                        0.1396*modeNPim       () +
-                                        0.1396*modeNPip       () +
-                                        0.4976*modeNKs        () +
-                                        0.4937*modeNKm        () +
-                                        0.4937*modeNKp        () +
-                                        0.0000*modeNGamma     () +
-                                        0.5479*modeNEta       () +
-                                        0.9383*modeNPm        () +
-                                        0.9383*modeNPp        () +
-                                        0.1057*modeNMm        () +
-                                        0.1057*modeNMp        () +
-                                        0.0005*modeNEm        () +
-                                        0.0005*modeNEp        () +
-                                        1.1157*modeNALambda   () +
-                                        1.1157*modeNLambda    ()); }
+double FSModeInfo::modeMass(){
+  double mass = 0.0;
+  vector<double> masses = modeMasses();
+  for (unsigned int i = 0; i < masses.size(); i++){ mass += masses[i]; }
+  return mass;
+}
+
+vector<double> FSModeInfo::modeMasses(){
+  vector<double> masses;
+  for (int i = 0; i < modeNLambda (); i++){ masses.push_back(FSPhysics::XMLambda); }
+  for (int i = 0; i < modeNALambda(); i++){ masses.push_back(FSPhysics::XMLambda); }
+  for (int i = 0; i < modeNEp     (); i++){ masses.push_back(FSPhysics::XMe); }
+  for (int i = 0; i < modeNEm     (); i++){ masses.push_back(FSPhysics::XMe); }
+  for (int i = 0; i < modeNMp     (); i++){ masses.push_back(FSPhysics::XMmu); }
+  for (int i = 0; i < modeNMm     (); i++){ masses.push_back(FSPhysics::XMmu); }
+  for (int i = 0; i < modeNPp     (); i++){ masses.push_back(FSPhysics::XMp); }
+  for (int i = 0; i < modeNPm     (); i++){ masses.push_back(FSPhysics::XMp); }
+  for (int i = 0; i < modeNEta    (); i++){ masses.push_back(FSPhysics::XMeta); }
+  for (int i = 0; i < modeNGamma  (); i++){ masses.push_back(0.000000); }
+  for (int i = 0; i < modeNKp     (); i++){ masses.push_back(FSPhysics::XMK); }
+  for (int i = 0; i < modeNKm     (); i++){ masses.push_back(FSPhysics::XMK); }
+  for (int i = 0; i < modeNKs     (); i++){ masses.push_back(FSPhysics::XMKs); }
+  for (int i = 0; i < modeNPip    (); i++){ masses.push_back(FSPhysics::XMpi); }
+  for (int i = 0; i < modeNPim    (); i++){ masses.push_back(FSPhysics::XMpi); }
+  for (int i = 0; i < modeNPi0    (); i++){ masses.push_back(FSPhysics::XMpi0); }
+  return masses;
+}
+
 
 
 FSModeInfo FSModeInfo::modeCC(){
