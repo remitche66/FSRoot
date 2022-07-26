@@ -22,6 +22,7 @@ const double FSPhysics::XMhc     = 3.52593;
 const double FSPhysics::XMrho    = 0.7755;
 const double FSPhysics::XMomega  = 0.78265;
 const double FSPhysics::XMphi    = 1.01946;
+const double FSPhysics::XMLambda = 0.1115683;
 const double FSPhysics::XMn      = 0.939565;
 const double FSPhysics::XMp      = 0.938272;
 const double FSPhysics::XMeta    = 0.547853;

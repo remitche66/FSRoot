@@ -28,6 +28,7 @@ class FSPhysics{
     static const double XMrho;
     static const double XMomega;
     static const double XMphi;
+    static const double XMLambda;
     static const double XMn;
     static const double XMp;
     static const double XMeta;
