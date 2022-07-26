@@ -105,7 +105,7 @@ class FSModeTree{
       // *********************************************************************
       // CREATE A TREE WITH PHASE SPACE EVENTS
       //    Start with the four-vector of the CM: EnPCM, PxPCM, PyPCM, PzPCM.
-      //    Genrate phase space for the final state specified by modeString.
+      //    Generate phase space for the final state specified by modeString.
       // *********************************************************************
 
     static void createPHSPTree(double EnPCM = 3.097, double PxPCM = 0.0, double PyPCM = 0.0, double PzPCM = 0.0, 
