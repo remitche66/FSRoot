@@ -122,10 +122,12 @@ class FSHistogram{
       // ********************************************************
 
     static void setHistogramMaxMin(TH1F* hist, 
-                                   bool zeroSuppression = false, TString MAXMIN = "MAXMIN");
+                                   bool zeroSuppression = false, TString MAXMIN = "MAXMIN",
+                                   double xlow = -1.0, double xhigh = -2.0);
 
     static void setHistogramMaxMin(vector<TH1F*> histVector,
-                                   bool zeroSuppression = false, TString MAXMIN = "MAXMIN");
+                                   bool zeroSuppression = false, TString MAXMIN = "MAXMIN",
+                                   double xlow = -1.0, double xhigh = -2.0);
 
     static void setHistogramMaxMin(TH2F* hist, 
                                    bool zeroSuppression = false, TString MAXMIN = "MAXMIN");

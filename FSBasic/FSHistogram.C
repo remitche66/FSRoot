@@ -736,9 +736,9 @@ FSHistogram::integral(TH2F* hist, bool function, double x1, double x2, double y1
   // ********************************************************
 
 void
-FSHistogram::setHistogramMaxMin(TH1F* hist, bool zeroSuppression, TString MAXMIN){
+FSHistogram::setHistogramMaxMin(TH1F* hist, bool zeroSuppression, TString MAXMIN, double xlow, double xhigh){
   vector<TH1F*> histVector;  histVector.push_back(hist);
-  setHistogramMaxMin(histVector, zeroSuppression, MAXMIN);
+  setHistogramMaxMin(histVector, zeroSuppression, MAXMIN, xlow, xhigh);
 }
 
 void
@@ -748,7 +748,7 @@ FSHistogram::setHistogramMaxMin(TH2F* hist, bool zeroSuppression, TString MAXMIN
 }
 
 void
-FSHistogram::setHistogramMaxMin(vector<TH1F*> histVector, bool zeroSuppression, TString MAXMIN){
+FSHistogram::setHistogramMaxMin(vector<TH1F*> histVector, bool zeroSuppression, TString MAXMIN, double xlow, double xhigh){
   vector<TH1F*> histVector2;
   for (unsigned int i = 0; i < histVector.size(); i++){
     if (histVector[i] && histVector[i]->GetNbinsX() > 0)
@@ -759,6 +759,7 @@ FSHistogram::setHistogramMaxMin(vector<TH1F*> histVector, bool zeroSuppression, 
   for (unsigned int i = 0; i < histVector2.size(); i++){
     TH1F* hist = histVector2[i];
     for (int j = 1; j <= hist->GetNbinsX(); j++){
+      if (xlow < xhigh && (hist->GetBinCenter(j) < xlow || hist->GetBinCenter(j) > xhigh)) continue;
       float max0 = hist->GetBinContent(j) + hist->GetBinError(j);
       if (max0 > max) max = max0;
       float min0 = hist->GetBinContent(j) - hist->GetBinError(j);
