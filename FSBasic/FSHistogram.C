@@ -11,6 +11,7 @@
 #include "TFile.h"
 #include "TTreeFormula.h"
 #include "TRandom.h"
+#include "TMarker.h"
 #include "FSBasic/FSControl.h"
 #include "FSBasic/FSString.h"
 #include "FSBasic/FSSystem.h"
@@ -585,6 +586,22 @@ FSHistogram::getTHNFBasicFormula(TString index, TString& STATUS){
   if (hist1d){ hist1d->SetTitle("f(x) = "+formula); hist1d->SetXTitle("x"); }
   if (hist2d){ hist2d->SetTitle("f(x,y) = "+formula); hist2d->SetXTitle("x"); hist2d->SetYTitle("y"); }
   return pair<TH1F*,TH2F*>(hist1d,hist2d);
+}
+
+void
+FSHistogram::draw2dParametricFormula(TString xFormula, TString yFormula, TString bounds, int markerType, double markerSize){
+  if (!FSString::checkBounds(1,bounds)) {cout << "problem with bounds: " << bounds << endl; return; }
+  int    npts   = FSString::parseBoundsNBinsX(bounds);
+  double lowpt  = FSString::parseBoundsLowerX(bounds);
+  double highpt = FSString::parseBoundsUpperX(bounds);
+  TFormula xF("xF",xFormula);
+  TFormula yF("yF",yFormula);
+  for (int i = 0; i < npts; i++){
+    double x = lowpt + (i+0.5)*(highpt-lowpt)/npts;
+    TMarker* marker = new TMarker(xF.Eval(x),yF.Eval(x),markerType);
+    marker->SetMarkerSize(markerSize);
+    marker->Draw();
+  }
 }
 
 

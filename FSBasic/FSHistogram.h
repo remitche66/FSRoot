@@ -95,6 +95,7 @@ class FSHistogram{
     static TH1F* getTH1FFormula(TF1* function, TString bounds, int numRandomTrials = -1);
     static TH2F* getTH2FFormula(TF2* function, TString bounds, int numRandomTrials = -1);
 
+    static void draw2dParametricFormula(TString xFormula, TString yFormula, TString bounds, int markerType = 24, double markerSize = 0.05);
 
       // ********************************************
       //  MAKE PROJECTIONS, DO INTEGRALS, ETC.
