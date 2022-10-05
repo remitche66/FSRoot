@@ -799,7 +799,7 @@ FSString::evalBooleanTString(TString input){
   // ********************************************************
 
 void
-FSString::latexHeader(TString filename, bool append, TString title){
+FSString::latexHeader(TString filename, bool append, TString title, TString author, TString date){
   filename = gSystem->ExpandPathName(TString2string(filename).c_str());
   std::ios_base::openmode mode = ios::out;
   if (append) mode = ios::app;
@@ -808,6 +808,7 @@ FSString::latexHeader(TString filename, bool append, TString title){
   outfile << "\\usepackage{graphicx}" << endl;
   outfile << "\\usepackage{amssymb}" << endl;
   outfile << "\\usepackage{color}" << endl;
+  outfile << "\\usepackage{titling}" << endl;
   outfile << "\\usepackage[]{epsfig}" << endl;
   outfile << endl;
   outfile << "\\textheight 8.5in" << endl;
@@ -823,17 +824,16 @@ FSString::latexHeader(TString filename, bool append, TString title){
   outfile << endl;
   outfile << "\\begin{document}" << endl;
   outfile << endl;
-  if (title == ""){
-    outfile << "\%\\title{\\vspace{-3.0cm}TITLE}" << endl;
-    outfile << "\%\\author{}" << endl;
-    outfile << "\%\\maketitle" << endl;
-  } else{
-    outfile << "\\title{\\vspace{-3.0cm}" << title << "}" << endl;
-    outfile << "\\author{RM}" << endl;
-    outfile << "\\maketitle" << endl;
-  }
+  if (title == "") outfile << "\%\\title{\\vspace{-3.0cm}TITLE}" << endl;
+  if (title != "") outfile << "\\title{\\vspace{-3.0cm}" << title << "}" << endl;
+  if (author == "") outfile << "\\preauthor{}\n\\author{}\n\\postauthor{}" << endl;
+  if (author != "") outfile << "\\author{" << author << "}" << endl;
+  if (date == "") outfile << "\\predate{}\n \\date{}\n \\postdate{}" << endl;
+  if (date != "") outfile << "\\date{" << date << "}" << endl;
+  if ((title != "") || (author != "") || (date != "")) outfile << "\\maketitle" << endl;
   outfile << endl;
   outfile << "\%\\abstract{}" << endl;
+  outfile << "\%\\vspace{1.5cm}" << endl;
   outfile.close();
 }
 
@@ -884,12 +884,12 @@ FSString::latexCloser(TString filename, bool append){
 
 
 void
-FSString::latexTemplate(TString filename){
+FSString::latexTemplate(TString filename, TString title, TString author, TString date){
   TCanvas* cLatexTemplate = new TCanvas("cLatexTemplate","cLatexTemplate",1000,800);
   TH1F* hist = new TH1F("hist","hist",3,0.0,9.0);  hist->SetTitle("Test Histogram");
   hist->Fill(5.0); hist->SetXTitle("x title"); hist->SetStats(0);  hist->Draw("hist");
   cLatexTemplate->Print("tempFigure.pdf");
-  latexHeader(filename,false,"TITLE");
+  latexHeader(filename,false,title,author,date);
   latexLine(filename, "This is a sample latex file.",true);
   latexFigure(filename,"tempFigure.pdf","0.7","example figure",true);
   TString table[9] = {"1","2","3","4","5","6","7","8","9"};

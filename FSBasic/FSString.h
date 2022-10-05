@@ -165,13 +165,15 @@ class FSString{
       // LATEX UTILITIES
       // ********************************************************
 
-    static void latexHeader(TString filename, bool append = false, TString title = "");
+    static void latexHeader(TString filename, bool append = false, TString title = "TITLE", 
+                             TString author = "RM", TString date = "\\today");
     static void latexFigure(TString filename, TString figurename, 
                             TString width = "1.0", TString caption = "", 
                             bool append = true);
     static void latexLine(TString filename, TString text, bool append = true);
     static void latexCloser(TString filename, bool append = true);
-    static void latexTemplate(TString filename);
+    static void latexTemplate(TString filename, TString title = "TITLE", 
+                             TString author = "RM", TString date = "\\today");
 
 
       // ********************************************************
