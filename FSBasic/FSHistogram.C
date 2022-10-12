@@ -165,7 +165,7 @@ FSHistogram::getTHNFBasicTree(TString index, TString& STATUS){
   int     dimension = FSString::TString2int(mapIndex["{-ND-}"]);
   TString fileName  = mapIndex["{-FN-}"];
   TString ntName    = mapIndex["{-NT-}"];
-  TString variable  = mapIndex["{-VA-}"];  variable = FSTree::expandVariable(variable);
+  TString var0      = mapIndex["{-VA-}"];  TString variable = FSTree::expandVariable(var0);
     if (variable == ""){ STATUS = "!!NO_VAR2!!"; return getTHNFBasicEmpty(index); }
   TString bounds    = mapIndex["{-BO-}"];
   TString cuts      = mapIndex["{-CU-}"];  cuts = FSTree::expandVariable(cuts);
@@ -204,8 +204,8 @@ FSHistogram::getTHNFBasicTree(TString index, TString& STATUS){
   }
 
     // return the created histogram
-  if (hist1d){ getTH1F(hist1d)->SetName(hname); }
-  if (hist2d){ getTH2F(hist2d)->SetName(hname); }
+  if (hist1d){ getTH1F(hist1d)->SetName(hname); hist1d->SetTitle(var0); }
+  if (hist2d){ getTH2F(hist2d)->SetName(hname); hist2d->SetTitle(var0); }
   if (FSControl::DEBUG){
     cout << "FSHistogram::getTHNFBasicTree DEBUG: finished making histogram from tree" << endl;
     printIndexInfo(index);
@@ -1382,16 +1382,21 @@ FSHistogram::executeRDataFrame(){
       double scale = 1.0;  
       if (indexMap.find("{-SC-}") != indexMap.end()) 
         scale = FSString::TString2double(indexMap["{-SC-}"]); 
+      TString var = "";
+      if (indexMap.find("{-VA-}") != indexMap.end()) 
+        var = indexMap["{-VA-}"]; 
       pair<TH1F*, TH2F*> histPair = histInfo->m_histPair;
       if (histPair.first){
         TH1F* hist = histPair.first;  TString hName = hist->GetName();
         ROOT::RDF::RResultPtr<TH1D> histRDF = histInfo->m_histPairRDF.first; 
-        histRDF->Copy(*hist);  hist = getTH1F(hist);  hist->SetName(hName);  hist->Scale(scale);
+        histRDF->Copy(*hist);  hist = getTH1F(hist);  hist->SetName(hName);  
+        hist->Scale(scale); hist->SetTitle(var);
       }
       if (histPair.second){
         TH2F* hist = histPair.second;  TString hName = hist->GetName();
         ROOT::RDF::RResultPtr<TH2D> histRDF = histInfo->m_histPairRDF.second; 
-        histRDF->Copy(*hist);  hist = getTH2F(hist);  hist->SetName(hName);  hist->Scale(scale);
+        histRDF->Copy(*hist);  hist = getTH2F(hist);  hist->SetName(hName);  
+        hist->Scale(scale); hist->SetTitle(var);
       }
       cout << histInfo->infoString() << endl;
     }
