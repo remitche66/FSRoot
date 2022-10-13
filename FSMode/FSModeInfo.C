@@ -1139,6 +1139,10 @@ FSModeInfo::display(int counter, bool showDetails){
     cout << m_categories[j] << "  ";
   }
   cout << endl;
+  cout << "                    Particle Indices:" << endl;
+  cout << "                        ";
+  vector<TString> vp = particles();
+  for (unsigned int i = 0; i < vp.size(); i++){ cout << vp[i] << "(" << i+1 << ") "; } cout << endl;
   cout << "                    Keyword Substitutions:" << endl;
   cout << "                        MODESTRING      ->  " << modeString("MODESTRING     ") << endl;
   cout << "                        MODEDESCRIPTION ->  " << modeString("MODEDESCRIPTION") << endl;
