@@ -406,7 +406,11 @@ FSModeTree::createRankingTree(TString fileName, TString ntName, TString category
       TString fileName_rank(fileName_i);  fileName_rank += ".";  fileName_rank += rankVarName;
       TString ntName_rank(ntName_i);  ntName_rank += "_";  ntName_rank += rankVarName;
       if (iLoop == 2){
-        rankTFile = new TFile(fileName_rank,"recreate");  rankTFile->cd();
+        rankTFile = new TFile(fileName_rank,"recreate");
+        if (!rankTFile || rankTFile->IsZombie()) {
+          cout << "FSModeTree::createRankingTree Error: could not create ranking file " << fileName_rank << endl; exit(1);
+        }
+        rankTFile->cd();
         rankTTree = new TTree(ntName_rank, ntName_rank);
         rankTTree->Branch(sVARRANK,            &VARRANK,            sVARRANK+"/I");
         rankTTree->Branch(sVARRANKGLOBAL,      &VARRANKGLOBAL,      sVARRANKGLOBAL+"/I");
