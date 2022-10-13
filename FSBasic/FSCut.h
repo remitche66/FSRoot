@@ -9,6 +9,7 @@
 
 
 using namespace std;
+class FSCutInfo;
 
 
 class FSCut{
@@ -58,16 +59,28 @@ class FSCut{
     static vector< pair<TString,double> > makeCutSB(vector<TString> cutList);
     static vector< pair<TString,double> > makeCutWT(vector<TString> cutList, vector<TString> skipCuts);
     static vector< pair<TString,double> > makeCutSBWT(vector<TString> cutList);
-    static pair< pair<TString,TString>, double> getCut(TString cutName);
+    static FSCutInfo* getCut(TString cutName);
 
 
       // global caches
 
-    static map< TString, pair< pair<TString,TString>, double > > m_cutCache;
+    static map< TString, FSCutInfo* > m_cutCache;
 
 
 };
 
+
+
+class FSCutInfo{
+  friend class FSCut;
+  private:
+    FSCutInfo(TString cutName, TString cut, TString cutSideBand, double weight):
+      m_cutName(cutName), m_cut(cut), m_cutSideBand(cutSideBand), m_weight(weight) {}
+    TString m_cutName;
+    TString m_cut;
+    TString m_cutSideBand;
+    double m_weight;
+};
 
 
 #endif

@@ -9,7 +9,7 @@
 
   // static member data
 
-map< TString, pair< pair<TString,TString>, double > > FSCut::m_cutCache;
+map< TString, FSCutInfo* > FSCut::m_cutCache;
 
 
       // ********************************************************
@@ -24,9 +24,8 @@ FSCut::defineCut(TString cutName, TString cut,
   cutSideBand = FSString::removeWhiteSpace(cutSideBand);
   if (cut == "") cut = "(1==1)";
   if (cutSideBand == "") cutSideBand = "(1==1)";
-  pair<TString,TString> cutPair(cut,cutSideBand);
-  pair< pair<TString,TString>, double > cutPairWt(cutPair,weight);
-  m_cutCache[cutName] = cutPairWt;
+  if (m_cutCache[cutName]) delete m_cutCache[cutName];
+  m_cutCache[cutName] = new FSCutInfo(cutName,cut,cutSideBand,weight);
   if (FSControl::DEBUG){
     cout << "FSCut: created cut..." << endl;
     display(cutName);
@@ -43,21 +42,21 @@ void
 FSCut::display(TString cutName){
   cutName = FSString::removeWhiteSpace(cutName);
   cout << "FSCut Information:" << endl;
-  map< TString, pair< pair<TString,TString>, double > >::iterator it = m_cutCache.begin();
+  map< TString, FSCutInfo* >::iterator it = m_cutCache.begin();
   int cutCountAll = 0;
   int cutCountShown = 0;
   for (; it != m_cutCache.end(); it++){
+    TString locName = it->first;  if (locName == "!!BAD_FSCUT!!") continue;
     cutCountAll++;
-    TString locName = it->first;
-    pair< pair<TString,TString>, double> cutInfo = m_cutCache[locName];
+    FSCutInfo* cutInfo = m_cutCache[locName];
     if ((cutName == "") || FSString::compareTStrings(locName,cutName)){
       cutCountShown++;
       cout << "  (" << cutCountShown << ") "
            << " ********** FSCUT NUMBER " << cutCountAll << " **********" << endl;
       cout << "              name: " << locName << endl;
-      cout << "            signal: " << cutInfo.first.first << endl;
-      cout << "          sideband: " << cutInfo.first.second << endl;
-      cout << "    sideband scale: " << cutInfo.second << endl;
+      cout << "            signal: " << cutInfo->m_cut << endl;
+      cout << "          sideband: " << cutInfo->m_cutSideBand << endl;
+      cout << "    sideband scale: " << cutInfo->m_weight << endl;
     }
   }
 }
@@ -171,7 +170,7 @@ FSCut::makeCut(vector<TString> cutList, vector<TString> skipCuts){
   vector< pair<TString,double> > newCuts;
   TString cut("");
   for (unsigned int i = 0; i < cutList.size(); i++){ 
-    TString cutSig  = getCut(cutList[i]).first.first;
+    TString cutSig  = getCut(cutList[i])->m_cut;
     for (unsigned int j = 0 ; j < skipCuts.size(); j++){ if (skipCuts[j] == cutList[i]) cutSig = "(1==1)"; }
     //if (find(skipCuts.begin(),skipCuts.end(),cutList[i]) != skipCuts.end()) cutSig = "(1==1)";
     if (i == 0) cut += "(";
@@ -214,12 +213,12 @@ FSCut::makeCutSB(vector<TString> cutList){
     TString cut("");
     double wt = 1.0;
     for (unsigned int j = 0; j < logicHelp[i].size(); j++){
-      TString cutSig  = getCut(cutList[j]).first.first;
-      TString cutSide = getCut(cutList[j]).first.second;
+      TString cutSig  = getCut(cutList[j])->m_cut;
+      TString cutSide = getCut(cutList[j])->m_cutSideBand;
       if ((cutSig == "") || (cutSide == "")){
         cout << "FSCut Error:  found empty cuts" << endl; exit(1);
       }
-      double cutWT    = getCut(cutList[j]).second;
+      double cutWT    = getCut(cutList[j])->m_weight;
       if (j == 0) cut += "(";
       if (j != 0) cut += "&&";
       cut += "(";
@@ -270,13 +269,13 @@ FSCut::makeCutWT(vector<TString> cutList, vector<TString> skipCuts){
 
 
 
-pair< pair<TString,TString>, double> 
+FSCutInfo*
 FSCut::getCut(TString cutName){
   if (m_cutCache.find(cutName) == m_cutCache.end()){
     TString badFSCut = "!!BAD_FSCUT!!";
-    pair<TString,TString> badPair = pair<TString,TString>(badFSCut,badFSCut);
+    defineCut(badFSCut,badFSCut,badFSCut);
     cout << "FSCut ERROR: can't find cut with name = " << cutName << endl;
-    return pair< pair<TString,TString>, double> (badPair,1.0);
+    return m_cutCache[badFSCut];
   }
   return m_cutCache[cutName];
 }
@@ -292,6 +291,8 @@ void
 FSCut::clearCuts(){
   if (FSControl::DEBUG) 
     cout << "FSCut: clearing cut cache" << endl;
+  map< TString, FSCutInfo* >::iterator it = m_cutCache.begin();
+  for (; it != m_cutCache.end(); it++){ if (it->second) delete it->second; }
   m_cutCache.clear();
   if (FSControl::DEBUG) 
     cout << "FSCut: done clearing cut cache" << endl;
