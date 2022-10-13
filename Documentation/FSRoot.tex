@@ -85,7 +85,7 @@ Alternatively, download and unpack ({\tt tar -xzf}) a released version ({\it not
 \end{verbatim}
  
 
-\item To use \FSR\ interactively within a \ROOT\ session, add these lines to your {\tt .rootrc} file (usually found in your home directory):
+\item To use \FSR\ interactively within a \ROOT\ session, add these lines to your {\tt .rootrc} file (usually found in your home directory; alternatively, you may put the file into the directory from which you want to start \FSR):
 \begin{verbatim}
     Unix.*.Root.DynamicPath: .:$(FSROOT):$(ROOTSYS)/lib:
     Unix.*.Root.MacroPath:   .:$(FSROOT):
@@ -161,7 +161,7 @@ This example places a cut on {\tt Chi2DOF}:
     root> FSHistogram::getTH1F("ExampleTree_0_221.root","ntExampleTree_0_221",
            "Chi2DOF","(60,0.0,6.0)","Chi2DOF<2.0")->Draw("hist");
 \end{verbatim}
-The variable and cut arguments can contain shortcuts.  For example, {\tt MASS(1,2)} is expanded into the total invariant mass of particles {\tt 1} and {\tt 2}, where {\tt 1} and {\tt 2} are not necessarily numbers~(they are the {\tt [CD]} in Sec.~\ref{sec:conventions}).  Characters in front of {\tt MASS}~(for example) are prepended to the variable names (the {\tt [AB]} in Sec.~\ref{sec:conventions}).  This is all done in the function {\tt FSTree::expandVariable}, which can also be run independently for testing.  
+The variable and cut arguments can contain shortcuts.  For example, {\tt MASS(1,2)} is expanded into the total invariant mass of particles {\tt 1} and {\tt 2}, where {\tt 1} and {\tt 2} are not necessarily numbers~(they are the {\tt [CD]} in Sec.~\ref{sec:conventions}).  Note that the macro {\tt MASS} is called with a single argument that is the sum of the two four-vectors that correspond to the labels {\tt 1} and {\tt 2}.  Similarly, {\tt MASS(1,-2)} would calculate the invariant mass of the difference of the two four-vectors.  This scheme extends to any number of labels (see further examples below).  Characters in front of {\tt MASS}~(for example) are prepended to the variable names (the {\tt [AB]} in Sec.~\ref{sec:conventions}).  This is all done in the function {\tt FSTree::expandVariable}, which can also be run independently for testing.  
 A list of all macros can be seen using {\tt FSTree::showDefinedMacros}~(for example, {\tt RECOILMASS}, {\tt MOMENTUM}, {\tt COSINE}, etc.).  An example for {\tt FSHistogram::getTH1F}:
 \begin{verbatim}
     root> FSHistogram::getTH1F("ExampleTree_0_221.root","ntExampleTree_0_221",
@@ -183,8 +183,14 @@ Examples for {\tt FSTree::expandVariable}:
     root> cout << FSTree::expandVariable("RECOILMASS(CM;D,2)") << endl;
       ==>   (sqrt(pow(((EnPCM)-(EnP2+EnPD)),2)-pow(((PxPCM)-(PxP2+PxPD)),2)
       ==>        -pow(((PyPCM)-(PyP2+PyPD)),2)-pow(((PzPCM)-(PzP2+PzPD)),2)))
+
+    root> cout << FSTree::expandVariable("MASS(CM,-D,-2)") << endl;
+      ==>   (sqrt(pow(((-EnP2-EnPD+EnPCM)),2)-pow(((-PxP2-PxPD+PxPCM)),2)
+      ==>        -pow(((-PyP2-PyPD+PyPCM)),2)-pow(((-PzP2-PzPD+PzPCM)),2)))
 \end{verbatim}
-Histograms are automatically cached so they are made only once.  To save histograms at the end of a session, use the function:
+Note that {\tt RECOILMASS} is called with two arguments separated by semicolon. The last example using the {\tt MASS} macro and the summation convention to obtain an expression that is mathematically identical to the one from the {\tt RECOILMASS} macro.
+
+Histograms are automatically cached, so they are made only once.  To save histograms at the end of a session, use the function:
 \begin{verbatim}
     root> FSHistogram::dumpHistogramCache(); 
 \end{verbatim}
@@ -271,27 +277,29 @@ This will take the tree named {\tt ntExampleTree\_0\_221} from the file {\tt Exa
 A ``final state''~(also called ``mode'') is made from a combination of: $\Lambda (\to p \pi^-)$, $\bar{\Lambda} (\to \bar{p} \pi^+)$, $e^+$, $e^-$, $\mu^+$, $\mu^-$, $p$, $\bar{p}$, $\eta (\to \gamma\gamma)$, $\gamma$, $K^+$, $K^-$, $K^0_S (\to \pi^+\pi^-)$, $\pi^+$, $\pi^-$, $\pi^0 (\to \gamma\gamma)$.
 
 As strings, these final state particles are:
-$\Lambda (\to p \pi^-) \equiv $~{\tt Lambda}, 
-$\bar{\Lambda} (\to \bar{p} \pi^+) \equiv $~{\tt ALambda}, 
-$e^+ \equiv $~{\tt e+}, 
-$e^- \equiv $~{\tt e-}, 
-$\mu^+ \equiv $~{\tt mu+},  
-$\mu^- \equiv $~{\tt mu-}, 
-$p \equiv $~{\tt p+}, 
-$\bar{p} \equiv $~{\tt p-}, 
-$\eta (\to \gamma\gamma) \equiv $~{\tt eta}, 
-$\gamma \equiv $~{\tt gamma}, 
-$K^+ \equiv $~{\tt K+}, 
-$K^- \equiv $~{\tt K-}, 
-$K^0_S (\to \pi^+\pi^-) \equiv $~{\tt Ks}, 
-$\pi^+ \equiv $~{\tt pi+}, 
-$\pi^- \equiv $~{\tt pi-}, 
-$\pi^0 (\to \gamma\gamma) \equiv $~{\tt pi0}.
+\begin{itemize}
+\item $\Lambda (\to p \pi^-) \equiv $~{\tt Lambda}, 
+\item $\bar{\Lambda} (\to \bar{p} \pi^+) \equiv $~{\tt ALambda}, 
+\item $e^+ \equiv $~{\tt e+}, 
+\item $e^- \equiv $~{\tt e-}, 
+\item $\mu^+ \equiv $~{\tt mu+},  
+\item $\mu^- \equiv $~{\tt mu-}, 
+\item $p \equiv $~{\tt p+}, 
+\item $\bar{p} \equiv $~{\tt p-}, 
+\item $\eta (\to \gamma\gamma) \equiv $~{\tt eta}, 
+\item $\gamma \equiv $~{\tt gamma}, 
+\item $K^+ \equiv $~{\tt K+}, 
+\item $K^- \equiv $~{\tt K-}, 
+\item $K^0_S (\to \pi^+\pi^-) \equiv $~{\tt Ks}, 
+\item $\pi^+ \equiv $~{\tt pi+}, 
+\item $\pi^- \equiv $~{\tt pi-}, 
+\item $\pi^0 (\to \gamma\gamma) \equiv $~{\tt pi0}.
+\end{itemize}
 
-In a {\tt TTree}, the final state particles should be listed in the order they are given above.  The numbering for the {\tt [CD]} (Sec.~\ref{sec:conventions}) starts at {\tt 1}.  For final state particles that decay~($\Lambda (\to p \pi^-) \equiv $~{\tt Lambda}, 
-$\bar{\Lambda} (\to \bar{p} \pi^+) \equiv $~{\tt ALambda}, $\eta (\to \gamma\gamma) \equiv $~{\tt eta}, $K^0_S (\to \pi^+\pi^-) \equiv $~{\tt Ks}, $\pi^0 (\to \gamma\gamma) \equiv $~{\tt pi0}), the four-momenta of the decay particles are listed using {\tt a} and {\tt b} in the same order as above.  No assumptions about ordering are made for identical particles.
+To determine the numbering for the {\tt [CD]} (Sec.~\ref{sec:conventions}) in a {\tt TTree} for a given channel, the final-state particles are sorted according ot the order given in the list above.  The numbering starts at {\tt 1} and is incremented for each final-state particle going from left to right through the ordered list.  No assumptions about ordering are made among identical particles.  For final-state particles that decay, i.e. $\Lambda (\to p \pi^-) \equiv $~{\tt Lambda}, 
+$\bar{\Lambda} (\to \bar{p} \pi^+) \equiv $~{\tt ALambda}, $\eta (\to \gamma\gamma) \equiv $~{\tt eta}, $K^0_S (\to \pi^+\pi^-) \equiv $~{\tt Ks}, $\pi^0 (\to \gamma\gamma) \equiv $~{\tt pi0}, the four-momenta of the decay particles are sorted using the same order as above.  The daughter particles are assigned the same number as their parent particle and in addition the label {\tt a} and {\tt b} is appended, respectively.
 
-For example, for the final state $\gamma K^+ K^0_S \pi^+ \pi^- \pi^- \pi^0$, the four-momenta are:
+For example, for the final state $\gamma K^+ K^0_S \pi^+ \pi^- \pi^- \pi^0$, with $K^0_S \to \pi^+ \pi^-$ and $\pi^0 \to \gamma \gamma$, the four-momenta are:
 \begin{verbatim}
     EnP1  PxP1  PyP1  PzP1     (for the gamma)
     EnP2  PxP2  PyP2  PzP2     (for the K+)
@@ -346,19 +354,21 @@ Information about an individual final state is carried by the {\tt FSModeInfo} c
       ==>  "The K- mesons have indices 4,5."
 \end{verbatim}
 
-The {\tt FSModeInfo} class also handles particle combinatorics within a given final state through the {\tt modeCombinatorics} member function.  This is done using place holders like {\tt [pi+]}, {\tt [pi-]}, {\tt [K+]}, {\tt [K+3]}, {\tt [tk+]}, {\tt [pi0]}, etc., which are replaced by particle indices.  While the {\tt modeCombinatorics} function is rarely used explicitly by the user, it can be useful for cross-checking the behavior of the combinatorics. For example:
+The {\tt FSModeInfo} class also handles particle combinatorics within a given final state through the {\tt modeCombinatorics} member function.  This is done using placeholders like {\tt [pi+]}, {\tt [pi-]}, {\tt [pi0]}, {\tt [K+]}, etc., which are replaced by the respective particle indices.  If the same placeholder appears multiple times in an expression it will be replaced by the same particle index.  To distinguish between identical particles, an arbitrary string is appended to the placeholder.  For example, in a final state with two $K^+$, {\tt [K+]} would represent one of the $K^+$ and {\tt [K+2]} the other in a given combination.  Instead of appending {\tt 2} to the second placeholder, we could have used, for example, the placeholders {\tt [K+0]} and {\tt [K+1]} or {\tt [K+first]} and {\tt [K+second]}.  In addition to the charge-specific placeholders, the placeholders {\tt [e]}, {\tt [mu]}, {\tt [pi]}, {\tt [K]}, and {\tt [p]} represent the respective positive and negative particles.  Note that {\tt [pi]} doesn not include $\pi^0$ and {\tt [K]} does not include $K^0_S$.  Similarly, the placeholders {\tt [l+]}, {\tt [l-]}, and {\tt [l]} represent $e^\pm$ or $\mu^\pm$ with the respective charge.  Finally, the placeholders {\tt [tk+]}, {\tt [tk-]}, and {\tt [tk]} represent any charged particle with the respective charge.
+
+While the {\tt modeCombinatorics} function is rarely used explicitly by the user, it can be useful for cross-checking the behavior of the combinatorics. For example:
 \begin{verbatim}
-    root> mi.modeCombinatorics("iK+ = [K+], iK- = [K-], iK+ = [K+], iK+2 = [K+2]",true);
+    root> mi.modeCombinatorics("iKm = [K-], iKp = [K+], iKp = [K+], other_iKp = [K+2]",true);
       ==>   *******************************
       ==>   *** MODE COMBINATORICS TEST ***
       ==>   *******************************
-      ==>         mode =  K+  K+  K-  K-  pi+  pi-  pi0  eta 
-      ==>        input = iK+ = [K+], iK- = [K-], iK+ = [K+], iK+2 = [K+2]
-      ==>     combinations:
-      ==>            (1) iK+=2,iK-=4,iK+=2,iK+2=3
-      ==>            (2) iK+=2,iK-=5,iK+=2,iK+2=3
-      ==>            (3) iK+=3,iK-=4,iK+=3,iK+2=2
-      ==>            (4) iK+=3,iK-=5,iK+=3,iK+2=2
+      ==>      mode =  K+  K+  K-  K-  pi+  pi-  pi0  eta
+      ==>     input = iKm = [K-], iKp = [K+], iKp = [K+], other_iKp = [K+2]
+      ==>  combinations:
+      ==>         (1) iKm=4,iKp=2,iKp=2,other_iKp=3
+      ==>         (2) iKm=4,iKp=3,iKp=3,other_iKp=2
+      ==>         (3) iKm=5,iKp=2,iKp=2,other_iKp=3
+      ==>         (4) iKm=5,iKp=3,iKp=3,other_iKp=2
       ==>   *******************************
 \end{verbatim}
 
@@ -524,6 +534,10 @@ Here is an example that makes plots using the \ROOT\ files constructed in Sec.~\
             "(100,3.0,3.2)","Chi2DOF<5.0")->Draw();
            // plot the same using a cut on track chi2
     root> TString cutTRACK("AND(TkChi2P[tk]<1)");
+           // look at expansion of cut for the KKpi decay mode of the J/psi
+    root> FSModeInfo* mi = FSModeCollection::modeVectorElement("pipiJpsi__KKpi");
+    root> cout << FSTree::expandVariable(mi->modeCuts(cutTRACK)) << endl;
+      ==> ((TkChi2P1<1)&&(TkChi2P3<1)&&(TkChi2P4<1)&&(TkChi2P5<1))
     root> FSModeHistogram::getTH1F(FN,NT,"","MASS(CM,-[pi+],-[pi-])",
             "(100,3.0,3.2)","Chi2DOF<5.0&&"+cutTRACK)->Draw("hist,same");
            // only plot the 3pi mode
