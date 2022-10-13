@@ -374,6 +374,7 @@ FSModeHistogram::drawMCComponents(TString fileName, TString ntName,
   htot->Draw();
   drawMCComponentsSame(fileName,ntName,category,variable,bounds,cuts,scale,reverseOrder);
   htot->Draw("same");
+  c1->RedrawAxis();
   return htot;
 
 }
