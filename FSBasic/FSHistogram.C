@@ -1378,18 +1378,21 @@ FSHistogram::executeRDataFrame(){
       double scale = 1.0;  
       if (indexMap.find("{-SC-}") != indexMap.end()) 
         scale = FSString::TString2double(indexMap["{-SC-}"]); 
+      TString var = "";  
+      if (indexMap.find("{-VA-}") != indexMap.end()) 
+        var = FSString::TString2double(indexMap["{-VA-}"]); 
       pair<TH1F*, TH2F*> histPair = histInfo->m_histPair;
       if (histPair.first){
         TH1F* hist = histPair.first;  TString hName = hist->GetName();
         ROOT::RDF::RResultPtr<TH1D> histRDF = histInfo->m_histPairRDF.first; 
         histRDF->Copy(*hist);  hist = getTH1F(hist);  hist->SetName(hName);  
-        hist->Scale(scale);
+        hist->Scale(scale); hist->SetTitle(var);
       }
       if (histPair.second){
         TH2F* hist = histPair.second;  TString hName = hist->GetName();
         ROOT::RDF::RResultPtr<TH2D> histRDF = histInfo->m_histPairRDF.second; 
         histRDF->Copy(*hist);  hist = getTH2F(hist);  hist->SetName(hName);  
-        hist->Scale(scale);
+        hist->Scale(scale); hist->SetTitle(var);
       }
       cout << histInfo->infoString() << endl;
     }
