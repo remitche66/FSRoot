@@ -290,6 +290,7 @@ class FSHistogramInfo{
     void show(bool showDetails = false);
 
     TString m_index;
+    TString m_title;
     bool m_waitingForEventLoop;
     TString m_status;
     vector<FSHistogramInfo*> m_basicHistograms;

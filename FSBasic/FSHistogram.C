@@ -49,8 +49,6 @@ FSHistogram::getTH1F(TH1F* hist){
     if (hist->GetSumw2N() == 0) hist->Sumw2();
     hist->SetDirectory(0);
     hist->SetStats(0);
-    //hist->SetTitleOffset(1.5,"X");
-    //hist->SetTitleOffset(1.8,"Y");
     hist->SetLineColor(kBlack);
     setHistogramMaxMin(hist);
   }
@@ -63,8 +61,6 @@ FSHistogram::getTH2F(TH2F* hist){
     if (hist->GetSumw2N() == 0) hist->Sumw2();
     hist->SetDirectory(0);
     hist->SetStats(0);
-    //hist->SetTitleOffset(1.5,"X");
-    //hist->SetTitleOffset(1.8,"Y");
     //hist->GetZaxis()->SetLabelSize(0.03);
     setHistogramMaxMin(hist);
   }
@@ -204,8 +200,8 @@ FSHistogram::getTHNFBasicTree(TString index, TString& STATUS){
   }
 
     // return the created histogram
-  if (hist1d){ getTH1F(hist1d)->SetName(hname); hist1d->SetTitle(var0); }
-  if (hist2d){ getTH2F(hist2d)->SetName(hname); hist2d->SetTitle(var0); }
+  if (hist1d) getTH1F(hist1d)->SetName(hname);
+  if (hist2d) getTH2F(hist2d)->SetName(hname);
   if (FSControl::DEBUG){
     cout << "FSHistogram::getTHNFBasicTree DEBUG: finished making histogram from tree" << endl;
     printIndexInfo(index);
@@ -1382,21 +1378,18 @@ FSHistogram::executeRDataFrame(){
       double scale = 1.0;  
       if (indexMap.find("{-SC-}") != indexMap.end()) 
         scale = FSString::TString2double(indexMap["{-SC-}"]); 
-      TString var = "";
-      if (indexMap.find("{-VA-}") != indexMap.end()) 
-        var = indexMap["{-VA-}"]; 
       pair<TH1F*, TH2F*> histPair = histInfo->m_histPair;
       if (histPair.first){
         TH1F* hist = histPair.first;  TString hName = hist->GetName();
         ROOT::RDF::RResultPtr<TH1D> histRDF = histInfo->m_histPairRDF.first; 
         histRDF->Copy(*hist);  hist = getTH1F(hist);  hist->SetName(hName);  
-        hist->Scale(scale); hist->SetTitle(var);
+        hist->Scale(scale);
       }
       if (histPair.second){
         TH2F* hist = histPair.second;  TString hName = hist->GetName();
         ROOT::RDF::RResultPtr<TH2D> histRDF = histInfo->m_histPairRDF.second; 
         histRDF->Copy(*hist);  hist = getTH2F(hist);  hist->SetName(hName);  
-        hist->Scale(scale); hist->SetTitle(var);
+        hist->Scale(scale);
       }
       cout << histInfo->infoString() << endl;
     }
@@ -1466,6 +1459,8 @@ FSHistogram::disableRDataFrame(){
 
 FSHistogramInfo::FSHistogramInfo(TString index, vector<TString> expandedIndices){
   m_index = index;  m_histPair.first = NULL;  m_histPair.second = NULL;
+  map<TString,TString> indexMap = FSHistogram::parseHistogramIndex(index);
+  if (indexMap.find("{-VA-}") != indexMap.end()) m_title = indexMap["{-VA-}"];
   m_waitingForEventLoop = false;  m_status = "OKAY";
   for (unsigned int i = 0; i < expandedIndices.size(); i++){
     m_basicHistograms.push_back(FSHistogram::getFSHistogramInfo(expandedIndices[i]));
@@ -1486,6 +1481,8 @@ FSHistogramInfo::getTHNF(){
     m_histPair = FSHistogram::getTHNFBasicEmpty(m_index);
     if (m_histPair.first)  FSHistogram::getTH1F(m_histPair.first)->SetName(FSHistogram::makeFSRootHistName());
     if (m_histPair.second) FSHistogram::getTH2F(m_histPair.second)->SetName(FSHistogram::makeFSRootHistName());
+    if (m_histPair.first)  m_histPair.first->SetTitle(m_title);
+    if (m_histPair.second) m_histPair.second->SetTitle(m_title);
     m_waitingForEventLoop = true;
 
       // case 2a: set up a single histogram
@@ -1525,6 +1522,8 @@ FSHistogramInfo::getTHNF(){
     m_histPair = FSHistogram::getTHNFBasicIndex(m_index,m_status);
     if (m_histPair.first)  FSHistogram::getTH1F(m_histPair.first)->SetName(FSHistogram::makeFSRootHistName());
     if (m_histPair.second) FSHistogram::getTH2F(m_histPair.second)->SetName(FSHistogram::makeFSRootHistName());
+    if (m_histPair.first)  m_histPair.first->SetTitle(m_title);
+    if (m_histPair.second) m_histPair.second->SetTitle(m_title);
   }
 
     // case 4: create a composite histogram
@@ -1540,6 +1539,8 @@ FSHistogramInfo::getTHNF(){
       if (m_histPair.first  && hNew.first)  m_histPair.first->Add(hNew.first);
       if (m_histPair.second && hNew.second) m_histPair.second->Add(hNew.second);
     }
+    if (m_histPair.first)  m_histPair.first->SetTitle(m_title);
+    if (m_histPair.second) m_histPair.second->SetTitle(m_title);
     cout << "    FINISHED COMPOSITE... " << std::flush;
   }
 
