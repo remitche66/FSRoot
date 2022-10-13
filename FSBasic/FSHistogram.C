@@ -1380,7 +1380,7 @@ FSHistogram::executeRDataFrame(){
         scale = FSString::TString2double(indexMap["{-SC-}"]); 
       TString var = "";  
       if (indexMap.find("{-VA-}") != indexMap.end()) 
-        var = FSString::TString2double(indexMap["{-VA-}"]); 
+        var = indexMap["{-VA-}"]; 
       pair<TH1F*, TH2F*> histPair = histInfo->m_histPair;
       if (histPair.first){
         TH1F* hist = histPair.first;  TString hName = hist->GetName();
