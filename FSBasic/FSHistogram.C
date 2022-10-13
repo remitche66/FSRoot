@@ -202,6 +202,8 @@ FSHistogram::getTHNFBasicTree(TString index, TString& STATUS){
     // return the created histogram
   if (hist1d) getTH1F(hist1d)->SetName(hname);
   if (hist2d) getTH2F(hist2d)->SetName(hname);
+  if (hist1d) hist1d->SetTitle(var0);
+  if (hist2d) hist2d->SetTitle(var0);
   if (FSControl::DEBUG){
     cout << "FSHistogram::getTHNFBasicTree DEBUG: finished making histogram from tree" << endl;
     printIndexInfo(index);
@@ -1525,8 +1527,6 @@ FSHistogramInfo::getTHNF(){
     m_histPair = FSHistogram::getTHNFBasicIndex(m_index,m_status);
     if (m_histPair.first)  FSHistogram::getTH1F(m_histPair.first)->SetName(FSHistogram::makeFSRootHistName());
     if (m_histPair.second) FSHistogram::getTH2F(m_histPair.second)->SetName(FSHistogram::makeFSRootHistName());
-    if (m_histPair.first)  m_histPair.first->SetTitle(m_title);
-    if (m_histPair.second) m_histPair.second->SetTitle(m_title);
   }
 
     // case 4: create a composite histogram
