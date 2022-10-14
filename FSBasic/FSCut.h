@@ -24,6 +24,18 @@ class FSCut{
                           TString cutSideBand = "", double weight = 1.0);
 
 
+/*
+static void defineCut(
+TString cutName, TString cutVariable,
+TString bounds,
+double sigLow, double sigHigh,
+double sbLow1, double sbHigh1,
+double sbLow2, double sbHigh2,
+double weight);
+*/
+
+
+
       // ********************************************************
       // DISPLAY CUTS
       // ********************************************************
