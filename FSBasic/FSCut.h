@@ -55,9 +55,9 @@ class FSCut{
 
   private:
 
-    static vector< pair<TString,double> > makeCut(vector<TString> cutList, vector<TString> skipCuts);
+    static vector< pair<TString,double> > makeCut(vector<TString> cutList);
     static vector< pair<TString,double> > makeCutSB(vector<TString> cutList);
-    static vector< pair<TString,double> > makeCutWT(vector<TString> cutList, vector<TString> skipCuts);
+    static vector< pair<TString,double> > makeCutWT(vector<TString> cutList);
     static vector< pair<TString,double> > makeCutSBWT(vector<TString> cutList);
     static FSCutInfo* getCut(TString cutName);
 
