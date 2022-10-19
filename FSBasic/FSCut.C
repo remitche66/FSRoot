@@ -20,11 +20,14 @@ void
 FSCut::defineCut(TString cutName, TString cut, 
                TString cutSideBand, double weight){
   cutName     = FSString::removeWhiteSpace(cutName);
-  cut         = FSString::removeWhiteSpace(cut);
-  cutSideBand = FSString::removeWhiteSpace(cutSideBand);
-  if (cut == "") cut = "(1==1)";
-  if (cutSideBand == "") cutSideBand = "(1==1)";
-  if (m_cutCache[cutName]) delete m_cutCache[cutName];
+  cut         = FSString::removeWhiteSpace(cut);         if (cut == "") cut = "(1==1)";
+  cutSideBand = FSString::removeWhiteSpace(cutSideBand); if (cutSideBand == "") cutSideBand = "(1==1)";
+  if (m_cutCache.find(cutName) != m_cutCache.end() && m_cutCache[cutName]) delete m_cutCache[cutName];
+  if (cutName == ""){ cout << "FSCut ERROR: no cut name" << endl; return; }
+  if (!FSString::checkParentheses(cut)){ 
+    cout << "FSCut ERROR: problem with parentheses in cut = " << cut << endl; return; }
+  if (!FSString::checkParentheses(cutSideBand)){
+    cout << "FSCut ERROR: problem with parentheses in sideband cut = " << cutSideBand << endl; return; }
   m_cutCache[cutName] = new FSCutInfo(cutName,cut,cutSideBand,weight);
   if (FSControl::DEBUG){
     cout << "FSCut: created cut..." << endl;
@@ -32,6 +35,129 @@ FSCut::defineCut(TString cutName, TString cut,
   }
 }
 
+
+void
+FSCut::defineCut(TString cutName, TString cutVariable,
+                            TString sigLow, TString sigHigh, 
+                            TString sbLow1, TString sbHigh1,
+                            TString sbLow2, TString sbHigh2, double weight){
+  cutName     = FSString::removeWhiteSpace(cutName);
+  cutVariable = FSString::removeWhiteSpace(cutVariable);
+  sigLow      = FSString::removeWhiteSpace(sigLow);
+  sigHigh     = FSString::removeWhiteSpace(sigHigh);
+  sbLow1      = FSString::removeWhiteSpace(sbLow1);
+  sbHigh1     = FSString::removeWhiteSpace(sbHigh1);
+  sbLow2      = FSString::removeWhiteSpace(sbLow2);
+  sbHigh2     = FSString::removeWhiteSpace(sbHigh2);
+  if (m_cutCache.find(cutName) != m_cutCache.end() && m_cutCache[cutName]) delete m_cutCache[cutName];
+  if (cutName == ""){ cout << "FSCut ERROR: no cut name" << endl; return; }
+  if (cutVariable == "") { cout << "FSCut ERROR: no cut variable" << endl; return; }
+  m_cutCache[cutName] = new FSCutInfo(cutName,cutVariable,
+                     sigLow, sigHigh, sbLow1, sbHigh1, sbLow2, sbHigh2, weight);
+  if (FSControl::DEBUG){
+    cout << "FSCut: created cut..." << endl;
+    display(cutName);
+  }  
+}
+
+
+      // ********************************************************
+      // VARY AND RESET CUTS
+      // ********************************************************
+
+
+void
+FSCut::varyCut(TString cutName, TString cut, TString cutSideBand, double weight){
+  cutName     = FSString::removeWhiteSpace(cutName);
+  cut         = FSString::removeWhiteSpace(cut);         if (cut == "") cut = "(1==1)";
+  cutSideBand = FSString::removeWhiteSpace(cutSideBand); if (cutSideBand == "") cutSideBand = "(1==1)";
+  FSCutInfo* cutInfo = getCut(cutName);  
+  if (!cutInfo){ cout << "FSCut::varyCut ERROR: no cut with name = " << cutName << endl; exit(0); }
+  cutInfo->m_cut =         cut;
+  cutInfo->m_cutSideBand = cutSideBand;
+  cutInfo->m_weight =      weight;
+}
+
+void
+FSCut::varyCut(TString cutName, TString cutVariable,
+                            TString sigLow, TString sigHigh, 
+                            TString sbLow1, TString sbHigh1,
+                            TString sbLow2, TString sbHigh2, double weight){
+  cutName     = FSString::removeWhiteSpace(cutName);
+  cutVariable = FSString::removeWhiteSpace(cutVariable);
+  sigLow      = FSString::removeWhiteSpace(sigLow);
+  sigHigh     = FSString::removeWhiteSpace(sigHigh);
+  sbLow1      = FSString::removeWhiteSpace(sbLow1);
+  sbHigh1     = FSString::removeWhiteSpace(sbHigh1);
+  sbLow2      = FSString::removeWhiteSpace(sbLow2);
+  sbHigh2     = FSString::removeWhiteSpace(sbHigh2);
+  FSCutInfo* cutInfo = getCut(cutName);  
+  if (!cutInfo){ cout << "FSCut::varyCut ERROR: no cut with name = " << cutName << endl; exit(0); }
+  cutInfo->m_cutVariable = cutVariable;
+  cutInfo->m_sSigLow =      sigLow;
+  cutInfo->m_sSigHigh =     sigHigh;
+  cutInfo->m_sSbLow1 =      sbLow1;
+  cutInfo->m_sSbHigh1 =     sbHigh1;
+  cutInfo->m_sSbLow2 =      sbLow2;
+  cutInfo->m_sSbHigh2 =     sbHigh2;
+  cutInfo->m_weight =      weight; 
+  cutInfo->makeCutStrings();
+}
+
+
+void
+FSCut::resetCut(TString cutName){
+  if (cutName == "") cutName = "*";
+  map< TString, FSCutInfo* >::iterator it = m_cutCache.begin();
+  for (; it != m_cutCache.end(); it++){
+    if (!FSString::compareTStrings(it->first,cutName)) continue;
+    FSCutInfo* cutInfo = it->second;  if (!cutInfo) continue;
+    cutInfo->m_cutVariable = cutInfo->m0_cutVariable;
+    cutInfo->m_cut =         cutInfo->m0_cut;        
+    cutInfo->m_cutSideBand = cutInfo->m0_cutSideBand;
+    cutInfo->m_weight =      cutInfo->m0_weight; 
+    cutInfo->m_sSigLow =      cutInfo->m0_sSigLow;
+    cutInfo->m_sSigHigh =     cutInfo->m0_sSigHigh;
+    cutInfo->m_sSbLow1 =      cutInfo->m0_sSbLow1;
+    cutInfo->m_sSbHigh1 =     cutInfo->m0_sSbHigh1;
+    cutInfo->m_sSbLow2 =      cutInfo->m0_sSbLow2;
+    cutInfo->m_sSbHigh2 =     cutInfo->m0_sSbHigh2;
+    if (cutInfo->m_cutVariable != "") cutInfo->makeCutStrings();
+  }
+}
+
+
+void
+FSCutInfo::makeCutStrings(){
+  TString cutSigLow (""); if (m_sSigLow  != "") cutSigLow  = "(("+m_cutVariable+")>="+m_sSigLow +")";
+  TString cutSigHigh(""); if (m_sSigHigh != "") cutSigHigh = "(("+m_cutVariable+")<="+m_sSigHigh+")";
+  TString cutSbLow1 (""); if (m_sSbLow1  != "") cutSbLow1  = "(("+m_cutVariable+")>="+m_sSbLow1 +")";
+  TString cutSbHigh1(""); if (m_sSbHigh1 != "") cutSbHigh1 = "(("+m_cutVariable+")<="+m_sSbHigh1+")";
+  TString cutSbLow2 (""); if (m_sSbLow2  != "") cutSbLow2  = "(("+m_cutVariable+")>="+m_sSbLow2 +")";
+  TString cutSbHigh2(""); if (m_sSbHigh2 != "") cutSbHigh2 = "(("+m_cutVariable+")<="+m_sSbHigh2+")";
+  TString cutSb1("");  TString cutSb2("");
+  if (cutSigLow != ""){ m_cut  = cutSigLow; }  if (cutSigHigh != ""){ if (m_cut  != "") m_cut  += "&&"; m_cut  += cutSigHigh; }
+  if (cutSbLow1 != ""){ cutSb1 = cutSbLow1; }  if (cutSbHigh1 != ""){ if (cutSb1 != "") cutSb1 += "&&"; cutSb1 += cutSbHigh1; }
+  if (cutSbLow2 != ""){ cutSb2 = cutSbLow2; }  if (cutSbHigh2 != ""){ if (cutSb2 != "") cutSb2 += "&&"; cutSb2 += cutSbHigh2; }
+  if (m_cut  != "") m_cut  = "("+m_cut +")";
+  if (cutSb1 != "") cutSb1 = "("+cutSb1+")";
+  if (cutSb2 != "") cutSb2 = "("+cutSb2+")";
+  if (cutSb1 != ""){ m_cutSideBand = cutSb1; }  if (cutSb2 != ""){ if (m_cutSideBand != "") m_cutSideBand += "||"; m_cutSideBand += cutSb2; }
+  if (m_cutSideBand != "") m_cutSideBand = "("+m_cutSideBand+")";  
+  if (m_cut == "") m_cut = "(1==1)";
+  if (m_cutSideBand == "") m_cutSideBand = "(1==1)";
+}
+
+
+      // ********************************************************
+      // DRAW CUT ARROWS
+      // ********************************************************
+
+
+void
+FSCut::drawCutArrows(TString cutName){
+  FSCutInfo* cutInfo = getCut(cutName);  if (!cutInfo) return;
+}
 
 
       // ********************************************************
@@ -41,15 +167,16 @@ FSCut::defineCut(TString cutName, TString cut,
 void 
 FSCut::display(TString cutName){
   cutName = FSString::removeWhiteSpace(cutName);
+  if (cutName == "") cutName = "*";
   cout << "FSCut Information:" << endl;
   map< TString, FSCutInfo* >::iterator it = m_cutCache.begin();
   int cutCountAll = 0;
   int cutCountShown = 0;
   for (; it != m_cutCache.end(); it++){
-    TString locName = it->first;  if (locName == "!!BAD_FSCUT!!") continue;
+    TString locName = it->first;
     cutCountAll++;
-    FSCutInfo* cutInfo = m_cutCache[locName];
-    if ((cutName == "") || FSString::compareTStrings(locName,cutName)){
+    FSCutInfo* cutInfo = it->second;
+    if (FSString::compareTStrings(locName,cutName)){
       cutCountShown++;
       cout << "  (" << cutCountShown << ") "
            << " ********** FSCUT NUMBER " << cutCountAll << " **********" << endl;
@@ -71,6 +198,8 @@ FSCut::expandCuts(TString cuts, bool showDetails){
   cuts = FSString::removeWhiteSpace(cuts);
   vector< pair<TString,double> > newCuts;
   vector<TString> skipCuts;
+  pair<TString,double> badCut = pair<TString,double>("!!BAD_FSCUT!!",1.0);
+  vector< pair<TString,double> > badCuts;  badCuts.push_back(badCut);
 
   if (FSControl::DEBUG){
     cout << "FSCut: expanding cut... " << endl;
@@ -104,6 +233,10 @@ FSCut::expandCuts(TString cuts, bool showDetails){
     size += cutsInParentheses.Length();
     vector<TString> spacers; spacers.push_back(","); spacers.push_back(";");
     vector<TString> cutList = FSString::parseTString(cutsInParentheses,spacers);
+
+      // check that the cuts exist
+    for (unsigned int i = 0; i < cutList.size(); i++){
+      if (!getCut(cutList[i])) return badCuts; }
 
       // skip some cuts
     if (mark != CUTSKIPMARK){
@@ -146,7 +279,7 @@ FSCut::expandCuts(TString cuts, bool showDetails){
     if (substitutes.size() > 0){
       double oldWT = 1.0;
       if (newCuts.size() > 1){
-        cout << "FSCut Error:  too many cut combinations" << endl;
+        cout << "FSCut ERROR:  too many cut combinations" << endl;
         exit(1);
       }
       if (newCuts.size() == 1) oldWT = newCuts[0].second;
@@ -225,7 +358,7 @@ FSCut::makeCutSB(vector<TString> cutList){
       TString cutSig  = getCut(cutList[j])->m_cut;
       TString cutSide = getCut(cutList[j])->m_cutSideBand;
       if ((cutSig == "") || (cutSide == "")){
-        cout << "FSCut Error:  found empty cuts" << endl; exit(1);
+        cout << "FSCut ERROR:  found empty cuts" << endl; exit(1);
       }
       double cutWT    = getCut(cutList[j])->m_weight;
       if (j == 0) cut += "(";
@@ -282,10 +415,8 @@ FSCut::makeCutWT(vector<TString> cutList){
 FSCutInfo*
 FSCut::getCut(TString cutName){
   if (m_cutCache.find(cutName) == m_cutCache.end()){
-    TString badFSCut = "!!BAD_FSCUT!!";
-    defineCut(badFSCut,badFSCut,badFSCut);
     cout << "FSCut ERROR: can't find cut with name = " << cutName << endl;
-    return m_cutCache[badFSCut];
+    return NULL;
   }
   return m_cutCache[cutName];
 }
