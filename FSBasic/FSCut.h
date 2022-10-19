@@ -38,7 +38,7 @@ class FSCut{
                         TString cutSideBand = "", double weight = 1.0);
 
     static void varyCut(TString cutName, TString cutVariable,
-                            TString sigLow = "", TString sigHigh = "", 
+                            TString sigLow, TString sigHigh, 
                             TString sbLow1 = "", TString sbHigh1 = "",
                             TString sbLow2 = "", TString sbHigh2 = "", double weight = 1.0);
 
