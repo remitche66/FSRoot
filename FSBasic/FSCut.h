@@ -6,6 +6,7 @@
 #include <string>
 #include <map>
 #include "TString.h"
+#include "FSBasic/FSCanvas.h"
 
 
 using namespace std;
@@ -48,7 +49,7 @@ class FSCut{
       // DRAW CUT ARROWS
       // ********************************************************
 
-    static void drawCutArrows(TString cutName);
+    static void drawCutArrows(TString cutName, int sigColor = kBlue, int sbColor = kRed);
 
 
       // ********************************************************

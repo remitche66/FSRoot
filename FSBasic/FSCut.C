@@ -3,6 +3,7 @@
 #include <string>
 #include <map>
 #include "FSBasic/FSControl.h"
+#include "FSBasic/FSCanvas.h"
 #include "FSBasic/FSString.h"
 #include "FSBasic/FSCut.h"
 
@@ -149,14 +150,21 @@ FSCutInfo::makeCutStrings(){
 }
 
 
+
       // ********************************************************
       // DRAW CUT ARROWS
       // ********************************************************
 
 
 void
-FSCut::drawCutArrows(TString cutName){
+FSCut::drawCutArrows(TString cutName, int sigColor, int sbColor){
   FSCutInfo* cutInfo = getCut(cutName);  if (!cutInfo) return;
+  if (cutInfo->m_sSigLow != "")  FSCanvas::drawCutArrow(FSString::TString2double(cutInfo->m_sSigLow),  sigColor, "|>", 0.02, 0.04);
+  if (cutInfo->m_sSigHigh != "") FSCanvas::drawCutArrow(FSString::TString2double(cutInfo->m_sSigHigh), sigColor, "<|", 0.02, 0.04);
+  if (cutInfo->m_sSbLow1 != "")  FSCanvas::drawCutArrow(FSString::TString2double(cutInfo->m_sSbLow1),  sbColor,  "|>", 0.02, 0.04);
+  if (cutInfo->m_sSbHigh1 != "") FSCanvas::drawCutArrow(FSString::TString2double(cutInfo->m_sSbHigh1), sbColor,  "<|", 0.02, 0.04);
+  if (cutInfo->m_sSbLow2 != "")  FSCanvas::drawCutArrow(FSString::TString2double(cutInfo->m_sSbLow2),  sbColor,  "|>", 0.02, 0.04);
+  if (cutInfo->m_sSbHigh2 != "") FSCanvas::drawCutArrow(FSString::TString2double(cutInfo->m_sSbHigh2), sbColor,  "<|", 0.02, 0.04);
 }
 
 

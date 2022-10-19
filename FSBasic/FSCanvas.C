@@ -108,6 +108,7 @@ FSCanvas::testColorScheme(int i){
 void
 FSCanvas::drawCutArrow(double x, int color, TString type, double size, double length){
   if (!gPad) return;
+  gPad->Update();
   if (type.Contains("<")) length = -1.0*length;
   double xmin = gPad->GetX1();
   double xmax = gPad->GetX2();
