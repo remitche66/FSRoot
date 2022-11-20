@@ -257,6 +257,7 @@ FSHistogram::getTHNFBasicTreeRDF(TString index, TString& STATUS){
     RDF = m_RDataFrameCache[rdfIndex]; 
   }
   else {
+/*
     vector<TString> allFiles = FSSystem::getAbsolutePaths(fileName);
     vector<string> rootFiles;
     for (unsigned int i = 0; i < allFiles.size(); i++){
@@ -272,6 +273,10 @@ FSHistogram::getTHNFBasicTreeRDF(TString index, TString& STATUS){
     }
     if (rootFiles2.size() == 0){ STATUS = "!!NO_TREE!!";  return histPairRDF; } 
     RDF = new ROOT::RDataFrame(sNT, rootFiles2);
+*/
+    TString treeSTATUS;  TTree* ntPointer = FSTree::getTChain(fileName,ntName,treeSTATUS);
+    if (treeSTATUS.Contains("!!")){ STATUS = "!!NO_TREE!!"; return histPairRDF; }
+    RDF = new ROOT::RDataFrame(*ntPointer);
     m_RDataFrameCache[rdfIndex] = RDF;
   }
 
