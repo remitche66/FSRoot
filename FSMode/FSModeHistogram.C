@@ -360,6 +360,7 @@ FSModeHistogram::drawMCComponents(TString fileName, TString ntName,
     exit(0);
   }
   TH1F* htot = getTH1F(fileName,ntName,category,variable,bounds,cuts,scale);
+  FSHistogram::executeRDataFrame();
   FSModeInfo* modeInfo = NULL; if (modeVector.size() > 0) modeInfo = modeVector[0];
   htot->SetTitle("");
   if (modeInfo) htot->SetTitle(FSModeString::rootSymbols(modeInfo->modeDescription()));
