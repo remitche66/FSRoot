@@ -459,6 +459,7 @@ class FSFitFunction{
       // interface to TH1F
 
     TH1F* getTH1F(TString bounds){
+      bounds = FSString::removeWhiteSpace(bounds);
       int nbins = 100; double xLow = 0.0; double xHigh = 10.0;
       if (FSString::checkBounds(1,bounds)){
         nbins = FSString::parseBoundsNBinsX(bounds);
@@ -613,6 +614,7 @@ class FSFitFunctionComposite : public FSFitFunction{
     FSFitFunctionComposite(TString n_fName, TString n_formula) :
       FSFitFunction(n_fName,0.0,0.0){ 
 
+      n_formula = FSString::removeWhiteSpace(n_formula);
       m_fName1 = "";
       m_fName2 = "";
       for (unsigned int i = 1; i <= 4; i++){
