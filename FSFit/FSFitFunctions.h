@@ -177,4 +177,66 @@ class FSFitHIST : public FSFitFunction{
 };
 
 
+class FSFitRELBW : public FSFitFunction{
+  public:
+    FSFitRELBW(TString n_fName, double n_xLow, double n_xHigh) :
+      FSFitFunction(n_fName,n_xLow,n_xHigh){ 
+      addParameter("N",10.0,"size");
+      addParameter("M",1.0,"mass");
+      addParameter("W",0.1,"width");
+    }
+    double fx (double x){
+      double N = getParameterValue("N");
+      double M = getParameterValue("M");
+      double W = getParameterValue("W");
+      double g = sqrt(M*M*(M*M+W*W));
+      double k = 2.0*sqrt(2.0)*M*W*g/3.141592654/sqrt(M*M+g);
+      double f = N*k/((x*x-M*M)*(x*x-M*M) + M*M*W*W);
+      if (f > 0) return f;
+      return 1.0e-12;
+    }
+    FSFitRELBW* clone(){ return new FSFitRELBW("",m_xLow,m_xHigh); }
+};
+
+
+class FSFit2RELBW : public FSFitFunction{
+  public:
+    FSFit2RELBW(TString n_fName, double n_xLow, double n_xHigh) :
+      FSFitFunction(n_fName,n_xLow,n_xHigh){ 
+      addParameter("N1",10.0,"size1");
+      addParameter("M1",1.0,"mass1");
+      addParameter("W1",0.1,"width1");
+      addParameter("N2",10.0,"size2");
+      addParameter("M2",1.0,"mass2");
+      addParameter("W2",0.1,"width2");
+      addParameter("PHI12",0.0,"relative phase");
+    }
+    double fx (double x){
+      double N1 = getParameterValue("N1");
+      double N2 = getParameterValue("N2");
+      double M1 = getParameterValue("M1");
+      double M2 = getParameterValue("M2");
+      double W1 = getParameterValue("W1");
+      double W2 = getParameterValue("W2");
+      double PHI12 = getParameterValue("PHI12");
+      double g1 = sqrt(M1*M1*(M1*M1+W1*W1));
+      double g2 = sqrt(M2*M2*(M2*M2+W2*W2));
+      double k1 = 2.0*sqrt(2.0)*M1*W1*g1/3.141592654/sqrt(M1*M1+g1);
+      double k2 = 2.0*sqrt(2.0)*M2*W2*g2/3.141592654/sqrt(M2*M2+g2);
+      complex<double> d1 = complex<double>(x*x - M1*M1, M1*W1);
+      complex<double> d2 = complex<double>(x*x - M2*M2, M2*W2);
+      if ((N1*k1 < 0) || (N2*k2 < 0)) return 1.0e-12;
+      complex<double> a1 = sqrt(N1*k1) / d1;
+      complex<double> a2 = sqrt(N2*k2) / d2;
+      complex<double> phase12 = complex<double>(cos(PHI12),sin(PHI12));
+      double f1 = norm(a1);
+      double f2 = norm(a2);
+      double f = norm(a1 + phase12*a2);
+      if (f > 0) return f;
+      return 1.0e-12;
+    }
+    FSFit2RELBW* clone(){ return new FSFit2RELBW("",m_xLow,m_xHigh); }
+};
+
+
 #endif
