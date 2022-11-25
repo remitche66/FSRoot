@@ -169,7 +169,7 @@ class FSHistogram{
     static void enableRDataFrame(bool executeImmediately = true, int numThreads = 0);
     static void executeRDataFrame();
     static void disableRDataFrame();
-
+    static bool isRDataFrameEnabled(){ return (m_USEDATAFRAME || m_USEDATAFRAMENOW); }
 
 
     friend class FSModeHistogram;
