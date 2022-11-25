@@ -218,11 +218,13 @@ FSCut::expandCuts(TString cuts, bool showDetails){
   TString CUTSKIPMARK ("CUTSKIP(");
   TString CUTMARK     ("CUT(");
   TString CUTSBMARK   ("CUTSB(");
+  TString CUTSUBMARK  ("CUTSUB(");
   TString CUTWTMARK   ("CUTWT(");
   TString CUTSBWTMARK ("CUTSBWT(");
   while (cuts.Contains(CUTSKIPMARK) ||
          cuts.Contains(CUTMARK) ||
          cuts.Contains(CUTSBMARK) ||
+         cuts.Contains(CUTSUBMARK) ||
          cuts.Contains(CUTWTMARK) ||
          cuts.Contains(CUTSBWTMARK)){
 
@@ -231,6 +233,7 @@ FSCut::expandCuts(TString cuts, bool showDetails){
          if (cuts.Contains(CUTSKIPMARK)){ mark = CUTSKIPMARK; }
     else if (cuts.Contains(CUTMARK))    { mark = CUTMARK; }
     else if (cuts.Contains(CUTSBMARK))  { mark = CUTSBMARK; }
+    else if (cuts.Contains(CUTSUBMARK)) { mark = CUTSUBMARK; }
     else if (cuts.Contains(CUTWTMARK))  { mark = CUTWTMARK; }
     else if (cuts.Contains(CUTSBWTMARK)){ mark = CUTSBWTMARK; }
     int index = cuts.Index(mark);
@@ -278,6 +281,7 @@ FSCut::expandCuts(TString cuts, bool showDetails){
       for (unsigned int i = 0; i < cutList.size(); i++){ skipCuts.push_back(cutList[i]); } }
     else if (mark == CUTMARK)    { substitutes = makeCut(cutList); }
     else if (mark == CUTSBMARK)  { substitutes = makeCutSB(cutList); }
+    else if (mark == CUTSUBMARK) { substitutes = makeCutSUB(cutList); }
     else if (mark == CUTWTMARK)  { substitutes = makeCutWT(cutList); }
     else if (mark == CUTSBWTMARK){ substitutes = makeCutSBWT(cutList); }
 
@@ -382,6 +386,21 @@ FSCut::makeCutSB(vector<TString> cutList){
   }
   if (newCuts.size() == 0) newCuts.push_back(pair<TString,double>("(1==1)",1.0));
 
+  return newCuts;
+}
+
+
+vector< pair<TString,double> > 
+FSCut::makeCutSUB(vector<TString> cutList){
+  vector< pair<TString,double> > newCuts;
+  vector< pair<TString,double> > cutSig = makeCut(cutList);
+  vector< pair<TString,double> > cutSb = makeCutSB(cutList);
+  if ((cutSig.size() != 1) || (cutSb.size() < 1)){
+    cout << "FSCut ERROR:  problem in makeCutSUB" << endl; exit(0); }
+  newCuts.push_back(cutSig[0]);
+  for (unsigned int i = 0; i < cutSb.size(); i++){
+    newCuts.push_back(pair<TString,double>(cutSb[i].first,-1.0*cutSb[i].second));
+  }
   return newCuts;
 }
 
