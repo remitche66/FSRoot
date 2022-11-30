@@ -223,12 +223,13 @@ FSModeHistogram::getMCComponentsAndSizes(TString fileName, TString ntName,
 
       // set the branch addresses for the new tree
 
-    Double_t dcode1 = 0.0, dcode2 = 0.0, dextra = 0.0;
+    Double_t dcode1 = 0.0, dcode2 = 0.0, dextra = 0.0, dwt = 0.0;
     Double_t dp1 = 0.0, dp2 = 0.0, dp3 = 0.0, 
              dp4 = 0.0, dp5 = 0.0, dp6 = 0.0;
     histTree->SetBranchAddress("MCDecayCode1",&dcode1);
     histTree->SetBranchAddress("MCDecayCode2",&dcode2);
     histTree->SetBranchAddress("MCExtras",&dextra);
+    histTree->SetBranchAddress("wt",&dwt);
     if (moreInfo){
       histTree->SetBranchAddress("MCDecayParticle1",&dp1);
       histTree->SetBranchAddress("MCDecayParticle2",&dp2);
@@ -241,6 +242,7 @@ FSModeHistogram::getMCComponentsAndSizes(TString fileName, TString ntName,
       // loop over the new tree and count MC components
 
     long int nentries = histTree->GetEntries();
+    double totalWeightedEntries = 0.0;
     cout << "  FSModeHistogram::getMCComponentsAndSizes:  looping over " << 
              FSString::int2TString(nentries,0,true) << " events..." << endl;
     for (int ientry = 0; ientry < histTree->GetEntries(); ientry++){
@@ -263,10 +265,12 @@ FSModeHistogram::getMCComponentsAndSizes(TString fileName, TString ntName,
       if (mapItrx == mcComponentsMap.end()){
         mcComponentsMap[modeString] = 0.0;
       }
-      mcComponentsMap[modeString] += scale;
+      mcComponentsMap[modeString] += scale*dwt;
+      totalWeightedEntries += scale*dwt;
     }
     for (map<TString,float>::iterator itr = mcComponentsMap.begin(); itr != mcComponentsMap.end(); itr++){
-      if (histTree->GetEntries() > 0) itr->second *= 1.0/histTree->GetEntries(); 
+      //if (histTree->GetEntries() > 0) itr->second *= 1.0/histTree->GetEntries(); 
+      if (totalWeightedEntries != 0.0) itr->second *= 1.0/totalWeightedEntries; 
     }
 
       // cache the new mcComponentsMap
