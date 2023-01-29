@@ -766,6 +766,7 @@ FSHistogram::setHistogramMaxMin(vector<TH1F*> histVector, bool zeroSuppression, 
       float max0 = hist->GetBinContent(j) + hist->GetBinError(j);
       if (max0 > max) max = max0;
       float min0 = hist->GetBinContent(j) - hist->GetBinError(j);
+      if (min0 < 0.0 && fabs(min0)/fabs(hist->GetBinContent(j) + hist->GetBinError(j)) < 5.0e-7) min0 = 0.0;
       if (min0 < min) min = min0;
     }
   }
