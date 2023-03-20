@@ -122,15 +122,14 @@ FSTree::getTChain(TString fileName, TString ntName, TString& STATUS){
         friendNTName += m_friendTrees[i].first;
         TChain* ntFriend = getTChain(friendFileName,friendNTName);
         if (!ntFriend) continue;
-        if (nt->GetEntries() != ntFriend->GetEntries()){
-          cout << "FSTree::getTChain ERROR:  problem with friend tree " 
-               << m_friendTrees[i].first << endl;
-          cout << "  friend file name = \n     " << friendFileName << endl;  
-          cout << "  friend tree name = " << friendNTName << endl;  
-          cout << "  entries in original tree = " << nt->GetEntries() << endl;
-          cout << "  entries in friend tree   = " << ntFriend->GetEntries() << endl;
-          exit(0);
-        }
+        if (nt->GetEntries() != ntFriend->GetEntries()) continue;
+          // cout << "FSTree::getTChain ERROR:  problem with friend tree " 
+          //      << m_friendTrees[i].first << endl;
+          // cout << "  friend file name = \n     " << friendFileName << endl;  
+          // cout << "  friend tree name = " << friendNTName << endl;  
+          // cout << "  entries in original tree = " << nt->GetEntries() << endl;
+          // cout << "  entries in friend tree   = " << ntFriend->GetEntries() << endl;
+          // exit(0); }
         if (FSControl::DEBUG){
           cout << "FSTree: adding friend tree... " << endl;
           cout << "            friend tree name = " << friendNTName << endl;
