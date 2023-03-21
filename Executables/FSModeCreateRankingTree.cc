@@ -11,7 +11,7 @@ void printUsage();
 int main(int argc, char* argv[]){
   FSControl::globalTweaks();
 
-  if (argc < 5){ 
+  if (argc < 3){ 
     cout << "FSModeCreateRankingTree ERROR: Wrong number of arguments." << endl;
     printUsage();
     exit(0);
@@ -25,6 +25,7 @@ int main(int argc, char* argv[]){
   TString cuts = "";
   TString groupVar1 = "Run";
   TString groupVar2 = "Event";
+  TString groupVar3 = "";
   vector<TString> friendNames;
   for (int i = 1; i < argc-1; i++){
     TString arg(argv[i]);
@@ -36,6 +37,7 @@ int main(int argc, char* argv[]){
     if (arg == "-cuts") cuts = argv[i+1];
     if (arg == "-gv1") groupVar1 = argv[i+1];
     if (arg == "-gv2") groupVar2 = argv[i+1];
+    if (arg == "-gv3") groupVar3 = argv[i+1];
     if (arg == "-friend")  friendNames.push_back(argv[i+1]);
   }
 
@@ -49,6 +51,7 @@ int main(int argc, char* argv[]){
   cout << "CutString:      " << cuts << endl;
   cout << "GroupVar1:      " << groupVar1 << endl;
   cout << "GroupVar2:      " << groupVar2 << endl;
+  cout << "GroupVar3:      " << groupVar3 << endl;
   cout << "Friends:  " << endl;
   for (unsigned int i = 0; i < friendNames.size(); i++){
     FSTree::addFriendTree(friendNames[i]);
@@ -61,7 +64,7 @@ int main(int argc, char* argv[]){
   }
   cout << "********************" << endl << endl;
 
-  if ((fileNameInput == "") || (chainName == "") || (modes.size() == 0)
+  if ((fileNameInput == "") 
       || (rankVarName == "") || (rankVar == "") || (groupVar1 == "")
       || (groupVar2 == "")){
     cout << "FSModeCreateRankingTree ERROR: Missing arguments." << endl;
@@ -74,7 +77,7 @@ int main(int argc, char* argv[]){
 
   FSModeTree::createRankingTree(fileNameInput, chainName, "", 
                                   rankVarName, rankVar, cuts,
-                                  groupVar1, groupVar2);
+                                  groupVar1, groupVar2, groupVar3);
 
   cout << "********************" << endl;
   cout << "FINISHED FSModeCreateRankingTree" << endl;
@@ -87,13 +90,14 @@ void printUsage(){
   cout << 
      " USAGE:  FSModeCreateRankingTree  \n"
      "           -i       InputFileName \n"
-     "           -nt      TreeName  \n"
-     "           -mode    FSCode2_FSCode1  (can use many of these) \n"
      "           -rvname  RankVarName \n"
      "           -rv      RankVar \n"
+     "          [-nt      TreeName]  \n"
+     "          [-mode    FSCode2_FSCode1]  (can use many of these) \n"
      "          [-cuts    CutString]       (default = \"\") \n"
      "          [-gv1     GroupVar1]       (default = \"Run\") \n"
      "          [-gv2     GroupVar2]       (default = \"Event\") \n"
+     "          [-gv3     GroupVar3]       (default = \"\") \n"
      "          [-friend  FriendName]      (can use many of these) \n"
   << endl;
 

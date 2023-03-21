@@ -91,13 +91,13 @@ class FSModeTree{
 
     static void createRankingTree(TString fileName, TString ntName, TString category, 
                                   TString rankVarName, TString rankVar, TString cuts = "",
-                                  TString groupVar1 = "Run", TString groupVar2 = "Event", 
+                                  TString groupVar1 = "Run", TString groupVar2 = "Event", TString groupVar3 = "",
                                   TString printCommandFile = "");
 
     static void createChi2RankingTree(TString fileName, TString ntName, TString category, 
                                       TString cuts = "", TString printCommandFile = ""){
       createRankingTree(fileName, ntName, category, "Chi2Rank", "1000*Chi2", 
-                        cuts, "Run", "Event", printCommandFile);
+                        cuts, "Run", "Event", "", printCommandFile);
     }
 
 
