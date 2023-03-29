@@ -177,6 +177,130 @@ class FSFitHIST : public FSFitFunction{
 };
 
 
+class FSFitHIST2 : public FSFitFunction{
+  public:
+
+    FSFitHIST2(TString n_fName, TH1F* hist) :
+      FSFitFunction(n_fName,-1.0,-1.0){ 
+      addParameter("S",1.0,"Scale");
+      addParameter("shift",0.0,"shift");
+      addParameter("sigma",0.0,"smearing sigma");
+      m_hist = hist;
+      m_nBins = hist->GetNbinsX();
+      m_binsize = m_hist->GetBinWidth(1);
+      m_shift = 0.0;
+      m_sigma = 0.0;
+      setXLow(m_hist->GetBinLowEdge(1));
+      setXHigh(m_hist->GetBinLowEdge(m_nBins)+m_hist->GetBinWidth(1));
+      if (m_nBins > m_MAXBINS){ cout << "ERROR in FSFitHIST2: Too many bins" << endl;  exit(0); }
+      m_histOriginal = (TH1F*) m_hist->Clone();
+      m_histShifted = (TH1F*) m_hist->Clone();
+      m_histSmeared = (TH1F*) m_hist->Clone();
+    }
+
+    double fx (double x){
+      updateHistSmeared();
+      double S = getParameterValue("S");
+      int iBin = (int) ((x-m_xLow)/((m_xHigh-m_xLow)/m_nBins)) + 1;
+      return S*m_histSmeared->GetBinContent(iBin);
+    }
+
+    double efx (double x){
+      updateHistSmeared();
+      double S = getParameterValue("S");
+      int iBin = (int) ((x-m_xLow)/((m_xHigh-m_xLow)/m_nBins)) + 1;
+      return S*m_histSmeared->GetBinError(iBin);
+    }
+
+    double integral (double x1, double x2){
+      updateHistSmeared();
+      double S = getParameterValue("S");
+      double total = 0.0;
+      for (int iBin = 1; iBin <= m_nBins; iBin++){
+        double x = m_histSmeared->GetBinCenter(iBin);
+        if ((x >= x1) && (x <= x2)) total += m_histSmeared->GetBinContent(iBin);
+      }
+      return S*m_histSmeared->GetBinWidth(1)*total;
+    }
+
+    FSFitHIST2* clone(){ return new FSFitHIST2("",m_hist); }
+
+  private:
+
+    void updateHistSmeared(){
+      double shift = getParameterValue("shift");
+      double sigma = getParameterValue("sigma");
+      if (shift == m_shift && sigma == m_sigma) return;
+      if (shift == m_shift && sigma != m_sigma){ m_sigma = sigma; smearHist(); return; }
+      if (shift != m_shift){ m_shift = shift; m_sigma = sigma; shiftHist(); smearHist(); }
+    }
+
+    void addFromOriginalToShifted(int iOriginal, int iShifted, double fraction){
+      if (iOriginal < 1 || iOriginal > m_nBins || iShifted < 1 || iShifted > m_nBins) return;
+      double yO  = fraction*m_histOriginal->GetBinContent(iOriginal);
+      double eyO = fraction*m_histOriginal->GetBinError(iOriginal);
+      double yM  = m_histShifted->GetBinContent(iShifted);
+      double eyM = m_histShifted->GetBinError(iShifted);
+      m_histShifted->SetBinContent(iShifted,yO+yM);
+      m_histShifted->SetBinError(iShifted,sqrt(eyO*eyO+eyM+eyM));
+    }
+
+    void addFromShiftedToSmeared(int iShifted, int iSmeared, double fraction){
+      if (iShifted < 1 || iShifted > m_nBins || iSmeared < 1 || iSmeared > m_nBins) return;
+      double yO  = fraction*m_histShifted->GetBinContent(iShifted);
+      double eyO = fraction*m_histShifted->GetBinError(iShifted);
+      double yM  = m_histSmeared->GetBinContent(iSmeared);
+      double eyM = m_histSmeared->GetBinError(iSmeared);
+      m_histSmeared->SetBinContent(iSmeared,yO+yM);
+      m_histSmeared->SetBinError(iSmeared,sqrt(eyO*eyO+eyM+eyM));
+    }
+
+    void shiftHist(){
+      //cout << "SHIFTING HISTOGRAM BY " << m_shift << endl;
+      m_histShifted->Reset();
+      int ishift1 = (int)(m_shift/m_binsize);  
+      int ishift2 = ishift1 + 1;  if (m_shift < 0.0) ishift2 = ishift1 - 1;  
+      double frac2 = fabs(m_shift/m_binsize) - (int)fabs(m_shift/m_binsize);
+      double frac1 = 1.0 - frac2;
+      for (int i = 1; i <= m_nBins; i++){
+        addFromOriginalToShifted(i,i+ishift1,frac1);
+        addFromOriginalToShifted(i,i+ishift2,frac2);
+      }
+    }
+
+    void smearHist(){
+      //cout << "SMEARING HISTOGRAM BY " << m_sigma << endl;
+      m_histSmeared->Reset();
+      double x1 = -0.5*m_binsize;
+      double x2 =  0.5*m_binsize;
+      for (int i = 0; i < m_MAXBINS; i++){
+        m_smear[i] = 0.5*(TMath::Erf(x2/sqrt(2.0)/m_sigma)-TMath::Erf(x1/sqrt(2.0)/m_sigma));
+        if (m_smear[i] < 1.0e-7) break;
+        x1 += m_binsize;  x2 += m_binsize;
+      }
+      for (int j = 1; j <= m_nBins; j++){
+        for (int i = 0; i < m_MAXBINS; i++){
+          if (m_smear[i] < 1.0e-7) break;
+          addFromShiftedToSmeared(j,j+i,m_smear[i]);
+          if (i > 0) addFromShiftedToSmeared(j,j-i,m_smear[i]);
+        }
+      }
+    }
+
+    TH1F* m_hist;
+    TH1F* m_histOriginal;
+    TH1F* m_histShifted;
+    TH1F* m_histSmeared;
+    int m_nBins;
+    double m_binsize;
+    double m_shift;
+    double m_sigma;
+    static const int m_MAXBINS = 1000;
+    double m_smear[m_MAXBINS];
+
+};
+
+
 class FSFitRELBW : public FSFitFunction{
   public:
     FSFitRELBW(TString n_fName, double n_xLow, double n_xHigh) :
