@@ -894,6 +894,15 @@ FSString::latexTemplate(TString filename, TString title, TString author, TString
   latexFigure(filename,"tempFigure.pdf","0.7","example figure",true);
   TString table[9] = {"1","2","3","4","5","6","7","8","9"};
   latexTable(3,3,table,filename,true,"table caption");
+  writeTStringToFile(filename,"\n\n\n\\begin{thebibliography}{9}",true);
+  writeTStringToFile(filename,"\n\n%\\cite{BESIII:2022bse}",true);
+  writeTStringToFile(filename,"\\bibitem{BESIII:2022bse}",true);
+  writeTStringToFile(filename,"M.~Ablikim \\textit{et al.} [BESIII],",true);
+  writeTStringToFile(filename,"%``Observation of a New X(3872) Production Process e+e-\\textrightarrow{}\\ensuremath{\\omega}X(3872),''",true);
+  writeTStringToFile(filename,"Phys. Rev. Lett. \\textbf{130}, no.15, 151904 (2023)",true);
+  writeTStringToFile(filename,"doi:10.1103/PhysRevLett.130.151904",true);
+  writeTStringToFile(filename,"[arXiv:2212.07291 [hep-ex]].",true);
+  writeTStringToFile(filename,"\n\n\\end{thebibliography}",true);
   latexCloser(filename,true);  
 }
 
