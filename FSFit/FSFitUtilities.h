@@ -306,7 +306,7 @@ class FSFitUtilities{
     static void minos(TH1F* hist, TString fName, TString fcnName = "CHI2", int strategy = 1){
       FSFitUtilities::createDataSet("dDefault",hist);
       FSFitUtilities::createMinuit("mDefault","dDefault",fName,fcnName);
-      FSFitUtilities::migrad("mDefault",strategy);
+      FSFitUtilities::minos("mDefault",strategy);
     }
 
       // Get the value of the FCN (only works after a fit).
