@@ -871,7 +871,32 @@ class FSFitDataSet {
       fillSelected();
     }
     void addLimits(double lowLimit, double highLimit) {
+      if (highLimit <= lowLimit) return;
       m_xLimits.push_back(pair<double,double>(lowLimit,highLimit));
+        // take out overlapping regions
+      vector< pair<double,double> > xLimitsCopy = m_xLimits;
+      m_xLimits.clear();
+        // sort by lower limits
+      for (unsigned int i = 0; i < xLimitsCopy.size(); i++){
+      for (unsigned int j = i+1; j < xLimitsCopy.size(); j++){
+        if (xLimitsCopy[j].first < xLimitsCopy[i].first){
+          pair<double,double> tempLimit = xLimitsCopy[i];
+          xLimitsCopy[i] = xLimitsCopy[j];
+          xLimitsCopy[j] = tempLimit;
+        }
+      }}
+        // refill the m_xLimits vector
+      for (unsigned int i = 0; i < xLimitsCopy.size(); i++){
+        pair<double,double> tempLimit = xLimitsCopy[i];
+        for (unsigned int j = i+1; j < xLimitsCopy.size(); j++){
+          if (xLimitsCopy[j].first < tempLimit.second){
+            if (xLimitsCopy[j].second > tempLimit.second)
+              tempLimit.second = xLimitsCopy[j].second;
+            i++;
+          }
+        }
+        m_xLimits.push_back(tempLimit);
+      }
       fillSelected();
     }
     void setLimits(double lowLimit, double highLimit) {
