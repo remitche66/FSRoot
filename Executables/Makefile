@@ -1,5 +1,5 @@
 ROOT_CFLAGS   := $(shell root-config --cflags)
-ROOT_LIBFLAGS := $(shell root-config --libs) -lMinuit -lMathCore -lMathMore -lTreePlayer
+ROOT_LIBFLAGS := $(shell root-config --libs) -lMinuit -lMathCore -lMathMore -lTreePlayer -ltbb
 
 FSROOT_LIBFILE  := $(FSROOT)/lib/libFSRoot.a
 FSROOT_LIBFLAGS := -L$(FSROOT)/lib -lFSRoot
