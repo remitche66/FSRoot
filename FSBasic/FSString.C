@@ -607,6 +607,28 @@ FSString::parseTString(vector<TString> inputs, vector<TString> spacers, bool rec
 }
 
 
+vector<TString>
+FSString::parseCSV(TString input, bool display){
+  input = FSString::removeTabs(input);
+  vector<TString> words;
+  TString word = "";
+  bool inQuotes = false;
+  for (int i = 0; i < input.Length(); i++){
+    TString digit(input[i]);
+    if (digit != "," || inQuotes){ word += digit; }
+    if (digit == "," && !inQuotes){ words.push_back(word); word = "";}
+    if (digit == "\""){ inQuotes = !inQuotes; }
+  }
+  words.push_back(word);
+  if (display){
+    for (unsigned int i = 0; i < words.size(); i++){
+       cout << "(" << i+1 << ") " << words[i] << endl;
+     }
+  }
+  return words;
+}
+
+
    // ********************************************************
    // PARSE STRING INTO A MAP ACCORDING TO KEYS
    // ********************************************************
@@ -983,6 +1005,16 @@ FSString::readLinesFromFile(TString filename){
   }
   infile.close();
   return lines;
+}
+
+vector< vector<TString> >
+FSString::readCSVFile(TString filename, bool display){
+  vector< vector<TString> > csvfile;
+  vector<TString> lines = readLinesFromFile(filename);
+  for (unsigned int i = 0; i < lines.size(); i++){
+    csvfile.push_back(FSString::parseCSV(lines[i],display)); 
+  }
+  return csvfile;
 }
 
 

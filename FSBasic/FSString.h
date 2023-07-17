@@ -123,6 +123,9 @@ class FSString{
     static vector<TString> parseTString(vector<TString> inputs, vector<TString> spacers,
                                         bool recordSpacers = false, bool display = false);
 
+    static vector<TString> parseCSV(TString input, bool display = false);
+ 
+
       // ********************************************************
       // PARSE STRING INTO A MAP ACCORDING TO KEYS
       // ********************************************************
@@ -192,6 +195,8 @@ class FSString{
       // ********************************************************
 
     static vector<TString> readLinesFromFile(TString filename);
+
+    static vector< vector<TString> > readCSVFile(TString filename, bool display = false);
 
 
       // ********************************************************
