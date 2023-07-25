@@ -96,6 +96,56 @@ class FSMath{
 
 
 // ***************************************
+//  additional interfaces to the functions above
+// ***************************************
+
+    static double helcostheta(TLorentzVector& PA,
+                              TLorentzVector& PB,
+                              TLorentzVector& PC){
+      return FSMath::helcostheta(PA.Px(), PA.Py(), PA.Pz(), PA.E(),
+                                 PB.Px(), PB.Py(), PB.Pz(), PB.E(),
+                                 PC.Px(), PC.Py(), PC.Pz(), PC.E());}
+    static double helphi(TLorentzVector& PA,
+                         TLorentzVector& PB,
+                         TLorentzVector& PC,
+                         TLorentzVector& PD){
+      return FSMath::helphi(PA.Px(), PA.Py(), PA.Pz(), PA.E(),
+                            PB.Px(), PB.Py(), PB.Pz(), PB.E(),
+                            PC.Px(), PC.Py(), PC.Pz(), PC.E(),
+                            PD.Px(), PD.Py(), PD.Pz(), PD.E());}
+    static double gjcostheta(TLorentzVector& PA,
+                             TLorentzVector& PB,
+                             TLorentzVector& PD){
+      return FSMath::gjcostheta(PA.Px(), PA.Py(), PA.Pz(), PA.E(),
+                                PB.Px(), PB.Py(), PB.Pz(), PB.E(),
+                                PD.Px(), PD.Py(), PD.Pz(), PD.E());}
+    static double gjphi(TLorentzVector& PA,
+                        TLorentzVector& PB,
+                        TLorentzVector& PC,
+                        TLorentzVector& PD){
+      return FSMath::gjphi(PA.Px(), PA.Py(), PA.Pz(), PA.E(),
+                           PB.Px(), PB.Py(), PB.Pz(), PB.E(),
+                           PC.Px(), PC.Py(), PC.Pz(), PC.E(),
+                           PD.Px(), PD.Py(), PD.Pz(), PD.E());}
+    static double prodcostheta(TLorentzVector& PR,
+                               TLorentzVector& PC,
+                               TLorentzVector& PD){
+      return FSMath::prodcostheta(PR.Px(), PR.Py(), PR.Pz(), PR.E(),
+                                  PC.Px(), PC.Py(), PC.Pz(), PC.E(),
+                                  PD.Px(), PD.Py(), PD.Pz(), PD.E());}
+    static double planephi(TLorentzVector& P1,
+                           TLorentzVector& P2,
+                           TLorentzVector& P3){
+      return FSMath::planephi(P1.Px(), P1.Py(), P1.Pz(), P1.E(),
+                              P2.Px(), P2.Py(), P2.Pz(), P2.E(),
+                              P3.Px(), P3.Py(), P3.Pz(), P3.E());}
+    static double boostEnergy(TLorentzVector& P1,
+                              TLorentzVector& P2){
+      return FSMath::boostEnergy(P1.Px(), P1.Py(), P1.Pz(), P1.E(),
+                                 P2.Px(), P2.Py(), P2.Pz(), P2.E());}
+
+
+// ***************************************
 //  D-FUNCTIONS, ETC.
 // ***************************************
 
