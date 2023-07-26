@@ -202,8 +202,10 @@ FSHistogram::getTHNFBasicTree(TString index, TString& STATUS){
     // return the created histogram
   if (hist1d) getTH1F(hist1d)->SetName(hname);
   if (hist2d) getTH2F(hist2d)->SetName(hname);
-  if (hist1d) hist1d->SetTitle(var0);
-  if (hist2d) hist2d->SetTitle(var0);
+  TString vartitle = var0;
+  while (vartitle.Contains(";")) { vartitle.Replace(vartitle.Index(";"),1,"#semicolon"); }
+  if (hist1d) hist1d->SetTitle(vartitle);
+  if (hist2d) hist2d->SetTitle(vartitle);
   if (FSControl::DEBUG){
     cout << "FSHistogram::getTHNFBasicTree DEBUG: finished making histogram from tree" << endl;
     printIndexInfo(index);
@@ -1389,18 +1391,20 @@ FSHistogram::executeRDataFrame(){
       TString var = "";  
       if (indexMap.find("{-VA-}") != indexMap.end()) 
         var = indexMap["{-VA-}"]; 
+      TString vartitle = var;
+      while (vartitle.Contains(";")) { vartitle.Replace(vartitle.Index(";"),1,"#semicolon"); }
       pair<TH1F*, TH2F*> histPair = histInfo->m_histPair;
       if (histPair.first){
         TH1F* hist = histPair.first;  TString hName = hist->GetName();
         ROOT::RDF::RResultPtr<TH1D> histRDF = histInfo->m_histPairRDF.first; 
         histRDF->Copy(*hist);  hist = getTH1F(hist);  hist->SetName(hName);  
-        hist->Scale(scale); hist->SetTitle(var);
+        hist->Scale(scale); hist->SetTitle(vartitle);
       }
       if (histPair.second){
         TH2F* hist = histPair.second;  TString hName = hist->GetName();
         ROOT::RDF::RResultPtr<TH2D> histRDF = histInfo->m_histPairRDF.second; 
         histRDF->Copy(*hist);  hist = getTH2F(hist);  hist->SetName(hName);  
-        hist->Scale(scale); hist->SetTitle(var);
+        hist->Scale(scale); hist->SetTitle(vartitle);
       }
       cout << histInfo->infoString() << endl;
     }
@@ -1472,6 +1476,7 @@ FSHistogramInfo::FSHistogramInfo(TString index, vector<TString> expandedIndices)
   m_index = index;  m_histPair.first = NULL;  m_histPair.second = NULL;
   map<TString,TString> indexMap = FSHistogram::parseHistogramIndex(index);
   if (indexMap.find("{-VA-}") != indexMap.end()) m_title = indexMap["{-VA-}"];
+  while (m_title.Contains(";")) { m_title.Replace(m_title.Index(";"),1,"#semicolon"); }
   m_waitingForEventLoop = false;  m_status = "OKAY";
   for (unsigned int i = 0; i < expandedIndices.size(); i++){
     m_basicHistograms.push_back(FSHistogram::getFSHistogramInfo(expandedIndices[i]));
