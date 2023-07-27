@@ -563,6 +563,9 @@ FSTree::createFriendTree(TString fileNameInput, TString treeNameInput,  TString 
 
     unsigned int nEvents = ntInput->GetEntries();
     for (unsigned int ientry = 0; ientry < nEvents; ientry++){
+      if ((ientry+1)%100000 == 0) 
+        cout << "FSTree::createFriendTree: processing entry... " << ientry+1 
+             << "  (" << 100.0*(ientry+1)/(double)nEvents << " percent)" << endl;
       ntInput->GetEntry(ientry);
       for (unsigned int i = 0; i < vecFormulas.size(); i++){
         friendVariables[i] = vecFormulas[i]->EvalInstance();
