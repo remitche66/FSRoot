@@ -750,6 +750,20 @@ FSTree::makeStandardDefinitions(){
                                   "PxP[I],PyP[I],PzP[I],EnP[I],"
                                   "PxP[J],PyP[J],PzP[J],EnP[J])");
 
+    defineMacro("LIST1", 1, "PxP[I],PyP[I],PzP[I],EnP[I]");
+
+    defineMacro("LIST2", 2, "PxP[I],PyP[I],PzP[I],EnP[I],"
+                            "PxP[J],PyP[J],PzP[J],EnP[J]");
+
+    defineMacro("LIST3", 3, "PxP[I],PyP[I],PzP[I],EnP[I],"
+                            "PxP[J],PyP[J],PzP[J],EnP[J],"
+                            "PxP[M],PyP[M],PzP[M],EnP[M]");
+
+    defineMacro("LIST4", 4, "PxP[I],PyP[I],PzP[I],EnP[I],"
+                            "PxP[J],PyP[J],PzP[J],EnP[J],"
+                            "PxP[M],PyP[M],PzP[M],EnP[M],"
+                            "PxP[N],PyP[N],PzP[N],EnP[N]");
+
   }
 }
 
