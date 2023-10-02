@@ -384,7 +384,10 @@ FSHistogram::getTHNFBasicContents(TTree* histTree, TString index,
 
     // initial checks
   STATUS = checkIndex(index,"TREE");
-  if (STATUS.Contains("!!")) return histTree;
+  if (STATUS.Contains("!!")){
+    cout << "FSHistogram::getTHNFBasicContents ERROR:  index status = " << STATUS << endl;
+    return histTree;
+  }
 
     // adjust the input parameters
   map<TString,TString> mapIndex = parseHistogramIndex(index);
