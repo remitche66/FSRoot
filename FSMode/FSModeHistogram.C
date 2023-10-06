@@ -341,7 +341,7 @@ FSModeHistogram::getMCComponentsTH1F(TString fileName, TString ntName,
     double fraction = 100*components[i].second;
     if (fraction < 0.01 || i > 10) continue;
     TString mcCut(cuts);
-    if (mcCut != "") mcCut += "*";
+    if (mcCut != ""){ mcCut = "("+mcCut+")"; mcCut += "*"; }
     mcCut += getMCComponentCut(components[i].first);
     TH1F* hcomp = getTH1F(fileName,ntName,category,variable,bounds,mcCut,scale);
     histograms.push_back(hcomp);
