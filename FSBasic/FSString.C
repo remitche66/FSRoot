@@ -945,6 +945,20 @@ FSString::writeTStringToFile(TString filename, TString text, bool append){
   }
 }
 
+void
+FSString::writeCSVFile(TString filename, vector< vector<TString> > csvFile){
+  bool append = false;
+  for (unsigned int i = 0; i < csvFile.size(); i++){
+    TString line("");
+    for (unsigned int j = 0; j < csvFile[i].size(); j++){
+      line += csvFile[i][j];
+      if (j != csvFile[i].size()-1) line += ",";
+	}
+    writeTStringToFile(filename,line,append);
+    append = true;
+  }
+}
+
 
   // ********************************************************
   // MAKE A LATEX TABLE

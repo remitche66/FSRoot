@@ -205,6 +205,8 @@ class FSString{
 
     static void writeTStringToFile(TString filename, TString text, bool append = true);
 
+    static void writeCSVFile(TString filename, vector< vector<TString> > csvFile);
+
 
       // ********************************************************
       // MAKE ALL PERMUTATIONS OF INPUTSTRING USING DEFINITIONS
