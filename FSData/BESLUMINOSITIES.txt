@@ -45,8 +45,10 @@ lumCategory lum100+ 100.0
 lumCategory lum500+ 500.0 
 
 ###################################
-###     2011 - 2014 XYZ Data    ###
-###   (from LUM and ECM papers  ###
+###     2011 - 2014 XYZ Data
+###   (from LUM and ECM papers)
+###    LUM:  Chinese Physics C Vol. 39, No. 9 (2015) 093001
+###    ECM:  Chinese Physics C Vol. 40, No. 6 (2016) 063001
 ####################################
 
 data  2013:3810     33490  33556  3807.65M  0.10  0.58    50.54  0.0 R0.01  2013
@@ -83,6 +85,7 @@ dsCategory 2011-2014  2011 2013 2014
 ###     2016 - 2017 Data        ###
 ###   (unofficial numbers)      ###
 ###    (from online database)   ###
+###   UPDATE TO:  Chinese Physics C Vol. 45, No. 10 (2021) 103001
 ###################################
 
 data  2016:4180   43716  47066  4180.0M  0.0  0.0  3024.22 0.0 R0.01  2016
@@ -103,6 +106,7 @@ dsCategory  201n:4190  2013:4190  2017:4190
 ###        2019 Data            ###
 ###   (unofficial numbers)      ###
 ###  (from charmonium website)  ###
+###   UPDATE TO:  Chinese Physics C Vol. 45, No. 10 (2021) 103001
 ###################################
 
 data 2019:4130   59163 59573   4128.48M  0.0  0.0   401.5 0.0 R0.01   2019
