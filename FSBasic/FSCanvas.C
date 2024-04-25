@@ -56,6 +56,14 @@ FSCanvas::colorScheme(int i){
     TColor::CreateGradientColorTable(3,stops,red,green,blue,250);
   }
 
+  else if (i == -1){
+    double stops[3] = {0.0,0.5,1.0};
+    double red[3]   = {0.0,1.0,1.0};
+    double green[3] = {0.0,1.0,0.0};
+    double blue[3]  = {1.0,1.0,0.0};
+    TColor::CreateGradientColorTable(3,stops,red,green,blue,250);
+  }
+
   else if (i == 2){
     //double stops[3] = {0.0,0.4,1.0};
     //double red[3]   = {1.0,0.2,0.0};
