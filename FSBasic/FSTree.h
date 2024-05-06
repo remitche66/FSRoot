@@ -1,6 +1,7 @@
 #if !defined(FSTREE_H)
 #define FSTREE_H
 
+#include <iostream>
 #include <utility>
 #include <vector>
 #include <string>
