@@ -397,6 +397,23 @@ FSModeHistogram::drawMCComponentsSame(TString fileName, TString ntName,
   vector<TH1F*> histograms =
     FSModeHistogram::getMCComponentsTH1F(fileName,ntName,category,variable,bounds,cuts,scale);
 
+    // better colors
+
+  if (histograms.size() >= 12){ cout << "drawMCComponentsSame ERROR: too many histograms" << endl; exit(0); }
+  int betterColors[13];
+  betterColors[1]  = kRed+2;
+  betterColors[2]  = kBlue+2;
+  betterColors[3]  = kGreen+2;
+  betterColors[4]  = kMagenta+2;
+  betterColors[5]  = kCyan+2;
+  betterColors[6]  = kYellow+2;
+  betterColors[7]  = kRed+1;
+  betterColors[8]  = kBlue+1;
+  betterColors[9]  = kGreen+1;
+  betterColors[10] = kMagenta+1;
+  betterColors[11] = kCyan+1;
+  betterColors[12] = kYellow+1;
+
     // make a stack of MC components and draw it
 
   THStack* stack = new THStack("sDrawMCComponents","sDrawMCComponents");
@@ -404,8 +421,8 @@ FSModeHistogram::drawMCComponentsSame(TString fileName, TString ntName,
   for (unsigned int ihist = 0; ihist < histograms.size(); ihist++){
     int i = ihist;  if (reverseOrder) i = histograms.size() - ihist - 1;
     TH1F* hcomp = histograms[i];
-    if (i != 0) hcomp->SetFillColor(i+1);
-    hcomp->SetLineColor(i+1);
+    if (i != 0) hcomp->SetFillColor(betterColors[i]);
+    hcomp->SetLineColor(betterColors[i]);
     stack->Add(hcomp,"hist");
     TString legendString(FSModeHistogram::formatMCComponent(components[i].first,components[i].second));
     legendString = FSModeString::rootSymbols(legendString);
