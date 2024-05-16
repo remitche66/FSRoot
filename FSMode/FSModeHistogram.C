@@ -401,18 +401,18 @@ FSModeHistogram::drawMCComponentsSame(TString fileName, TString ntName,
 
   if (histograms.size() >= 12){ cout << "drawMCComponentsSame ERROR: too many histograms" << endl; exit(0); }
   int betterColors[13];
-  betterColors[1]  = kRed+2;
-  betterColors[2]  = kBlue+2;
-  betterColors[3]  = kGreen+2;
-  betterColors[4]  = kMagenta+2;
-  betterColors[5]  = kCyan+2;
-  betterColors[6]  = kYellow+2;
-  betterColors[7]  = kRed+1;
-  betterColors[8]  = kBlue+1;
-  betterColors[9]  = kGreen+1;
-  betterColors[10] = kMagenta+1;
-  betterColors[11] = kCyan+1;
-  betterColors[12] = kYellow+1;
+  betterColors[1]  = kRed;
+  betterColors[2]  = kBlue;
+  betterColors[3]  = kGreen;
+  betterColors[4]  = kMagenta;
+  betterColors[5]  = kCyan;
+  betterColors[6]  = kYellow;
+  betterColors[7]  = kRed+2;
+  betterColors[8]  = kBlue+2;
+  betterColors[9]  = kGreen+2;
+  betterColors[10] = kMagenta+2;
+  betterColors[11] = kCyan+2;
+  betterColors[12] = kYellow+2;
 
     // make a stack of MC components and draw it
 
