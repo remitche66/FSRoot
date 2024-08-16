@@ -121,6 +121,23 @@ FSMath::prodcostheta(double PxPR, double PyPR, double PzPR, double EnPR,
   return PR.CosTheta();
 }
 
+double
+FSMath::prodphi(double PxPR, double PyPR, double PzPR, double EnPR,
+                double PxPC, double PyPC, double PzPC, double EnPC,
+                double PxPD, double PyPD, double PzPD, double EnPD){
+  TLorentzVector PR(PxPR,PyPR,PzPR,EnPR);
+  TLorentzVector PC(PxPC,PyPC,PzPC,EnPC);
+  TLorentzVector PD(PxPD,PyPD,PzPD,EnPD);
+  TLorentzVector PS = PR + PC;
+    // boost all needed four-vectors to the S rest frame
+  PR.Boost(-1.0*PS.BoostVector());
+  PD.Boost(-1.0*PS.BoostVector());
+    // rotate so PD is aligned along the z-axis
+  PR.RotateZ(-1.0*PD.Phi());
+  PR.RotateY(-1.0*PD.Theta());
+  return PR.Phi();
+}
+
 
 // ***************************************
 //  PLANEPHI

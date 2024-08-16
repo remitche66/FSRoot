@@ -48,6 +48,7 @@ class FSMath{
 //        and D and Q are either (1) back-to-back [pD = -pQ] or (2) parallel [pD = pQ].
 //    * Rotate all four-vectors so pD is along the z-axis.  
 //    * Return the cosine of the polar angle of pR (prodcostheta). 
+//        or the azimuthal angle of pR (prodphi).
 //
 // ***************************************
 
@@ -73,6 +74,10 @@ class FSMath{
     static double prodcostheta(double PxPR, double PyPR, double PzPR, double EnPR,
                                double PxPC, double PyPC, double PzPC, double EnPC,
                                double PxPD, double PyPD, double PzPD, double EnPD);
+
+    static double prodphi(double PxPR, double PyPR, double PzPR, double EnPR,
+                          double PxPC, double PyPC, double PzPC, double EnPC,
+                          double PxPD, double PyPD, double PzPD, double EnPD);
 
 
 // ***************************************
@@ -131,6 +136,12 @@ class FSMath{
                                TLorentzVector& PC,
                                TLorentzVector& PD){
       return FSMath::prodcostheta(PR.Px(), PR.Py(), PR.Pz(), PR.E(),
+                                  PC.Px(), PC.Py(), PC.Pz(), PC.E(),
+                                  PD.Px(), PD.Py(), PD.Pz(), PD.E());}
+    static double prodphi(TLorentzVector& PR,
+                               TLorentzVector& PC,
+                               TLorentzVector& PD){
+      return FSMath::prodphi(PR.Px(), PR.Py(), PR.Pz(), PR.E(),
                                   PC.Px(), PC.Py(), PC.Pz(), PC.E(),
                                   PD.Px(), PD.Py(), PD.Pz(), PD.E());}
     static double planephi(TLorentzVector& P1,
