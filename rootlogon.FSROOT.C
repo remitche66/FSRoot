@@ -152,7 +152,8 @@ cout << "--------------------------------------------------" << endl;
 cout << "-----   Finished loading the FSRoot Macros   -----" << endl;
 cout << "--------------------------------------------------" << endl;
 
-
+cout << "Load AmpTools Classes" << endl;
+gROOT->ProcessLine( ".x loadAmpTools.C" );
 
 }
 
