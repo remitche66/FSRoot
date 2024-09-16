@@ -96,6 +96,20 @@ class FSMath{
 
 
 // ***************************************
+//  van Hove X and Y
+//      return van Hove X and Y for P1, P2 and P3 (it is assumed that CM = P1 + P2 + P3)
+// ***************************************
+
+    static double vanHoveX(double PxP1, double PyP1, double PzP1, double EnP1,
+                           double PxP2, double PyP2, double PzP2, double EnP2,
+                           double PxP3, double PyP3, double PzP3, double EnP3);
+
+    static double vanHoveY(double PxP1, double PyP1, double PzP1, double EnP1,
+                           double PxP2, double PyP2, double PzP2, double EnP2,
+                           double PxP3, double PyP3, double PzP3, double EnP3);
+
+
+// ***************************************
 //  additional interfaces to the functions above
 // ***************************************
 
@@ -143,6 +157,18 @@ class FSMath{
                               TLorentzVector& P2){
       return FSMath::boostEnergy(P1.Px(), P1.Py(), P1.Pz(), P1.E(),
                                  P2.Px(), P2.Py(), P2.Pz(), P2.E());}
+    static double vanHoveX(TLorentzVector& P1,
+                           TLorentzVector& P2,
+                           TLorentzVector& P3){
+      return FSMath::vanHoveX(P1.Px(), P1.Py(), P1.Pz(), P1.E(),
+                              P2.Px(), P2.Py(), P2.Pz(), P2.E(),
+                              P3.Px(), P3.Py(), P3.Pz(), P3.E());}
+    static double vanHoveY(TLorentzVector& P1,
+                           TLorentzVector& P2,
+                           TLorentzVector& P3){
+      return FSMath::vanHoveY(P1.Px(), P1.Py(), P1.Pz(), P1.E(),
+                              P2.Px(), P2.Py(), P2.Pz(), P2.E(),
+                              P3.Px(), P3.Py(), P3.Pz(), P3.E());}
 
 
 // ***************************************

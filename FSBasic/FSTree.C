@@ -764,6 +764,15 @@ FSTree::makeStandardDefinitions(){
                             "PxP[M],PyP[M],PzP[M],EnP[M],"
                             "PxP[N],PyP[N],PzP[N],EnP[N]");
 
+    defineMacro("VANHOVEX", 3,  "FSMath::vanHoveX("
+                                "PxP[I],PyP[I],PzP[I],EnP[I],"
+                                "PxP[J],PyP[J],PzP[J],EnP[J],"
+                                "PxP[M],PyP[M],PzP[M],EnP[M])");
+
+    defineMacro("VANHOVEY", 3,  "FSMath::vanHoveY("
+                                "PxP[I],PyP[I],PzP[I],EnP[I],"
+                                "PxP[J],PyP[J],PzP[J],EnP[J],"
+                                "PxP[M],PyP[M],PzP[M],EnP[M])");
   }
 }
 
