@@ -750,6 +750,10 @@ FSTree::makeStandardDefinitions(){
                                   "PxP[I],PyP[I],PzP[I],EnP[I],"
                                   "PxP[J],PyP[J],PzP[J],EnP[J])");
 
+    defineMacro("MOMENTUMZBOOST",  2,    "FSMath::boostPz("
+                                         "PxP[I],PyP[I],PzP[I],EnP[I],"
+                                         "PxP[J],PyP[J],PzP[J],EnP[J])");
+
     defineMacro("LIST1", 1, "PxP[I],PyP[I],PzP[I],EnP[I]");
 
     defineMacro("LIST2", 2, "PxP[I],PyP[I],PzP[I],EnP[I],"
@@ -773,6 +777,23 @@ FSTree::makeStandardDefinitions(){
                                 "PxP[I],PyP[I],PzP[I],EnP[I],"
                                 "PxP[J],PyP[J],PzP[J],EnP[J],"
                                 "PxP[M],PyP[M],PzP[M],EnP[M])");
+
+    defineMacro("VANHOVEOMEGA", 3,  "FSMath::vanHoveomega("
+                                    "PxP[I],PyP[I],PzP[I],EnP[I],"
+                                    "PxP[J],PyP[J],PzP[J],EnP[J],"
+                                    "PxP[M],PyP[M],PzP[M],EnP[M])");
+
+    defineMacro("VANHOVETHETA", 4,  "FSMath::vanHovetheta("
+                                    "PxP[I],PyP[I],PzP[I],EnP[I],"
+                                    "PxP[J],PyP[J],PzP[J],EnP[J],"
+                                    "PxP[M],PyP[M],PzP[M],EnP[M],"
+                                    "PxP[N],PyP[N],PzP[N],EnP[N])");
+
+    defineMacro("VANHOVEPHI", 4,  "FSMath::vanHovephi("
+                                    "PxP[I],PyP[I],PzP[I],EnP[I],"
+                                    "PxP[J],PyP[J],PzP[J],EnP[J],"
+                                    "PxP[M],PyP[M],PzP[M],EnP[M],"
+                                    "PxP[N],PyP[N],PzP[N],EnP[N])");
   }
 }
 

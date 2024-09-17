@@ -160,7 +160,21 @@ FSMath::boostEnergy(double PxP1, double PyP1, double PzP1, double EnP1,
 }
 
 // ***************************************
-//  van Hove coordinates
+//  boostPz
+//    return the z-momentum of P1 in the P2 rest frame
+// ***************************************
+
+double
+FSMath::boostPz(double PxP1, double PyP1, double PzP1, double EnP1,
+                double PxP2, double PyP2, double PzP2, double EnP2){
+  TLorentzVector P1(PxP1,PyP1,PzP1,EnP1);
+  TLorentzVector P2(PxP2,PyP2,PzP2,EnP2);
+  P1.Boost(-1.0*P2.BoostVector());
+  return P1.Pz();
+}
+
+// ***************************************
+//  Three Body van Hove coordinates
 //   return van Hove X and Y for particles P1, P2, and P3 (it is assumed that CM = P1 + P2 + P3)
 // ***************************************
 
@@ -174,19 +188,11 @@ FSMath::vanHoveX(double PxP1, double PyP1, double PzP1, double EnP1,
     TLorentzVector cm = p1 + p2 + p3;
     p1.Boost(-1.0*cm.BoostVector());
     p2.Boost(-1.0*cm.BoostVector());
-    p3.Boost(-1.0*cm.BoostVector());
 
     double q1 = p1.Pz();
     double q2 = p2.Pz();
-    double q3 = p3.Pz();
 
-    double q = TMath::Sqrt(q1*q1 + q2*q2 + q3*q3);
-
-    double sinOmega = TMath::Sqrt(3.0/2.0) * q1 / q;
-
-    double omega = TMath::ASin(sinOmega);
-
-    return q * TMath::Cos(omega);
+    return -1.0*(q1+2.0*q2) / TMath::Sqrt(2.0);
 }
 
 double
@@ -198,22 +204,88 @@ FSMath::vanHoveY(double PxP1, double PyP1, double PzP1, double EnP1,
     TLorentzVector p3(PxP3,PyP3,PzP3,EnP3);
     TLorentzVector cm = p1 + p2 + p3;
     p1.Boost(-1.0*cm.BoostVector());
+
+    double q1 = p1.Pz();
+
+    return TMath::Sqrt(3.0/2.0)*q1;
+}
+
+double
+FSMath::vanHoveomega(double PxP1, double PyP1, double PzP1, double EnP1,
+                     double PxP2, double PyP2, double PzP2, double EnP2,
+                     double PxP3, double PyP3, double PzP3, double EnP3){
+    TLorentzVector p1(PxP1,PyP1,PzP1,EnP1);
+    TLorentzVector p2(PxP2,PyP2,PzP2,EnP2);
+    TLorentzVector p3(PxP3,PyP3,PzP3,EnP3);
+    TLorentzVector cm = p1 + p2 + p3;
+    p1.Boost(-1.0*cm.BoostVector());
+    p2.Boost(-1.0*cm.BoostVector());
+
+    double q1 = p1.Pz();
+    double q2 = p2.Pz();
+
+    return TMath::ATan2(-1.0*TMath::Sqrt(3.0)*q1,q1+2*q2) + TMath::Pi();
+}
+
+// ***************************************
+//  Four Body van Hove coordinates
+//   return van Hove theta and phi for particles P1, P2, P3, and P4 (it is assumed that CM = P1 + P2 + P3 + P4, and P4 is the recoil proton)
+// ***************************************
+
+double
+FSMath::vanHovetheta(double PxP1, double PyP1, double PzP1, double EnP1,
+                     double PxP2, double PyP2, double PzP2, double EnP2,
+                     double PxP3, double PyP3, double PzP3, double EnP3,
+                     double PxP4, double PyP4, double PzP4, double EnP4){
+    TLorentzVector p1(PxP1,PyP1,PzP1,EnP1);
+    TLorentzVector p2(PxP2,PyP2,PzP2,EnP2);
+    TLorentzVector p3(PxP3,PyP3,PzP3,EnP3);
+    TLorentzVector p4(PxP4,PyP4,PzP4,EnP4);
+    TLorentzVector cm = p1 + p2 + p3 + p4;
+    p1.Boost(-1.0*cm.BoostVector());
     p2.Boost(-1.0*cm.BoostVector());
     p3.Boost(-1.0*cm.BoostVector());
+    p4.Boost(-1.0*cm.BoostVector());
 
     double q1 = p1.Pz();
     double q2 = p2.Pz();
     double q3 = p3.Pz();
 
-    double q = TMath::Sqrt(q1*q1 + q2*q2 + q3*q3);
+    double x = TMath::Sqrt(3.0/8.0)*(q3-q2);
+    double y = (2.0*q1 + 3.0*q2 +3.0*q3) / TMath::Sqrt(8.0);
+    double z = q1;
 
-    double sinOmega = TMath::Sqrt(3.0/2.0) * q1 / q;
-
-    return q * sinOmega;
+    return TMath::ATan2(TMath::Sqrt(x*x+y*y),z);
 }
 
+double
+FSMath::vanHovephi(double PxP1, double PyP1, double PzP1, double EnP1,
+                   double PxP2, double PyP2, double PzP2, double EnP2,
+                   double PxP3, double PyP3, double PzP3, double EnP3,
+                   double PxP4, double PyP4, double PzP4, double EnP4){
+    TLorentzVector p1(PxP1,PyP1,PzP1,EnP1);
+    TLorentzVector p2(PxP2,PyP2,PzP2,EnP2);
+    TLorentzVector p3(PxP3,PyP3,PzP3,EnP3);
+    TLorentzVector p4(PxP4,PyP4,PzP4,EnP4);
+    TLorentzVector cm = p1 + p2 + p3 + p4;
+    p1.Boost(-1.0*cm.BoostVector());
+    p2.Boost(-1.0*cm.BoostVector());
+    p3.Boost(-1.0*cm.BoostVector());
+    p4.Boost(-1.0*cm.BoostVector());
 
+    double q1 = p1.Pz();
+    double q2 = p2.Pz();
+    double q3 = p3.Pz();
 
+    double x = TMath::Sqrt(3.0/8.0)*(q3-q2);
+    double y = (2.0*q1 + 3.0*q2 +3.0*q3) / TMath::Sqrt(8.0);
+
+    double phi = TMath::ATan2(y,x);
+    if( phi < 0 )
+        phi += 2.0*TMath::Pi();
+
+    return phi;
+}
 
 // ***************************************
 //  D-FUNCTIONS, ETC.
