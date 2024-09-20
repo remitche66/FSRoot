@@ -175,7 +175,7 @@ FSMath::boostPz(double PxP1, double PyP1, double PzP1, double EnP1,
 
 // ***************************************
 //  Three Body van Hove coordinates
-//   return van Hove X and Y for particles P1, P2, and P3 (it is assumed that CM = P1 + P2 + P3)
+//   return van Hove X, Y, and omega for particles P1, P2, and P3 (it is assumed that CM = P1 + P2 + P3)
 // ***************************************
 
 double
@@ -229,7 +229,7 @@ FSMath::vanHoveomega(double PxP1, double PyP1, double PzP1, double EnP1,
 
 // ***************************************
 //  Four Body van Hove coordinates
-//   return van Hove theta and phi for particles P1, P2, P3, and P4 (it is assumed that CM = P1 + P2 + P3 + P4, and P4 is the recoil proton)
+//   return van Hove theta and phi for particles P1, P2, P3, and P4 (it is assumed that CM = P1 + P2 + P3 + P4)
 // ***************************************
 
 double

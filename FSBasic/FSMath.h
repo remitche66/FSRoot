@@ -100,11 +100,11 @@ class FSMath{
 // ***************************************
 
     static double boostPz(double PxP1, double PyP1, double PzP1, double EnP1,
-                              double PxP2, double PyP2, double PzP2, double EnP2);
+                          double PxP2, double PyP2, double PzP2, double EnP2);
 
 // ***************************************
 //  van Hove X, Y and omega for three-body final states
-//      return van Hove X and Y for P1, P2 and P3 (it is assumed that CM = P1 + P2 + P3)
+//      return van Hove X, Y, and omega for P1, P2, and P3 (it is assumed that CM = P1 + P2 + P3)
 // ***************************************
 
     static double vanHoveX(double PxP1, double PyP1, double PzP1, double EnP1,
@@ -121,7 +121,7 @@ class FSMath{
 
 // ***************************************
 //  van Hove angles for four-body final states
-//      return van Hove theta and phi for P1, P2, P3 and P4 (it is assumed that CM = P1 + P2 + P3 + P4, and P4 = recoil proton)
+//      return van Hove theta and phi for P1, P2, P3, and P4 (it is assumed that CM = P1 + P2 + P3 + P4)
 // ***************************************
 
     static double vanHovetheta(double PxP1, double PyP1, double PzP1, double EnP1,
