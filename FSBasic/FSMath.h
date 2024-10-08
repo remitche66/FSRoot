@@ -99,6 +99,45 @@ class FSMath{
     static double boostEnergy(double PxP1, double PyP1, double PzP1, double EnP1,
                               double PxP2, double PyP2, double PzP2, double EnP2);
 
+// ***************************************
+//  boostPz
+//    return the z-momentum of P1 in the P2 rest frame
+// ***************************************
+
+    static double boostPz(double PxP1, double PyP1, double PzP1, double EnP1,
+                          double PxP2, double PyP2, double PzP2, double EnP2);
+
+// ***************************************
+//  van Hove X, Y and omega for three-body final states
+//      return van Hove X, Y, and omega for P1, P2, and P3 (it is assumed that CM = P1 + P2 + P3)
+// ***************************************
+
+    static double vanHoveX(double PxP1, double PyP1, double PzP1, double EnP1,
+                           double PxP2, double PyP2, double PzP2, double EnP2,
+                           double PxP3, double PyP3, double PzP3, double EnP3);
+
+    static double vanHoveY(double PxP1, double PyP1, double PzP1, double EnP1,
+                           double PxP2, double PyP2, double PzP2, double EnP2,
+                           double PxP3, double PyP3, double PzP3, double EnP3);
+
+    static double vanHoveomega(double PxP1, double PyP1, double PzP1, double EnP1,
+                               double PxP2, double PyP2, double PzP2, double EnP2,
+                               double PxP3, double PyP3, double PzP3, double EnP3);
+
+// ***************************************
+//  van Hove angles for four-body final states
+//      return van Hove theta and phi for P1, P2, P3, and P4 (it is assumed that CM = P1 + P2 + P3 + P4)
+// ***************************************
+
+    static double vanHovetheta(double PxP1, double PyP1, double PzP1, double EnP1,
+                               double PxP2, double PyP2, double PzP2, double EnP2,
+                               double PxP3, double PyP3, double PzP3, double EnP3,
+                               double PxP4, double PyP4, double PzP4, double EnP4);
+
+    static double vanHovephi(double PxP1, double PyP1, double PzP1, double EnP1,
+                             double PxP2, double PyP2, double PzP2, double EnP2,
+                             double PxP3, double PyP3, double PzP3, double EnP3,
+                             double PxP4, double PyP4, double PzP4, double EnP4);
 
 // ***************************************
 //  additional interfaces to the functions above
@@ -154,7 +193,45 @@ class FSMath{
                               TLorentzVector& P2){
       return FSMath::boostEnergy(P1.Px(), P1.Py(), P1.Pz(), P1.E(),
                                  P2.Px(), P2.Py(), P2.Pz(), P2.E());}
+    static double boostPz(TLorentzVector& P1,
+                          TLorentzVector& P2){
+      return FSMath::boostPz(P1.Px(), P1.Py(), P1.Pz(), P1.E(),
+                             P2.Px(), P2.Py(), P2.Pz(), P2.E());}
+    static double vanHoveX(TLorentzVector& P1,
+                           TLorentzVector& P2,
+                           TLorentzVector& P3){
+      return FSMath::vanHoveX(P1.Px(), P1.Py(), P1.Pz(), P1.E(),
+                              P2.Px(), P2.Py(), P2.Pz(), P2.E(),
+                              P3.Px(), P3.Py(), P3.Pz(), P3.E());}
+    static double vanHoveY(TLorentzVector& P1,
+                           TLorentzVector& P2,
+                           TLorentzVector& P3){
+      return FSMath::vanHoveY(P1.Px(), P1.Py(), P1.Pz(), P1.E(),
+                              P2.Px(), P2.Py(), P2.Pz(), P2.E(),
+                              P3.Px(), P3.Py(), P3.Pz(), P3.E());}
+    static double vanHoveomega(TLorentzVector& P1,
+                           TLorentzVector& P2,
+                           TLorentzVector& P3){
+      return FSMath::vanHoveomega(P1.Px(), P1.Py(), P1.Pz(), P1.E(),
+                              P2.Px(), P2.Py(), P2.Pz(), P2.E(),
+                              P3.Px(), P3.Py(), P3.Pz(), P3.E());}
 
+    static double vanHovetheta(TLorentzVector& P1,
+                               TLorentzVector& P2,
+                               TLorentzVector& P3,
+                               TLorentzVector& P4){
+      return FSMath::vanHovetheta(P1.Px(), P1.Py(), P1.Pz(), P1.E(),
+                                  P2.Px(), P2.Py(), P2.Pz(), P2.E(),
+                                  P3.Px(), P3.Py(), P3.Pz(), P3.E(),
+                                  P4.Px(), P4.Py(), P4.Pz(), P4.E());}
+    static double vanHovephi(TLorentzVector& P1,
+                             TLorentzVector& P2,
+                             TLorentzVector& P3,
+                             TLorentzVector& P4){
+      return FSMath::vanHovephi(P1.Px(), P1.Py(), P1.Pz(), P1.E(),
+                                P2.Px(), P2.Py(), P2.Pz(), P2.E(),
+                                P3.Px(), P3.Py(), P3.Pz(), P3.E(),
+                                P4.Px(), P4.Py(), P4.Pz(), P4.E());}
 
 // ***************************************
 //  D-FUNCTIONS, ETC.
