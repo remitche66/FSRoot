@@ -59,9 +59,9 @@ void step4_WriteHistTree(){
 void step5_TestContents(TString variable, TString bounds, TString cuts, float scale){
     // make a normal histogram and draw it
   FSHistogram::clearHistogramCache();
-  FSHistogram::getTH1F(FN1,NT1,variable,bounds,cuts,"",scale)->Draw();
+  FSHistogram::getTH1F(FN1,NT1,variable,bounds,cuts,scale)->Draw();
     // put the contents of the histogram in a TTree
-  TTree* histTree = FSHistogram::getTH1FContents(FN1,NT1,variable,bounds,cuts,"",scale);
+  TTree* histTree = FSHistogram::getTH1FContents(FN1,NT1,variable,bounds,cuts,scale);
   //histTree->Print();
     // write the TTree to a file
   TFile* tfile = new TFile("testHistContents.root","recreate");
@@ -77,14 +77,14 @@ void step6_TestModeContents(TString cat, TString variable, TString bounds, TStri
   FSHistogram::clearHistogramCache();
   step3_SetUpModes();
     // make a normal histogram and draw it
-  FSModeHistogram::getTH1F(FN1,NT1,cat,variable,bounds,cuts,"",scale)->Draw();
+  FSModeHistogram::getTH1F(FN1,NT1,cat,variable,bounds,cuts,scale)->Draw();
     // put the contents of the histogram in a TTree
   vector< pair<TString,TString> > extraTreeContents;
   pair<TString,TString> extra1 = pair<TString,TString>("one","1.0");
   pair<TString,TString> extra2 = pair<TString,TString>("mass12","MASS(1,2)");
   extraTreeContents.push_back(extra1);
   extraTreeContents.push_back(extra2);
-  TTree* histTree = FSModeHistogram::getTH1FContents(FN1,NT1,cat,variable,bounds,cuts,"",scale,extraTreeContents);
+  TTree* histTree = FSModeHistogram::getTH1FContents(FN1,NT1,cat,variable,bounds,cuts,scale,extraTreeContents);
   //histTree->Print();
     // write the TTree to a file
   TFile* tfile = new TFile("testHistContents.root","recreate");
@@ -104,9 +104,9 @@ void step7_TestModeContents2(TString cat, TString variable, TString bounds, TStr
   c1->Divide(2,1);
     // make a normal histogram and draw it
   c1->cd(1);
-  FSModeHistogram::getTH2F(FN1,NT1,cat,variable,bounds,cuts,"",scale)->Draw("colz");
+  FSModeHistogram::getTH2F(FN1,NT1,cat,variable,bounds,cuts,scale)->Draw("colz");
     // put the contents of the histogram in a TTree
-  TTree* histTree = FSModeHistogram::getTH2FContents(FN1,NT1,cat,variable,bounds,cuts,"",scale);
+  TTree* histTree = FSModeHistogram::getTH2FContents(FN1,NT1,cat,variable,bounds,cuts,scale);
   //histTree->Print();
     // write the TTree to a file
   TFile* tfile = new TFile("testHistContents.root","recreate");
