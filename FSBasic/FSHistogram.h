@@ -186,8 +186,7 @@ class FSHistogram{
     static pair<TH1F*,TH2F*> getTHNFBasicEmpty(TString index);
     static pair<TH1F*,TH2F*> getTHNFBasicFormula(TString index, TString& STATUS);
 
-    static TTree* getTHNFBasicContents(TTree* histTree, TString index,
-                         vector< pair<TString,TString> > extraTreeContents, TString& STATUS);
+    static TTree* getTHNFBasicContents(TTree* histTree, TString index, TString& STATUS);
 
 #if ROOT_VERSION_CODE >= ROOT_VERSION(6,18,0)
     static pair< ROOT::RDF::RResultPtr<TH1D>, 
@@ -221,10 +220,13 @@ class FSHistogram{
     static TString getHistogramIndexEmpty(int dimension, TString bounds);
 
     static vector<TString> expandHistogramIndexTree(TString index);
+    static TString getHistogramIndexContents(vector< pair<TString,TString> > extraTreeContents);
     static pair<TString, vector<TString> >  getHistogramIndexTree(int dimension,
                                                    TString fileName, TString ntName,
                                                    TString variable, TString bounds,
-                                                   TString cuts, double scale = 1.0);
+                                                   TString cuts, double scale = 1.0,
+                                        vector< pair<TString,TString> > extraTreeContents = 
+                                        vector< pair<TString,TString> >());
 
     static map<TString,TString> parseHistogramIndex(TString index);
 
@@ -278,8 +280,7 @@ class FSHistogramInfo{
   private:
     FSHistogramInfo(TString index, vector<TString> expandedIndices);
     pair<TH1F*,TH2F*> getTHNF();
-    TTree* getTHNFContents(vector< pair<TString,TString> > extraTreeContents 
-                              = vector< pair<TString,TString> >());
+    TTree* getTHNFContents();
     TString getHistName(){ if (m_histPair.first)  return m_histPair.first->GetName();
                            if (m_histPair.second) return m_histPair.second->GetName(); 
                            return TString(""); };

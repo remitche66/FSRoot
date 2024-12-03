@@ -139,7 +139,9 @@ class FSModeHistogram{
     static pair<TString, vector<TString> >  getHistogramIndexTree(int dimension,
                                               TString fileName, TString ntName, TString category,
                                               TString variable, TString bounds,
-                                              TString cuts, double scale = 1.0);
+                                              TString cuts, double scale = 1.0,
+                                        vector< pair<TString,TString> > extraTreeContents = 
+                                        vector< pair<TString,TString> >());
 
 
 

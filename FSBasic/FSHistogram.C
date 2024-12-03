@@ -364,8 +364,8 @@ FSHistogram::getTH1FContents(TString fileName, TString ntName, TString variable,
                              TString cuts, double scale,
                              vector< pair<TString,TString> > extraTreeContents){
   pair<TString, vector<TString> > 
-    indices = getHistogramIndexTree(1,fileName,ntName,variable,bounds,cuts,scale);
-  return getFSHistogramInfo(indices.first,indices.second)->getTHNFContents(extraTreeContents);
+    indices = getHistogramIndexTree(1,fileName,ntName,variable,bounds,cuts,scale,extraTreeContents);
+  return getFSHistogramInfo(indices.first,indices.second)->getTHNFContents();
 }
 
 TTree*
@@ -373,14 +373,13 @@ FSHistogram::getTH2FContents(TString fileName, TString ntName, TString variable,
                              TString cuts, double scale,
                              vector< pair<TString,TString> > extraTreeContents){
   pair<TString, vector<TString> > 
-    indices = getHistogramIndexTree(2,fileName,ntName,variable,bounds,cuts,scale);
-  return getFSHistogramInfo(indices.first,indices.second)->getTHNFContents(extraTreeContents);
+    indices = getHistogramIndexTree(2,fileName,ntName,variable,bounds,cuts,scale,extraTreeContents);
+  return getFSHistogramInfo(indices.first,indices.second)->getTHNFContents();
 }
 
 
 TTree* 
-FSHistogram::getTHNFBasicContents(TTree* histTree, TString index,
-                                vector< pair<TString,TString> > extraTreeContents, TString& STATUS){
+FSHistogram::getTHNFBasicContents(TTree* histTree, TString index, TString& STATUS){
 
     // initial checks
   STATUS = checkIndex(index,"TREE");
@@ -398,6 +397,18 @@ FSHistogram::getTHNFBasicContents(TTree* histTree, TString index,
   TString bounds    = mapIndex["{-BO-}"];
   TString cuts      = mapIndex["{-CU-}"];  cuts = FSTree::expandVariable(cuts);
   double  scale     = FSString::TString2double(mapIndex["{-SC-}"]);
+  vector< pair<TString,TString> > extraTreeContents;
+  if (mapIndex.find("{-TCN-}") != mapIndex.end()){
+    int tcn = FSString::TString2int(mapIndex["{-TCN-}"]);
+    for (int i = 1; i <= tcn; i++){
+      TString si = FSString::int2TString(i,4);
+      if ((mapIndex.find("{-TCV"+si+"-}") == mapIndex.end()) ||
+          (mapIndex.find("{-TCF"+si+"-}") == mapIndex.end())){
+             cout << "getTHNFBasicContents ERROR" << endl;  exit(0);}
+      extraTreeContents.push_back(pair<TString,TString>(mapIndex["{-TCV"+si+"-}"],
+                                                        mapIndex["{-TCF"+si+"-}"]));
+    }
+  }
   for (unsigned int i = 0; i < extraTreeContents.size(); i++){
     extraTreeContents[i].first  = FSString::removeWhiteSpace(extraTreeContents[i].first);
     extraTreeContents[i].second = FSString::removeWhiteSpace(extraTreeContents[i].second);
@@ -1150,6 +1161,17 @@ FSHistogram::getHistogramIndex(map<TString,TString> indexMap){
   if (indexMap.find("{-CU-}") != indexMap.end()){ index += "{-CU-}"; index += indexMap["{-CU-}"]; }
   if (indexMap.find("{-SC-}") != indexMap.end()){ index += "{-SC-}"; index += indexMap["{-SC-}"]; }
   if (indexMap.find("{-HN-}") != indexMap.end()){ index += "{-HN-}"; index += indexMap["{-HN-}"]; }
+  if (indexMap.find("{-TCN-}") != indexMap.end()){index += "{-TCN-}";index += indexMap["{-TCN-}"];
+    int tcn = FSString::TString2int(indexMap["{-TCN-}"]);
+    for (int i = 1; i <= tcn; i++){
+      TString si = FSString::int2TString(i,4);
+      if ((indexMap.find("{-TCV"+si+"-}") == indexMap.end()) ||
+          (indexMap.find("{-TCF"+si+"-}") == indexMap.end())){
+             cout << "getHistogramIndex ERROR" << endl;  exit(0);}
+      index += "{-TCV"+si+"-}"; index += indexMap["{-TCV"+si+"-}"];
+      index += "{-TCF"+si+"-}"; index += indexMap["{-TCF"+si+"-}"];
+    }
+  }
   return index;
 }
 
@@ -1185,11 +1207,24 @@ FSHistogram::getHistogramIndexEmpty(int dimension, TString bounds){
   return FSString::removeWhiteSpace(index);
 }
 
+TString
+FSHistogram::getHistogramIndexContents(vector< pair<TString,TString> > extraTreeContents){
+  TString index = "";
+  if (extraTreeContents.size() == 0) return index;
+  index += "{-TCN-}";  index += FSString::int2TString(extraTreeContents.size(),4);
+  for (unsigned int i = 0; i < extraTreeContents.size(); i++){
+    index += "{-TCV" + FSString::int2TString(i+1,4) + "-}";  index += extraTreeContents[i].first;
+    index += "{-TCF" + FSString::int2TString(i+1,4) + "-}";  index += extraTreeContents[i].second;
+  }
+  return index;
+}
+
 pair<TString, vector<TString> >
 FSHistogram::getHistogramIndexTree(int dimension,
                       TString fileName, TString ntName,
                       TString variable, TString bounds,
-                      TString cuts, double scale){
+                      TString cuts, double scale, 
+                      vector< pair<TString,TString> > extraTreeContents){
   TString index;
   fileName = FSString::removeWhiteSpace(fileName);
   ntName   = FSString::removeWhiteSpace(ntName);
@@ -1206,6 +1241,7 @@ FSHistogram::getHistogramIndexTree(int dimension,
   index += "{-BO-}";  index += bounds;
   index += "{-CU-}";  index += FSTree::reorderVariable(cuts);
   index += "{-SC-}";  index += FSString::double2TString(scale,8,true);
+  index += FSHistogram::getHistogramIndexContents(extraTreeContents);
   vector<TString> subIndices = expandHistogramIndexTree(index);
   if (subIndices.size() == 1){ index = subIndices[0]; subIndices.clear(); }
   return pair<TString, vector<TString> > (index,subIndices);
@@ -1226,6 +1262,15 @@ FSHistogram::parseHistogramIndex(TString index){
   spacers.push_back("{-CU-}");
   spacers.push_back("{-SC-}");
   spacers.push_back("{-FO-}");
+  if (index.Contains("{-TCN-}")){
+    spacers.push_back("{-TCN-}");
+    int tcn = FSString::TString2int(FSString::captureMarker(index,"*{-TCN-}0000{-TCV*","0000"));
+    for (int i = 1; i <= tcn; i++){
+      TString si = FSString::int2TString(i,4);
+      spacers.push_back("{-TCV"+si+"-}");
+      spacers.push_back("{-TCF"+si+"-}");
+    }
+  }
   map<TString,TString> mapWords = FSString::parseTStringToMap1(index,spacers);
   return mapWords;
 }  
@@ -1567,18 +1612,18 @@ FSHistogramInfo::getTHNF(){
 
 
 TTree* 
-FSHistogramInfo::getTHNFContents(vector< pair<TString,TString> > extraTreeContents){
+FSHistogramInfo::getTHNFContents(){
   TTree* histTree = NULL;
   if (basic()){
     cout << "    CREATING TREE FROM HISTOGRAM..." << std::flush;
-    histTree = FSHistogram::getTHNFBasicContents(histTree,m_index,extraTreeContents,m_status);
+    histTree = FSHistogram::getTHNFBasicContents(histTree,m_index,m_status);
   }
   else{
     cout << "    CREATING COMPOSITE TREE FROM HISTOGRAM... " << endl;
     for (unsigned int i = 0; i < m_basicHistograms.size(); i++){
       TString tmpStatus;
       histTree = FSHistogram::getTHNFBasicContents(histTree,
-                                     m_basicHistograms[i]->m_index,extraTreeContents,tmpStatus);
+                                     m_basicHistograms[i]->m_index,tmpStatus);
     }
     cout << "    FINISHED COMPOSITE TREE FROM HISTOGRAM... " << std::flush;
   }
