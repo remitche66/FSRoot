@@ -382,7 +382,7 @@ TTree*
 FSHistogram::getTHNFBasicContents(TTree* histTree, TString index, TString& STATUS){
 
     // initial checks
-  STATUS = checkIndex(index,"TREE");
+  STATUS = checkIndex(index,"TREEC");
   if (STATUS.Contains("!!")){
     cout << "FSHistogram::getTHNFBasicContents ERROR:  index status = " << STATUS << endl;
     return histTree;
@@ -422,9 +422,9 @@ FSHistogram::getTHNFBasicContents(TTree* histTree, TString index, TString& STATU
     // create a new tree if one hasn't been passed in
   if (!histTree){
     histTree = new TTree("HistContents", "HistContents");
-    Double_t x;  if (dimension >= 1) histTree->Branch("x",  &x,  "x/D");
-    Double_t y;  if (dimension == 2) histTree->Branch("y",  &y,  "y/D");
-    Double_t wt; if (dimension >= 1) histTree->Branch("wt", &wt, "wt/D");
+    Double_t x;  if (dimension >= 1 && variable != "") histTree->Branch("x",  &x,  "x/D");
+    Double_t y;  if (dimension == 2 && variable != "") histTree->Branch("y",  &y,  "y/D");
+    Double_t wt; if (dimension >= 1 && variable != "") histTree->Branch("wt", &wt, "wt/D");
     vector<Double_t> tempDoubles;
     for (unsigned int i = 0; i < extraTreeContents.size(); i++){
       tempDoubles.push_back(0.0);
@@ -434,13 +434,13 @@ FSHistogram::getTHNFBasicContents(TTree* histTree, TString index, TString& STATU
   }
 
     // get the x and y variable names
-  TString varX("");  if (dimension >= 1) varX = FSString::parseVariableX(variable);
-  TString varY("");  if (dimension == 2) varY = FSString::parseVariableY(variable);
+  TString varX("");  if (dimension >= 1 && variable != "") varX = FSString::parseVariableX(variable);
+  TString varY("");  if (dimension == 2 && variable != "") varY = FSString::parseVariableY(variable);
 
     // set the addresses of the values to add to histTree
-  Double_t x = 0.0;  if (dimension >= 1) histTree->SetBranchAddress("x",  &x);
-  Double_t y = 0.0;  if (dimension == 2) histTree->SetBranchAddress("y",  &y);
-  Double_t wt = 0.0; if (dimension >= 1) histTree->SetBranchAddress("wt", &wt);
+  Double_t x = 0.0;  if (dimension >= 1 && variable != "") histTree->SetBranchAddress("x",  &x);
+  Double_t y = 0.0;  if (dimension == 2 && variable != "") histTree->SetBranchAddress("y",  &y);
+  Double_t wt = 0.0; if (dimension >= 1 && variable != "") histTree->SetBranchAddress("wt", &wt);
   Double_t extraValues[200];
   if (extraTreeContents.size() > 200){
     cout << "FSHistogram::getTHNFBasicContents ERROR: too many extra branches" << endl;
@@ -462,9 +462,9 @@ FSHistogram::getTHNFBasicContents(TTree* histTree, TString index, TString& STATU
   TTreeFormula* cutsF = NULL; 
   TTreeFormula* varXF = NULL; 
   TTreeFormula* varYF = NULL; 
-  if (dimension >= 1){ cutsF = new TTreeFormula("cutsF", cuts, nt); formulas->Add(cutsF); }
-  if (dimension >= 1){ varXF = new TTreeFormula("varXF", varX, nt); formulas->Add(varXF); }
-  if (dimension == 2){ varYF = new TTreeFormula("varYF", varY, nt); formulas->Add(varYF); }
+  if (dimension >= 1){                   cutsF = new TTreeFormula("cutsF", cuts, nt); formulas->Add(cutsF); }
+  if (dimension >= 1 && variable != ""){ varXF = new TTreeFormula("varXF", varX, nt); formulas->Add(varXF); }
+  if (dimension == 2 && variable != ""){ varYF = new TTreeFormula("varYF", varY, nt); formulas->Add(varYF); }
   vector<TTreeFormula*> varEF;
   for (unsigned int i = 0; i < extraTreeContents.size(); i++){
     TString varName("varEF"); varName += i;
@@ -475,24 +475,24 @@ FSHistogram::getTHNFBasicContents(TTree* histTree, TString index, TString& STATU
   nt->SetNotify(formulas);
 
     // get cut values according to the histogram bounds
-  double xLow  = 0.0;  if (dimension >= 1)  xLow = FSString::parseBoundsLowerX(bounds);
-  double xHigh = 0.0;  if (dimension >= 1) xHigh = FSString::parseBoundsUpperX(bounds);
-  double yLow  = 0.0;  if (dimension == 2)  yLow = FSString::parseBoundsLowerY(bounds);
-  double yHigh = 0.0;  if (dimension == 2) yHigh = FSString::parseBoundsUpperY(bounds);
+  double xLow  = 0.0;  if (dimension >= 1 && bounds != "")  xLow = FSString::parseBoundsLowerX(bounds);
+  double xHigh = 0.0;  if (dimension >= 1 && bounds != "") xHigh = FSString::parseBoundsUpperX(bounds);
+  double yLow  = 0.0;  if (dimension == 2 && bounds != "")  yLow = FSString::parseBoundsLowerY(bounds);
+  double yHigh = 0.0;  if (dimension == 2 && bounds != "") yHigh = FSString::parseBoundsUpperY(bounds);
 
     // loop over events
   unsigned int nEvents = nt->GetEntries();
   for (unsigned int i = 0; i < nEvents; i++){
     nt->GetEntry(i);
     if (!cutsF->EvalInstance()) continue;
-    if (dimension >= 1) x = varXF->EvalInstance();
-    if (dimension == 2) y = varYF->EvalInstance();
-    if (dimension >= 1) wt = scale * cutsF->EvalInstance();
+    if (dimension >= 1 && variable != "") x = varXF->EvalInstance();
+    if (dimension == 2 && variable != "") y = varYF->EvalInstance();
+    if (dimension >= 1 && variable != "") wt = scale * cutsF->EvalInstance();
     for (unsigned int j = 0; j < varEF.size(); j++){
       extraValues[j] = varEF[j]->EvalInstance();
     }
-    if ((dimension >= 1) && ((x < xLow) || (x > xHigh))) continue;      
-    if ((dimension == 2) && ((y < yLow) || (y > yHigh))) continue;      
+    if ((dimension >= 1 && bounds != "") && ((x < xLow) || (x > xHigh))) continue;      
+    if ((dimension == 2 && bounds != "") && ((y < yLow) || (y > yHigh))) continue;      
     histTree->Fill();  
   }
 
@@ -1334,18 +1334,24 @@ FSHistogram::checkIndex(TString index, TString type){
     TString bounds = iMap["{-BO-}"];
     if (!FSString::checkBounds(dimension,bounds)) return TString("!!BAD_BOUNDS!!"); 
   }
+  if (type == "TREEC"){
+    TString bounds = iMap["{-BO-}"];
+    TString variable = iMap["{-VA-}"];
+    if (bounds != "" && variable == "") return TString("!!NO_VAR!!");
+    if (bounds != "" && !FSString::checkBounds(dimension,bounds)) return TString("!!BAD_BOUNDS!!"); 
+  }
     // checks on file (FN)
-  if (type == "TREE" || type == "FILE"){
+  if (type == "TREE" || type == "TREEC" || type == "FILE"){
     TString fileName = iMap["{-FN-}"];
     if (FSSystem::getAbsolutePath(fileName) == "") return TString("!!NO_FILE!!");
   }
     // checks on tree (NT)
-  if (type == "TREE"){
+  if (type == "TREE" || type == "TREEC"){
     TString treeName = iMap["{-NT-}"];
     if (treeName == "") return TString("!!NO_TREE!!");
   }
     // checks on category (CA)
-  if (type == "TREE"){
+  if (type == "TREE" || type == "TREEC"){
     TString category = iMap["{-CA-}"];
     if (category == "!!NO_MODES!!") return TString("!!NO_MODES!!");
   }
@@ -1357,8 +1363,15 @@ FSHistogram::checkIndex(TString index, TString type){
         (!FSString::checkVariable(dimension,variable)))
       return TString("!!BAD_VAR!!");
   }
+  if (type == "TREEC"){
+    TString variable = iMap["{-VA-}"];
+    if ((variable != "") &&
+        ((!FSString::checkParentheses(variable)) ||
+         (!FSString::checkVariable(dimension,variable))))
+      return TString("!!BAD_VAR!!");
+  }
     // checks on cuts (CU)
-  if (type == "TREE"){
+  if (type == "TREE" || type == "TREEC"){
     TString cuts = iMap["{-CU-}"];
     if (!FSString::checkParentheses(cuts)) return TString("!!BAD_CUTS!!");
     if (cuts.Contains("!!BAD_FSCUT!!")) return TString("!!BAD_FSCUT!!");
@@ -1369,7 +1382,7 @@ FSHistogram::checkIndex(TString index, TString type){
     if (!FSString::checkParentheses(formula)) return TString("!!BAD_FUNC!!");
   }
     // checks on scale (SC)
-  if (type == "TREE"){
+  if (type == "TREE" || type == "TREEC"){
     TString scale = iMap["{-SC-}"];
     if (scale == "") return TString("!!NO_SCALE!!");
     scale = FSString::double2TString(FSString::TString2double(scale),3,true);
