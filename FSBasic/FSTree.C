@@ -58,11 +58,14 @@ FSTree::getTChain(TString fileName, TString ntName, TString& STATUS){
     // create an index for this chain and search for it
 
   TString index(fileName);  index += ":";  index += ntName;
+    vector<TString> friendNames = getFriendNames();
+    for (unsigned int i = 0; i < friendNames.size(); i++){ index += ":"; index += friendNames[i]; }
   map<TString,TChain*>::const_iterator mapItr = m_chainCache.find(index);
   if (mapItr != m_chainCache.end()){
     if (FSControl::DEBUG) 
       cout << "FSTree: found TChain with index " << index << endl;
     nt = m_chainCache[index];
+    return nt;
   }
 
     // create the chain from scratch if not found
