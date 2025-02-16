@@ -1324,7 +1324,7 @@ TString
 FSHistogram::checkIndex(TString index, TString type){
   map<TString,TString> iMap = parseHistogramIndex(index);
     // checks on type (TP)
-  if (type != "" && type != iMap["{-TP-}"]) return TString("!!BAD_TYPE!!");
+  if (type != "" && !type.Contains(iMap["{-TP-}"])) return TString("!!BAD_TYPE!!");
   type = iMap["{-TP-}"];    if (type == "") return TString("!!NO_TYPE!!");
     // checks on dimension (ND)
   int dimension = FSString::TString2int(iMap["{-ND-}"]);
