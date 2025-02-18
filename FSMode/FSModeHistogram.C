@@ -371,6 +371,7 @@ FSModeHistogram::drawMCComponents(TString fileName, TString ntName,
     // make a new TCanvas if one isn't passed in
 
   if (!c1) c1 = new TCanvas("cDrawMCComponents","cDrawMCComponents",600,600);
+  c1->cd();
 
     // draw everything
 
