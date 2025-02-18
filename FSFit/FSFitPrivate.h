@@ -1141,12 +1141,14 @@ class FSFitMinuit {
              << fpName1 << " and " << fpName2 << ", returning zero." << endl;
         return 0.0;
       }
-      Double_t** matrix = new Double_t*[npars]; 
-      for (int i = 0; i < npars; i++){ matrix[i] = new Double_t[npars]; }
+      Double_t matrix[npars][npars];
+      //Double_t** matrix = new Double_t*[npars]; 
+      //for (int i = 0; i < npars; i++){ matrix[i] = new Double_t[npars]; }
       m_minuit->mnemat(&matrix[0][0],npars);
-      double cError = matrix[par1-1][par2-1];
-      for (int i = 0; i < npars; i++){ delete[] matrix[i]; } delete[] matrix;
-      return cError;
+      return matrix[par1-1][par2-1];
+      //double cError = matrix[par1-1][par2-1];
+      //for (int i = 0; i < npars; i++){ delete[] matrix[i]; } delete[] matrix;
+      //return cError;
     }
 
     void setParameters(Double_t* par){
