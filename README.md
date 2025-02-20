@@ -5,3 +5,4 @@ to analyze a variety of final states (FS) produced in particle physics experimen
 
 See Documentation/FSRoot.pdf for documentation, including installation instructions.
 
+This branch is experimental, and includes functionality for looking at reconstructed neutrons.
