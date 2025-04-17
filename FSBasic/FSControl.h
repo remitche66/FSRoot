@@ -22,6 +22,8 @@ class FSControl{
     static bool DEBUG;              // verbose prints for debugging
     static bool QUIET;              // turns off almost all printing
 
+    static bool DRAWMCCOMPONENTSBETTER;
+
     static bool REORDERMATH;        // reorder math in FSModeHistogram
 
     static void globalTweaks(){     // same as rootlogon.FSROOT.C
@@ -73,4 +75,3 @@ TGaxis::SetMaxDigits(4);
 
 
 #endif
-

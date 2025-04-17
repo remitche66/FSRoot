@@ -44,21 +44,21 @@ class FSModeHistogram{
       //       "y" for the y variable (2d only)
       //       "wt" for a weight (set by scale and FSCut)
       //   as well as optional extra variables in extraTreeContents,
-      //     where pair<TString,TString> = 
+      //     where pair<TString,TString> =
       //      pair< extra variable name, formula to calculate extra variable >
       // ********************************************************
 
     static TTree*  getTH1FContents(TString fileName, TString ntName, TString category,
-                                   TString variable, TString bounds, 
+                                   TString variable, TString bounds,
                                    TString cuts, double scale = 1.0,
-                                   vector< pair<TString,TString> > extraTreeContents = 
+                                   vector< pair<TString,TString> > extraTreeContents =
                                      vector< pair<TString,TString> >());
 
 
     static TTree*  getTH2FContents(TString fileName, TString ntName, TString category,
-                                   TString variable, TString bounds, 
+                                   TString variable, TString bounds,
                                    TString cuts, double scale = 1.0,
-                                   vector< pair<TString,TString> > extraTreeContents = 
+                                   vector< pair<TString,TString> > extraTreeContents =
                                      vector< pair<TString,TString> >());
 
 
@@ -84,39 +84,39 @@ class FSModeHistogram{
       //   * uses variables MCDecayCode1, MCDecayCode2, and MCExtras
       //      (described in the FSModeInfo.h header)
       //   * a single component is labeled by the string:
-      //      MCExtras_MCDecayCode2_MCDecayCode1 
+      //      MCExtras_MCDecayCode2_MCDecayCode1
       // ********************************************************
 
-    static TH1F* drawMCComponents(TString fileName, TString ntName, 
-                                TString category, TString variable, 
+    static TH1F* drawMCComponents(TString fileName, TString ntName,
+                                TString category, TString variable,
                                 TString bounds, TString cuts,
                                 double scale = 1.0, TCanvas* c1 = NULL,
-                                bool reverseOrder = false);
+                                bool reverseOrder = false, double maxNamedComp=0.01, int maxNumComp=10);
 
-    static void drawMCComponentsSame(TString fileName, TString ntName, 
-                                TString category, TString variable, 
+    static void drawMCComponentsSame(TString fileName, TString ntName,
+                                TString category, TString variable,
                                 TString bounds, TString cuts, double scale = 1.0,
-                                bool reverseOrder = false);
+                                bool reverseOrder = false, double maxNamedComp=0.01, int maxNumComp=10, TPad *p2=nullptr);
 
-    static vector< pair<TString, float> > 
-        getMCComponentsAndSizes(TString fileName, TString ntName, 
-                                TString category, TString variable, 
+    static vector< pair<TString, float> >
+        getMCComponentsAndSizes(TString fileName, TString ntName,
+                                TString category, TString variable,
                                 TString bounds, TString cuts,
                                 double scale = 1.0, bool moreInfo = false, bool show = false);
 
-    static vector<TString> 
-                getMCComponents(TString fileName, TString ntName, 
-                                TString category, TString variable, 
+    static vector<TString>
+                getMCComponents(TString fileName, TString ntName,
+                                TString category, TString variable,
                                 TString bounds, TString cuts,
                                 double scale = 1.0, bool moreInfo = false, bool show = false);
 
     static vector<TH1F*>
-            getMCComponentsTH1F(TString fileName, TString ntName, 
-                                TString category, TString variable, 
+            getMCComponentsTH1F(TString fileName, TString ntName,
+                                TString category, TString variable,
                                 TString bounds, TString cuts,
-                                double scale = 1.0);
+                                double scale = 1.0, double maxNamedComp=0.01, unsigned int maxNumComp=10);
 
-    static TString getMCComponentCut(TString component);    
+    static TString getMCComponentCut(TString component);
 
     static TString formatMCComponent(TString component, float fraction = -1.0);
 
@@ -140,7 +140,7 @@ class FSModeHistogram{
                                               TString fileName, TString ntName, TString category,
                                               TString variable, TString bounds,
                                               TString cuts, double scale = 1.0,
-                                        vector< pair<TString,TString> > extraTreeContents = 
+                                        vector< pair<TString,TString> > extraTreeContents =
                                         vector< pair<TString,TString> >());
 
 
