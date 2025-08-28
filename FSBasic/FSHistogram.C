@@ -1005,6 +1005,7 @@ FSHistogram::clearHistogramCache(TString histName, TString selectIndex){
     if (hInfo->m_histPair.second) delete hInfo->m_histPair.second;
     delete hInfo;
   }
+  FSTree::clearChainCache();
   if (FSControl::DEBUG) 
     cout << "FSHistogram: done clearing histogram cache" << endl;
 }
