@@ -605,17 +605,24 @@ FSModeTree::createRankingTree(TString fileName, TString ntName, TString category
 void
 FSModeTree::createPHSPTree(double EnPCM, double PxPCM, double PyPCM, double PzPCM, 
                                TString modeString, int nEvents, 
-                               TString fileNameOutput,  TString ntName){
+                               TString fileNameOutput,  TString ntName,
+                               vector<double> extraFSParticleMasses){
   FSModeInfo modeInfo(modeString);
   fileNameOutput = modeInfo.modeString(fileNameOutput);
   ntName = modeInfo.modeString(ntName);
   vector<TString> vParticles = modeInfo.particles();
   vector<double> vMasses = modeInfo.modeMasses();
+  for (unsigned int i = 0; i < extraFSParticleMasses.size(); i++){ 
+    vParticles.push_back("E"+FSString::int2TString(i+1));
+    vMasses.push_back(extraFSParticleMasses[i]);
+  }
   cout << endl;
   cout << "----------------" << endl;
   cout << "MAKING PHSP TREE" << endl;
   cout << "----------------" << endl;
-  cout << "  FINAL STATE:   " << modeInfo.modeDescription() << endl;
+  cout << "  FINAL STATE:   " << modeInfo.modeDescription();
+  for (unsigned int i = 0; i < extraFSParticleMasses.size(); i++){
+  cout << "  +  " << extraFSParticleMasses[i];}  cout << endl; 
   cout << "    FILE NAME:   " << fileNameOutput << endl;
   cout << "    TREE NAME:   " << ntName << endl;
   cout << "     BRANCHES: " << endl;
