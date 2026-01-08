@@ -355,7 +355,7 @@ FSTree::skimTree(TString fileNameInput, TString chainName,
   // write out message
 
   if (FSControl::QUIET){
-    cout << "creating " << fileNameOutput << endl;
+    //cout << "creating " << fileNameOutput << endl;
   }
   if (!FSControl::QUIET){
     cout << endl;
