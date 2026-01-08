@@ -61,8 +61,8 @@ class FSFitUtilities{
 
       // Return a TF1* associated with a given function (for drawing).
 
-    static TF1* getTF1(TString fName, double xLow = -99.0, double xHigh = -999.0){
-      return FSFitFunctionList::getFunction(fName)->getTF1(xLow,xHigh);
+    static TF1* getTF1(TString fName, double xLow = 0.0, double xHigh = -1.0, int color = kRed, int style = kSolid){
+      return FSFitFunctionList::getFunction(fName)->getTF1(xLow,xHigh,color,style);
     }
 
 
@@ -70,8 +70,8 @@ class FSFitUtilities{
       //   This is more stable than the above getTF1 -- once created it is
       //    independent of the function and its parameters.
 
-    static TH1F* getTH1F(TString fName, TString bounds){
-      return FSFitFunctionList::getFunction(fName)->getTH1F(bounds);
+    static TH1F* getTH1F(TString fName, TString bounds, int color = kRed, int style = kSolid){
+      return FSFitFunctionList::getFunction(fName)->getTH1F(bounds,color,style);
     }
 
 

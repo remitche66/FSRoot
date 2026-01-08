@@ -447,18 +447,19 @@ class FSFitFunction{
 
     double operator() (double *x, double *p) { if (p == NULL) p = NULL; return fx(x[0]); }
 
-    TF1* getTF1(double xLow = -99.0, double xHigh = -999.0){
+    TF1* getTF1(double xLow = 0.0, double xHigh = -1.0, int color = kRed, int style = kSolid){
       FSFitFunction* newff = cloneBASE();
       //TF1* ff = new TF1(newff->fName(), newff, &FSFitFunction::rootFunction, m_xLow, m_xHigh, 0);
       if (xHigh < xLow){ xLow = m_xLow; xHigh = m_xHigh; }
       TF1* ff = new TF1(newff->fName(), newff, xLow, xHigh, 0);
       ff->SetNpx(2000);
+      ff->SetLineColor(color); ff->SetLineStyle(style);
       return ff;
     }
 
       // interface to TH1F
 
-    TH1F* getTH1F(TString bounds){
+    TH1F* getTH1F(TString bounds, int color = kRed, int style = kSolid){
       bounds = FSString::removeWhiteSpace(bounds);
       int nbins = 100; double xLow = 0.0; double xHigh = 10.0;
       if (FSString::checkBounds(1,bounds)){
@@ -477,7 +478,9 @@ class FSFitFunction{
           hist->SetBinError(i+1,efx(x));
         }
       }
-      return FSHistogram::getTH1F(hist);
+      hist = FSHistogram::getTH1F(hist);
+      hist->SetLineColor(color); hist->SetLineStyle(style);
+      return hist;
     }
 
       // manage parameters
