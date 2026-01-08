@@ -1325,8 +1325,10 @@ TString
 FSHistogram::checkIndex(TString index, TString type){
   map<TString,TString> iMap = parseHistogramIndex(index);
     // checks on type (TP)
-  if (type != "" && !type.Contains(iMap["{-TP-}"])) return TString("!!BAD_TYPE!!");
-  type = iMap["{-TP-}"];    if (type == "") return TString("!!NO_TYPE!!");
+  TString typeFromIndex = iMap["{-TP-}"];
+  if (typeFromIndex == "") return TString("!!NO_TYPE!!");
+  if (type == "") type = typeFromIndex;
+  if (!type.Contains(typeFromIndex)) return TString("!!BAD_TYPE!!");
     // checks on dimension (ND)
   int dimension = FSString::TString2int(iMap["{-ND-}"]);
   if ((dimension != 1) && (dimension != 2)) return TString("!!BAD_DIM!!"); 
@@ -1338,7 +1340,7 @@ FSHistogram::checkIndex(TString index, TString type){
   if (type == "TREEC"){
     TString bounds = iMap["{-BO-}"];
     TString variable = iMap["{-VA-}"];
-    if (bounds != "" && variable == "") return TString("!!NO_VAR!!");
+    if (bounds != "" && variable == "") return TString("!!BOUNDS_BUT_NO_VAR!!");
     if (bounds != "" && !FSString::checkBounds(dimension,bounds)) return TString("!!BAD_BOUNDS!!"); 
   }
     // checks on file (FN)
@@ -1641,7 +1643,7 @@ FSHistogramInfo::getTHNFContents(){
     }
     cout << "    FINISHED COMPOSITE TREE FROM HISTOGRAM... " << std::flush;
   }
-  cout << infoString() << "(entries = " << histTree->GetEntries() << ")" << endl;
+  if (histTree) cout << infoString() << "(entries = " << histTree->GetEntries() << ")" << endl;
   return histTree;
 }
 
