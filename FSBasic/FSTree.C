@@ -1052,25 +1052,25 @@ FSTree::expandVariable(TString variable, bool show){
       for (unsigned int ic = 0; ic < commaParts.size(); ic++){
         if (commaParts[ic].Length() == 0) continue;
         TString subMass = "";
-        if ((commaParts[ic].Length() > 2)&&
-           (FSString::subString(commaParts[ic],commaParts[ic].Length()-2,commaParts[ic].Length()) == "pi")){
-          commaParts[ic] = FSString::subString(commaParts[ic],0,commaParts[ic].Length()-2);
+        if ((commaParts[ic].Length() > 4)&&
+           (FSString::subString(commaParts[ic],commaParts[ic].Length()-4,commaParts[ic].Length()) == "->pi")){
+          commaParts[ic] = FSString::subString(commaParts[ic],0,commaParts[ic].Length()-4);
           subMass = FSString::double2TString(FSPhysics::XMpi,8); }
-        if ((commaParts[ic].Length() > 1)&&
-           (FSString::subString(commaParts[ic],commaParts[ic].Length()-1,commaParts[ic].Length()) == "K")){
-          commaParts[ic] = FSString::subString(commaParts[ic],0,commaParts[ic].Length()-1);
+        if ((commaParts[ic].Length() > 3)&&
+           (FSString::subString(commaParts[ic],commaParts[ic].Length()-3,commaParts[ic].Length()) == "->K")){
+          commaParts[ic] = FSString::subString(commaParts[ic],0,commaParts[ic].Length()-3);
           subMass = FSString::double2TString(FSPhysics::XMK,8); }
-        if ((commaParts[ic].Length() > 1)&&
-           (FSString::subString(commaParts[ic],commaParts[ic].Length()-1,commaParts[ic].Length()) == "p")){
-          commaParts[ic] = FSString::subString(commaParts[ic],0,commaParts[ic].Length()-1);
+        if ((commaParts[ic].Length() > 3)&&
+           (FSString::subString(commaParts[ic],commaParts[ic].Length()-3,commaParts[ic].Length()) == "->p")){
+          commaParts[ic] = FSString::subString(commaParts[ic],0,commaParts[ic].Length()-3);
           subMass = FSString::double2TString(FSPhysics::XMp,8); }
-        if ((commaParts[ic].Length() > 1)&&
-           (FSString::subString(commaParts[ic],commaParts[ic].Length()-1,commaParts[ic].Length()) == "e")){
-          commaParts[ic] = FSString::subString(commaParts[ic],0,commaParts[ic].Length()-1);
+        if ((commaParts[ic].Length() > 3)&&
+           (FSString::subString(commaParts[ic],commaParts[ic].Length()-3,commaParts[ic].Length()) == "->e")){
+          commaParts[ic] = FSString::subString(commaParts[ic],0,commaParts[ic].Length()-3);
           subMass = FSString::double2TString(FSPhysics::XMe,8); }
-        if ((commaParts[ic].Length() > 2)&&
-           (FSString::subString(commaParts[ic],commaParts[ic].Length()-2,commaParts[ic].Length()) == "mu")){
-          commaParts[ic] = FSString::subString(commaParts[ic],0,commaParts[ic].Length()-2);
+        if ((commaParts[ic].Length() > 4)&&
+           (FSString::subString(commaParts[ic],commaParts[ic].Length()-4,commaParts[ic].Length()) == "->mu")){
+          commaParts[ic] = FSString::subString(commaParts[ic],0,commaParts[ic].Length()-4);
           subMass = FSString::double2TString(FSPhysics::XMmu,8); }
         TString plusMinus("+");
         TString firstDigit = FSString::subString(commaParts[ic],0,1);
