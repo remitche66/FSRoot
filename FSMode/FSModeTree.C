@@ -576,7 +576,7 @@ FSModeTree::createRankingTree(TString fileName, TString ntName, TString category
                   "******************************************" << endl;
           cout << "  new fileName      = " << fileName_rank << endl;
           cout << "  new ntName        = " << ntName_rank << endl;
-          cout << "  most combos       = " << DEBUGMAXCOMBO << endl;
+          cout << "  most combos       = " << DEBUGMAXCOMBO-1 << endl;
           cout << "  skipped events    = " << NSKIPPED << endl;
           if (nEvents > 0)
           cout << "  fraction skipped  = " << (100.0*NSKIPPED)/nEvents << " percent" << endl;
@@ -626,6 +626,7 @@ FSModeTree::createPHSPTree(double EnPCM, double PxPCM, double PyPCM, double PzPC
   cout << "    FILE NAME:   " << fileNameOutput << endl;
   cout << "    TREE NAME:   " << ntName << endl;
   cout << "     BRANCHES: " << endl;
+  cout << "           Run Event:  Run = 1 and Event = 1..nEvents (for tests of ranking)" << endl;
   cout << "           PxPCM PyPCM PzPCM EnPCM:  four-vector of the CM system" << endl;
   for (unsigned int i = 0; i < vParticles.size(); i++){
     TString si = FSString::int2TString(i+1);
@@ -640,6 +641,7 @@ FSModeTree::createPHSPTree(double EnPCM, double PxPCM, double PyPCM, double PzPC
   cout << "----------------" << endl;
   cout << "Creating " << nEvents << " events..." << endl;
   TLorentzVector pParent(PxPCM, PyPCM, PzPCM, EnPCM);
+  double Run = 1;  double Event = 0;
   double masses[100];
   double PxPN[100]; double PxPNa[100]; double PxPNb[100];
   double PyPN[100]; double PyPNa[100]; double PyPNb[100];
@@ -648,6 +650,8 @@ FSModeTree::createPHSPTree(double EnPCM, double PxPCM, double PyPCM, double PzPC
   TLorentzVector* pPN[100]; TLorentzVector* pPNa[100]; TLorentzVector* pPNb[100];
   TFile file(fileNameOutput,"recreate");
   TTree tree(ntName,ntName);
+  tree.Branch("Run",    &Run,      "Run/D");
+  tree.Branch("Event",  &Event,    "Event/D");
   tree.Branch("PxPCM",  &PxPCM,    "PxPCM/D");
   tree.Branch("PyPCM",  &PyPCM,    "PyPCM/D");
   tree.Branch("PzPCM",  &PzPCM,    "PzPCM/D");
@@ -695,7 +699,7 @@ FSModeTree::createPHSPTree(double EnPCM, double PxPCM, double PyPCM, double PzPC
         PxPNb[i] = pPNb[i]->Px();  PyPNb[i] = pPNb[i]->Py();  PzPNb[i] = pPNb[i]->Pz();  EnPNb[i] = pPNb[i]->E();
       }
     }
-    count++;
+    count++;  Event = count;
     tree.Fill();
   }
   tree.Write();
