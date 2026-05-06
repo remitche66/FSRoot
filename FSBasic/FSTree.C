@@ -11,6 +11,7 @@
 #include "TH2F.h"
 #include "TFile.h"
 #include "TFriendElement.h"
+#include "TEntryList.h"
 #include "FSBasic/FSControl.h"
 #include "FSBasic/FSString.h"
 #include "FSBasic/FSSystem.h"
@@ -340,11 +341,17 @@ FSTree::skimTree(TString fileNameInput, TString chainName,
     return;
   }
 
-  // create an output file first (further set up later)
+  // turn off all chain caching
 
-  TFile* file2 = new TFile(fileNameOutput,"recreate");
+  bool saveChainCaching = FSControl::CHAINCACHING;
+  FSControl::CHAINCACHING = false;
+  clearChainCache();
 
-  // retrieve tree 1
+  // create an output file
+
+  TFile* fileOut = new TFile(fileNameOutput,"recreate");
+
+  // retrieve the input tree (with friends)
 
   TChain* nt = getTChain(fileNameInput,chainName);
 
@@ -381,110 +388,108 @@ FSTree::skimTree(TString fileNameInput, TString chainName,
 
   if ((!nt) || (nt->GetEntries() == 0) || (nt->GetNbranches() == 0)){
     cout << "Could not find any entries...  skipping..." << endl;
+    FSControl::CHAINCACHING = saveChainCaching;
     return;
   }
 
+  // get a list of events to keep and store them in a vector
 
-  // set up the output file
-
-  file2->cd();
-  //vector<TString> dirs = FSString::parseTString(chainName,"/");
-  //if (dirs.size() > 2){
-  //  for (unsigned int i = 0; i < dirs.size()-1; i++){
-  //    file2->mkdir(dirs[i]);
-  //    file2->cd(dirs[i]);
-  //  }
-  //}
-
-
-  // copy the tree with selection criteria
-
-  TTree* tree2 = NULL;
-  if (maxEntries < 0)  tree2 = nt->CopyTree(newCuts);
-  if (maxEntries >= 0) tree2 = nt->CopyTree(newCuts,"",maxEntries);
-  if (!tree2){
-    cout << "Could not copy the tree....  skipping..." << endl;
-    return;
+  nt->Draw( ">>elist", newCuts, "entrylist", maxEntries >=0 ? maxEntries : TTree::kMaxEntries );
+  TEntryList* elist = (TEntryList*)gDirectory->Get( "elist" );
+  vector<Long64_t> vList;
+  Long64_t nSelected = elist->GetN();
+  for (Long64_t i = 0; i < nSelected; i++){
+    vList.push_back(elist->GetEntry(i));
   }
-  if (newChainName != ""){ tree2->SetName(newChainName); tree2->SetTitle(newChainName); }
-  if (!FSControl::QUIET){
-    cout << "Number of entries kept:" << endl;
-    cout << "\t" << FSString::int2TString(tree2->GetEntries(),0,true) << endl;
-    cout << endl;
-    cout << "Skim Ratio:" << endl;
-    cout << "\t" << (float) tree2->GetEntries() / (float) nt->GetEntries() << endl;
-    cout << endl;
-  }
+//cout << "TESTING:  vList.size() = " << vList.size() << endl;
 
-
-  // write the tree to file2
-
-  if (tree2->GetListOfFriends()) tree2->GetListOfFriends()->Clear();
-  file2->Write();
-  file2->Close();
-
-  clearChainCache();
-  delete file2;
-
-
-  // ***** also skim friend trees *****
-
-  if (FSTree::getFriendNames(1).size() == 0) return;
-
-
-  // 1. find the friend trees
-
-  nt = getTChain(fileNameInput,chainName);
-  vector<TTree*> friendTrees;
-  TIter next(nt->GetListOfFriends());
-  while (TFriendElement *obj = (TFriendElement*) next()){
-    friendTrees.push_back(obj->GetTree());
-  }
-
-  // 2. add friends to each friend so they can be used separately
-  //     and still access all branches
-
-  for (unsigned int i = 0; i < friendTrees.size(); i++){
-    friendTrees[i]->AddFriend(nt);
-    for (unsigned int j = 0; j < friendTrees.size(); j++){
-      if (i==j) continue;
-      friendTrees[i]->AddFriend(friendTrees[j]);
-    }
-  }
-
-  // 3. get the friend names
+  // get a list of friends associated with this tree
 
   vector<TString> friendNames;
-  for (unsigned int i = 0; i < friendTrees.size(); i++){
-    TString name = friendTrees[i]->GetName();
-    vector<TString> parts = FSString::parseTString(name,"_");
-    friendNames.push_back(parts[parts.size()-1]);
-  }
-
-  // 4. loop over friend trees and skim them
-
-  for (unsigned int i = 0; i < friendTrees.size(); i++){
-    TString fileNameFriend = fileNameOutput + "." + friendNames[i];
-    TString chainNameFriend = chainName + "_" + friendNames[i];
-    cout << "Copying Friend: \n\t" << chainNameFriend
-         << "\nTo File: \n\t" << fileNameFriend << endl;
-    TFile* fileFriend = new TFile(fileNameFriend,"recreate");
-    fileFriend->cd();
-    TTree* treeFriend = NULL;
-    if (maxEntries < 0)  treeFriend = friendTrees[i]->CopyTree(newCuts);
-    if (maxEntries >= 0) treeFriend = friendTrees[i]->CopyTree(newCuts,"",maxEntries);
-    if (!treeFriend){
-      cout << "Could not copy the friend tree....  skipping..." << endl;
-      return;
+  TIter nextFriend(nt->GetListOfFriends());
+  while (TFriendElement *obj = (TFriendElement*) nextFriend()){
+    TTree* friendTree = obj->GetTree();
+    if (friendTree){
+      TString name = friendTree->GetName();
+      vector<TString> parts = FSString::parseTString(name,"_");
+      friendNames.push_back(parts[parts.size()-1]);
     }
-    cout << "\nNumber of entries kept:  \n\t"
-         << FSString::int2TString(treeFriend->GetEntries(),0,true) << endl << endl;
-    if (treeFriend->GetListOfFriends()) treeFriend->GetListOfFriends()->Clear();
-    fileFriend->Write();
-    fileFriend->Close();
-    delete fileFriend;
   }
+//cout << "TESTING: NUMBER OF FRIENDS = " << nt->GetListOfFriends()->GetEntries() << endl;
+//cout << "TESTING:  friendNames.size() = " << friendNames.size() << endl;
+//for (unsigned int i = 0; i < friendNames.size(); i++){ cout << "   " << i+1 << ".  " << friendNames[i] << endl; }
+
+  // get the original input tree with no friends
+
+  bool saveUseFriendTrees = m_useFriendTrees;
+  m_useFriendTrees = false;
+  nt = getTChain(fileNameInput,chainName);
+//TList* flist = nt->GetListOfFriends();
+//if (!flist) cout << "NO FRIENDS!!" << endl;
+//if (flist) cout << "TESTING: NUMBER OF FRIENDS = " << nt->GetListOfFriends() << endl;
+//cout << "NO FRIEND TREE ENTRIES = " << nt->GetEntries() << endl;
+
+  // skim the original file
+
+  fileOut->cd();
+  TTree* treeOut = nt->CloneTree(0);
+  if (!treeOut){ cout << "ERROR:  problem with the clone tree" << endl; return; }
+  for (unsigned int i = 0; i < vList.size(); i++){
+    nt->GetEntry(vList[i]);
+    treeOut->Fill();
+  }
+  // FIX LATER
+  //if (newChainName != ""){ tree2->SetName(newChainName); tree2->SetTitle(newChainName); }
+  if (!FSControl::QUIET){
+    cout << "Number of entries kept:" << endl;
+    cout << "\t" << FSString::int2TString(treeOut->GetEntries(),0,true) << endl;
+    cout << endl;
+    cout << "Skim Ratio:" << endl;
+    cout << "\t" << (float) treeOut->GetEntries() / (float) nt->GetEntries() << endl;
+    cout << endl;
+  }
+  treeOut->Write();
+  fileOut->Close();
   clearChainCache();
+  delete fileOut;
+
+  // now skim the friends
+
+  for (unsigned int i = 0; i < friendNames.size(); i++){
+    TString fileNameFriendInput = fileNameInput + "." + friendNames[i];
+    TString chainNameFriendInput = chainName + "_" + friendNames[i];
+    TTree* ntFriendInput = getTChain(fileNameFriendInput,chainNameFriendInput);
+    if (!ntFriendInput){
+      cout << "Could not copy the friend tree....  skipping..." << endl;
+      continue;
+    }
+    TString fileNameFriendOutput = fileNameOutput + "." + friendNames[i];
+    TString chainNameFriendOutput = chainName + "_" + friendNames[i];
+    TFile* fileFriendOut = new TFile(fileNameFriendOutput,"recreate");
+    cout << "Copying Friend: \n\t" << chainNameFriendInput
+         << "\nTo File: \n\t" << fileNameFriendOutput << endl;
+    fileFriendOut->cd();
+    TTree* treeFriendOut = ntFriendInput->CloneTree(0);
+    if (!treeFriendOut){ cout << "ERROR:  problem with the clone tree" << endl; return; } 
+    for (unsigned int i = 0; i < vList.size(); i++){
+      ntFriendInput->GetEntry(vList[i]);
+      treeFriendOut->Fill();
+    }
+    // FIX LATER
+    //if (newChainName != ""){ tree2->SetName(newChainName); tree2->SetTitle(newChainName); }
+    if (!FSControl::QUIET){
+      cout << "\nNumber of entries kept:  \n\t"
+           << FSString::int2TString(treeFriendOut->GetEntries(),0,true) << endl << endl;
+    }
+    fileFriendOut->cd();
+    treeFriendOut->Write();
+    fileFriendOut->Close();
+    clearChainCache();
+    delete fileFriendOut;
+  }
+
+  clearChainCache();
+  FSControl::CHAINCACHING = saveChainCaching; m_useFriendTrees = saveUseFriendTrees;
 
 }
 
