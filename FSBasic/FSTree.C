@@ -315,6 +315,7 @@ FSTree::skimTree(TString fileNameInput, TString chainName,
     maxEntries = pairMaxEntries.first;
     cuts = pairMaxEntries.second;
   }
+  if (newChainName == "") newChainName = chainName;
 
     // expand "cuts" using FSCut and check for multidimensional sidebands
 
@@ -438,8 +439,7 @@ FSTree::skimTree(TString fileNameInput, TString chainName,
     nt->GetEntry(vList[i]);
     treeOut->Fill();
   }
-  // FIX LATER
-  //if (newChainName != ""){ tree2->SetName(newChainName); tree2->SetTitle(newChainName); }
+  treeOut->SetName(newChainName); treeOut->SetTitle(newChainName);
   if (!FSControl::QUIET){
     cout << "Number of entries kept:" << endl;
     cout << "\t" << FSString::int2TString(treeOut->GetEntries(),0,true) << endl;
@@ -464,7 +464,7 @@ FSTree::skimTree(TString fileNameInput, TString chainName,
       continue;
     }
     TString fileNameFriendOutput = fileNameOutput + "." + friendNames[i];
-    TString chainNameFriendOutput = chainName + "_" + friendNames[i];
+    TString chainNameFriendOutput = newChainName + "_" + friendNames[i];
     TFile* fileFriendOut = new TFile(fileNameFriendOutput,"recreate");
     cout << "Copying Friend: \n\t" << chainNameFriendInput
          << "\nTo File: \n\t" << fileNameFriendOutput << endl;
@@ -475,8 +475,8 @@ FSTree::skimTree(TString fileNameInput, TString chainName,
       ntFriendInput->GetEntry(vList[i]);
       treeFriendOut->Fill();
     }
-    // FIX LATER
-    //if (newChainName != ""){ tree2->SetName(newChainName); tree2->SetTitle(newChainName); }
+    treeFriendOut->SetName(chainNameFriendOutput); 
+    treeFriendOut->SetTitle(chainNameFriendOutput);
     if (!FSControl::QUIET){
       cout << "\nNumber of entries kept:  \n\t"
            << FSString::int2TString(treeFriendOut->GetEntries(),0,true) << endl << endl;
