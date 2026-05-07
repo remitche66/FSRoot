@@ -1,5 +1,2 @@
-
-
-
-
+*  Note that the "minus sign shortcut" doesn't work with submodes, e.g. MASS(BES3CMS,-[D0]) will only put the minus sign with the first particle in the D0 submode.  I don't see an easy fix.  Anyway, MASS(BES3CMS;[D0]) works fine.
 
