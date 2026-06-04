@@ -12,6 +12,7 @@
 #include "TFile.h"
 #include "TFriendElement.h"
 #include "TEntryList.h"
+#include "TEventList.h"
 #include "FSBasic/FSControl.h"
 #include "FSBasic/FSString.h"
 #include "FSBasic/FSSystem.h"
@@ -395,8 +396,8 @@ FSTree::skimTree(TString fileNameInput, TString chainName,
 
   // get a list of events to keep and store them in a vector
 
-  nt->Draw( ">>elist", newCuts, "entrylist", maxEntries >=0 ? maxEntries : TTree::kMaxEntries );
-  TEntryList* elist = (TEntryList*)gDirectory->Get( "elist" );
+  nt->Draw( ">>elist", newCuts, "", maxEntries >=0 ? maxEntries : TTree::kMaxEntries );
+  TEventList* elist = (TEventList*)gDirectory->Get( "elist" );
   vector<Long64_t> vList;
   Long64_t nSelected = elist->GetN();
   for (Long64_t i = 0; i < nSelected; i++){
