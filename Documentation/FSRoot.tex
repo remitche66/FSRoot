@@ -188,7 +188,17 @@ Examples for {\tt FSTree::expandVariable}:
       ==>   (sqrt(pow(((-EnP2-EnPD+EnPCM)),2)-pow(((-PxP2-PxPD+PxPCM)),2)
       ==>        -pow(((-PyP2-PyPD+PyPCM)),2)-pow(((-PzP2-PzPD+PzPCM)),2)))
 \end{verbatim}
-Note that {\tt RECOILMASS} is called with two arguments separated by semicolon. The last example using the {\tt MASS} macro and the summation convention to obtain an expression that is mathematically identical to the one from the {\tt RECOILMASS} macro.
+Note that {\tt RECOILMASS} is called with two arguments separated by a semicolon. The last example using the {\tt MASS} macro yields an expression that is mathematically identical to the one from the {\tt RECOILMASS} macro.
+
+Another trick.  The four-momenta of particles can be forced to have specific masses, like in the example below (options are {\tt ->e}, {\tt ->mu}, {\tt ->pi}, {\tt ->K}, {\tt ->p}):
+\begin{verbatim}
+    root> cout << FSTree::expandVariable("MASS(1->K,C->pi)") << endl;
+      ==>   (sqrt(pow(((sqrt(PxP1*PxP1+PyP1*PyP1+PzP1*PzP1+0.49367700*0.49367700)
+      ==>              +sqrt(PxPC*PxPC+PyPC*PyPC+PzPC*PzPC+0.13957000*0.13957000))),2)
+      ==>        -pow(((PxP1+PxPC)),2)
+      ==>        -pow(((PyP1+PyPC)),2)
+      ==>        -pow(((PzP1+PzPC)),2)))
+\end{verbatim}
 
 Histograms are automatically cached, so they are made only once.  To save histograms at the end of a session, use the function:
 \begin{verbatim}

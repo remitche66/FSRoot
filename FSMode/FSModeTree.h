@@ -111,7 +111,8 @@ class FSModeTree{
     static void createPHSPTree(double EnPCM = 3.097, double PxPCM = 0.0, double PyPCM = 0.0, double PzPCM = 0.0, 
                                TString modeString = "0_111", int nEvents = 10000, 
                                TString fileNameOutput = "PHSPTree_MODECODE.root",  
-                               TString ntName = "PHSPTree_MODECODE");
+                               TString ntName = "PHSPTree_MODECODE",
+                               vector<double> extraFSParticleMasses = vector<double>());
 
 
 
