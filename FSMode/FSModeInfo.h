@@ -6,7 +6,7 @@
 //    a class used for the bookkeeping of decay modes
 //
 //    every decay mode is specified in three different ways:
-//                 
+//
 //      modeCode -- two integers that count the number of particles
 //                  in a decay mode.
 //                    code1 = abcdefg
@@ -17,16 +17,18 @@
 //                         e = #pi+
 //                         f = #pi-
 //                         g = #pi0
-//                    code2 = abcdefghi
-//                         a = #lambda
-//                         b = #alambda
-//                         c = #e+
-//                         d = #e-
-//                         e = #mu+
-//                         f = #mu-
-//                         g = #p+
-//                         h = #p-
-//                         i = #eta
+//                    code2 = abcdefghijk
+//                         a = #n (neutron)
+//                         b = #nbar (antineutron)
+//                         c = #lambda
+//                         d = #alambda
+//                         e = #e+
+//                         f = #e-
+//                         g = #mu+
+//                         h = #mu-
+//                         i = #p+
+//                         j = #p-
+//                         k = #eta
 //
 //      modeString -- puts code1 and code2 in a string format:
 //                    "code2_code1".
@@ -70,19 +72,19 @@ class FSModeInfo{
 
       // *******************************************************
       // CONSTRUCTORS STARTING FROM:
-      //   "modeCode", "modeCode1,modeCode2", "modeString", 
+      //   "modeCode", "modeCode1,modeCode2", "modeString",
       //     or "modeDescription"
       // *******************************************************
 
-    FSModeInfo (pair < int,int > mCode, bool useStandardCategories = true);
-    FSModeInfo (int mCode1, int mCode2, bool useStandardCategories = true);
+    FSModeInfo (pair < long int,long int > mCode, bool useStandardCategories = true);
+    FSModeInfo (long int mCode1, long int mCode2, bool useStandardCategories = true);
     FSModeInfo (TString mString, bool useStandardCategories = true);
     FSModeInfo (vector<int> pdgIDs, bool useStandardCategories = true);
 
 
       // *******************************************************
       // RETURN INFORMATION ABOUT THIS MODE
-      //  modeString recognizes and replaces these strings 
+      //  modeString recognizes and replaces these strings
       //    if "original" is given:
       //      "MODESTRING"
       //      "MODEDESCRIPTION"
@@ -99,9 +101,9 @@ class FSModeInfo{
       //    modeString also calls the modeCuts method (see below)
       // *******************************************************
 
-    pair<int,int>  modeCode();
-    int            modeCode1();
-    int            modeCode2();
+    pair<long int,long int>  modeCode();
+    long int            modeCode1();
+    long int            modeCode2();
     TString        modeString(TString original = "MODESTRING", int counter = -1);
     TString        modeDescription();
     TString        modeGlueXFormat();
@@ -148,6 +150,8 @@ class FSModeInfo{
     int modeNMp        ();
     int modeNEm        ();
     int modeNEp        ();
+    int modeNNeutron   ();
+    int modeNANeutron  ();
     int modeNALambda   ();
     int modeNLambda    ();
     int modeNParticles ();
@@ -194,6 +198,8 @@ class FSModeInfo{
     vector<int> modeLmIndices       ();
     vector<int> modeLpIndices       ();
     vector<int> modeLIndices        ();
+    vector<int> modeANeutronIndices ();
+    vector<int> modeNeutronIndices  ();
     vector<int> modeALambdaIndices  ();
     vector<int> modeLambdaIndices   ();
     vector<int> modeParticleIndices (TString particleName = "");
@@ -201,7 +207,7 @@ class FSModeInfo{
 
       // *************************************************************
       // USEFUL FOR MAKING CUTS ON INDIVIDIUAL PARTICLE TYPES
-      //  examples for pi+ pi+ pi+ pi- pi- pi-:  
+      //  examples for pi+ pi+ pi+ pi- pi- pi-:
       //             AND(EnP[pi+]>0) --> ((EnP1>0)&&(EnP2>0)&&(EnP3>0))
       //              OR(EnP[pi+]>0) --> ((EnP1>0)||(EnP2>0)||(EnP3>0))
       //              MAX(EnP[pi+1]) --> (((EnP[pi+1])>=(EnP1))&&
@@ -222,7 +228,7 @@ class FSModeInfo{
       // HANDLES COMBINATORICS
       // *************************************************************
 
-    vector<TString> modeCombinatorics (TString varString, 
+    vector<TString> modeCombinatorics (TString varString,
                                        bool printCombinatorics = false,
                                        bool removeDuplicates = true);
 
@@ -248,7 +254,7 @@ class FSModeInfo{
       // PRIVATE MEMBER DATA
       // ****************************************************
 
-    pair<int,int> m_modeCode;
+    pair<long int,long int> m_modeCode;
     vector<TString> m_categories;
     vector<TString> m_particles;
 
@@ -282,4 +288,3 @@ class FSModeInfo{
 
 
 #endif
-

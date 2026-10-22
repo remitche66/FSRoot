@@ -20,7 +20,7 @@ map< pair<int,int>, FSModeInfo*> FSModeCollection::m_modeInfoMap;
   // *******************************************************
 
 FSModeInfo*
-FSModeCollection::addModeInfo(pair<int,int> mCode){
+FSModeCollection::addModeInfo(pair<long int,long int> mCode){
   pair<int,int> mCode2(mCode.second,mCode.first);
   if (m_modeInfoMap.find(mCode2) == m_modeInfoMap.end())
     m_modeInfoMap[mCode2] = new FSModeInfo(mCode);
@@ -28,7 +28,7 @@ FSModeCollection::addModeInfo(pair<int,int> mCode){
 }
 
 FSModeInfo*
-FSModeCollection::addModeInfo(int mCode1, int mCode2){
+FSModeCollection::addModeInfo(long int mCode1, long int mCode2){
   return addModeInfo(FSModeInfo(mCode1,mCode2).modeCode());
 }
 
@@ -114,8 +114,8 @@ FSModeCollection::addModesFromFile(TString filename){
 }
 
 
-TString 
-FSModeCollection::expandLine(TString line, TString word, TString definition, 
+TString
+FSModeCollection::expandLine(TString line, TString word, TString definition,
                    map<TString, vector<TString> >& decayMap){
   FSModeInfo miLine(line,false);
   FSModeInfo miDef(definition,false);
@@ -124,7 +124,7 @@ FSModeCollection::expandLine(TString line, TString word, TString definition,
   vector<TString> catsExtra;
   for (unsigned int i = 0; i < catsLine.size(); i++){
   for (unsigned int j = 0; j < catsDef.size(); j++){
-    if (decayMap.find(catsLine[i]) == decayMap.end() && 
+    if (decayMap.find(catsLine[i]) == decayMap.end() &&
         decayMap.find(catsDef[j]) == decayMap.end())
       catsExtra.push_back(catsLine[i]+"__"+catsDef[j]);
   }}
@@ -167,7 +167,7 @@ FSModeCollection::modeVector(TString category){
   return vector<FSModeInfo*>();
 }
 
-int 
+int
 FSModeCollection::modeVectorSize(TString category){
   return modeVector(category).size();
 }
@@ -185,8 +185,8 @@ FSModeCollection::modeVectorElement(TString category, unsigned int index){
   // DEFINE MODE-SPECIFIC CUTS USING FSCUT
   // *******************************************************
 
-void 
-FSModeCollection::defineCuts(TString category, TString cutName, TString cut, 
+void
+FSModeCollection::defineCuts(TString category, TString cutName, TString cut,
                            TString cutSideBand, double weight){
   vector<FSModeInfo*> modes = modeVector(category);
   for (unsigned int i = 0; i < modes.size(); i++){
@@ -215,12 +215,12 @@ FSModeCollection::testCombinatorics(TString category, TString testString, bool e
 
 
   // *******************************************************
-  // PRINT STRINGS WITH REPLACED KEYWORDS 
+  // PRINT STRINGS WITH REPLACED KEYWORDS
   //   (see FSModeInfo::modeString) TO A FILE
   // *******************************************************
 
 void
-FSModeCollection::printStrings(TString category, TString inputLine, TString outputFile, 
+FSModeCollection::printStrings(TString category, TString inputLine, TString outputFile,
                              int counterStart, bool append){
   vector<TString> mStrings = modeStrings(category,inputLine,counterStart);
   if (outputFile == ""){
@@ -239,7 +239,7 @@ FSModeCollection::printStrings(TString category, TString inputLine, TString outp
 
 
 vector<TString>
-FSModeCollection::modeStrings(TString category, TString inputLine, 
+FSModeCollection::modeStrings(TString category, TString inputLine,
                              int counterStart, bool show){
   vector<FSModeInfo*> mVector = modeVector(category);
   vector<TString> mStrings;
@@ -255,7 +255,7 @@ FSModeCollection::modeStrings(TString category, TString inputLine,
   // DISPLAY MODES IN THE COLLECTION
   // *******************************************************
 
-void 
+void
 FSModeCollection::display(TString category, bool showDetails){
   vector<FSModeInfo*> mvec = modeVector(category);
   for (unsigned int i = 0; i < mvec.size(); i++){
@@ -268,13 +268,13 @@ FSModeCollection::display(TString category, bool showDetails){
   // CLEAR THE COLLECTION
   // *******************************************************
 
-void 
+void
 FSModeCollection::clear(TString category){
   vector<FSModeInfo*> eraseVector = modeVector(category);
   for (unsigned int i = 0; i < eraseVector.size(); i++){
-    int code1 = eraseVector[i]->modeCode1();
-    int code2 = eraseVector[i]->modeCode2();
-    pair<int,int> mode2(code2,code1);
+    long int code1 = eraseVector[i]->modeCode1();
+    long int code2 = eraseVector[i]->modeCode2();
+    pair<long int,long int> mode2(code2,code1);
     if (m_modeInfoMap.find(mode2) != m_modeInfoMap.end()){
       if (m_modeInfoMap[mode2]) delete m_modeInfoMap[mode2];
       m_modeInfoMap.erase(mode2);
@@ -282,4 +282,3 @@ FSModeCollection::clear(TString category){
   }
   if (category == "") m_modeInfoMap.clear();
 }
-

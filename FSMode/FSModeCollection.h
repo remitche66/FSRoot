@@ -16,8 +16,8 @@ class FSModeCollection{
       // ADD MODES TO THE COLLECTION
       // *******************************************************
 
-    static FSModeInfo* addModeInfo(pair<int,int> mCode);
-    static FSModeInfo* addModeInfo(int mCode1, int mCode2);
+    static FSModeInfo* addModeInfo(pair<long int,long int> mCode);
+    static FSModeInfo* addModeInfo(long int mCode1, long int mCode2);
     static FSModeInfo* addModeInfo(TString mString);
 
 
@@ -34,7 +34,7 @@ class FSModeCollection{
 
     static vector<FSModeInfo*> modeVector(TString category = "");
     static int                 modeVectorSize(TString category = "");
-    static FSModeInfo*         modeVectorElement(TString category = "", 
+    static FSModeInfo*         modeVectorElement(TString category = "",
                                                unsigned int index = 0);
 
 
@@ -44,7 +44,7 @@ class FSModeCollection{
       //     to distinguish modes (see FSModeInfo::modeString)
       // *******************************************************
 
-    static void defineCuts(TString category, TString cutName, TString cut, 
+    static void defineCuts(TString category, TString cutName, TString cut,
                            TString cutSideBand = "", double weight = 1.0);
 
 
@@ -63,11 +63,11 @@ class FSModeCollection{
       //   See FSModeInfo::modeString(...) for keywords.
       // *******************************************************
 
-    static void printStrings(TString category, TString inputLine, 
+    static void printStrings(TString category, TString inputLine,
                              TString outputFile = "",
                              int counterStart = 1, bool append = false);
 
-    static vector<TString> modeStrings(TString category, TString inputLine, 
+    static vector<TString> modeStrings(TString category, TString inputLine,
                                        int counterStart = 1, bool show = false);
 
 
@@ -92,7 +92,7 @@ class FSModeCollection{
     static map< pair<int,int>, FSModeInfo*> m_modeInfoMap;
 
       // helper function for addModesFromFile
-    static TString expandLine(TString line, TString word, TString definition, 
+    static TString expandLine(TString line, TString word, TString definition,
                    map<TString, vector<TString> >& decayMap);
 
 

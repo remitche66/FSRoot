@@ -25,7 +25,7 @@ class FSString{
 
 
       // ********************************************************
-      // PAD A TSTRING WITH SPACES 
+      // PAD A TSTRING WITH SPACES
       //   LRC = "L", "R", or "C" for left, right, or center-justified
       // ********************************************************
 
@@ -43,7 +43,7 @@ class FSString{
       // CONVERT FROM TSTRING TO INT
       // ********************************************************
 
-    static int TString2int(TString input);
+    static long int TString2int(TString input);
 
 
       // ********************************************************
@@ -64,31 +64,31 @@ class FSString{
       // ********************************************************
       // ROUTINES TO CONVERT FROM DOUBLE TO TSTRING
       //   scientific == true:
-      //       put the result in scentific format by adding eXX 
-      //   fixdecimal == false: 
+      //       put the result in scentific format by adding eXX
+      //   fixdecimal == false:
       //       *precision* will be the number of significant digits
-      //   fixdecimal == true: 
+      //   fixdecimal == true:
       //       the last digit will be in the pow(10,*precision*) place
       //   sign:  can be "+-", "+", or "-"
       // ********************************************************
 
 
-    static TString double2TString(double x, int precision = 3, int scientific = 0, 
+    static TString double2TString(double x, int precision = 3, int scientific = 0,
                                           bool fixdecimal = false, bool show = false);
 
-    static TString latexMeasurement(double x, double ex1, 
+    static TString latexMeasurement(double x, double ex1,
                                     int precision = 2, bool fixdecimal = false);
 
-    static TString latexMeasurement(double x, TString sign1, double ex1, 
-                                              TString sign2, double ex2, 
+    static TString latexMeasurement(double x, TString sign1, double ex1,
+                                              TString sign2, double ex2,
                                     int precision = 2, bool fixdecimal = false);
 
-    static TString latexMeasurement(double x, TString sign1, double ex1, 
+    static TString latexMeasurement(double x, TString sign1, double ex1,
                                 	      TString sign2, double ex2,
                                 	      TString sign3, double ex3,
                                     int precision = 2, bool fixdecimal = false);
 
-    static TString latexMeasurement(double x, TString sign1, double ex1, 
+    static TString latexMeasurement(double x, TString sign1, double ex1,
                                 	      TString sign2, double ex2,
                                 	      TString sign3, double ex3,
                                 	      TString sign4, double ex4,
@@ -114,26 +114,23 @@ class FSString{
       // PARSE STRINGS INTO WORDS
       // ********************************************************
 
-    static vector<TString> parseTString(TString input, TString spacer = " ", 
+    static vector<TString> parseTString(TString input, TString spacer = " ",
                                         bool recordSpacers = false, bool display = false);
-    static vector<TString> parseTString(vector<TString> inputs, TString spacer = " ", 
+    static vector<TString> parseTString(vector<TString> inputs, TString spacer = " ",
                                         bool recordSpacers = false, bool display = false);
     static vector<TString> parseTString(TString input, vector<TString> spacers,
                                         bool recordSpacers = false, bool display = false);
     static vector<TString> parseTString(vector<TString> inputs, vector<TString> spacers,
                                         bool recordSpacers = false, bool display = false);
 
-    static vector<TString> parseCSV(TString input, bool display = false);
- 
-
       // ********************************************************
       // PARSE STRING INTO A MAP ACCORDING TO KEYS
       // ********************************************************
 
-    static map<TString, TString> 
+    static map<TString, TString>
        parseTStringToMap1(TString input, vector<TString> keys, bool display = false);
 
-    static map<TString, vector<TString> > 
+    static map<TString, vector<TString> >
        parseTStringToMap2(TString input, vector<TString> keys, bool display = false);
 
 
@@ -142,13 +139,13 @@ class FSString{
       // ********************************************************
 
     static TString subString(TString input, int startIndex, int endIndex);
-    static TString captureParentheses(TString input, int startIndex, 
+    static TString captureParentheses(TString input, int startIndex,
                                       TString opening = "(", TString closing = ")");
     static TString captureMarker(TString input, TString templateString, TString marker);
 
 
       // ********************************************************
-      // PARSE LOGIC 
+      // PARSE LOGIC
       //    evalLogicalTString:
       //      Determines whether or not a list of categories contains
       //        what is in the input logic.
@@ -168,14 +165,14 @@ class FSString{
       // LATEX UTILITIES
       // ********************************************************
 
-    static void latexHeader(TString filename, bool append = false, TString title = "TITLE", 
+    static void latexHeader(TString filename, bool append = false, TString title = "TITLE",
                              TString author = "RM", TString date = "\\today");
-    static void latexFigure(TString filename, TString figurename, 
-                            TString width = "1.0", TString caption = "", 
+    static void latexFigure(TString filename, TString figurename,
+                            TString width = "1.0", TString caption = "",
                             bool append = true);
     static void latexLine(TString filename, TString text, bool append = true);
     static void latexCloser(TString filename, bool append = true);
-    static void latexTemplate(TString filename, TString title = "TITLE", 
+    static void latexTemplate(TString filename, TString title = "TITLE",
                              TString author = "RM", TString date = "\\today");
 
 
@@ -186,7 +183,7 @@ class FSString{
       //      that fills left to right, top to bottom
       // ********************************************************
 
-    static void latexTable(int nrows, int ncols, TString* tableContents, 
+    static void latexTable(int nrows, int ncols, TString* tableContents,
                            TString filename, bool append = false, TString caption = "");
 
 
@@ -196,16 +193,12 @@ class FSString{
 
     static vector<TString> readLinesFromFile(TString filename);
 
-    static vector< vector<TString> > readCSVFile(TString filename, bool display = false);
-
 
       // ********************************************************
       // WRITE A TSTRING TO A FILE
       // ********************************************************
 
     static void writeTStringToFile(TString filename, TString text, bool append = true);
-
-    static void writeCSVFile(TString filename, vector< vector<TString> > csvFile);
 
 
       // ********************************************************
@@ -216,7 +209,7 @@ class FSString{
       //     NAME3 DEFN31 DEFN32
       // ********************************************************
 
-    static vector<TString> expandDefinitions(TString inputString, 
+    static vector<TString> expandDefinitions(TString inputString,
                                              map<TString, vector<TString> > definitions,
                                              TString spacer = " ",
                                              bool synchronizeDefinitions = false);
@@ -293,8 +286,8 @@ class FSString{
 
       // helper function for double2TString
 
-    static pair<int, pair<double,int> > 
-       double2SignNumberExponent(double x, int precision = 12, 
+    static pair<int, pair<double,int> >
+       double2SignNumberExponent(double x, int precision = 12,
                                  bool fixdecimal = false, bool show = false);
 
       // helper function for expandIntegers
@@ -313,4 +306,3 @@ class FSString{
 
 
 #endif
-

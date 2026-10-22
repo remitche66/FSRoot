@@ -16,19 +16,19 @@ map < TString, vector<TString> > FSModeInfo::m_submodeMap;
 
       // *******************************************************
       // CONSTRUCTORS STARTING FROM:
-      //   "modeCode", "modeCode1,modeCode2", "modeString", 
+      //   "modeCode", "modeCode1,modeCode2", "modeString",
       //     or "modeDescription"
       // *******************************************************
 
 
-FSModeInfo::FSModeInfo(pair<int,int> mCode, bool useStandardCategories){
+FSModeInfo::FSModeInfo(pair<long int,long int> mCode, bool useStandardCategories){
   m_modeCode = mCode;
   if (useStandardCategories) addStandardCategories();
 }
 
 
-FSModeInfo::FSModeInfo(int mCode1, int mCode2, bool useStandardCategories){
-  m_modeCode = pair<int,int>(mCode1,mCode2);
+FSModeInfo::FSModeInfo(long int mCode1, long int mCode2, bool useStandardCategories){
+  m_modeCode = pair<long int,long int>(mCode1,mCode2);
   if (useStandardCategories) addStandardCategories();
 }
 
@@ -36,8 +36,8 @@ FSModeInfo::FSModeInfo(int mCode1, int mCode2, bool useStandardCategories){
 FSModeInfo::FSModeInfo(TString mString, bool useStandardCategories){
   vector<TString> parts = FSString::parseTString(mString);
   vector<TString> extraCategories;
-  int code1 = 0;
-  int code2 = 0;
+  long int code1 = 0;
+  long int code2 = 0;
   for (unsigned int i = 0; i < parts.size(); i++){
          if (parts[i] == "pi0")    code1 += 1;
     else if (parts[i] == "pi-")    code1 += 10;
@@ -46,15 +46,17 @@ FSModeInfo::FSModeInfo(TString mString, bool useStandardCategories){
     else if (parts[i] == "K-")     code1 += 10000;
     else if (parts[i] == "K+")     code1 += 100000;
     else if (parts[i] == "gamma")  code1 += 1000000;
-    else if (parts[i] == "eta")    code2 += 1;
-    else if (parts[i] == "p-")     code2 += 10;
-    else if (parts[i] == "p+")     code2 += 100;
-    else if (parts[i] == "mu-")    code2 += 1000;
-    else if (parts[i] == "mu+")    code2 += 10000;
-    else if (parts[i] == "e-")     code2 += 100000;
-    else if (parts[i] == "e+")     code2 += 1000000;
-    else if (parts[i] == "ALambda")code2 += 10000000;
-    else if (parts[i] == "Lambda") code2 += 100000000;
+    else if (parts[i] == "eta")      code2 += 1;
+    else if (parts[i] == "p-")       code2 += 10;
+    else if (parts[i] == "p+")       code2 += 100;
+    else if (parts[i] == "mu-")      code2 += 1000;
+    else if (parts[i] == "mu+")      code2 += 10000;
+    else if (parts[i] == "e-")       code2 += 100000;
+    else if (parts[i] == "e+")       code2 += 1000000;
+    else if (parts[i] == "ALambda")  code2 += 10000000;
+    else if (parts[i] == "Lambda")   code2 += 100000000;
+    else if (parts[i] == "nbar")     code2 += 1000000000;
+    else if (parts[i] == "n")        code2 += 10000000000;
     else{
       TString cat = parts[i];
       extraCategories.push_back(cat);
@@ -67,10 +69,10 @@ FSModeInfo::FSModeInfo(TString mString, bool useStandardCategories){
         vector<TString> codes = FSString::parseTString(parts[i],"_");
         code1 += FSString::TString2int(codes[codes.size()-1]);
         TString scode2(codes[codes.size()-2]);
-        int ipow = 1;
+        long int ipow = 1;
         for (unsigned int dig = scode2.Length(); dig > 0; dig--){
           TString sdig(scode2[dig-1]);
-          if (sdig == "0" || sdig == "1" || sdig == "2" || sdig == "3" || sdig == "4" 
+          if (sdig == "0" || sdig == "1" || sdig == "2" || sdig == "3" || sdig == "4"
            || sdig == "0" || sdig == "6" || sdig == "7" || sdig == "8" || sdig == "9"){
             code2 += FSString::TString2int(sdig)*ipow;  ipow *= 10;
           }
@@ -85,15 +87,15 @@ FSModeInfo::FSModeInfo(TString mString, bool useStandardCategories){
       }
     }
   }
-  m_modeCode = pair<int,int>(code1,code2);
+  m_modeCode = pair<long int,long int>(code1,code2);
   if (useStandardCategories) addStandardCategories();
   addCategory(extraCategories);
 }
 
 
 FSModeInfo::FSModeInfo(vector<int> pdgIDs, bool useStandardCategories){
-  int code1 = 0;
-  int code2 = 0;
+  long int code1 = 0;
+  long int code2 = 0;
   for (unsigned int i = 0; i < pdgIDs.size(); i++){
          if (pdgIDs[i] == FSPhysics::kpdgPi0    ) code1 += 1;
     else if (pdgIDs[i] == FSPhysics::kpdgPim    ) code1 += 10;
@@ -111,6 +113,8 @@ FSModeInfo::FSModeInfo(vector<int> pdgIDs, bool useStandardCategories){
     else if (pdgIDs[i] == FSPhysics::kpdgEp     ) code2 += 1000000;
     else if (pdgIDs[i] == FSPhysics::kpdgALambda) code2 += 10000000;
     else if (pdgIDs[i] == FSPhysics::kpdgLambda ) code2 += 100000000;
+    else if (pdgIDs[i] == FSPhysics::kpdgAntiN)   code2 += 1000000000;
+    else if (pdgIDs[i] == FSPhysics::kpdgN)       code2 += 10000000000;
   }
   m_modeCode = pair<int,int>(code1,code2);
   if (useStandardCategories) addStandardCategories();
@@ -120,7 +124,7 @@ FSModeInfo::FSModeInfo(vector<int> pdgIDs, bool useStandardCategories){
 
       // *******************************************************
       // RETURN INFORMATION ABOUT THIS MODE
-      //  modeString recognizes and replaces these strings 
+      //  modeString recognizes and replaces these strings
       //    if "original" is given:
       //      "MODESTRING"
       //      "MODEDESCRIPTION"
@@ -138,17 +142,17 @@ FSModeInfo::FSModeInfo(vector<int> pdgIDs, bool useStandardCategories){
       // *******************************************************
 
 
-pair<int,int>
+pair<long int,long int>
 FSModeInfo::modeCode(){
   return m_modeCode;
 }
 
-int
+long int
 FSModeInfo::modeCode1(){
   return m_modeCode.first;
 }
 
-int
+long int
 FSModeInfo::modeCode2(){
   return m_modeCode.second;
 }
@@ -163,22 +167,22 @@ FSModeInfo::modeString(TString original, int counter){
     original.Replace(original.Index("MODESTRING"),10,mString);
   }
   while (original.Contains("MODEDESCRIPTION")){
-    TString stmp("");  
+    TString stmp("");
     stmp += modeDescription();
     original.Replace(original.Index("MODEDESCRIPTION"),15,stmp);
   }
   while (original.Contains("MODELATEX")){
-    TString stmp("");  
+    TString stmp("");
     stmp += FSString::latexSymbols(modeDescription());
     original.Replace(original.Index("MODELATEX"),9,stmp);
   }
   while (original.Contains("MODECODE1")){
-    TString stmp("");  
+    TString stmp("");
     stmp += m_modeCode.first;
     original.Replace(original.Index("MODECODE1"),9,stmp);
   }
   while (original.Contains("MODECODE2")){
-    TString stmp("");  
+    TString stmp("");
     stmp += m_modeCode.second;
     original.Replace(original.Index("MODECODE2"),9,stmp);
   }
@@ -186,12 +190,12 @@ FSModeInfo::modeString(TString original, int counter){
     original.Replace(original.Index("MODECODE"),8,mString);
   }
   while (original.Contains("MODEGLUEXFORMAT")){
-    TString stmp("");  
+    TString stmp("");
     stmp += modeGlueXFormat();
     original.Replace(original.Index("MODEGLUEXFORMAT"),15,stmp);
   }
   while (original.Contains("MODEGLUEXNAME")){
-    TString stmp("");  
+    TString stmp("");
     stmp += modeGlueXName();
     original.Replace(original.Index("MODEGLUEXNAME"),13,stmp);
   }
@@ -241,6 +245,8 @@ FSModeInfo::modeDescription(){
   np = modeNPim       ();  for (int i = 0; i < np; i++){ description += " pi- "; }
   np = modeNPi0       ();  for (int i = 0; i < np; i++){ description += " pi0 "; }
   np = modeNEta       ();  for (int i = 0; i < np; i++){ description += " eta "; }
+  np = modeNNeutron   ();  for (int i = 0; i < np; i++){ description += " n ";}
+  np = modeNANeutron  ();  for (int i = 0; i < np; i++){ description += " nbar ";}
   return description;
 }
 
@@ -256,8 +262,8 @@ FSModeInfo::mcExtrasDescription(TString mcExtras){
     for (int i = 0; i < np; i++){
       if (iP == 3) description += " nu ";
       if (iP == 2) description += " Kl ";
-      if (iP == 1) description += " n ";
-      if (iP == 0) description += " nbar ";
+      //if (iP == 1) description += " n "; // don't include neutrons now that they are in code2
+      //if (iP == 0) description += " nbar "; // don't include nbar now that they are in code 2
     }
   }
   return description;
@@ -271,20 +277,22 @@ FSModeInfo::modeGlueXFormat(){
   np = modeNGamma     ();  for (int i = 0; i < np; i++){ gluexFormat += "_1"; }
   np = modeNEp        ();  for (int i = 0; i < np; i++){ gluexFormat += "_2"; }
   np = modeNEm        ();  for (int i = 0; i < np; i++){ gluexFormat += "_3"; }
-  np = modeNMp        ();  if (np != 0){ cout << "No muons in modeGlueXFormat yet" << endl; }
-  np = modeNMm        ();  if (np != 0){ cout << "No muons in modeGlueXFormat yet" << endl; }
+  np = modeNMp        ();  for (int i = 0; i < np; i++){ gluexFormat += "_5"; }
+  np = modeNMm        ();  for (int i = 0; i < np; i++){ gluexFormat += "_6"; }
   np = modeNPi0       ();  for (int i = 0; i < np; i++){ gluexFormat += "_7"; }
   np = modeNPip       ();  for (int i = 0; i < np; i++){ gluexFormat += "_8"; }
   np = modeNPim       ();  for (int i = 0; i < np; i++){ gluexFormat += "_9"; }
   np = modeNKp        ();  for (int i = 0; i < np; i++){ gluexFormat += "_11"; }
   np = modeNKm        ();  for (int i = 0; i < np; i++){ gluexFormat += "_12"; }
+  np = modeNNeutron   ();  for (int i = 0; i < np; i++){ gluexFormat += "_13"; } // goes in order similar to mesons
   np = modeNKs        ();  for (int i = 0; i < np; i++){ gluexFormat += "_16"; }
   np = modeNEta       ();  for (int i = 0; i < np; i++){ gluexFormat += "_17"; }
+  np = modeNPm        ();  for (int i = 0; i < np; i++){ gluexFormat += "_15"; } // appears before proton for some reason
+  np = modeNANeutron  ();  for (int i = 0; i < np; i++){ gluexFormat += "_25"; }
+  np = modeNALambda   ();  for (int i = 0; i < np; i++){ gluexFormat += "_26"; }// appears here for some reason
   np = modeNPp        ();  for (int i = 0; i < np; i++){ gluexFormat += "_14"; }
-  np = modeNPm        ();  for (int i = 0; i < np; i++){ gluexFormat += "_15"; }
   np = modeNLambda    ();  for (int i = 0; i < np; i++){ gluexFormat += "_18"; }
-  np = modeNALambda   ();  for (int i = 0; i < np; i++){ gluexFormat += "_26"; }
-  return gluexFormat;
+return gluexFormat;
 }
 
 TString
@@ -300,6 +308,8 @@ FSModeInfo::modeGlueXName(){
   np = modeNKs        ();  for (int i = 0; i < np; i++){ gluexName += "ks"; }
   np = modeNEta       ();  for (int i = 0; i < np; i++){ gluexName += "eta"; }
   np = modeNLambda    ();  for (int i = 0; i < np; i++){ gluexName += "lamb"; }
+  np = modeNNeutron   ();  for (int i = 0; i < np; i++){ gluexName += "n";}// swapped order here
+  np = modeNANeutron  ();  for (int i = 0; i < np; i++){ gluexName += "nbar";}
   return gluexName;
 }
 
@@ -307,7 +317,7 @@ TString
 FSModeInfo::modeComboFormat(int min, TString tag){
   TString cF("");
   int np;
-  if (tag != "") tag = "_" + tag + "_";  
+  if (tag != "") tag = "_" + tag + "_";
   TString ind[10]; for (int i = 0; i < 10; i++){ind[i] = tag + FSString::int2TString(i+min);}
   np = modeNGamma  ();  for (int i = 0; i < np; i++){ cF += "[gamma"  ; cF += ind[i] + "],"; }
   np = modeNEp     ();  for (int i = 0; i < np; i++){ cF += "[e+"     ; cF += ind[i] + "],"; }
@@ -325,15 +335,21 @@ FSModeInfo::modeComboFormat(int min, TString tag){
   np = modeNPm     ();  for (int i = 0; i < np; i++){ cF += "[p-"     ; cF += ind[i] + "],"; }
   np = modeNLambda ();  for (int i = 0; i < np; i++){ cF += "[Lambda" ; cF += ind[i] + "],"; }
   np = modeNALambda();  for (int i = 0; i < np; i++){ cF += "[ALambda"; cF += ind[i] + "],"; }
+  np = modeNNeutron();  for (int i = 0; i < np; i++){ cF += "[n"      ; cF += ind[i] + "],"; }
+  np = modeNANeutron(); for (int i = 0; i < np; i++){ cF += "[nbar"   ; cF += ind[i] + "],"; }
   if (cF.Length() != 0) cF = FSString::subString(cF,0,cF.Length()-1);
   return cF;
 }
 
 
-vector<TString> 
-FSModeInfo::particles(){ 
+
+// this was the issue, had neutron at the bottom, needed to be at the top
+vector<TString>
+FSModeInfo::particles(){
   if (m_particles.size() != 0) return m_particles;
   int np;
+  np = modeNNeutron   ();  for (int i = 0; i < np; i++){ m_particles.push_back("n");   }
+  np = modeNANeutron  ();  for (int i = 0; i < np; i++){ m_particles.push_back("nbar");}
   np = modeNLambda    ();  for (int i = 0; i < np; i++){ m_particles.push_back("Lambda"); }
   np = modeNALambda   ();  for (int i = 0; i < np; i++){ m_particles.push_back("ALambda"); }
   np = modeNEp        ();  for (int i = 0; i < np; i++){ m_particles.push_back("e+"); }
@@ -389,7 +405,12 @@ int FSModeInfo::modeNALambda   (){return (((m_modeCode.second%100000000)-
                                          (m_modeCode.second%10000000))/10000000); }
 int FSModeInfo::modeNLambda    (){return (((m_modeCode.second%1000000000)-
                                          (m_modeCode.second%100000000))/100000000); }
-
+int FSModeInfo::modeNANeutron   (){return (((m_modeCode.second%(long)10000000000)-
+                                         (m_modeCode.second%(long)1000000000))/(long)1000000000); }
+int FSModeInfo::modeNNeutron    (){
+                  int val = (((m_modeCode.second%(long)100000000000)-
+                                         (m_modeCode.second%(long)10000000000))/(long)10000000000);
+                                         return  val;}
 int FSModeInfo::modeNParticles (){return ( 1*modeNPi0       () +
                                          1*modeNPim       () +
                                          1*modeNPip       () +
@@ -405,7 +426,9 @@ int FSModeInfo::modeNParticles (){return ( 1*modeNPi0       () +
                                          1*modeNEm        () +
                                          1*modeNEp        () +
                                          1*modeNALambda   () +
-                                         1*modeNLambda    ()); }
+                                         1*modeNLambda    () +
+                                         1*modeNNeutron   () +
+                                         1*modeNANeutron  ()); }
 
 int FSModeInfo::modeCharge     (){return ( 0*modeNPi0       () +
                                         -1*modeNPim       () +
@@ -427,7 +450,9 @@ int FSModeInfo::modeCharge     (){return ( 0*modeNPi0       () +
 int FSModeInfo::modeBaryonNumber(){return (-1*modeNALambda  () +
                                           1*modeNLambda   () +
                                          -1*modeNPm       () +
-                                          1*modeNPp       ()); }
+                                          1*modeNPp       () +
+                                          1*modeNNeutron  () +
+                                         -1*modeNANeutron ()); }
 
 int FSModeInfo::modeStrangeness (){
   int S = -1*(modeNKp()+modeNALambda()) + 1*(modeNKm()+modeNLambda());
@@ -463,6 +488,8 @@ vector<double> FSModeInfo::modeMasses(){
   for (int i = 0; i < modeNPip    (); i++){ masses.push_back(FSPhysics::XMpi); }
   for (int i = 0; i < modeNPim    (); i++){ masses.push_back(FSPhysics::XMpi); }
   for (int i = 0; i < modeNPi0    (); i++){ masses.push_back(FSPhysics::XMpi0); }
+  for (int i = 0; i < modeNNeutron(); i++){ masses.push_back(FSPhysics::XMn);}
+  for (int i = 0; i < modeNANeutron();i++){ masses.push_back(FSPhysics::XMn);}
   return masses;
 }
 
@@ -478,6 +505,8 @@ FSModeInfo FSModeInfo::modeCC(){
   np = modeNMm        ();  for (int i = 0; i < np; i++){ cc += " mu+ "; }
   np = modeNPp        ();  for (int i = 0; i < np; i++){ cc += " p- "; }
   np = modeNPm        ();  for (int i = 0; i < np; i++){ cc += " p+ "; }
+  np = modeNNeutron   ();  for (int i = 0; i < np; i++){ cc += " n ";}
+  np = modeNANeutron  ();  for (int i = 0; i < np; i++){ cc += " nbar ";}
   np = modeNLambda    ();  for (int i = 0; i < np; i++){ cc += " ALambda "; }
   np = modeNALambda   ();  for (int i = 0; i < np; i++){ cc += " Lambda "; }
   np = modeNKp        ();  for (int i = 0; i < np; i++){ cc += " K- "; }
@@ -522,6 +551,8 @@ bool FSModeInfo::modeContains(TString mString){
   if (mitest.modeNPim()     > modeNPim())     return false;
   if (mitest.modeNPi0()     > modeNPi0())     return false;
   if (mitest.modeNEta()     > modeNEta())     return false;
+  if (mitest.modeNNeutron() > modeNNeutron()) return false;
+  if (mitest.modeNANeutron()>modeNANeutron()) return false;
   return true;
 }
 
@@ -530,12 +561,12 @@ bool FSModeInfo::modeContains(TString mString){
   // GET PARTICLE INDICES
   // *******************************************************
 
-vector<int> 
+vector<int>
 FSModeInfo::modeParticleIndices(TString particleName){
   vector<TString> pv = particles();
   vector<int> indexVector;
   for (unsigned int i = 0; i < pv.size(); i++){
-    if ( (particleName == pv[i]) || 
+    if ( (particleName == pv[i]) ||
         ((particleName == "e")  && ((pv[i] == "e+")  || (pv[i] == "e-")))  ||
         ((particleName == "mu") && ((pv[i] == "mu+") || (pv[i] == "mu-"))) ||
         ((particleName == "pi") && ((pv[i] == "pi+") || (pv[i] == "pi-"))) ||
@@ -567,7 +598,7 @@ FSModeInfo::modeParticleIndices(TString particleName){
   return indexVector;
 }
 
-vector<int> FSModeInfo::modePi0Indices     (){return modeParticleIndices ("pi0");}   
+vector<int> FSModeInfo::modePi0Indices     (){return modeParticleIndices ("pi0");}
 vector<int> FSModeInfo::modePimIndices     (){return modeParticleIndices ("pi-");}
 vector<int> FSModeInfo::modePipIndices     (){return modeParticleIndices ("pi+");}
 vector<int> FSModeInfo::modePiIndices      (){return modeParticleIndices ("pi");}
@@ -594,6 +625,8 @@ vector<int> FSModeInfo::modeLpIndices      (){return modeParticleIndices ("l+");
 vector<int> FSModeInfo::modeLIndices       (){return modeParticleIndices ("l");}
 vector<int> FSModeInfo::modeALambdaIndices (){return modeParticleIndices ("ALambda");}
 vector<int> FSModeInfo::modeLambdaIndices  (){return modeParticleIndices ("Lambda");}
+vector<int> FSModeInfo::modeNeutronIndices (){return modeParticleIndices ("n");}
+vector<int> FSModeInfo::modeANeutronIndices(){return modeParticleIndices ("nbar");}
 
 
 
@@ -602,7 +635,7 @@ vector<int> FSModeInfo::modeLambdaIndices  (){return modeParticleIndices ("Lambd
   // USEFUL FOR MAKING CUTS ON INDIVIDIUAL PARTICLE TYPES
   // *************************************************************
 
-//  examples for pi+ pi+ pi+ pi- pi- pi-:  
+//  examples for pi+ pi+ pi+ pi- pi- pi-:
 //             AND(EnP[pi+]>0) --> ((EnP1>0)&&(EnP2>0)&&(EnP3>0))
 //              OR(EnP[pi+]>0) --> ((EnP1>0)||(EnP2>0)||(EnP3>0))
 //               MAX(EnP[pi+]) --> (((EnP[pi+])>=(EnP2))&&
@@ -615,7 +648,7 @@ vector<int> FSModeInfo::modeLambdaIndices  (){return modeParticleIndices ("Lambd
 //   (also allows nested functions although it may not be useful)
 //   NOTE:  this method is called by the modeString method
 
-TString 
+TString
 FSModeInfo::modeCuts(TString varString){
   //varString = FSString::removeWhiteSpace(varString);
   //if (!FSString::checkParentheses(varString)){
@@ -629,14 +662,14 @@ FSModeInfo::modeCuts(TString varString){
   TString MINMARK("MIN(");
   TString LISTMARK("LIST(");
   TString newString(varString);
-  while (newString.Contains(ANDMARK) || 
+  while (newString.Contains(ANDMARK) ||
          newString.Contains(ORMARK)  ||
          newString.Contains(MAXMARK) ||
          newString.Contains(MINMARK) ||
          newString.Contains(LISTMARK)){
     TString markDeepest = "";
     TString encString = newString;
-    while (encString.Contains(ANDMARK) || 
+    while (encString.Contains(ANDMARK) ||
            encString.Contains(ORMARK)  ||
            encString.Contains(MAXMARK) ||
            encString.Contains(MINMARK) ||
@@ -703,12 +736,12 @@ FSModeInfo::modeCuts(TString varString){
   // CHECK IF THIS IS A PROPER "modeDescription"
   // *******************************************************
 
-bool 
+bool
 FSModeInfo::isModeDescription(TString mDescription){
   vector<TString> p = FSString::parseTString(mDescription);
   if (p.size() == 0) return false;
   for (unsigned int i = 0; i < p.size(); i++){
-    if ((p[i] != "pi0") && 
+    if ((p[i] != "pi0") &&
         (p[i] != "pi-") &&
         (p[i] != "pi+") &&
         (p[i] != "Ks") &&
@@ -723,7 +756,9 @@ FSModeInfo::isModeDescription(TString mDescription){
         (p[i] != "e-") &&
         (p[i] != "e+") &&
         (p[i] != "ALambda") &&
-        (p[i] != "Lambda")) return false;
+        (p[i] != "Lambda") &&
+        (p[i] != "n") &&
+        (p[i] != "nbar")) return false;
   }
   return true;
 }
@@ -734,7 +769,7 @@ FSModeInfo::isModeDescription(TString mDescription){
   // CHECK IF THIS IS A PROPER "modeString"
   // *******************************************************
 
-bool 
+bool
 FSModeInfo::isModeString(TString mString){
   vector<TString> parts = FSString::parseTString(mString);
   if (parts.size() != 1) return false;
@@ -754,7 +789,7 @@ FSModeInfo::isModeString(TString mString){
   // DEFINE SUBMODES FOR MORE COMPLICATED COMBINATORICS
   // *************************************************************
 
-void 
+void
 FSModeInfo::setSubmode (TString particleName,
                       vector<TString> particleDecays){
   m_submodeMap[particleName] = particleDecays;
@@ -773,7 +808,7 @@ FSModeInfo::modeCombinatorics(TString varString, bool printCombinatorics, bool r
   vector<TString> allCombinatorics;
 
 
-    // check if there is a requirement that varString contains 
+    // check if there is a requirement that varString contains
     //   all particles in this final state
 
   bool completeFinalState = false;
@@ -798,8 +833,8 @@ FSModeInfo::modeCombinatorics(TString varString, bool printCombinatorics, bool r
     vector< TString > modifiedStrings;
 
     if (!FSString::checkParentheses(expandedVarStrings[isubmode],"[","]")){
-      cout << "FSModeInfo WARNING: possible problem with brackets in " << 
-                 expandedVarStrings[isubmode] << endl; 
+      cout << "FSModeInfo WARNING: possible problem with brackets in " <<
+                 expandedVarStrings[isubmode] << endl;
     }
 
        // first make lists like this (for example K+ K+ K- K- pi+ pi- pi0 pi0):
@@ -826,6 +861,8 @@ FSModeInfo::modeCombinatorics(TString varString, bool printCombinatorics, bool r
         if (found) continue;
                // (careful with the order of these lines...)
              if (contents.Index("ALL")     == 0){ particleLists.push_back(modeParticleIndices()); }
+        else if (contents.Index("n")       == 0){ particleLists.push_back(modeNeutronIndices()); }
+        else if (contents.Index("nbar")    == 0){ particleLists.push_back(modeANeutronIndices());}
         else if (contents.Index("Lambda")  == 0){ particleLists.push_back(modeLambdaIndices()); }
         else if (contents.Index("ALambda") == 0){ particleLists.push_back(modeALambdaIndices()); }
         else if (contents.Index("eta")     == 0){ particleLists.push_back(modeEtaIndices()); }
@@ -859,7 +896,7 @@ FSModeInfo::modeCombinatorics(TString varString, bool printCombinatorics, bool r
 
       // check for a complete final state
 
-    if (completeFinalState && (replaceStrings.size() > 0) && 
+    if (completeFinalState && (replaceStrings.size() > 0) &&
          ((int) replaceStrings.size() != modeNParticles())) continue;
 
       // now recombine particleLists into all possible combinations
@@ -983,7 +1020,7 @@ FSModeInfo::modeCombinatorics(TString varString, bool printCombinatorics, bool r
   if (allCombinatorics.size() > 1){
     for (unsigned int i = 0; i < allCombinatorics.size()-1; i++){
     for (unsigned int j = i+1; j < allCombinatorics.size(); j++){
-      if (FSString::TString2string(allCombinatorics[j]) < 
+      if (FSString::TString2string(allCombinatorics[j]) <
           FSString::TString2string(allCombinatorics[i])){
         TString temp = allCombinatorics[i];
         allCombinatorics[i] = allCombinatorics[j];
@@ -1031,8 +1068,8 @@ FSModeInfo::categories(TString category, bool show){
 }
 
 
-void 
-FSModeInfo::addStandardCategories(){ 
+void
+FSModeInfo::addStandardCategories(){
 
   if (FSControl::DEBUG)
     cout << "FSModeInfo:  adding standard categories to mode " << modeString() << endl;
@@ -1053,8 +1090,11 @@ FSModeInfo::addStandardCategories(){
   int nep  = modeNEp();
   int nal  = modeNALambda();
   int nl   = modeNLambda();
+  int nn   = modeNNeutron();
+  int nnbar = modeNANeutron();
 
   if (nal+nl > 0) m_categories.push_back("HasLambdas");
+  if (nn+nnbar > 0) m_categories.push_back("HasNeutrons");
   if (nem+nep > 0) m_categories.push_back("HasElectrons");
   if (nmm+nmp > 0) m_categories.push_back("HasMuons");
   if (ng > 0) m_categories.push_back("Radiative");
@@ -1078,7 +1118,7 @@ FSModeInfo::addStandardCategories(){
                        + FSString::int2TString(ng) + "G";
   m_categories.push_back(nTKnVnGGnG);
 
-  int nbody = npi0+npim+npip+nks+nkm+nkp+ne+npm+npp+ng+nmm+nmp+nem+nep+nal+nl;
+  int nbody = npi0+npim+npip+nks+nkm+nkp+ne+npm+npp+ng+nmm+nmp+nem+nep+nal+nl+nn+nnbar;
   TString sbody("");  sbody += nbody;  sbody += "Body";
   m_categories.push_back(sbody);
 
@@ -1092,7 +1132,7 @@ FSModeInfo::addStandardCategories(){
 
   if (FSControl::DEBUG)
     cout << "FSModeInfo:  done adding standard categories to mode " << modeString() << endl;
-  
+
 }
 
 
@@ -1156,4 +1196,3 @@ FSModeInfo::display(int counter, bool showDetails){
   cout << "                        MODECOUNTER     ->  " << modeString("MODECOUNTER    ", counter) << endl;
   cout << endl;
 }
-

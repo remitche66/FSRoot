@@ -31,7 +31,7 @@ FSString::TString2string(TString input){
 
 
   // ********************************************************
-  // PAD A TSTRING WITH SPACES 
+  // PAD A TSTRING WITH SPACES
   //   LRC = "L", "R", or "C" for left, right, or center-justified
   // ********************************************************
 
@@ -69,14 +69,14 @@ FSString::compareTStrings(TString inputNoWildCards, TString inputWithWildCards, 
 }
 
 bool
-FSString::compareChars(const char* cNone, const char* cWith) { 
+FSString::compareChars(const char* cNone, const char* cWith) {
   if (*cNone == '\0' && *cWith == '\0') return true;
   if (*cNone == '\0' && *cWith == '*' && *(cWith+1) == '\0') return true;
   if (*cNone == '\0' || *cWith == '\0') return false;
-  if (*cNone == *cWith || *cWith == '?') return compareChars(cNone+1,cWith+1); 
-  if (*cWith == '*') return compareChars(cNone,cWith+1) || compareChars(cNone+1,cWith); 
+  if (*cNone == *cWith || *cWith == '?') return compareChars(cNone+1,cWith+1);
+  if (*cWith == '*') return compareChars(cNone,cWith+1) || compareChars(cNone+1,cWith);
   return false;
-} 
+}
 
 
   // ********************************************************
@@ -84,9 +84,9 @@ FSString::compareChars(const char* cNone, const char* cWith) {
   // ********************************************************
 
 
-int
+long int
 FSString::TString2int(TString input){
-  return (int) FSString::TString2double(input);
+  return (long int) FSString::TString2double(input);
 }
 
 double
@@ -113,7 +113,7 @@ FSString::TString2double(TString input){
   // CONVERT FROM INT TO TSTRING
   // ********************************************************
 
-TString 
+TString
 FSString::int2TString(long int number, int minimumDigits, bool useCommas){
   TString sign("");  if (number < 0) sign = "-";
   TString snumber("");  snumber += abs(number);
@@ -125,7 +125,7 @@ FSString::int2TString(long int number, int minimumDigits, bool useCommas){
   if (useCommas){
     int length = snumber.Length();
     for (int i = length-3; i > 0; i -= 3){
-      snumber.Insert(i,",");      
+      snumber.Insert(i,",");
     }
   }
   return (sign+snumber);
@@ -136,34 +136,34 @@ FSString::int2TString(long int number, int minimumDigits, bool useCommas){
       // ********************************************************
       // ROUTINES TO CONVERT FROM DOUBLE TO TSTRING
       //   scientific == true:
-      //       put the result in scentific format by adding eXX 
-      //   fixdecimal == false: 
+      //       put the result in scentific format by adding eXX
+      //   fixdecimal == false:
       //       *precision* will be the number of significant digits
-      //   fixdecimal == true: 
+      //   fixdecimal == true:
       //       the last digit will be in the pow(10,*precision*) place
       //   sign:  can be "+-", "+", or "-"
       // ********************************************************
 
 pair<int, pair<double,int> >
 FSString::double2SignNumberExponent(double x, int precision, bool fixdecimal, bool show){
-  if (!fixdecimal && precision > 12){ 
+  if (!fixdecimal && precision > 12){
     cout << "FSString::double2SignNumberExponent: max digits = 12" << endl; exit(0); }
-  if (!fixdecimal && precision <  1){ 
+  if (!fixdecimal && precision <  1){
     cout << "FSString::double2SignNumberExponent: digits < 1" << endl; exit(0); }
   double ax = abs(x);  ax += ax*1.0e-14;  int exp = 0;
   int isign = 1; if (x < 0.0) isign = -1;
   while (ax >= 10.0 && abs(exp) < 100){ ax /= 10.0; exp++; }
   while (ax  <  1.0 && abs(exp) < 100){ ax *= 10.0; exp--; }
   if (abs(exp) == 100) {isign = 1; ax = 0.0; exp = 0; }
-  if (fixdecimal && (exp-precision+1) > 12){ 
-    cout << "FSString::double2SignNumberExponent WARNING: sig digits = " 
+  if (fixdecimal && (exp-precision+1) > 12){
+    cout << "FSString::double2SignNumberExponent WARNING: sig digits = "
          << exp-precision+1 << endl;}
   if (!fixdecimal){ ax += ax*1.0e-14; ax = round(pow(10,precision-1)*ax)/pow(10,precision-1);
                     ax += ax*1.0e-14; }
   if (fixdecimal){  ax += ax*1.0e-14; ax = round(pow(10,exp-precision)*ax)/pow(10,exp-precision);
                     ax += ax*1.0e-14; }
   if (ax < 1.0) {isign = 1; ax = 0.0; exp = 0; }
-  if (ax >= 10.0) 
+  if (ax >= 10.0)
     return FSString::double2SignNumberExponent(isign*ax*pow(10.0,exp),precision,fixdecimal,show);
   if (show){ cout.precision(12); cout << isign << " " << std::fixed << ax << " " << exp << endl; }
   return pair<int, pair<double,int> >(isign,pair<double,int>(ax,exp));
@@ -200,7 +200,7 @@ FSString::double2TString(double x, int precision, int scientific, bool fixdecima
     int iDigitPlace = 0;
     for (int iPlace = -1*firstPlace; iPlace <= -1*lastPlace; iPlace++){
       if (iPlace == 1) sDouble += ".";
-      if (iPlace >= -1*firstDigitPlace && iPlace <= -1*lastDigitPlace){ 
+      if (iPlace >= -1*firstDigitPlace && iPlace <= -1*lastDigitPlace){
             sDouble += saxNum[iDigitPlace++]; }
       else{ sDouble += "0"; }
     }
@@ -209,8 +209,8 @@ FSString::double2TString(double x, int precision, int scientific, bool fixdecima
 }
 
 
-TString 
-FSString::latexMeasurement(double x, double ex1, 
+TString
+FSString::latexMeasurement(double x, double ex1,
                                   int precision, bool fixdecimal){
   if (!fixdecimal){
     int ex1precision = -1*precision + 1
@@ -223,9 +223,9 @@ FSString::latexMeasurement(double x, double ex1,
 }
 
 
-TString 
-FSString::latexMeasurement(double x, TString sign1, double ex1, 
-                                   TString sign2, double ex2, 
+TString
+FSString::latexMeasurement(double x, TString sign1, double ex1,
+                                   TString sign2, double ex2,
                                   int precision, bool fixdecimal){
   if (!fixdecimal){
     int ex1precision = -1*precision + 1
@@ -248,10 +248,10 @@ FSString::latexMeasurement(double x, TString sign1, double ex1,
 }
 
 
-TString 
-FSString::latexMeasurement(double x, TString sign1, double ex1, 
+TString
+FSString::latexMeasurement(double x, TString sign1, double ex1,
                                    TString sign2, double ex2,
-                                   TString sign3, double ex3, 
+                                   TString sign3, double ex3,
                                   int precision, bool fixdecimal){
   if (!fixdecimal){
     int ex1precision = -1*precision + 1
@@ -281,8 +281,8 @@ FSString::latexMeasurement(double x, TString sign1, double ex1,
 }
 
 
-TString 
-FSString::latexMeasurement(double x, TString sign1, double ex1, 
+TString
+FSString::latexMeasurement(double x, TString sign1, double ex1,
                                    TString sign2, double ex2,
                                    TString sign3, double ex3,
                                    TString sign4, double ex4,
@@ -346,7 +346,7 @@ FSString::root2latexSymbols(TString input){
 
 TString
 FSString::latexSymbols(TString input){
-  return root2latexSymbols(rootSymbols(input)); 
+  return root2latexSymbols(rootSymbols(input));
 }
 
 
@@ -549,7 +549,7 @@ FSString::parseTString(TString input, TString spacer, bool recordSpacers, bool d
   if (display) cout << "FSString::parseTString output:" << endl;
   if (display) for (unsigned int i = 0; i < words.size(); i++){ cout << " " << words[i] << endl; }
   return words;
-}    
+}
 
 vector<TString>
 FSString::parseTString(vector<TString> inputs, TString spacer, bool recordSpacers, bool display){
@@ -607,28 +607,6 @@ FSString::parseTString(vector<TString> inputs, vector<TString> spacers, bool rec
 }
 
 
-vector<TString>
-FSString::parseCSV(TString input, bool display){
-  input = FSString::removeTabs(input);
-  vector<TString> words;
-  TString word = "";
-  bool inQuotes = false;
-  for (int i = 0; i < input.Length(); i++){
-    TString digit(input[i]);
-    if (digit != "," || inQuotes){ word += digit; }
-    if (digit == "," && !inQuotes){ words.push_back(word); word = "";}
-    if (digit == "\""){ inQuotes = !inQuotes; }
-  }
-  words.push_back(word);
-  if (display){
-    for (unsigned int i = 0; i < words.size(); i++){
-       cout << "(" << i+1 << ") " << words[i] << endl;
-     }
-  }
-  return words;
-}
-
-
    // ********************************************************
    // PARSE STRING INTO A MAP ACCORDING TO KEYS
    // ********************************************************
@@ -639,7 +617,7 @@ FSString::parseTStringToMap2(TString input, vector<TString> keys, bool display){
   vector<TString> words = parseTString(input,keys,true);
   TString key = ""; TString value = "";
   for (unsigned int i = 0; i < words.size(); i++){
-    bool isKey = false; 
+    bool isKey = false;
     for (unsigned int j = 0; j < keys.size(); j++){ if (words[i] == keys[j]){ isKey = true; break; } }
     if (isKey){
       if (key != "") wordMap[key].push_back(value);
@@ -765,7 +743,7 @@ FSString::captureMarker(TString input, TString templateString, TString marker){
 
 
       // ********************************************************
-      // PARSE LOGIC 
+      // PARSE LOGIC
       // ********************************************************
 
 
@@ -782,7 +760,7 @@ FSString::evalLogicalTString(TString input, vector<TString> cats){
   spacers.push_back("&");  spacers.push_back("|");  spacers.push_back("!");
   vector<TString> words = FSString::parseTString(input,spacers,true);
   for (unsigned int i = 0; i < words.size(); i++){
-    if ((words[i] != "(") && (words[i] != ")") && (words[i] != ",") && 
+    if ((words[i] != "(") && (words[i] != ")") && (words[i] != ",") &&
         (words[i] != "&") && (words[i] != "|") && (words[i] != "!")){
       TString found("(1==0)");
       for (unsigned int ic = 0; ic < cats.size(); ic++){
@@ -797,7 +775,7 @@ FSString::evalLogicalTString(TString input, vector<TString> cats){
 }
 
 
-bool 
+bool
 FSString::evalBooleanTString(TString input){
   while (input.Contains("&&")) input.Replace(input.Index("&&"),2,"%%");
   while (input.Contains("&"))  input.Replace(input.Index("&"), 1,"%%");
@@ -861,7 +839,7 @@ FSString::latexHeader(TString filename, bool append, TString title, TString auth
 
 
 void
-FSString::latexFigure(TString filename, TString figurename, 
+FSString::latexFigure(TString filename, TString figurename,
                              TString width, TString caption, bool append){
   filename = gSystem->ExpandPathName(TString2string(filename).c_str());
   std::ios_base::openmode mode = ios::out;
@@ -916,16 +894,7 @@ FSString::latexTemplate(TString filename, TString title, TString author, TString
   latexFigure(filename,"tempFigure.pdf","0.7","example figure",true);
   TString table[9] = {"1","2","3","4","5","6","7","8","9"};
   latexTable(3,3,table,filename,true,"table caption");
-  writeTStringToFile(filename,"\n\n\n\\begin{thebibliography}{9}",true);
-  writeTStringToFile(filename,"\n\n%\\cite{BESIII:2022bse}",true);
-  writeTStringToFile(filename,"\\bibitem{BESIII:2022bse}",true);
-  writeTStringToFile(filename,"M.~Ablikim \\textit{et al.} [BESIII],",true);
-  writeTStringToFile(filename,"%``Observation of a New X(3872) Production Process e+e-\\textrightarrow{}\\ensuremath{\\omega}X(3872),''",true);
-  writeTStringToFile(filename,"Phys. Rev. Lett. \\textbf{130}, no.15, 151904 (2023)",true);
-  writeTStringToFile(filename,"doi:10.1103/PhysRevLett.130.151904",true);
-  writeTStringToFile(filename,"[arXiv:2212.07291 [hep-ex]].",true);
-  writeTStringToFile(filename,"\n\n\\end{thebibliography}",true);
-  latexCloser(filename,true);  
+  latexCloser(filename,true);
 }
 
 
@@ -945,20 +914,6 @@ FSString::writeTStringToFile(TString filename, TString text, bool append){
   }
 }
 
-void
-FSString::writeCSVFile(TString filename, vector< vector<TString> > csvFile){
-  bool append = false;
-  for (unsigned int i = 0; i < csvFile.size(); i++){
-    TString line("");
-    for (unsigned int j = 0; j < csvFile[i].size(); j++){
-      line += csvFile[i][j];
-      if (j != csvFile[i].size()-1) line += ",";
-	}
-    writeTStringToFile(filename,line,append);
-    append = true;
-  }
-}
-
 
   // ********************************************************
   // MAKE A LATEX TABLE
@@ -968,7 +923,7 @@ FSString::writeCSVFile(TString filename, vector< vector<TString> > csvFile){
   // ********************************************************
 
 void
-FSString::latexTable(int nrows, int ncols, TString* tableContents, 
+FSString::latexTable(int nrows, int ncols, TString* tableContents,
                             TString filename, bool append, TString caption){
   filename = gSystem->ExpandPathName(TString2string(filename).c_str());
   std::ios_base::openmode mode = ios::out;
@@ -995,7 +950,7 @@ FSString::latexTable(int nrows, int ncols, TString* tableContents,
   if (caption != "") outfile << "\\end{table}" << endl;
   outfile << endl;
   outfile.close();
-}  
+}
 
 
   // ********************************************************
@@ -1015,20 +970,10 @@ FSString::readLinesFromFile(TString filename){
     TString line = FSString::string2TString(instring);
     if (line.Length() > 0 && line[line.Length()-1] == '\r')
       line.Replace(line.Length()-1,1,"");
-    lines.push_back(line); 
+    lines.push_back(line);
   }
   infile.close();
   return lines;
-}
-
-vector< vector<TString> >
-FSString::readCSVFile(TString filename, bool display){
-  vector< vector<TString> > csvfile;
-  vector<TString> lines = readLinesFromFile(filename);
-  for (unsigned int i = 0; i < lines.size(); i++){
-    csvfile.push_back(FSString::parseCSV(lines[i],display)); 
-  }
-  return csvfile;
 }
 
 
@@ -1040,8 +985,8 @@ FSString::readCSVFile(TString filename, bool display){
   //     NAME3 DEFN31 DEFN32
   // *************************************************************
 
-vector<TString> 
-FSString::expandDefinitions(TString inputString, 
+vector<TString>
+FSString::expandDefinitions(TString inputString,
                                    map< TString, vector<TString> > definitions,
                                    TString spacer, bool synchronizeDefinitions){
 
@@ -1103,7 +1048,7 @@ FSString::expandDefinitions(TString inputString,
 
     vector<TString>::iterator vIter;
     vector< pair< TString, vector<TString> > >::reverse_iterator mIter;
-    for (vIter = expanded.begin(); 
+    for (vIter = expanded.begin();
           vIter != expanded.end(); vIter++){
       for (mIter = defVector.rbegin(); mIter != defVector.rend(); mIter++){
         TString element(spacer+*vIter+spacer);
@@ -1112,7 +1057,7 @@ FSString::expandDefinitions(TString inputString,
       if (mIter != defVector.rend()) break;
     }
 
-      // if one is found, remove it and add new elements with 
+      // if one is found, remove it and add new elements with
       //   expanded definitions, then repeat
 
     if (vIter != expanded.end()){
@@ -1159,7 +1104,7 @@ FSString::expandDefinitions(TString inputString,
   // PARSE HISTOGRAM INPUTS
   // ********************************************************
 
-int    
+int
 FSString::parseBoundsNBinsX(TString bounds){
   vector<TString> boundVector = parseBounds(bounds);
   if (boundVector.size() < 3) return 0;
@@ -1180,7 +1125,7 @@ FSString::parseBoundsUpperX(TString bounds){
   return TString2double(boundVector[2]);
 }
 
-int    
+int
 FSString::parseBoundsNBinsY(TString bounds){
   vector<TString> boundVector = parseBounds(bounds);
   if (boundVector.size() != 6) return 0;
@@ -1273,7 +1218,7 @@ FSString::makeBounds(int dimension){
 }
 
 
-TString 
+TString
 FSString::parseVariableX(TString variable){
   while (variable.Contains("::")){ variable.Replace(variable.Index("::"),2,"COLONCOLON"); }
   vector<TString> vars = FSString::parseTString(variable,":");
@@ -1284,7 +1229,7 @@ FSString::parseVariableX(TString variable){
   return varXY;
 }
 
-TString 
+TString
 FSString::parseVariableY(TString variable){
   while (variable.Contains("::")){ variable.Replace(variable.Index("::"),2,"COLONCOLON"); }
   vector<TString> vars = FSString::parseTString(variable,":");
@@ -1375,7 +1320,7 @@ FSString::expandSUM(TString inputString){
         TString word1 = captureParentheses(inputString,i+3,"{","}");
         TString word2 = captureParentheses(inputString,i+4+word1.Length()+1,"{","}");
         if (((TString)inputString[i+4+word1.Length()+1] != "{") ||
-            (word1 == "") || (word2 == "")){ 
+            (word1 == "") || (word2 == "")){
           cout << "FSString::expandSUM ERROR: formatting problem" << endl;
           exit(0);
         }
@@ -1475,7 +1420,7 @@ FSString::pushBackToEach(vector< vector<int> > originalList, vector<int> newPart
 
 vector<TString> FSString::m_reorderMathSpacers;
 
-int 
+int
 FSString::nMathSpacer(TString part){
   for (unsigned int i = 0; i < m_reorderMathSpacers.size(); i++){
     if (part == m_reorderMathSpacers[i]) return i+1;
@@ -1484,7 +1429,7 @@ FSString::nMathSpacer(TString part){
   return 0;
 }
 
-TString 
+TString
 FSString::reorderMathHelp(vector<TString> parts, bool sort){
   if (parts.size() == 0) return TString("");
   if (parts.size() == 1) return parts[0];
@@ -1507,24 +1452,24 @@ FSString::reorderMathHelp(vector<TString> parts, bool sort){
 
 
 
-TString 
+TString
 FSString::reorderMath(TString original, bool show){
   if (m_reorderMathSpacers.size() == 0){
-    m_reorderMathSpacers.push_back("("); 
-    m_reorderMathSpacers.push_back(")"); 
-    m_reorderMathSpacers.push_back(":"); 
-    m_reorderMathSpacers.push_back(","); 
-    m_reorderMathSpacers.push_back(";"); 
+    m_reorderMathSpacers.push_back("(");
+    m_reorderMathSpacers.push_back(")");
+    m_reorderMathSpacers.push_back(":");
+    m_reorderMathSpacers.push_back(",");
+    m_reorderMathSpacers.push_back(";");
     m_reorderMathSpacers.push_back("||");
     m_reorderMathSpacers.push_back("&&");
     m_reorderMathSpacers.push_back("==");
     m_reorderMathSpacers.push_back("!=");
     m_reorderMathSpacers.push_back("<=");
-    m_reorderMathSpacers.push_back("<"); 
+    m_reorderMathSpacers.push_back("<");
     m_reorderMathSpacers.push_back(">=");
-    m_reorderMathSpacers.push_back(">"); 
-    m_reorderMathSpacers.push_back("+"); 
-    m_reorderMathSpacers.push_back("*"); 
+    m_reorderMathSpacers.push_back(">");
+    m_reorderMathSpacers.push_back("+");
+    m_reorderMathSpacers.push_back("*");
   }
   if (show){
     cout << "BEGIN FSString::reorderMath" << endl;
@@ -1532,8 +1477,8 @@ FSString::reorderMath(TString original, bool show){
   }
   original =  FSString::removeWhiteSpace(original);
   if (original == "") return TString("");
-  if (!FSString::checkParentheses(original)){ 
-    cout << "FSString::reorderMath WARNING: bad parentheses in input..." << endl; 
+  if (!FSString::checkParentheses(original)){
+    cout << "FSString::reorderMath WARNING: bad parentheses in input..." << endl;
     cout << "    " << original << endl;
     return original;
   }
@@ -1618,8 +1563,8 @@ FSString::reorderMath(TString original, bool show){
     // quick checks
 
   if (parts.size() == 3) return original;
-  if (parts.size() < 5){ 
-    cout << "FSString::reorderMath WARNING: unable to reorder this expression..." << endl; 
+  if (parts.size() < 5){
+    cout << "FSString::reorderMath WARNING: unable to reorder this expression..." << endl;
     cout << "    " << original << endl;
     return original;
   }
@@ -1642,7 +1587,7 @@ FSString::reorderMath(TString original, bool show){
     parts = groupedParts;  groupedParts.clear();
 
       // group expressions
-      //  look for patterns like: 
+      //  look for patterns like:
       //    opBegin abc opMiddle def (opMiddle ghi) opEnd
 
     for (unsigned int i = 0; i < parts.size(); i++){
@@ -1672,7 +1617,7 @@ FSString::reorderMath(TString original, bool show){
         iOpEnd += 2;
       }
       if (opEnd == opMiddle) continue;
-      if (opEnd == "(") continue; 
+      if (opEnd == "(") continue;
       if ((nMathSpacer(opMiddle) > nMathSpacer(opBegin))
          &&(nMathSpacer(opMiddle) > nMathSpacer(opEnd))){
         if ((opMiddle == ":") || opMiddle.Contains(">") || opMiddle.Contains("<") || (opMiddle == ",")
@@ -1694,10 +1639,8 @@ FSString::reorderMath(TString original, bool show){
   }
 
   if (parts.size() == 1) return parts[0];
-  cout << "FSString::reorderMath WARNING: unable to reorder this expression..." << endl; 
+  cout << "FSString::reorderMath WARNING: unable to reorder this expression..." << endl;
   cout << "    " << original << endl;
   return original;
 
 }
-
-
